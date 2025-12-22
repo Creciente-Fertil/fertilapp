@@ -14,6 +14,7 @@
     import { goto } from "$app/navigation";
     import {capitalize} from "$lib/stringutil/lib"
     import { shorterWord } from "$lib/stringutil/lib";  
+    
     //FILTROS
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
@@ -176,7 +177,9 @@
         const recordsa = await pb.collection("animales").getFullList({
             filter:`active=true && cab='${cab.id}' && delete=false`
         })
+
         animales = recordsa
+        animales = animales.sort((a,b)=>a.caravana.toLocaleLowerCase()<b.caravana.toLocaleLowerCase()?-1:1)
     }
     async function getTratamientos(){
         const records = await pb.collection('tratamientos').getFullList({
@@ -193,7 +196,7 @@
             sort: '-created',
         });
         tipotratamientos = records
-        tipotratamientos.sort((tp1,tp2)=>tp1.nombre>tp2.nombre?1:-1)
+        tipotratamientos.sort((tp1,tp2)=>tp1.nombre.toLocaleLowerCase()>tp2.nombre.toLocaleLowerCase()?1:-1)
     }
     async function guardar(){
         try{
@@ -316,7 +319,7 @@
                 }
                 const  record = await pb.collection("tipotratamientos").create(data)
                 tipotratamientos.push(record)
-                tipotratamientos.sort((tp1,tp2)=>tp1.nombre>tp2.nombre?1:-1)
+                tipotratamientos.sort((tp1,tp2)=>tp1.nombre.toLocaleLowerCase()>tp2.nombre.toLocaleLowerCase()?1:-1)
                 
                 cerrarTipoModal()
             }
@@ -339,7 +342,7 @@
             let item = {...data,id:idtipotratamiento}
             tipotratamientos = tipotratamientos.filter(tp => tp.id != idtipotratamiento)
             tipotratamientos.push(item)
-            tipotratamientos.sort((tp1,tp2)=>tp1.nombre>tp2.nombre?1:-11)
+            tipotratamientos.sort((tp1,tp2)=>tp1.nombre.toLocaleLowerCase()>tp2.nombre.toLocaleLowerCase()?1:-11)
             
             
             cerrarTipoModal()
@@ -357,7 +360,7 @@
             }
             const  record = await pb.collection("tipotratamientos").update(idtipotratamiento,data)
             tipotratamientos = tipotratamientos.filter(tp => tp.id != idtipotratamiento)
-            tipotratamientos.sort((tp1,tp2)=>tp1.nombre>tp2.nombre?1:-11)
+            tipotratamientos.sort((tp1,tp2)=>tp1.nombre.toLocaleLowerCase()>tp2.nombre.toLocaleLowerCase()?1:-11)
         }
         catch(err){
             console.error(err)

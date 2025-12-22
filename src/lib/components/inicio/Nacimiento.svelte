@@ -205,7 +205,9 @@
 <div class="modal-action justify-start ">
     <form method="dialog" >
       <!-- if there is a button, it will close the modal -->
-      <button class="btn btn-success text-white" disabled={!nacimiento.botonhabilitadonac}  onclick={guardarNacimiento} >Guardar</button>
+      <button class="btn btn-success text-white" 
+      disabled = {!nacimiento.fechanac || nacimiento.fechanac.length == 0 || !madrenac || madrenac.length == 0}
+      onclick={guardarNacimiento} >Guardar</button>
       <button
             class="btn btn-error text-white"
             

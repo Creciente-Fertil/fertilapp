@@ -190,6 +190,7 @@
         } else {
             await guardarInseminacion();
         }
+        filas = []
         await getServicios();
         await getInseminaciones();
         nuevoServicioModal.close();
@@ -213,6 +214,7 @@
         });
         borrados = recordsa;
         padres = recordsa.filter((a) => a.sexo == "M" && a.active);
+        padres = padres.sort((a,b)=>a.caravana.toLocaleLowerCase()<b.caravana.toLocaleLowerCase()?-1:1)
         listapadres = padres.map((item) => {
             return {
                 id: item.id,

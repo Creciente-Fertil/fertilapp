@@ -6,6 +6,7 @@
     import categorias from "$lib/stores/categorias";
     import Swal from "sweetalert2";
     import {getPermisosMessage, getPermisosList } from "$lib/permisosutil/lib";
+    import { capitalize } from "$lib/stringutil/lib";
     let{cabid,categoria,userpermisos=$bindable([])} = $props()
     let ruta = import.meta.env.VITE_RUTA
     const pb = new PocketBase(ruta);
@@ -50,7 +51,7 @@
             sort: '-nombre',
         });
         tipotratamientos = records
-        tipotratamientos.sort((tp1,tp2)=>tp1.nombre>tp2.nombre?1:-1)
+        tipotratamientos.sort((tp1,tp2)=>tp1.nombre.toLocaleLowerCase()>tp2.nombre.toLocaleLowerCase()?1:-1)
     }
     async function getTratamientos(){
         const records = await pb.collection('tratamientos').getFullList({
@@ -129,7 +130,7 @@
                             <td class="text-base mx-1 px-1">
                                 {t.expand.tipo.nombre}
                             </td>
-                            <td class="text-base mx-1 px-1">{t.categoria}</td>
+                            <td class="text-base mx-1 px-1">{capitalize(t.categoria)}</td>
 
                         </tr>
                     {/each}

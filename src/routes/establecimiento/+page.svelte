@@ -108,6 +108,7 @@
             provincia = record.provincia;
             telefono = record.telefono;
             mail = record.mail;
+            
             localidadesProv = localidades.filter(
                 (lo) => lo.idProv == provincia,
             );
@@ -660,7 +661,7 @@
             <div class="mt-8 flex justify-end">
                 {#if !modoedicion}
                     <button
-                        onclick={() => (modoedicion = true)}
+                        onclick={() => {modoedicion = true;botonhabilitado = true}}
                         class=" 
                             btn px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md
                             text-white font-bold font-lg focus:outline-none
@@ -674,6 +675,7 @@
                         onclick={() => {
                             reestablercerCabaña();
                             modoedicion = false;
+                            botonhabilitado = false
                         }}
                         class="
                             btn btn-error

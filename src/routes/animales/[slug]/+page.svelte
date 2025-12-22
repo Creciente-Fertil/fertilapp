@@ -1,5 +1,4 @@
 <script>
-    
     import Navbarr from "$lib/components/Navbarr.svelte";
     import PocketBase from "pocketbase";
     import { onMount } from "svelte";
@@ -31,10 +30,9 @@
     import Pesajes from "$lib/components/animal/Pesajes.svelte";
     import HistoriaClinica from "$lib/components/animal/HistoriaClinica.svelte";
     import tiponoti from "$lib/stores/tiponoti";
-    import Servicios from  "$lib/components/animal/Servicios.svelte";
+    import Servicios from "$lib/components/animal/Servicios.svelte";
     import SelectTab from "$lib/components/animal/SelectTab.svelte";
-    
-    
+
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -48,7 +46,7 @@
     let userpermisos = $state([]);
 
     // Datos
-    let animal =  $state({})
+    let animal = $state({});
     let slug = $state("");
     let caravana = $state("");
     let usuarioid = $state("");
@@ -56,8 +54,8 @@
     let fechanacimiento = $state("");
     let sexo = $state("");
     let nacimiento = $state("");
-    let padre = $state({})
-    let madre = $state({})
+    let padre = $state({});
+    let madre = $state({});
     let rodeo = $state("");
     let lote = $state("");
     let peso = $state(0);
@@ -66,17 +64,17 @@
     let pariciones = $state([]);
     let fechafall = $state("");
     let motivobaja = $state("");
-    let raza = $state("")
-    let color = $state("")
+    let raza = $state("");
+    let color = $state("");
     let connacimiento = $state(false);
     let nacimientoobj = $state({});
     let tactos = $state([]);
     let prenada = $state(0);
     let modohistoria = $state(false);
     //Geneologia
-    const genealogiaStorage = createStorageProxy('genealogia_arbol', {
+    const genealogiaStorage = createStorageProxy("genealogia_arbol", {
         progenitores: [],
-        posicionActual: -1
+        posicionActual: -1,
     });
     async function getPariciones(id) {
         const recordpariciones = await pb
@@ -96,24 +94,24 @@
         tactos = recordtactos;
     }
     async function getMadre(id) {
-        if(id==""){
-            madre = {id:-1}
+        if (id == "") {
+            madre = { id: -1 };
+        } else {
+            const record = await pb
+                .collection("animales")
+                .getOne(id, { expand: "lote,rodeo" });
+            madre = record;
         }
-        else{
-            const record = await pb.collection('animales').getOne(id, {expand:"lote,rodeo"});
-            madre = record
-        }
-        
     }
     async function getPadre(id) {
-        if(id==""){
-            padre = {id:-1}
+        if (id == "") {
+            padre = { id: -1 };
+        } else {
+            const record = await pb
+                .collection("animales")
+                .getOne(id, { expand: "lote,rodeo" });
+            padre = record;
         }
-        else{
-            const record = await pb.collection('animales').getOne(id, {expand:"lote,rodeo"});
-            padre = record
-        }
-        
     }
     async function darBaja(fechafallecimiento, motivo) {
         if (!userpermisos[5]) {
@@ -217,15 +215,15 @@
         //Lo idea seria poder ver los datos del animaal este donde este
         let recordxiste = await pb.collection("animales").getFullList({
             filter: `cab='${cab.id}' && id='${_id}'`,
-            expand:"lote,rodeo,nacimiento",
+            expand: "lote,rodeo,nacimiento",
             skipTotal: true,
         });
         if (recordxiste.length > 0) {
-            genealogiaStorage.save({progenitores:[],posicionActual:-1})
-            padre = recordxiste[0]
-            navegarAPadre(animal.id,animal.caravana,animal)
-            
-            navegarAPadre(padre.id,padre.caravana,padre)
+            genealogiaStorage.save({ progenitores: [], posicionActual: -1 });
+            padre = recordxiste[0];
+            navegarAPadre(animal.id, animal.caravana, animal);
+
+            navegarAPadre(padre.id, padre.caravana, padre);
 
             goto(`${pre}/animales/geneologia`);
             //slug = $page.params.slug;
@@ -248,7 +246,7 @@
                 const recorda = await pb.collection("animales").getOne(slug, {
                     expand: "nacimiento",
                 });
-                animal = recorda
+                animal = recorda;
                 caravana = recorda.caravana;
                 color = recorda.raza;
                 raza = recorda.color;
@@ -258,11 +256,11 @@
                 nacimiento = "";
                 nacimientoobj = {};
                 if (recorda.nacimiento != "") {
-                    connacimiento = true
+                    connacimiento = true;
                     nacimiento = recorda.nacimiento;
                     nacimientoobj = recorda.expand.nacimiento;
-                    await getMadre(recorda.expand.nacimiento.madre)
-                    await getPadre(recorda.expand.nacimiento.padre)
+                    await getMadre(recorda.expand.nacimiento.madre);
+                    await getPadre(recorda.expand.nacimiento.padre);
                 }
                 peso = recorda.peso;
                 sexo = recorda.sexo;
@@ -277,44 +275,46 @@
                 }
                 cargado = true;
                 tab = "datos";
-                if (sexo.toLowerCase() == "h") {
-                    pestañas = [
-                        { id: "datos", nombre: "Datos básicos" },
-                        { id: "pesajes", nombre: "Pesajes" },
-                        { id: "tratamientos", nombre: "Tratamientos" },
-                        { id: "observaciones", nombre: "Observaciones" },
-                        { id: "pariciones", nombre: "Pariciones" },
-                        { id: "tactos", nombre: "Tactos" },
-                        { id: "servicios", nombre: "Servicios" },
-                        { id: "clinica", nombre: "Historia clínica" },
-                        { id: "historial", nombre: "Historial" },
-                    ];
-                } else {
-                    pestañas = [
-                        { id: "datos", nombre: "Datos básicos" },
-                        { id: "pesajes", nombre: "Pesajes" },
-                        { id: "tratamientos", nombre: "Tratamientos" },
-                        { id: "observaciones", nombre: "Observaciones" },
-                        { id: "clinica", nombre: "Historia clínica" },
-                        { id: "historial", nombre: "Historial" },
-                    ];
-                }
+                calcularTabs();
             } catch (err) {
                 Swal.fire("Error animal", "No existe el animal", "error");
             }
         }
     }
+    function calcularTabs() {
+        if (sexo.toLowerCase() == "h") {
+            pestañas = [
+                { id: "datos", nombre: "Datos básicos" },
+                { id: "pesajes", nombre: "Pesajes" },
+                { id: "tratamientos", nombre: "Tratamientos" },
+                { id: "observaciones", nombre: "Observaciones" },
+                { id: "pariciones", nombre: "Pariciones" },
+                { id: "tactos", nombre: "Tactos" },
+                { id: "servicios", nombre: "Servicios" },
+                { id: "clinica", nombre: "Historia clínica" },
+                { id: "historial", nombre: "Historial" },
+            ];
+        } else {
+            pestañas = [
+                { id: "datos", nombre: "Datos básicos" },
+                { id: "pesajes", nombre: "Pesajes" },
+                { id: "tratamientos", nombre: "Tratamientos" },
+                { id: "observaciones", nombre: "Observaciones" },
+                { id: "clinica", nombre: "Historia clínica" },
+                { id: "historial", nombre: "Historial" },
+            ];
+        }
+    }
     //Necesito una funcion que traiga toda la informacion del animal
     onMount(async () => {
-        
         let _id = $page.params.slug;
         let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
         await perfilAnimal(_id);
-        
+
         let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
         per.setPer(respermisos.permisos, usuarioid);
-        
+
         userpermisos = getPermisosList(per.per.permisos);
     });
 </script>
@@ -352,8 +352,8 @@
                     bind:fechanacimiento
                     bind:modohistoria
                     bind:userpermisos
-
                     {irPadre}
+                    {calcularTabs}
                 />
             </CardAnimal>
             <CardAnimal cardsize="max-w-7xl" titulo="Acciones">

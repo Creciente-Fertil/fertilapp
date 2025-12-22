@@ -273,7 +273,7 @@
             sort: "-created",
         });
         tipotratamientos = records;
-        tipotratamientos.sort((tp1, tp2) => (tp1.nombre > tp2.nombre ? 1 : -1));
+        tipotratamientos.sort((tp1, tp2) => (tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase() ? 1 : -1));
     }
     function verficarPermisosColab(animal) {
         let listapermisos = getPermisosList(permisos.permisos);
@@ -337,6 +337,49 @@
         initObservacion();
         nuevoModalObservacion.showModal();
     }
+    async function guardarAnimalParicion(madre,idnacimiento,fecha) {
+        //let verificar = await verificarNivel(cab.id)
+        let verificar = true;
+        if (!verificar) {
+            Swal.fire(
+                "Error guardar",
+                `No tienes el nivel de la cuenta para tener más animales`,
+                "error",
+            );
+            return { id: -1 };
+        }
+        let categoriaseleccion = sexo=="M"?"ternero":"ternera"
+        
+        let lote = ""
+        let rodeo = ""
+        let idx_madre = animales.findIndex(a=>a.id == madre)
+        if(idx_madre != -1){
+            lote = animales[idx_madre].lote
+            rodeo = animales[idx_madre].rodeo
+        }
+        let data = {
+            caravana,
+            active: true,
+            categoria:categoriaseleccion,
+            delete: false,
+            fechanacimiento: fecha + " 03:00:00",
+            sexo: sexo,
+            peso: peso,
+            cab: cab.id,
+            lote,
+            rodeo,
+            nacimiento: idnacimiento
+        };
+        let listapermisos = getPermisosList(permisos.permisos);
+        if (!listapermisos[5]) {
+            Swal.fire("Error permisos", getPermisosMessage(5), "error");
+            return { id: -1 };
+        }
+
+        let recorda = await pb.collection("animales").create(data);
+        totaleventos.animales += 1;
+        return recorda;
+    }
     async function guardarAnimal(esTacto, esInseminacion) {
         //let verificar = await verificarNivel(cab.id)
         let verificar = true;
@@ -348,10 +391,11 @@
             );
             return { id: -1 };
         }
+        let categoriaseleccion = sexo=="M"?"ternero":"ternera"
         let data = {
             caravana,
             active: true,
-            categoria,
+            categoria:categoriaseleccion,
             delete: false,
             fechanacimiento: fechanacimiento + " 03:00:00",
             sexo: sexo,
@@ -401,7 +445,7 @@
                     fecha: tacto.fechatacto + " 03:00:00",
                     observacion: tacto.observaciontacto,
                     animal: a.id,
-                    categoria: tacto.categoriatacto,
+                    categoria:sexo=="M"?"ternero":"ternera",
                     prenada: prenadatacto,
                     tipo: tacto.tipotacto,
                     nombreveterinario: "",
@@ -430,6 +474,8 @@
             }
         } else {
             try {
+                
+                
                 let data = {
                     fecha: tacto.fechatacto + " 03:00:00",
                     observacion: tacto.observaciontacto,
@@ -512,12 +558,12 @@
                     return false;
                 }
                 //Laburar esta parte
-                let a = await guardarAnimal(true, false);
+                let a = await guardarAnimalParicion(nacimiento.madrenac,recordparicion.id,nacimiento.fechanac);
 
                 await getAnimales();
-                await pb
-                    .collection("animales")
-                    .update(a.id, { nacimiento: recordparicion.id });
+                //await pb
+                //    .collection("animales")
+                //    .update(a.id, { nacimiento: recordparicion.id });
             }
             //let recordnacimientos = await pb
             //    .collection("nacimientos")

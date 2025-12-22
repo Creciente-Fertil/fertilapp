@@ -8,6 +8,7 @@
     import categorias from "$lib/stores/categorias";
     import estados from "$lib/stores/estados";
     import { guardarHistorial } from "$lib/historial/lib";
+    import { capitalize } from "$lib/stringutil/lib";
     import RadioButton from "../RadioButton.svelte";
     import {
         getEstadoNombre,

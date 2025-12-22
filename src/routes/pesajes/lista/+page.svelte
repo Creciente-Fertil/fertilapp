@@ -207,6 +207,8 @@
             pesajesprocesados.push(value)
         }
         
+        pesajesprocesados.sort((a,b)=>a.animal.toLocaleLowerCase()<b.animal.toLocaleLowerCase()?-1:1)
+        
 
     }
     function procesarPesajes(){

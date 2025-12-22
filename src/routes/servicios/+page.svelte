@@ -41,6 +41,7 @@
     // Datos para mostrar
     let servicios = $state([])
     let serviciosrow = $state([])
+    let caravanamadre = $state("")
     
     let totalServicios = $state(0)
     // Datos para mostrar
@@ -107,6 +108,10 @@
         idserv = id
         let ser = servicios.filter(s=>s.id == id)[0]
         if(ser){
+            caravanamadre = ""
+            if(ser.expand && ser.expand.madre){
+                caravanamadre = ser.expand.madre.caravana
+            }
             madre = ser.madre
             fechadesdeserv = ser.fechadesde.split(" ")[0]
             fechahastaserv = ser.fechahasta.split(" ")[0]
@@ -121,6 +126,10 @@
         idins = id
         let ser = serviciosrow.filter(s=>s.id == id)[0]
         if(ser){
+            caravanamadre = ""
+            if(ser.expand && ser.expand.animal){
+                caravanamadre = ser.expand.animal.caravana
+            }
             idanimal = ser.animal
             fechainseminacion = ser.fechainseminacion.split(" ")[0]
             padre = ser.padre
@@ -145,8 +154,10 @@
                     dataser.fechahasta = fechahastaserv + " 03:00:00"
                 }
                 await pb.collection("servicios").update(idserv,dataser)
+                Swal.fire("Éxito editar","Se pudo editar el servicio con exito","success")
                 await getServicios()
                 esservicio = false
+
                 filterUpdate()
             }
             catch(err){
@@ -164,7 +175,7 @@
                     observacion,
                     categoria
                 }
-                const record = await pb.collection('inseminacion').update(idserv, data);
+                const record = await pb.collection('inseminacion').update(idins, data);
                 await getInseminaciones()
                 
                 
@@ -236,10 +247,12 @@
         serviciosrow = servicios
     }
     async function getAnimales(){
-        const recordsa = await pb.collection("animales").getFullList({
+        let recordsa = await pb.collection("animales").getFullList({
             filter:`cab='${cab.id}'`
         })
+        recordsa = recordsa.sort((a,b)=>a.caravana.toLocaleLowerCase()<b.caravana.toLocaleLowerCase()?-1:1)
         borrados = recordsa
+        
         madres = recordsa.filter(a=>(a.sexo == "H" || a.sexo == "F") && a.active)
         padres = recordsa.filter(a=>a.sexo == "M" && a.active )
         listapadres = padres.map(item=>{
@@ -350,7 +363,7 @@
             })
         }
         
-        ordenarServicios(forma)
+        //ordenarServicios(forma)
         totalServicios = serviciosrow.length
     }
     function prepararData(item){
@@ -919,8 +932,14 @@
         <div class="form-control">
             <label for = "nombre" class="label">
                 <span class="label-text text-base">Madre</span>
+                
             </label>
-            <label class="input-group ">
+            <label for = "nombre" class="label">
+                <span class="text-md">{caravanamadre}</span>
+                
+            </label>
+            
+            <label class="hidden input-group ">
                 <select 
                     class={`
                         select select-bordered w-full
@@ -1048,8 +1067,14 @@
         <div class="form-control">
             <label for = "nombre" class="label">
                 <span class="label-text text-base">Caravana</span>
+                
             </label>
-            <label class="input-group ">
+            
+            <label for = "nombre" class="label">
+                <span class="text-md">{caravanamadre}</span>
+                
+            </label>
+            <label class="hidden input-group ">
                 <select 
                     class={`
                         select select-bordered w-full

@@ -54,7 +54,7 @@
 
             {/if}
         </div>
-        <div class="mb-1 lg:mb-0">
+        <div class="mb-1 lg:mb-0 hidden">
             <label for = "categoria" class="label">
                 <span class="label-text text-base">Categoria</span>
             </label>

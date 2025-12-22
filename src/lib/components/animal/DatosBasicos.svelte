@@ -38,7 +38,8 @@
         color=$bindable(""),
         modohistoria = $bindable(),
         irPadre,
-        userpermisos=$bindable([])
+        userpermisos=$bindable([]),
+        calcularTabs
     } = $props();
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -560,6 +561,7 @@
                         ${estilos.bgdark2}
                     `}
                     bind:value={sexo}
+                    onchange={calcularTabs}
                 >
                     {#each sexos as s}
                         <option value={s.id}>{s.nombre}</option>

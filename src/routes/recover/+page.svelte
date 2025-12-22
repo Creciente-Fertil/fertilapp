@@ -105,7 +105,7 @@
                         Email
                     </label>
                     <input 
-                        type="username" 
+                        type="email" 
                         id="username" 
                         bind:value={usuariomail} 
                         required 

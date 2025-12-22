@@ -43,7 +43,7 @@
         let a = animales.filter((an) => an.id == observacion.animalobs)[0];
         animal = a
         if (a) {
-            observacion.categoriaobs = a.categorias;
+            observacion.categoriaobs = a.categoria;
         } else {
             observacion.categoriaobs = "";
         }

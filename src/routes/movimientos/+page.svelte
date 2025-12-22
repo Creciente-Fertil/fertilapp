@@ -21,6 +21,7 @@
     } from "$lib/components/estadosutils/lib";
     import { getSexoNombre,capitalize } from "$lib/stringutil/lib";
     
+    
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
@@ -236,7 +237,7 @@
         });
 
         animales = recordsa;
-        animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
+        animales.sort((a1, a2) => (a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase() ? 1 : -1));
         animalesrows = animales;
     }
     function openNewModal() {
@@ -329,6 +330,11 @@
             });
             if (resultList.items.length == 0) {
                 malcodigo = true;
+                Swal.fire(
+                    "Error transferencia",
+                    "No hay ningún establecimiento con ese RENSPA",
+                    "error",
+                );
                 return;
             }
             if (resultList.totalItems > 1) {
@@ -507,7 +513,7 @@
             selecttransfer = false;
             textoboton = "Dar baja";
         }
-        if (seccion == "TRANSFER") {
+        if (seccion == "TRANSFERIR") {
             selectcategoria = false;
             selectlote = false;
             selectrodeo = false;

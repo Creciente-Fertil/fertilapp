@@ -4,6 +4,7 @@
     import Animalesmodal from "./Animalesmodal.svelte";
     import SelectFertil from "../SelectFertil.svelte";
     import CustomDate from "../CustomDate.svelte";
+    import motivos from "$lib/stores/motivos";
     let {
         //binds
         nuevacategoria = $bindable(""),
@@ -220,13 +221,24 @@
                     <label for="fecha" class="label">
                         <span class="label-text text-base">Motivo</span>
                     </label>
-                    <input
-                        id="caravana"
-                        type="text"
-                        class={`input input-bordered w-full ${estilos.bgdark2}`}
-                        bind:value={motivo}
-                        oninput={() => oninput("MOTIVO")}
-                    />
+                    <label class="input-group">
+                        <select
+                            class={`
+                                select select-bordered w-full
+                                rounded-md
+                                focus:outline-none 
+                                focus:ring-2 
+                                focus:ring-green-500 focus:border-green-500
+                                ${estilos.bgdark2}
+                            `}
+                            bind:value={motivo}
+                            onchange={() => oninput("MOTIVO")}
+                        >
+                            {#each motivos as r}
+                                <option value={r.id}>{r.nombre}</option>
+                            {/each}
+                        </select>
+                    </label>
                 </div>
                 <div>
                     <label for="fecha" class="label">

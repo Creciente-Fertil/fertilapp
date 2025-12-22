@@ -106,7 +106,7 @@
             expand:"nacimiento"
         })
         animales = recordsa
-        animales.sort((a1,a2)=>a1.caravana>a2.caravana?1:-1)
+        animales.sort((a1,a2)=>a1.caravana.toLocaleLowerCase()>a2.caravana.toLocaleLowerCase()?1:-1)
     }
     function openNewModal(){
         if(permisos[4]){

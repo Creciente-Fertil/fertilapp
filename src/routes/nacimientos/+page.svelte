@@ -95,10 +95,11 @@
         return (!str || str.length === 0 );
     }
     async function getAnimales(){
-        const recordsa = await pb.collection("animales").getFullList({
+        let recordsa = await pb.collection("animales").getFullList({
             filter:`active=true && cab='${cab.id}' && delete = false`,
             expand:"nacimiento"
         })
+        recordsa = recordsa.sort((a,b)=>a.caravana.toLocaleLowerCase()<b.caravana.toLocaleLowerCase()?-1:1)
         madres = recordsa.filter(a=>a.sexo == "H" || a.sexo == "F")
         padres = recordsa.filter(a=>a.sexo == "M")
         cargadoanimales = true

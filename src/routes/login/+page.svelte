@@ -10,6 +10,7 @@
     import { fade, fly } from "svelte/transition";
     import { quintOut } from "svelte/easing";
     import { createEventDispatcher } from "svelte";
+    import { json } from "@sveltejs/kit";
     const dispatch = createEventDispatcher();
 
     let ruta = import.meta.env.VITE_RUTA;

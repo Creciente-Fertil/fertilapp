@@ -10,7 +10,8 @@
         onelegir=()=>{},
         onwrite=()=>{},
         validarAnimal=()=>{},
-        size="w-4/5"
+        size="w-4/5",
+        campo="nombre"
     } = $props()
 
     let containerPredict = $state(null)
@@ -30,7 +31,7 @@
         }
         else{
             isOpen = true
-            listarow = lista.filter(e=>e.nombre.toLowerCase().includes(cadena.toLowerCase()))
+            listarow = lista.filter(e=>e[campo].toLowerCase().includes(cadena.toLowerCase()))
             
             if(listarow.length == 0){
                 valor = ""
@@ -50,7 +51,7 @@
         }
         
         isOpen = !isOpen
-        cadena = listarow.filter(l=>l.id==id)[0].nombre
+        cadena = listarow.filter(l=>l.id==id)[0][campo]
         nombre = cadena
         if(validarAnimal){
             validarAnimal()
@@ -77,7 +78,7 @@
     onMount(()=>{
         document.addEventListener("click",handleClickOutside)
         if(valor.length !=0){
-            cadena = listarow.filter(l=>l.id==valor)[0].nombre
+            cadena = listarow.filter(l=>l.id==valor)[0][campo]
             nombre = cadena
         }
     })
@@ -170,7 +171,7 @@
                                     font-normal
                                 `}
                             >
-                                {v.nombre}
+                                {v[campo]}
                             </span>
                             {#if v.id == valor}
                                 <span 

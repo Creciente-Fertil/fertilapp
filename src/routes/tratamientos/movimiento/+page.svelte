@@ -278,7 +278,7 @@
             sort: "-created",
         });
         tipotratamientos = records;
-        tipotratamientos.sort((tp1, tp2) => (tp1.nombre > tp2.nombre ? 1 : -1));
+        tipotratamientos.sort((tp1, tp2) => (tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase() ? 1 : -1));
     }
     async function getAnimales() {
         const recordsa = await pb.collection("animales").getFullList({
@@ -287,7 +287,7 @@
         });
 
         animales = recordsa;
-        animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
+        animales.sort((a1, a2) => (a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase() ? 1 : -1));
         animalesrows = animales;
     }
     function openNewModal() {

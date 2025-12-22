@@ -6,6 +6,7 @@
     import categorias from "$lib/stores/categorias";
     import Swal from "sweetalert2";
     import {getPermisosMessage, getPermisosList } from "$lib/permisosutil/lib";
+    import { capitalize } from "$lib/stringutil/lib";
     let { cabid, categoria, userpermisos = $bindable([]) } = $props();
     let ruta = import.meta.env.VITE_RUTA;
     const HOY = new Date().toISOString().split("T")[0];
@@ -118,7 +119,7 @@
                                 {`${o.observacion}`}
                             </td>
                             <td class="text-base mx-1 px-1">
-                                {`${o.categoria}`}
+                                {`${capitalize(o.categoria)}`}
                             </td>
                         </tr>
                     {/each}
