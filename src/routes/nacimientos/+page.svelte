@@ -603,9 +603,7 @@
         {#if isOpenFilter}
             <div transition:slide>
                 <div class="grid grid-cols-1 lg:grid-cols-2 mb-2 lg:mb-3 gap-1" >
-                    <CustomDate
-                        bind:fecha={fechadesde}
-                    />
+                    
                     <div class="">
                         <label class="block tracking-wide  mb-2" for="grid-first-name">
                           Fecha desde
