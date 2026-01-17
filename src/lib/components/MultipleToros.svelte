@@ -7,17 +7,13 @@
         valor=$bindable(),
         cambiar=()=>{},
         quitarElemento=(id)=>{},
-        agregarElemento=(id)=>{}
+        agregarElemento=(id)=>{},
+        
     } = $props()
     let cadenabuscar = $state("")
-    let torosrows = $state([])
+    let torosrows = $derived(cadenabuscar.length>0?toros.filter(t=>t.caravana.toLocaleLowerCase().includes(cadenabuscar.toLocaleLowerCase())):toros)
     let isOpen=$state(false)
-    function inputCadena(){
-        torosrows = toros
-        if(cadenabuscar != ""){
-            torosrows = torosrows.filter(t=>t.caravana.toLocaleLowerCase().includes(cadenabuscar.toLocaleLowerCase()))
-        }
-    }
+    
     function clickOption(t){
         
         if(!dentroLista(t)){
@@ -49,33 +45,35 @@
         cambiar()
         
     }
-    onMount(()=>{
-        torosrows = toros
-    })
-    
+    //w-80 lg:w-96
 </script>
-<div>   
-    <input type="text"
+<div>  
+    
+    <input 
+    type="text"
         class={`
             input input-bordered w-full 
             ${estilos.bgdark2}
         `}
         
         bind:value={cadenabuscar} 
-        oninput={inputCadena} 
+        
         onclick={()=>{isOpen = !isOpen}}
     >
     {#if isOpen}
         <div 
             class={`
                 absolute z-10 mt-0  rounded-md shadow-lg   
-                bg-white border-gray-300 dark:border-gray-600 dark:bg-gray-800 text-gray-900 dark:text-gray-100
+                bg-white border-gray-300 
+                dark:border-gray-600 dark:bg-gray-800 text-gray-900 
+                dark:text-gray-100
             `}
         >
             <ul 
                 class="
                     text-base max-h-40 focus:outline-none sm:text-sm overflow-y-auto 
-                    w-80 lg:w-96"
+                    w-80 md:w-96
+                "
             >
                 {#each torosrows as t}
                     <li class={`cursor-default hover:bg-green-100 hover:text-green-800 dark:hover:text-green-800  dark:text-white `}>

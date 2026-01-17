@@ -25,7 +25,7 @@
   import Tratamiento from "$lib/svgs/tratamiento.svelte";
   import Bell from "$lib/svgs/bell.svelte";
   import Reportes from "$lib/svgs/reportes.svelte";
-    import Importar from "$lib/svgs/importar.svelte";
+  import Importar from "$lib/svgs/importar.svelte";
   //tamaño
   let innerWidth = $state(0);
   let innerHeight = $state(0);
@@ -267,8 +267,6 @@
       </div>
     </div>
     <main class="py-16">
-
-      
       {@render children()}
       {#if esCelu}
         <NavegacionBottom />
@@ -522,12 +520,12 @@
       >
         {#if cab.exist}
           <a class={`py-0 ${classtext}`} href={pre + "/importar"}>
-            <Importar size="size-12"/>
+            <Importar size="size-12" />
             <span class="px-3">Importar</span>
           </a>
         {:else}
           <div class={classtext}>
-            <Importar size="size-12"/>
+            <Importar size="size-12" />
             <span class="px-3">Importar</span>
           </div>
         {/if}

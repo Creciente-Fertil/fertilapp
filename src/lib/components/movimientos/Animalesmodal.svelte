@@ -1,16 +1,25 @@
 <script>
     import { shorterWord } from "$lib/stringutil/lib";
     import estilos from "$lib/stores/estilos";
-    
+    import { capitalize } from "$lib/stringutil/lib";    
     let {
-        listaanimales=$bindable([])
+        listaanimales=[],
+        quitarAnimal = (id)=>{}
     } = $props()
 
 </script>
 <div class="block justify-items-center mx-1">
     {#each listaanimales as a,i}
         <div class="card  w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900">
-            <div class="block p-4">
+            <!-- Botón "Quitar" en la esquina superior derecha -->
+            <button
+                onclick={()=>quitarAnimal(a.id)}
+                class="absolute top-2 right-2 text-xl text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                aria-label="Quitar de la lista"
+            >
+                ✕
+            </button>
+            <div class="block p-4 pt-6">
                 <div class="grid grid-cols-2 gap-y-2">
                     <div class="flex items-start col-span-2">
                         <span >Caravana:</span> 
@@ -39,6 +48,14 @@
                                 a.expand.rodeo.nombre:
                                 "":
                                 ""
+                            }
+                        </span>
+                    </div>
+                    <div class="flex items-start col-span-2">
+                        <span >Categoria:</span> 
+                        <span class="font-semibold">
+                            {
+                                capitalize(a.categoria)
                             }
                         </span>
                     </div>

@@ -1,5 +1,7 @@
 <script>
     import Navbarr from "$lib/components/Navbarr.svelte";
+    //solo modifique el navbarr
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import Swal from "sweetalert2";
     import PocketBase from "pocketbase";
     import { createRoler } from "$lib/stores/defaultrol.svelte";
@@ -10,6 +12,8 @@
     import CardBase from "$lib/components/CardBase.svelte";
     import Colaboradores from "$lib/components/establecimiento/Colaboradores.svelte";
     import ListaColabs from "$lib/components/establecimiento/ListaColabs.svelte";
+    //botones
+    import Success from "$lib/components/botones/Success.svelte";
     //permisos
     import { getPermisosMessage, getPermisosList } from "$lib/permisosutil/lib";
     import { createPer } from "$lib/stores/permisos.svelte";
@@ -355,7 +359,7 @@
     });
 </script>
 
-<Navbarr>
+<Navbar2>
     {#if cab.exist}
         <CardBase titulo={`Bienvenido a ${nombre}`} cardsize="max-w-5xl">
             <div class="space-y-6">
@@ -660,10 +664,23 @@
             </div>
             <div class="mt-8 flex justify-end">
                 {#if !modoedicion}
+                    <Success
+                        texto ={"Editar establecimiento"}
+                        onclick={() => {modoedicion = true;botonhabilitado = true}}
+                        disabled = {false}
+                        rounded="rounded-md"
+                        fuentesize="text-md"
+                        fuentepeso="font-bold"
+                        px="px-6"
+                        py="py-2"
+                        btn="btn"
+                    />
                     <button
                         onclick={() => {modoedicion = true;botonhabilitado = true}}
                         class=" 
-                            btn px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md
+                            hidden
+                            btn px-6 py-2 bg-green-600 
+                            hover:bg-green-700 rounded-md
                             text-white font-bold font-lg focus:outline-none
                             focus:ring-2 focus:ring-offset-2 focus:ring-green-500
                         "
@@ -783,4 +800,4 @@
             </div>
         </CardBase>
     {/if}
-</Navbarr>
+</Navbar2>

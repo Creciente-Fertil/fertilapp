@@ -317,6 +317,4 @@
     {/if}
 </div>
 
-<div>
-    <Animalesmodal bind:listaanimales />
-</div>
+

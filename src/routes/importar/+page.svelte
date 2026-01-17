@@ -1,5 +1,6 @@
 <script>
     import Navbarr from '$lib/components/Navbarr.svelte';
+    import Navbar2 from '$lib/components/Navbar2.svelte';
     import CardImportar from '$lib/components/importar/CardImportar.svelte';
 
     import ImportarServicios from '$lib/components/importar/ImportarServicios.svelte';   
@@ -61,7 +62,7 @@
     })
 
 </script>
-<Navbarr>
+<Navbar2>
     {#if cargado}
     <CardImportar cardsize="max-w-2xl" titulo="Importar animales">
         <!--LOTES Y RODEOS-->
@@ -104,4 +105,4 @@
     </CardImportar>
     {/if}
     
-</Navbarr>
+</Navbar2>

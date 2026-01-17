@@ -6,7 +6,7 @@
     import { goto } from "$app/navigation";
     import estilos from "$lib/stores/estilos";
     import Swal from "sweetalert2";
-    import CardBase from "$lib/components/CardBase.svelte";
+    
     import CardAnimal from "$lib/components/animal/CardAnimal.svelte";
     import DatosBasicos from "$lib/components/animal/DatosBasicos.svelte";
     import Pariciones from "$lib/components/animal/Pariciones.svelte";

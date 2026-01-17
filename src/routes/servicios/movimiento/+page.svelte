@@ -1,6 +1,8 @@
 <script>
     import { goto } from "$app/navigation";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import BuscadorMovimientos from "$lib/components/servicios/BuscadorMovimientos.svelte";
     import PocketBase from "pocketbase";
     import Swal from "sweetalert2";
     import { onMount } from "svelte";
@@ -26,6 +28,7 @@
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
+    import { elements } from "chart.js";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -75,6 +78,19 @@
         ...defaultfiltro,
     });
     let proxy = createStorageProxy("serviciosanimales", defaultfiltro);
+
+    //movimiento
+    let defaultmovimiento = {
+        esNatural: true,
+        padres:[],
+        selecthashmap: {},
+        listapadres: [],
+    };
+    let detallemovimiento = $state({ ...defaultmovimiento });
+    let proxyDetalleMovimiento = createStorageProxy(
+        "detallemovimientoservicio",
+        defaultmovimiento,
+    );
 
     let lotes = $state([]);
     let rodeos = $state([]);
@@ -160,7 +176,43 @@
         proxyfiltros.loteseleccion = loteseleccion;
         proxyfiltros.categoriaseleccion = categoriaseleccion;
     }
+    function setDetalle(esNatural = false) {
+        detallemovimiento.selecthashmap = selecthashmap;
+        detallemovimiento.esNatural = esNatural;
+        detallemovimiento.listapadres = listapadres;
+        detallemovimiento.padres = padres
+        proxyDetalleMovimiento.save(detallemovimiento);
+    }
+    function setLista() {
+        selectanimales = [];
+        for (const [key, value] of Object.entries(selecthashmap)) {
+            if (value != null) {
+                selectanimales.push(value);
+            }
+        }
+        if(selectanimales.length == animales.length){
+            todos = true
+            algunos = false
+            ninguno = false
+        }
+        else if(selectanimales.length>0){
+            todos = false
+            algunos = true
+            ninguno = false
+        }
+        else{
+            todos = false
+            algunos = false
+            ninguno = true
+        }
+        
+    }
+    function loadDetalle() {
+        detallemovimiento = proxyDetalleMovimiento.load();
 
+        selecthashmap = detallemovimiento.selecthashmap;
+        setLista();
+    }
     function limpiarFiltros() {
         proxyfiltros = { ...defaultfiltro };
 
@@ -274,6 +326,7 @@
                 observacion: "",
             };
         }
+        setDetalle();
     }
     function clickTodos() {
         if (todos) {
@@ -301,6 +354,7 @@
             todos = false;
             ninguno = true;
         }
+        setDetalle();
     }
     async function getLotes() {
         const records = await pb.collection("lotes").getFullList({
@@ -325,7 +379,11 @@
         });
 
         animales = recordsa;
-        animales.sort((a1, a2) => (a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase() ? 1 : -1));
+        animales.sort((a1, a2) =>
+            a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase()
+                ? 1
+                : -1,
+        );
         madres = animales.filter((a) => a.sexo == "H");
         padres = animales.filter((a) => a.sexo == "M");
         cargadoanimales = true;
@@ -336,6 +394,19 @@
             };
         });
         animalesrows = madres;
+    }
+    function irServicio(esServicio) {
+        if (ninguno) {
+            Swal.fire(
+                "Error servicio",
+                "No hay animales seleccionados",
+                "error",
+            );
+            
+            return;
+        }
+        setDetalle(esServicio);
+        goto(pre + "/servicios/movimiento/detallemovimento");
     }
     function openNewModal() {
         esservicio = true;
@@ -357,6 +428,7 @@
         servicioMasivo.showModal();
     }
     function openNewModalInseminacion() {
+        
         esinseminacion = true;
         if (ninguno) {
             Swal.fire(
@@ -807,16 +879,41 @@
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
+
         await getAnimales();
         await getRodeos();
         await getLotes();
 
         cargado = true;
+        loadDetalle();
     });
 </script>
 
-<Navbarr>
-    <div class="grid grid-cols-1 lg:grid-cols-2 mx-1 lg:mx-10 mt-1 w-11/12">
+<Navbar2>
+    <BuscadorMovimientos
+        {animalesrows}
+        selecthashmap={selecthashmap}
+        bind:buscar
+        {rodeos}
+        bind:rodeoseleccion
+        {lotes}
+        bind:loteseleccion
+        {categorias}
+        {estados}
+        bind:estado
+        bind:categoriaseleccion
+        bind:raza
+        bind:color
+        bind:isOpenFilter
+        {clickFilter}
+        {filterUpdate}
+        nuevoServicio={() => irServicio(true)}
+        nuevoInseminacion={() => irServicio(false)}
+        {limpiarFiltros}
+    />
+    <div
+        class="hidden grid grid-cols-1 lg:grid-cols-2 mx-1 lg:mx-10 mt-1 w-11/12"
+    >
         <div>
             <button
                 class="bg-transparent border-none flex"
@@ -860,7 +957,7 @@
     </div>
 
     <div
-        class="grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
+        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
     >
         <div class="w-11/12">
             <label
@@ -879,7 +976,7 @@
             <Limpiar {limpiarFiltros} />
         </div>
     </div>
-    <div class="w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
+    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
         <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
             <div class="flex justify-between items-center px-1">
                 <h1 class="font-semibold text-lg py-2">Filtros</h1>
@@ -981,101 +1078,34 @@
                         />
                     </label>
                 </div>
-                
             </div>
         {/if}
     </div>
     <div
-        class="hidden w-full md:grid justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
+        class={`
+            hidden w-full md:grid
+            mx-auto py-6 px-4 max-w-7xl
+        `}
     >
-        <table class="table table-lg w-full">
-            <thead>
-                <tr>
-                    <th class="">
-                        <button
-                            aria-label="Todos"
-                            onclick={clickTodos}
-                            class={`
-                                text-base bg-transparent rounded-lg
-                                p-1 text-base
-                                ${estilos.secundario}
-                            `}
-                        >
-                            {#if todos}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="size-6"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                    />
-                                </svg>
-                            {/if}
-                            {#if ninguno}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="size-6"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                    />
-                                </svg>
-                            {/if}
-                            {#if algunos}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="size-6"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                    />
-                                </svg>
-                            {/if}
-                        </button>
-                    </th>
-                    <th class="text-base">Caravana</th>
-                    <th class="text-base">Estado</th>
-                    <th class="text-base">Categoria</th>
-                    <th class="text-base">Peso</th>
-                    <th class="text-base">Rodeo</th>
-                    <th class="text-base">Lote</th>
-                    <th class="text-base">Raza</th>
-                    <th class="text-base">Color</th>
-                    
-                </tr>
-            </thead>
-            <tbody>
-                {#each animalesrows as a}
+        <div
+            class={`
+                overflow-hidden rounded-xl
+            `}
+        >
+            <table class="table table-lg w-full">
+                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
                     <tr>
-                        <td class="">
+                        <th class="px-1 p-0 m-0 border-b border-emerald-700">
                             <button
-                                aria-label="fila"
-                                onclick={() => clickAnimal(a.id)}
+                                aria-label="Todos"
+                                onclick={clickTodos}
                                 class={`
-                                font-medium bg-transparent rounded-lg
-                                p-1 text-base
-                                ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
-                            `}
+                                    text-white bg-transparent rounded-lg
+                                    px-3 py-3
+                                    ${estilos.secundario}
+                                `}
                             >
-                                {#if selecthashmap[a.id]}
+                                {#if todos}
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
@@ -1087,10 +1117,11 @@
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
-                                            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                                         />
                                     </svg>
-                                {:else}
+                                {/if}
+                                {#if ninguno}
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
@@ -1102,32 +1133,141 @@
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
-                                            d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                            d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                        />
+                                    </svg>
+                                {/if}
+                                {#if algunos}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="1.5"
+                                        stroke="currentColor"
+                                        class="size-6"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                                         />
                                     </svg>
                                 {/if}
                             </button>
-                        </td>
-                        <td class="text-base">{shorterWord(a.caravana)}</td>
-                        <td class="text-base">{getEstadoNombre(a.prenada)}</td>
-                        <td class="text-base">{capitalize(a.categoria)}</td>
-                        <td class="text-base">{a.peso}</td>
-                        <td class="text-base"
-                            >{a.expand?.rodeo?.nombre || ""}</td
+                        </th>
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
                         >
-                        <td class="text-base">{a.expand?.lote?.nombre || ""}</td
+                            Caravana</th
                         >
-                        <td>
-                            {a.raza}
-                        </td>
-                        <td>
-                            {a.color}
-                        </td>
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Estado</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Categoria</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Peso</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Rodeo</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Lote</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Raza</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Color</th
+                        >
                     </tr>
-                {/each}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {#each animalesrows as a}
+                        <tr>
+                            <td class="">
+                                <button
+                                    aria-label="fila"
+                                    onclick={() => clickAnimal(a.id)}
+                                    class={`
+                                font-medium bg-transparent rounded-lg
+                                p-1 text-base
+                                ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
+                            `}
+                                >
+                                    {#if selecthashmap[a.id]}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="size-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                            />
+                                        </svg>
+                                    {:else}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="size-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </button>
+                            </td>
+                            <td class="text-base">{shorterWord(a.caravana)}</td>
+                            <td class="text-base"
+                                >{getEstadoNombre(a.prenada)}</td
+                            >
+                            <td class="text-base">{capitalize(a.categoria)}</td>
+                            <td class="text-base">{a.peso}</td>
+                            <td class="text-base"
+                                >{a.expand?.rodeo?.nombre || ""}</td
+                            >
+                            <td class="text-base"
+                                >{a.expand?.lote?.nombre || ""}</td
+                            >
+                            <td>
+                                {a.raza}
+                            </td>
+                            <td>
+                                {a.color}
+                            </td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+        </div>
     </div>
+
     <div class="block md:hidden justify-items-center mx-1">
         <div class="w-full flex justify-start">
             <button
@@ -1299,7 +1439,7 @@
             </div>
         {/each}
     </div>
-</Navbarr>
+</Navbar2>
 <dialog id="servicioMasivo" class="modal modal-middle rounded-xl">
     <div
         class="

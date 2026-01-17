@@ -1,38 +1,41 @@
 <script>
-    import Navbarr from '$lib/components/Navbarr.svelte';
-    import Exportar from '$lib/components/Exportar.svelte';
-    import PocketBase from 'pocketbase'
-    import { slide } from 'svelte/transition';
-    import Swal from 'sweetalert2';
-    import { onMount } from 'svelte';
-    import { createCaber } from '$lib/stores/cab.svelte';
-    import {isEmpty} from "$lib/stringutil/lib"
-    import estilos from '$lib/stores/estilos';
-    import {shorterWord} from "$lib/stringutil/lib"
-    import * as XLSX from "xlsx"
+    import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
+    import UltimosPesajes from "$lib/components/pesajes/UltimosPesajes.svelte";
+    import Exportar from "$lib/components/Exportar.svelte";
+    import PocketBase from "pocketbase";
+    import { slide } from "svelte/transition";
+    import Swal from "sweetalert2";
+    import { onMount } from "svelte";
+    import { createCaber } from "$lib/stores/cab.svelte";
+    import { isEmpty } from "$lib/stringutil/lib";
+    import estilos from "$lib/stores/estilos";
+    import { shorterWord } from "$lib/stringutil/lib";
+    import * as XLSX from "xlsx";
     //FILTROS
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
-    let caber = createCaber()
-    let cab = caber.cab
-    let ruta = import.meta.env.VITE_RUTA
-    let pre = import.meta.env.VITE_PRE
+    import { goto } from "$app/navigation";
+    let caber = createCaber();
+    let cab = caber.cab;
+    let ruta = import.meta.env.VITE_RUTA;
+    let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
-    const HOY = new Date().toISOString().split("T")[0]
+    const HOY = new Date().toISOString().split("T")[0];
     const today = new Date();
-    const DESDE = new Date(today.getFullYear(), today.getMonth() - 1, 1);    
+    const DESDE = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const HASTA = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    let isOpenFilter = $state(false)
+    let isOpenFilter = $state(false);
     //Datos filtrar
-    let buscarcaravana = $state("")
-    let fechadesde = $state("")
-    let fechahasta = $state("")
-    let pesajes = $state([])
-    let pesajesrows = $state([])
-    let filas = $state([])
-    let columnas = $state([])
-    let tablapesaje = $state({})
-    let pesajesprocesados = $state([])
+    let buscarcaravana = $state("");
+    let fechadesde = $state("");
+    let fechahasta = $state("");
+    let pesajes = $state([]);
+    let pesajesrows = $state([]);
+    let filas = $state([]);
+    let columnas = $state([]);
+    let tablapesaje = $state({});
+    let pesajesprocesados = $state([]);
     let defaultfiltro = {
         buscarcaravana: "",
         fechadesde: "",
@@ -43,23 +46,22 @@
     });
     let proxy = createStorageProxy("listapesajes", defaultfiltro);
     //pesaje
-    let idpesaje = $state("")
-    let caravana = $state("")
-    let fecha = $state("")
-    let pesoanterior = $state("")
-    let pesonuevo = $state("")
-    let ultimos = $state(5)
-    function clickFilter(){
-        isOpenFilter = !isOpenFilter
+    let idpesaje = $state("");
+    let caravana = $state("");
+    let fecha = $state("");
+    let pesoanterior = $state("");
+    let pesonuevo = $state("");
+    let ultimos = $state(5);
+    function clickFilter() {
+        isOpenFilter = !isOpenFilter;
     }
-    async function getPesajes(){
-        const records = await pb.collection('pesaje').getFullList({
-            sort: '-fecha',
-            expand:"animal,animal.cab",
-            filter:`animal.cab = '${cab.id}'`
+    async function getPesajes() {
+        const records = await pb.collection("pesaje").getFullList({
+            sort: "-fecha",
+            expand: "animal,animal.cab",
+            filter: `animal.cab = '${cab.id}'`,
         });
-        pesajes = records
-        
+        pesajes = records;
     }
     function setFilters() {
         buscarcaravana = proxyfiltros.buscarcaravana;
@@ -79,209 +81,246 @@
         setFilters();
         filterUpdate();
     }
-    function filterUpdate(){
+    function filterUpdate() {
         setProxyFilter();
         proxy.save(proxyfiltros);
-        filas = []
-        columnas = []
-        tablapesaje = {}
-        pesajesrows = pesajes
-        if(!isEmpty(buscarcaravana)){
-            pesajesrows = pesajesrows.filter(p=>p.expand.animal.caravana.toLocaleLowerCase().includes(buscarcaravana.toLocaleLowerCase()))
+        filas = [];
+        columnas = [];
+        tablapesaje = {};
+        pesajesrows = pesajes;
+        if (!isEmpty(buscarcaravana)) {
+            pesajesrows = pesajesrows.filter((p) =>
+                p.expand.animal.caravana
+                    .toLocaleLowerCase()
+                    .includes(buscarcaravana.toLocaleLowerCase()),
+            );
         }
-        if(!isEmpty(fechadesde)){
-            pesajesrows = pesajesrows.filter(p=>p.fecha>=fechadesde)
+        if (!isEmpty(fechadesde)) {
+            pesajesrows = pesajesrows.filter((p) => p.fecha >= fechadesde);
         }
-        if(!isEmpty(fechahasta)){
-            pesajesrows = pesajesrows.filter(p=>p.fecha<=fechahasta)
+        if (!isEmpty(fechahasta)) {
+            pesajesrows = pesajesrows.filter((p) => p.fecha <= fechahasta);
         }
         //procesarPesajes()
-        procesarUltimosPesajes()
+        procesarUltimosPesajes();
     }
     async function editarPesaje() {
-        try{
+        try {
             let data = {
-                fecha:new Date(fecha).toISOString().split("T")[0]+" 03:00:00",
-                pesonuevo
-            }
-            await pb.collection("pesaje").update(idpesaje,data)
-            await getPesajes()
-            filterUpdate()
-            Swal.fire("Éxito editar pesaje","Se pudo editar el pesaje","success")
-        }   
-        catch(err){
-            console.error(err)
-            Swal.fire("Error editar pesaje","No se pudo editar el pesaje","error")
+                fecha:
+                    new Date(fecha).toISOString().split("T")[0] + " 03:00:00",
+                pesonuevo,
+            };
+            await pb.collection("pesaje").update(idpesaje, data);
+            await getPesajes();
+            filterUpdate();
+            Swal.fire(
+                "Éxito editar pesaje",
+                "Se pudo editar el pesaje",
+                "success",
+            );
+        } catch (err) {
+            console.error(err);
+            Swal.fire(
+                "Error editar pesaje",
+                "No se pudo editar el pesaje",
+                "error",
+            );
         }
-        detallePesaje.close()
+        detallePesaje.close();
+    }
+    async function eliminar() {
+        try {
+            await pb.collection("pesaje").delete(idpesaje);
+            await getPesajes();
+            Swal.fire(
+                "Éxito eliminar pesaje",
+                "Se pudo eliminar el pesaje",
+                "success",
+            );
+            filterUpdate();
+            detallePesaje.close();
+        } catch (err) {
+            console.error(err);
+            Swal.fire(
+                "Error eliminar pesaje",
+                "No se pudo eliminar el pesaje",
+                "error",
+            );
+            detallePesaje.close();
+        }
+    }
+    function openDetalle(id) {
+        idpesaje = id;
+        let pesaje = pesajes.filter((p) => p.id == idpesaje)[0];
+        caravana = pesaje.expand.animal.caravana;
+        fecha = pesaje.fecha.split(" ")[0];
+        pesoanterior = pesaje.pesoanterior;
+        pesonuevo = pesaje.pesonuevo;
 
+        detallePesaje.showModal();
     }
-    async function eliminar(){
-        
-        try{
-            
-            await pb.collection("pesaje").delete(idpesaje)
-            await getPesajes()
-             Swal.fire("Éxito eliminar pesaje","Se pudo eliminar el pesaje","success")
-            filterUpdate()
-            detallePesaje.close()
-        }
-        catch(err){
-            console.error(err)
-            Swal.fire("Error eliminar pesaje","No se pudo eliminar el pesaje","error")
-            detallePesaje.close()
-        }
-    }
-    function openDetalle(id){
-        idpesaje = id
-        let pesaje = pesajes.filter(p=>p.id==idpesaje)[0]
-        caravana = pesaje.expand.animal.caravana
-        fecha = pesaje.fecha.split(" ")[0]
-        pesoanterior = pesaje.pesoanterior
-        pesonuevo = pesaje.pesonuevo
-
-        detallePesaje.showModal()
-    }
-    function prepararData(item){
+    function prepararData(item) {
         return {
-            ANIMAL:item.expand.animal.caravana,
-            FECHA:new Date(item.fecha).toISOString().split("T")[0],
-            PESO_ANTERIO:item.pesoanterior,
-            PESO_NUEVO:item.pesonuevo
-        }
+            ANIMAL: item.expand.animal.caravana,
+            FECHA: new Date(item.fecha).toISOString().split("T")[0],
+            PESO_ANTERIO: item.pesoanterior,
+            PESO_NUEVO: item.pesonuevo,
+        };
     }
-    function exportarPesaje(){
-        
-        let lista = pesajesrows
-        let csvdata = lista.map(f=>{
-
+    function exportarPesaje() {
+        let lista = pesajesrows;
+        let csvdata = lista.map((f) => {
             let filaexcel = {
-                ANIMAL:f.expand.animal.caravana,
-                FECHA:new Date(f.fecha).toLocaleDateString(),
-                PESO_ANTERIO:f.pesoanterior,
-                PESO_NUEVO:f.pesonuevo
-            }
-            
-            return filaexcel
-        })
+                ANIMAL: f.expand.animal.caravana,
+                FECHA: new Date(f.fecha).toLocaleDateString(),
+                PESO_ANTERIO: f.pesoanterior,
+                PESO_NUEVO: f.pesonuevo,
+            };
+
+            return filaexcel;
+        });
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet([])
-        ws['A1']={t:'s',v:"Pesajes",s:{}}
-        const range = XLSX.utils.decode_range('A1:K1');
-        ws['!merges'] = [{ s: { r: range.s.r, c: range.s.c }, e: { r: range.e.r, c: range.e.c } }];
-        XLSX.utils.sheet_add_json(ws, csvdata, { origin: 'A2' });
+        const ws = XLSX.utils.aoa_to_sheet([]);
+        ws["A1"] = { t: "s", v: "Pesajes", s: {} };
+        const range = XLSX.utils.decode_range("A1:K1");
+        ws["!merges"] = [
+            {
+                s: { r: range.s.r, c: range.s.c },
+                e: { r: range.e.r, c: range.e.c },
+            },
+        ];
+        XLSX.utils.sheet_add_json(ws, csvdata, { origin: "A2" });
         XLSX.utils.book_append_sheet(wb, ws, "Pesajes");
-        let confiltros = false
-        let filtros = []
-        if(confiltros){
-            const wsFilter = XLSX.utils.aoa_to_sheet(filtros)
-            XLSX.utils.book_append_sheet(wb, wsFilter, 'Filtros aplicados');
+        let confiltros = false;
+        let filtros = [];
+        if (confiltros) {
+            const wsFilter = XLSX.utils.aoa_to_sheet(filtros);
+            XLSX.utils.book_append_sheet(wb, wsFilter, "Filtros aplicados");
         }
-        XLSX.writeFile(wb, `${"Pesajes".replace(/\//g, "-")}.xlsx`, { cellStyles: true });
-
+        XLSX.writeFile(wb, `${"Pesajes".replace(/\//g, "-")}.xlsx`, {
+            cellStyles: true,
+        });
     }
-    function procesarUltimosPesajes(){
-        pesajesprocesados = []
+    function procesarUltimosPesajes() {
+        pesajesprocesados = [];
         //tabla[animal] = { animal,pesajes:[{fecha,peso}]}
-        let tablapesajes = {}
-        for(let i = 0;i<pesajesrows.length;i++){
-            let p = pesajesrows[i]
-            let caravana = p.expand.animal.caravana
-            let fecha = p.fecha
-            let peso = p.pesonuevo
-            let id = p.id
-            if(tablapesajes[caravana]){
-                if(tablapesajes[caravana].pesajes.length < ultimos){
-                    tablapesajes[caravana].pesajes.push({fecha,peso,id})
+        let tablapesajes = {};
+        for (let i = 0; i < pesajesrows.length; i++) {
+            let p = pesajesrows[i];
+            let caravana = p.expand.animal.caravana;
+            let fecha = p.fecha;
+            let peso = p.pesonuevo;
+            let id = p.id;
+            if (tablapesajes[caravana]) {
+                if (tablapesajes[caravana].pesajes.length < ultimos) {
+                    tablapesajes[caravana].pesajes.push({ fecha, peso, id });
                 }
-            }
-            else{
+            } else {
                 tablapesajes[caravana] = {
-                    animal:caravana,
-                    pesajes:[{fecha,peso,id}]
-                }
+                    animal: caravana,
+                    pesajes: [{ fecha, peso, id }],
+                };
             }
         }
-        
-        for (const [key, value] of Object.entries(tablapesajes)) {
-            pesajesprocesados.push(value)
-        }
-        
-        pesajesprocesados.sort((a,b)=>a.animal.toLocaleLowerCase()<b.animal.toLocaleLowerCase()?-1:1)
-        
 
+        for (const [key, value] of Object.entries(tablapesajes)) {
+            pesajesprocesados.push(value);
+        }
+
+        pesajesprocesados.sort((a, b) =>
+            a.animal.toLocaleLowerCase() < b.animal.toLocaleLowerCase()
+                ? -1
+                : 1,
+        );
     }
-    function procesarPesajes(){
-        let setanimales = new Set()
-        let setfechas = new Set()
-        tablapesaje = {}
-        for(let i = 0;i<pesajesrows.length;i++){
-            let p = pesajesrows[i]
-            let caravana = p.expand.animal.caravana
-            let fecha = p.fecha
-            if(tablapesaje[fecha]){
+    function procesarPesajes() {
+        let setanimales = new Set();
+        let setfechas = new Set();
+        tablapesaje = {};
+        for (let i = 0; i < pesajesrows.length; i++) {
+            let p = pesajesrows[i];
+            let caravana = p.expand.animal.caravana;
+            let fecha = p.fecha;
+            if (tablapesaje[fecha]) {
                 //Puede ocurrir que tenga 2 pesajes en el mismo dia?
                 //En teoria si pero debe ser unerror, guardo el último
-                if(tablapesaje[fecha][caravana]){
+                if (tablapesaje[fecha][caravana]) {
                     tablapesaje[fecha][caravana] = {
-                        pesonuevo:p.pesonuevo,
-                        pesoanterior:p.pesoanterior,
-                        id:p.id
-                    }
-                }
-                else{
+                        pesonuevo: p.pesonuevo,
+                        pesoanterior: p.pesoanterior,
+                        id: p.id,
+                    };
+                } else {
                     tablapesaje[fecha][caravana] = {
-                        pesonuevo:p.pesonuevo,
-                        pesoanterior:p.pesoanterior,
-                        id:p.id
-                    }
+                        pesonuevo: p.pesonuevo,
+                        pesoanterior: p.pesoanterior,
+                        id: p.id,
+                    };
                 }
-            }
-            else{
-                tablapesaje[fecha]={}
+            } else {
+                tablapesaje[fecha] = {};
                 tablapesaje[fecha][caravana] = {
-                    pesonuevo:p.pesonuevo,
-                    pesoanterior:p.pesoanterior,
-                    id:p.id
-                }
+                    pesonuevo: p.pesonuevo,
+                    pesoanterior: p.pesoanterior,
+                    id: p.id,
+                };
             }
             //Así recorro los animales
-            setanimales.add(caravana)
+            setanimales.add(caravana);
             //Así recorro las fecha
-            setfechas.add(fecha)
+            setfechas.add(fecha);
         }
-        filas = Array.from(setanimales)
-        columnas = Array.from(setfechas)
-        columnas.sort((a,b)=>new Date(a)<new Date(b)?-1:1)
-        
+        filas = Array.from(setanimales);
+        columnas = Array.from(setfechas);
+        columnas.sort((a, b) => (new Date(a) < new Date(b) ? -1 : 1));
     }
-    onMount(async ()=>{
+    onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
-        await getPesajes()
-        filterUpdate()
-    })
+        await getPesajes();
+        filterUpdate();
+    });
 </script>
-<Navbarr>
-    <div class="grid grid-cols-1  lg:grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12">
+
+<Navbar2>
+    <UltimosPesajes
+        cabnombre={cab.nombre}
+        pesajesrows={pesajesprocesados}
+        bind:isOpenFilter
+        bind:buscar={buscarcaravana}
+        bind:fechadesde
+        bind:fechahasta
+        {limpiarFiltros}
+        {prepararData}
+        historial={() => goto(pre + "/pesajes/historial")}
+        {filterUpdate}
+        {clickFilter}
+    />
+    <div
+        class="hidden grid grid-cols-1 lg:grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12"
+    >
         <div class="hidden md:block">
-            <h1 class="text-2xl col-span-2 lg:col-span-1">Historia pesajes - Últimos 5</h1>  
+            <h1 class="text-2xl col-span-2 lg:col-span-1">
+                Historia pesajes - Últimos 5
+            </h1>
         </div>
         <div class="md:hidden">
-            <h1 class="text-2xl col-span-2 lg:col-span-1">Historia pesajes - Últimos 3</h1>  
+            <h1 class="text-2xl col-span-2 lg:col-span-1">
+                Historia pesajes - Últimos 3
+            </h1>
         </div>
         <div class="flex col-span-2 gap-1 justify-end">
-            
-            <div class="flex flex-row gap-2 ">
+            <div class="flex flex-row gap-2">
                 <div>
-                    <a class={`
+                    <a
+                        class={`
                         btn 
                         bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                        ${estilos.btnsecondary}`} 
-                        href={pre+"/pesajes/historial"}
-    
+                        ${estilos.btnsecondary}`}
+                        href={pre + "/pesajes/historial"}
                     >
-                        <span  class="text-xl font-semibold ">Historial</span>
+                        <span class="text-xl font-semibold">Historial</span>
                     </a>
                 </div>
                 <button
@@ -291,28 +330,27 @@
                         ${estilos.btnsecondary}
                         rounded-full
                         p-2
-                    `} 
+                    `}
                     aria-label="Exportar"
                 >
-                    <span  class="text-xl font-semibold ">Exportar</span>
-                    
+                    <span class="text-xl font-semibold">Exportar</span>
                 </button>
             </div>
             <div>
-                <a class={`
+                <a
+                    class={`
                     btn 
                     bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                    ${estilos.btnsecondary}`} 
-                    href={pre+"/pesajes"}
-
+                    ${estilos.btnsecondary}`}
+                    href={pre + "/pesajes"}
                 >
-                    <span  class="text-xl font-semibold ">Volver</span>
+                    <span class="text-xl font-semibold">Volver</span>
                 </a>
             </div>
         </div>
     </div>
     <div
-        class="grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10 w-11/12"
+        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10 w-11/12"
     >
         <div class="w-11/12">
             <label
@@ -337,160 +375,262 @@
             <Limpiar {limpiarFiltros} />
         </div>
     </div>
-    <div class="w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
-        <button 
-            aria-label="Filtrar" 
-            class="w-full"
-            onclick={clickFilter}
-        >
+    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
+        <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
             <div class="flex justify-between items-center px-1">
                 <h1 class="font-semibold text-lg py-2">Filtros</h1>
-                <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    class={`h-5 w-5 transition-all duration-300 ${isOpenFilter? 'transform rotate-180':''}`}
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class={`h-5 w-5 transition-all duration-300 ${isOpenFilter ? "transform rotate-180" : ""}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                    />
                 </svg>
-            </div> 
+            </div>
         </button>
         {#if isOpenFilter}
             <div transition:slide>
-                <div class="grid grid-cols-1 lg:grid-cols-3 mb-2 lg:mb-3 gap-1" >
+                <div class="grid grid-cols-1 lg:grid-cols-3 mb-2 lg:mb-3 gap-1">
                     <div class="">
-                        <label class="block tracking-wide  mb-2" for="grid-first-name">
-                          Fecha desde
+                        <label
+                            class="block tracking-wide mb-2"
+                            for="grid-first-name"
+                        >
+                            Fecha desde
                         </label>
-                        <input id ="fechadesde" type="date"  
+                        <input
+                            id="fechadesde"
+                            type="date"
                             class={`
                                 input input-bordered
                                 ${estilos.bgdark2}
-                            `} 
-                            bind:value={fechadesde} onchange={filterUpdate}
+                            `}
+                            bind:value={fechadesde}
+                            onchange={filterUpdate}
                         />
                     </div>
                     <div class="">
-                        <label class="block tracking-wide mb-2" for="grid-first-name">
-                          Fecha Hasta
+                        <label
+                            class="block tracking-wide mb-2"
+                            for="grid-first-name"
+                        >
+                            Fecha Hasta
                         </label>
-                        <input id ="fechadesde" type="date"  
+                        <input
+                            id="fechadesde"
+                            type="date"
                             class={`
                                 input input-bordered
                                 ${estilos.bgdark2}
-                            `} 
-                            bind:value={fechahasta} onchange={filterUpdate}
+                            `}
+                            bind:value={fechahasta}
+                            onchange={filterUpdate}
                         />
                     </div>
                 </div>
             </div>
         {/if}
     </div>
-    
-    <div class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto">
-        <table class="table table-lg w-full" >
-            <thead>
-                <tr>
-                    <th class="text-base mx-1 px-1 border-b dark:border-gray-600">Animal</th>
-                    <th class="text-base mx-1 px-1 border-b dark:border-gray-600">5</th>
-                    <th class="text-base mx-1 px-1 border-b dark:border-gray-600">4</th>
-                    <th class="text-base mx-1 px-1 border-b dark:border-gray-600">3</th>
-                    <th class="text-base mx-1 px-1 border-b dark:border-gray-600">2</th>
-                    <th class="text-base mx-1 px-1 border-b dark:border-gray-600">1</th>
-                </tr>
-                
-            </thead>
-            <tbody>
-                {#each pesajesprocesados as f}
+    <!--Tabla grande-->
+    <div
+        class={`
+            hidden w-full md:grid
+            mx-auto py-6 px-4 max-w-7xl
+        `}
+    >
+        <div
+            class={`
+                    overflow-hidden rounded-xl
+                `}
+        >
+            <table class="table table-lg w-full">
+                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
                     <tr>
-                        <td class="text-base mx-1 px-1">
-                            {shorterWord(f.animal)}
-                        </td>
-                        {#each Array(5) as _,idx}
-                            {#if f.pesajes.length < ultimos - idx}
-                                <td>
-                                    {"-"}
-                                </td>
-                            {:else}
-                                <td onclick={()=>openDetalle(f.pesajes[ultimos - idx - 1].id)} class="cursor-pointer text-base mx-1 px-1 hover:bg-gray-200 dark:hover:bg-gray-900">
-                                    {new Date(f.pesajes[ultimos - idx - 1].fecha).toLocaleDateString()} , {f.pesajes[ultimos - idx - 1].peso}
-                                </td>
-                            {/if}
-                                
-                        {/each}
-                        
-                        
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Animal</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            5</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            4</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            3</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            2</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            1</th
+                        >
                     </tr>
-                {/each}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {#each pesajesprocesados as f}
+                        <tr>
+                            <td class="text-base mx-1 px-1">
+                                {shorterWord(f.animal)}
+                            </td>
+                            {#each Array(5) as _, idx}
+                                {#if f.pesajes.length < ultimos - idx}
+                                    <td>
+                                        {"-"}
+                                    </td>
+                                {:else}
+                                    <td
+                                        onclick={() =>
+                                            openDetalle(
+                                                f.pesajes[ultimos - idx - 1].id,
+                                            )}
+                                        class="cursor-pointer text-base mx-1 px-1 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                    >
+                                        {new Date(
+                                            f.pesajes[ultimos - idx - 1].fecha,
+                                        ).toLocaleDateString()} , {f.pesajes[
+                                            ultimos - idx - 1
+                                        ].peso}
+                                    </td>
+                                {/if}
+                            {/each}
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="w-full md:hidden justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto">
-        <table class="table table-lg w-full" >
-            <thead>
-                <tr>
-                    <th class="text-base mx-1 px-1 border-b dark:border-gray-600">Animal</th>
-                    
-                    <th class="text-base mx-1 px-1 border-b dark:border-gray-600">3</th>
-                    <th class="text-base mx-1 px-1 border-b dark:border-gray-600">2</th>
-                    <th class="text-base mx-1 px-1 border-b dark:border-gray-600">1</th>
-                </tr>
-                
-            </thead>
-            <tbody>
-                {#each pesajesprocesados as f}
+
+    <!--Tabla chica-->
+    <div
+        class={`
+            w-full md:hidden
+            mx-auto py-6 px-4 max-w-7xl
+        `}
+    >
+        <div
+            class={`
+                    overflow-hidden rounded-xl
+                `}
+        >
+            <table class="table table-lg w-full">
+                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
                     <tr>
-                        <td class="text-base mx-1 px-1">
-                            {shorterWord(f.animal)}
-                        </td>
-                        {#each Array(3) as _,idx}
-                            {#if f.pesajes.length < ultimos - ( idx + 2)}
-                                <td>
-                                    {"-"}
-                                </td>
-                            {:else}
-                                <td onclick={()=>openDetalle(f.pesajes[ultimos - ( idx + 2) - 1].id)} class="cursor-pointer text-base mx-1 px-1 hover:bg-gray-200 dark:hover:bg-gray-900">
-                                    {new Date(f.pesajes[ultimos - ( idx + 2) - 1].fecha).toLocaleDateString()} , {f.pesajes[ultimos - ( idx + 2) - 1].peso}
-                                </td>
-                            {/if}
-                                
-                        {/each}
-                        
-                        
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Animal</th
+                        >
+
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                            >3</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                            >2</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                            >1</th
+                        >
                     </tr>
-                {/each}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {#each pesajesprocesados as f}
+                        <tr>
+                            <td class="text-base mx-1 px-1">
+                                {shorterWord(f.animal)}
+                            </td>
+                            {#each Array(3) as _, idx}
+                                {#if f.pesajes.length < ultimos - (idx + 2)}
+                                    <td>
+                                        {"-"}
+                                    </td>
+                                {:else}
+                                    <td
+                                        onclick={() =>
+                                            openDetalle(
+                                                f.pesajes[
+                                                    ultimos - (idx + 2) - 1
+                                                ].id,
+                                            )}
+                                        class="cursor-pointer text-base mx-1 px-1 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                    >
+                                        {new Date(
+                                            f.pesajes[
+                                                ultimos - (idx + 2) - 1
+                                            ].fecha,
+                                        ).toLocaleDateString()} , {f.pesajes[
+                                            ultimos - (idx + 2) - 1
+                                        ].peso}
+                                    </td>
+                                {/if}
+                            {/each}
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+        </div>
     </div>
-    
-</Navbarr>
-<dialog id="detallePesaje" class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle">
-    <div class="
+</Navbar2>
+<dialog
+    id="detallePesaje"
+    class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"
+>
+    <div
+        class="
         modal-box w-11/12 max-w-xl
-        bg-gradient-to-br from-white to-gray-100 
-        dark:from-gray-900 dark:to-gray-800 
+        bg-gradient-to-br from-white to-gray-100
+        dark:from-gray-900 dark:to-gray-800
         "
     >
         <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl">✕</button>
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
         </form>
-        <h3 class="text-lg font-bold">Ver pesaje</h3>  
+        <h3 class="text-lg font-bold">Ver pesaje</h3>
         <div class="form-control">
             <div class="grid grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
                 <div class="mb-1 lg:mb-0">
-                    <label for = "caravana" class="label">
+                    <label for="caravana" class="label">
                         <span class="label-text text-base">Caravana</span>
                     </label>
-                    <label for="caravana" 
+                    <label
+                        for="caravana"
                         class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
                     >
                         {caravana}
                     </label>
                 </div>
                 <div class="mb-1 lg:mb-0">
-                    <label for = "caravana" class="label">
+                    <label for="caravana" class="label">
                         <span class="label-text text-base">Fecha</span>
                     </label>
-                    <label class="input-group ">
-                        <input id ="fecha" type="date"   
+                    <label class="input-group">
+                        <input
+                            id="fecha"
+                            type="date"
                             class={`
                                 input input-bordered 
                                 w-full
@@ -499,29 +639,31 @@
                                 focus:ring-green-500 
                                 focus:border-green-500
                                 ${estilos.bgdark2}
-                            `} 
+                            `}
                             bind:value={fecha}
                         />
                     </label>
                 </div>
                 <div class="mb-1 lg:mb-0">
-                    <label for = "pesoanterior" class="label">
-                        <span class="label-text text-base">Peso anterior(KG)</span>
+                    <label for="pesoanterior" class="label">
+                        <span class="label-text text-base"
+                            >Peso anterior(KG)</span
+                        >
                     </label>
-                    <label for="pesoanterior" 
+                    <label
+                        for="pesoanterior"
                         class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
                     >
                         {pesoanterior}
                     </label>
                 </div>
                 <div class="mb-1 lg:mb-0">
-                    <label for = "pesonuevo" class="label">
+                    <label for="pesonuevo" class="label">
                         <span class="label-text text-base">Peso nuevo(KG)</span>
                     </label>
-                    <input 
-                        id ="pesonuevo" 
-                        type="number"  
-                        
+                    <input
+                        id="pesonuevo"
+                        type="number"
                         class={`
                             input 
                             input-bordered 
@@ -531,22 +673,25 @@
                             ${estilos.bgdark2}
                         `}
                         bind:value={pesonuevo}
-                        oninput={()=>pesonuevo = Math.max(pesonuevo,0)}
+                        oninput={() => (pesonuevo = Math.max(pesonuevo, 0))}
                     />
                 </div>
             </div>
         </div>
-        <div class="modal-action justify-start ">
-                <button class="btn btn-success text-white"  onclick={editarPesaje} >Editar</button>
-                <button class="btn btn-error text-white" onclick={eliminar}>Eliminar</button>
-                <button class={`
+        <div class="modal-action justify-start">
+            <button class="btn btn-success text-white" onclick={editarPesaje}
+                >Editar</button
+            >
+            <button class="btn btn-error text-white" onclick={eliminar}
+                >Eliminar</button
+            >
+            <button
+                class={`
                     btn 
                     bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                    ${estilos.btnsecondary}`} 
-                    onclick={()=>detallePesaje.close()}
-
-                >Cerrar</button>
-            
+                    ${estilos.btnsecondary}`}
+                onclick={() => detallePesaje.close()}>Cerrar</button
+            >
         </div>
     </div>
 </dialog>

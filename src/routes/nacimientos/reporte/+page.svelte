@@ -177,11 +177,10 @@
                     let parto = partos[i]
                     let dias_entre_fechas =  diasEntreFechas(parto.fecha,fecha_parto)
                     if(isNaN(dias_entre_fechas)){
-                        console.log
-                        console.log(parto)
+                        
                         continue
                     }
-                    console.log(dias_entre_fechas)
+                    
 
                     dias += dias_entre_fechas
                     fecha_parto = parto.fecha

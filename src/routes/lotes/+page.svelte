@@ -1,5 +1,7 @@
 <script>
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
+    import Buscador from "$lib/components/lotes/Buscador.svelte";
     import PocketBase from "pocketbase";
     import Swal from "sweetalert2";
     import { onMount } from "svelte";
@@ -57,11 +59,11 @@
     let nombre = $state("");
 
     //filtros
-    function goToAnimales(){
-        proxyanimales.load()
-        proxyfiltrosanimales.loteseleccion = [`${idlote}`]
-        proxyanimales.save(proxyfiltrosanimales)
-        goto(pre+"/animales")
+    function goToAnimales() {
+        proxyanimales.load();
+        proxyfiltrosanimales.loteseleccion = [`${idlote}`];
+        proxyanimales.save(proxyfiltrosanimales);
+        goto(pre + "/animales");
     }
 
     //validacciones
@@ -86,7 +88,7 @@
             let total = await getAnimalesTotal(lotes[i].id);
             lotes[i].total = total;
         }
-        filterUpdate()
+        filterUpdate();
     }
     function openNewModal() {
         if (userpermisos[1]) {
@@ -103,12 +105,10 @@
     }
     function setFilters() {
         buscar = proxyfiltros.buscar;
-        
     }
 
     function setProxyFilter() {
         proxyfiltros.buscar = buscar;
-        
     }
     function limpiarFiltros() {
         proxyfiltros = { ...defaultfiltro };
@@ -246,10 +246,14 @@
             malnombre = false;
         }
     }
+    function nuevo() {
+        openNewModal();
+    }
 </script>
 
-<Navbarr>
-    <div class="grid grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12">
+<Navbar2>
+    <Buscador {lotesrows} bind:buscar {limpiarFiltros} {filterUpdate} {nuevo} />
+    <div class="hidden grid grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12">
         <div>
             <h1 class="text-2xl">Lote</h1>
         </div>
@@ -264,7 +268,7 @@
         </div>
     </div>
     <div
-        class="grid grid-cols-3 lg:grid-cols-4 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
+        class="hidden grid grid-cols-3 lg:grid-cols-4 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
     >
         <div class="col-span-2">
             <label
@@ -291,46 +295,56 @@
                 </label>
             </div>
         </div>
-        
     </div>
-    <div class="flex w-11/12 justify-start lg:w-1/2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10">
+    <div
+        class="hidden flex w-11/12 justify-start lg:w-1/2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
+    >
         <Limpiar {limpiarFiltros} />
     </div>
-    
     <div
-        class="w-full grid grid-cols-1 justify-items-center mx-1 lg:mx-10 lg:w-3/4"
+        class={`
+            w-full grid grid-cols-1
+            mx-auto py-6 px-4 max-w-7xl
+        `}
     >
-        <table class="table table-lg w-full">
-            <thead>
-                <tr>
-                    <th
-                        class="text-base ml-3 pl-3 mr-1 pr-1 border-b dark:border-gray-600"
-                        >Nombre</th
-                    >
-                    <th
-                        class="text-base mx-1 px-1 border-b dark:border-gray-600"
-                        >Total</th
-                    >
-                </tr>
-            </thead>
-            <tbody>
-                {#each lotesrows as r}
-                    {#if r.total != 0 || mostrarVacios}
-                        <tr
-                            onclick={() => openEditModal(r.id)}
-                            class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
+        <div
+            class="overflow-hidden rounded-xl"
+        >
+            <table class="table table-lg w-full">
+                <thead
+                    class="bg-emerald-600 text-white dark:bg-emerald-700"
+                >
+                    <tr>
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                            >Nombre</th
                         >
-                            <td class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                >{r.nombre}</td
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                            >Total</th
+                        >
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each lotesrows as r}
+                        {#if r.total != 0 || mostrarVacios}
+                            <tr
+                                onclick={() => openEditModal(r.id)}
+                                class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
                             >
-                            <td class="text-base mx-1 px-1">{r.total}</td>
-                        </tr>
-                    {/if}
-                {/each}
-            </tbody>
-        </table>
+                                <td
+                                    class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
+                                    >{r.nombre}</td
+                                >
+                                <td class="text-base mx-1 px-1">{r.total}</td>
+                            </tr>
+                        {/if}
+                    {/each}
+                </tbody>
+            </table>
+        </div>
     </div>
-</Navbarr>
+</Navbar2>
 <dialog
     id="nuevoModal"
     class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"
@@ -402,7 +416,7 @@
                         onclick={() => eliminar(idlote)}>Eliminar</button
                     >
                 {/if}
-                <button class="btn btn-info" onclick={goToAnimales}
+                <button class="btn btn-info text-white" onclick={goToAnimales}
                     >Ver animales</button
                 >
                 <button class="btn btn-neutral" onclick={cerrarModal}

@@ -1,6 +1,8 @@
 <script>
+    //NUEVO
     import CustomDate from "$lib/components/CustomDate.svelte";
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import Swal from "sweetalert2";
     import PocketBase from "pocketbase";
     import { createRoler } from "$lib/stores/defaultrol.svelte";
@@ -1041,8 +1043,7 @@
         }
     });
 </script>
-
-<Navbarr>
+<Navbar2>
     <div class="flex items-center justify-center">
         <h2 class="text-xl font-bold">
             ¡Proximamente Lanzamiento de Preventas!
@@ -1201,7 +1202,8 @@
             </div>
         </CardBase>
     {/if}
-</Navbarr>
+</Navbar2>
+
 <dialog
     id="nuevoModalTacto"
     class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"

@@ -2,6 +2,7 @@
     //En esta pagina solo se van a crear y ver animales
     //Se pueden crear nuevos animales con un nacimientos
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import NavegacionBottom from "$lib/components/NavegacionBottom.svelte";
     import Exportar from "$lib/components/Exportar.svelte";
     import PocketBase from "pocketbase";
@@ -16,7 +17,7 @@
     import { createCaber } from "$lib/stores/cab.svelte";
     import { createUserer } from "$lib/stores/user.svelte";
     import NuevoAnimal from "$lib/components/animales/NuevoAnimal.svelte";
-    
+
     //filtros
     import { createStorageProxy } from "$lib/filtros/filtros";
 
@@ -40,6 +41,7 @@
         shorterWord,
     } from "$lib/stringutil/lib";
     import { verificarNivel } from "$lib/permisosutil/lib";
+    import Buscador from "$lib/components/animales/Buscador.svelte";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -64,8 +66,8 @@
         estadobuscar: -1,
         categoriabuscar: "",
         activosbuscar: "activos",
-        raza:"",
-        color:""
+        raza: "",
+        color: "",
     };
     let proxyfiltros = $state({
         ...defaultfiltro,
@@ -91,8 +93,8 @@
     let sexobuscar = $state("");
     let lotebuscar = $state("");
     let estadobuscar = $state("");
-    let raza  =$state("")
-    let color  =$state("")
+    let raza = $state("");
+    let color = $state("");
     let categoriabuscar = $state("");
     let activosbuscar = $state("activos");
     let totalAnimalesEncontrados = $state(0);
@@ -117,7 +119,7 @@
     let nombremadre = $state("");
     let nombrepadre = $state("");
     let observacion = $state("");
-    
+
     //Validaciones
     let malcaravana = $state(false);
     let malfechanacimiento = $state(false);
@@ -309,7 +311,7 @@
                 lote,
                 rodeo,
                 rp,
-                categoria:categoria?"":sexo=="M"?"ternero":"ternera",
+                categoria: categoria ? "" : sexo == "M" ? "ternero" : "ternera",
                 cab: cab.id,
             };
             if (conparicion) {
@@ -371,8 +373,8 @@
     }
     function setProxyFilter() {
         proxyfiltros.buscar = buscar;
-        proxyfiltros.raza = raza
-        proxyfiltros.color = color
+        proxyfiltros.raza = raza;
+        proxyfiltros.color = color;
         proxyfiltros.rodeobuscar = rodeobuscar;
         proxyfiltros.rodeoseleccion = rodeoseleccion;
         proxyfiltros.loteseleccion = loteseleccion;
@@ -382,61 +384,49 @@
         proxyfiltros.estadobuscar = estadobuscar;
         proxyfiltros.categoriabuscar = categoriabuscar;
         proxyfiltros.activosbuscar = activosbuscar;
-        
-
     }
     function filterUpdate() {
         setProxyFilter();
         proxy.save(proxyfiltros);
         animalesrows = animales;
-        
+
         if (buscar != "") {
             animalesrows = animalesrows.filter((a) =>
                 a.caravana
                     .toLocaleLowerCase()
                     .includes(buscar.toLocaleLowerCase()),
             );
-            
         }
-        if(raza != ""){
+        if (raza != "") {
             animalesrows = animalesrows.filter((a) =>
-                a.raza
-                    .toLocaleLowerCase()
-                    .includes(raza.toLocaleLowerCase()),
+                a.raza.toLocaleLowerCase().includes(raza.toLocaleLowerCase()),
             );
         }
-        if(color != ""){
+        if (color != "") {
             animalesrows = animalesrows.filter((a) =>
-                a.color
-                    .toLocaleLowerCase()
-                    .includes(color.toLocaleLowerCase()),
+                a.color.toLocaleLowerCase().includes(color.toLocaleLowerCase()),
             );
         }
         if (sexobuscar != "") {
             animalesrows = animalesrows.filter((a) => a.sexo == sexobuscar);
-         
         }
 
         if (rodeoseleccion.length != 0) {
             if (rodeoseleccion.length == 1 && rodeoseleccion[0] == "-1") {
                 animalesrows = animalesrows.filter((a) => !a.rodeo);
-         
             } else {
                 animalesrows = animalesrows.filter((a) =>
                     rodeoseleccion.includes(a.rodeo),
                 );
-         
             }
         }
         if (loteseleccion.length != 0) {
             if (loteseleccion.length == 1 && loteseleccion[0] == "-1") {
                 animalesrows = animalesrows.filter((a) => !a.lote);
-         
             } else {
                 animalesrows = animalesrows.filter((a) =>
                     loteseleccion.includes(a.lote),
                 );
-         
             }
         }
 
@@ -444,7 +434,6 @@
             animalesrows = animalesrows.filter(
                 (a) => a.prenada == estadobuscar && a.sexo == "H",
             );
-         
         }
         if (categoriaseleccion.length != 0) {
             if (
@@ -452,21 +441,17 @@
                 categoriaseleccion[0] == "-1"
             ) {
                 animalesrows = animalesrows.filter((a) => !a.categoria);
-         
             } else {
                 animalesrows = animalesrows.filter((a) =>
                     categoriaseleccion.includes(a.categoria),
                 );
-         
             }
         }
         if (activosbuscar == "activos") {
             animalesrows = animalesrows.filter((a) => a.active == true);
-         
         }
         if (activosbuscar == "inactivos") {
             animalesrows = animalesrows.filter((a) => a.active == false);
-         
         }
         totalAnimalesEncontrados = animalesrows.length;
     }
@@ -693,13 +678,48 @@
             });
         }
     }
+    function nuevo() {
+        openNewModal();
+    }
+    function estadisticas() {
+        goto(pre + "/animales/estadisticas");
+    }
 </script>
 
-<Navbarr>
+<Navbar2>
     {#if esdev}
         premisos {JSON.stringify(userpermisos, null, 2)}
     {/if}
-    <div class="grid grid-cols-1 lg:grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12">
+    <Buscador
+        {animalesrows}
+        cabnombre={cab.nombre}
+        bind:isOpenFilter
+        bind:buscar
+        {rodeos}
+        bind:rodeoseleccion
+        bind:sexobuscar
+        {sexos}
+        {lotes}
+        bind:loteseleccion
+        {categorias}
+        bind:categoriaseleccion
+        bind:raza
+        bind:color
+        bind:estadobuscar
+        {estados}
+        bind:activosbuscar
+        {activos}
+        {limpiarFiltros}
+        {prepararData}
+        {nuevo}
+        {estadisticas}
+        {filterUpdate}
+        {clickFilter}
+        
+    />
+    <div
+        class="hidden grid grid-cols-1 lg:grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12"
+    >
         <div class="">
             <h1 class="text-2xl">Animales</h1>
         </div>
@@ -731,8 +751,8 @@
                         ${estilos.btnsecondary}
                         rounded-full
                         px-4 pt-2 pb-3
-                    `} 
-                    onclick={() => goto(pre+"/animales/estadisticas")}
+                    `}
+                    onclick={() => goto(pre + "/animales/estadisticas")}
                 >
                     <span class="text-lg font-semibold">Estadísticas</span>
                 </button>
@@ -741,7 +761,7 @@
     </div>
 
     <div
-        class="grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
+        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
     >
         <div class="w-11/12">
             <label
@@ -780,7 +800,7 @@
         </div>
     </div>
     <!--Filtros-->
-    <div class="w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
+    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
         <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
             <div class="flex justify-between items-center px-1">
                 <h1 class="font-semibold text-lg py-2">Filtros</h1>
@@ -886,8 +906,6 @@
                                 bind:value={raza}
                                 oninput={filterUpdate}
                             />
-                                
-                            
                         </label>
                     </div>
                     <div class="my-0 py-0">
@@ -909,8 +927,6 @@
                                 bind:value={color}
                                 oninput={filterUpdate}
                             />
-                                
-                            
                         </label>
                     </div>
                     <div>
@@ -1039,258 +1055,296 @@
         {/if}
     </div>
     <div
-        class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-5/6 overflow-x-auto"
+        class={`
+            hidden w-full md:grid
+            mx-auto py-6 px-4 max-w-7xl
+        `}
     >
-        <table class="table table-lg w-full">
-            <thead>
-                <tr>
-                    <th
-                        onclick={() => ordenarAnimales("caravana")}
-                        class={`
-                            text-base p-3 border-b dark:border-gray-600 
-                            hover:cursor-pointer hover:bg-gray-200 
-                            dark:hover:bg-gray-800
-                            
-                        `}
-                    >
-                        <div class="flex flex-row justify-between">
-                            Animal
+        <div
+            class={`
+                overflow-hidden rounded-xl
+            `}
+        >
+            <table class="table table-lg w-full">
+                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
+                    <tr>
+                        <th
+                            onclick={() => ordenarAnimales("caravana")}
+                            class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                        >
+                            <div class="flex flex-row justify-between">
+                                Animal
 
-                            {#if forma == "caravana"}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
-                            {/if}
-                        </div>
-                    </th>
+                                {#if forma == "caravana"}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                {/if}
+                            </div>
+                        </th>
 
-                    <th
-                        onclick={() => ordenarAnimales("sexo")}
-                        class={`
-                            text-base p-3 border-b dark:border-gray-600 
-                            hover:cursor-pointer hover:bg-gray-200 
-                            dark:hover:bg-gray-800
-                            
-                        `}
-                    >
-                        <div class="flex flex-row justify-between">
-                            Sexo
-                            {#if forma == "sexo"}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
-                            {/if}
-                        </div>
-                    </th>
-                    <th
-                        onclick={() => ordenarAnimales("categoria")}
-                        class="text-base p-3 border-b dark:border-gray-600 hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
-                    >
-                        <div class="flex flex-row justify-between">
-                            Categoria
-                            {#if forma == "categoria"}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
-                            {/if}
-                        </div>
-                    </th>
-                    <th
-                        onclick={() => ordenarAnimales("estado")}
-                        class="text-base p-3 border-b dark:border-gray-600 hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
-                    >
-                        <div class="flex flex-row justify-between">
-                            Estado
-                            {#if forma == "estado"}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
-                            {/if}
-                        </div>
-                    </th>
-                    <th
-                        onclick={() => ordenarAnimales("lote")}
-                        class="text-base p-3 border-b dark:border-gray-600 hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
-                    >
-                        <div class="flex flex-row justify-between">
-                            Lote
-                            {#if forma == "lote"}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
-                            {/if}
-                        </div>
-                    </th>
-                    <th
-                        onclick={() => ordenarAnimales("rodeo")}
-                        class="text-base p-3 border-b dark:border-gray-600 hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
-                    >
-                        <div class="flex flex-row justify-between">
-                            Rodeo
-                            {#if forma == "rodeo"}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
-                            {/if}
-                        </div>
-                    </th>
-                    <th
-                        class="text-base p-3 border-b dark:border-gray-600 hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
-                    >
-                        <div class="flex flex-row justify-between">Edad</div>
-                    </th>
-                    <th
-                        class="text-base p-3 border-b dark:border-gray-600 hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
-                    >
-                        <div class="flex flex-row justify-between">Raza</div>
-                    </th>
-                    <th
-                        class="text-base p-3 border-b dark:border-gray-600 hover:cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
-                    >
-                        <div class="flex flex-row justify-between">Color</div>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {#each animalesrows as a}
-                    <tr
-                        class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
-                        onclick={() => goto(`${pre}/animales/${a.id}`)}
-                    >
-                        <td class="text-base p-3">
-                            <div class="flex gap-1">
-                                {`${shorterWord(a.caravana)}`}
-                                {#if !a.active}
-                                    <div
-                                        class={`
+                        <th
+                            onclick={() => ordenarAnimales("sexo")}
+                            class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                        >
+                            <div class="flex flex-row justify-between">
+                                Sexo
+                                {#if forma == "sexo"}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                {/if}
+                            </div>
+                        </th>
+                        <th
+                            onclick={() => ordenarAnimales("categoria")}
+                            class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                        >
+                            <div class="flex flex-row justify-between">
+                                Categoria
+                                {#if forma == "categoria"}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                {/if}
+                            </div>
+                        </th>
+                        <th
+                            onclick={() => ordenarAnimales("estado")}
+                            class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                        >
+                            <div class="flex flex-row justify-between">
+                                Estado
+                                {#if forma == "estado"}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                {/if}
+                            </div>
+                        </th>
+                        <th
+                            onclick={() => ordenarAnimales("lote")}
+                            class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                        >
+                            <div class="flex flex-row justify-between">
+                                Lote
+                                {#if forma == "lote"}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                {/if}
+                            </div>
+                        </th>
+                        <th
+                            onclick={() => ordenarAnimales("rodeo")}
+                            class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                        >
+                            <div class="flex flex-row justify-between">
+                                Rodeo
+                                {#if forma == "rodeo"}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                {/if}
+                            </div>
+                        </th>
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            <div class="flex flex-row justify-between">
+                                Edad
+                            </div>
+                        </th>
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            <div class="flex flex-row justify-between">
+                                Raza
+                            </div>
+                        </th>
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            <div class="flex flex-row justify-between">
+                                Color
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each animalesrows as a}
+                        <tr
+                            class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
+                            onclick={() => goto(`${pre}/animales/${a.id}`)}
+                        >
+                            <td class="text-base p-3">
+                                <div class="flex gap-1">
+                                    {`${shorterWord(a.caravana)}`}
+                                    {#if !a.active}
+                                        <div
+                                            class={`
                                     bg-transparent rounded-lg
                                     p-0 m-0  ${estilos.danger}
                                 `}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-6"
                                         >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3"
-                                            />
-                                        </svg>
-                                    </div>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke-width="1.5"
+                                                stroke="currentColor"
+                                                class="size-6"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3"
+                                                />
+                                            </svg>
+                                        </div>
+                                    {/if}
+                                </div>
+                            </td>
+                            <td class="text-base p-3"> {a.sexo}</td>
+                            <td class="text-base p-3">
+                                {capitalize(a.categoria)}</td
+                            >
+                            <td class="text-base p-3">
+                                {#if a.sexo == "H"}
+                                    {getEstadoNombre(a.prenada)}
+                                {:else}
+                                    -
                                 {/if}
-                            </div>
-                        </td>
-                        <td class="text-base p-3"> {a.sexo}</td>
-                        <td class="text-base p-3"> {capitalize(a.categoria)}</td>
-                        <td class="text-base p-3">
-                            {#if a.sexo == "H"}
-                                {getEstadoNombre(a.prenada)}
-                            {:else}
-                                -
-                            {/if}
-                        </td>
-                        <td class="text-base p-3">
-                            {a.expand
-                                ? a.expand.lote
-                                    ? a.expand.lote.nombre
-                                    : ""
-                                : ""}
-                        </td>
-                        <td class="text-base p-3">
-                            {a.expand
-                                ? a.expand.rodeo
-                                    ? a.expand.rodeo.nombre
-                                    : ""
-                                : ""}
-                        </td>
-                        <td>
-                            {a.fechanacimiento != ""
-                                ? calcularEdad(a.fechanacimiento)
-                                : "-"}
-                        </td>
-                        
-                        <td>
-                            {a.raza}
-                        </td>
-                        <td>
-                            {a.color}
-                        </td>
-                    </tr>
-                {/each}
-            </tbody>
-        </table>
+                            </td>
+                            <td class="text-base p-3">
+                                {a.expand
+                                    ? a.expand.lote
+                                        ? a.expand.lote.nombre
+                                        : ""
+                                    : ""}
+                            </td>
+                            <td class="text-base p-3">
+                                {a.expand
+                                    ? a.expand.rodeo
+                                        ? a.expand.rodeo.nombre
+                                        : ""
+                                    : ""}
+                            </td>
+                            <td>
+                                {a.fechanacimiento != ""
+                                    ? calcularEdad(a.fechanacimiento)
+                                    : "-"}
+                            </td>
+
+                            <td>
+                                {a.raza}
+                            </td>
+                            <td>
+                                {a.color}
+                            </td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+        </div>
     </div>
+
     <div class="block md:hidden justify-items-center mx-1">
         {#each animalesrows as a}
             <div
@@ -1369,8 +1423,7 @@
             </div>
         {/each}
     </div>
-    
-</Navbarr>
+</Navbar2>
 <dialog
     id="nuevoModal"
     class="

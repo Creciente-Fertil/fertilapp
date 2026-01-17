@@ -1,5 +1,6 @@
 <script>
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import Swal from "sweetalert2";
     import PocketBase from "pocketbase";
     import { onMount } from "svelte";
@@ -182,8 +183,11 @@
         username = pb_json.record.username;
         nombre = pb_json.record.nombre;
         apellido = pb_json.record.apellido;
-        const record = await pb.collection("users").getOne(usuarioid);
-        nivel = record.nivel;
+        
+        //const record = await pb.collection("users").getOne(usuarioid);
+        
+        //nivel = record.nivel;
+        nivel = pb_json.record.nivel
         let light = !darker.dark;
         tokencolab = pb_json.record.codigo;
         cab = caber.cab;
@@ -198,7 +202,7 @@
     });
 </script>
 
-<Navbarr>
+<Navbar2>
     <CardBase titulo="Configuración" cardsize="max-w-5xl">
         <div class="rounded-2xl shadow p-6 mb-6 text-xl">
             <h2
@@ -487,7 +491,7 @@
             </div>
         </div>
     </CardBase>
-</Navbarr>
+</Navbar2>
 <dialog
     id="modalCambioContra"
     class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"

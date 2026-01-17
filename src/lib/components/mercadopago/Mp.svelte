@@ -89,11 +89,9 @@
                     },
                     body: JSON.stringify(body),
                 })
-                console.log("lego del fetch d el fethc")
+                
                 let data = await res.json() 
-                console.log("data")
-                console.log(JSON.stringify(data))
-                console.log(JSON.stringify(data.init_point  ))
+                
                 //nuevonivel.setNivel(p_nivel)
                 window.location.href = data.init_point
             }

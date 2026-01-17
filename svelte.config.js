@@ -56,6 +56,7 @@ const config = {
 				"/recover/token",
 				"/user/nivel",
 				"/servicios",
+				"/servicios/1",
 				"/servicios/movimiento",
 				"/pesajes/historial",
 				"/manual",

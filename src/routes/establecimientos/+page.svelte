@@ -1,5 +1,6 @@
 <script>
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import PocketBase from 'pocketbase'
     import Swal from 'sweetalert2';
     import { onMount } from 'svelte';
@@ -119,7 +120,7 @@
         }
     })
 </script>
-<Navbarr>
+<Navbar2>
     <div class="flex justify-center mt-1">
         <div class="w-full max-w-7xl px-4">
             <div class="grid grid-cols-3 mx-1  lg:mx-10 mt-2">
@@ -237,4 +238,4 @@
     {/if}
     </div>
 
-</Navbarr>
+</Navbar2>

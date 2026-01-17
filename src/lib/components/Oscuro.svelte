@@ -4,7 +4,7 @@
     import { onMount } from "svelte";
     let darker = createDarker()
     $: dark = darker
-    let classtextnav="text-white dark:text-gray-700"
+    let classtextnav="text-gray-700 dark:text-white"
     onMount(()=>{
         let light = !darker.dark
         if(light){

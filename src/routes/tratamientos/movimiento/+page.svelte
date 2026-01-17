@@ -1,6 +1,8 @@
 <script>
     import { goto } from "$app/navigation";
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
+    import BuscadorTratamientos from "$lib/components/tratamientos/BuscadorTratamientos.svelte";
     import PocketBase from "pocketbase";
     import Swal from "sweetalert2";
     import { onMount } from "svelte";
@@ -59,6 +61,16 @@
         ...defaultfiltro,
     });
     let proxy = createStorageProxy("tratamientosanimales", defaultfiltro);
+    //movimientot
+    let defaultmovimiento = {
+        selecthashmap: {},
+        tipos :[]
+    };
+    let detallemovimento = $state({ ...defaultmovimiento });
+    let proxymovimiento = createStorageProxy(
+        "detallemovimientotrata",
+        defaultmovimiento,
+    );
 
     let categoria = $state("");
     let sexo = $state("H");
@@ -126,7 +138,41 @@
         proxyfiltros.loteseleccion = loteseleccion;
         proxyfiltros.categoriaseleccion = categoriaseleccion;
     }
-
+    function setDetalle() {
+        detallemovimento.selecthashmap = selecthashmap;
+        detallemovimento.tipos = tipotratamientos
+        proxymovimiento.save(detallemovimento);
+    }
+    function loadDetalleMovimiento() {
+        detallemovimento = proxymovimiento.load();
+        selecthashmap = detallemovimento.selecthashmap;
+        selectanimales = [];
+        for (const [key, value] of Object.entries(selecthashmap)) {
+            if (value != null) {
+                selectanimales.push({
+                    ...value,
+                    tipotratamiento: "",
+                    observacionnuevo: "",
+                });
+            }
+        }
+        if (selectanimales.length == animalesrows.length) {
+            todos = true;
+            algunos = false;
+            ninguno = false;
+        } else if (selectanimales.length > 0) {
+            todos = false;
+            algunos = true;
+            ninguno = false;
+        } else {
+            todos = false;
+            algunos = false;
+            ninguno = true;
+        }
+    }
+    function setLista() {
+        selectanimales = [];
+    }
     function limpiarFiltros() {
         proxyfiltros = { ...defaultfiltro };
 
@@ -228,6 +274,7 @@
                 ...a,
             };
         }
+        setDetalle();
     }
     function clickTodos() {
         if (todos) {
@@ -250,6 +297,7 @@
             todos = false;
             ninguno = true;
         }
+        setDetalle();
     }
     function inputObsGeneral() {
         for (let i = 0; i < selectanimales.length; i++) {
@@ -278,7 +326,11 @@
             sort: "-created",
         });
         tipotratamientos = records;
-        tipotratamientos.sort((tp1, tp2) => (tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase() ? 1 : -1));
+        tipotratamientos.sort((tp1, tp2) =>
+            tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase()
+                ? 1
+                : -1,
+        );
     }
     async function getAnimales() {
         const recordsa = await pb.collection("animales").getFullList({
@@ -287,8 +339,24 @@
         });
 
         animales = recordsa;
-        animales.sort((a1, a2) => (a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase() ? 1 : -1));
+        animales.sort((a1, a2) =>
+            a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase()
+                ? 1
+                : -1,
+        );
         animalesrows = animales;
+    }
+    function irDetalle() {
+        if (ninguno) {
+            Swal.fire(
+                "Error tratamiento",
+                "No hay animales seleccionados",
+                "error",
+            );
+            return;
+        }
+        setDetalle()
+        goto(pre + "/tratamientos/movimiento/detallemovimiento");
     }
     function openNewModal() {
         if (ninguno) {
@@ -401,11 +469,30 @@
         await getLotes();
         await getRodeos();
         await getTiposTratamientos();
+        loadDetalleMovimiento();
     });
 </script>
 
-<Navbarr>
-    <div class="grid grid-cols-2 mx-1 lg:mx-10 mt-1 w-11/12">
+<Navbar2>
+    <BuscadorTratamientos
+        {animalesrows}
+        {selecthashmap}
+        bind:buscar
+        {rodeos}
+        bind:rodeoseleccion
+        {lotes}
+        bind:loteseleccion
+        {categorias}
+        bind:categoriaseleccion
+        bind:raza
+        bind:color
+        bind:isOpenFilter
+        {clickFilter}
+        {filterUpdate}
+        nuevoTratamiento={() => irDetalle()}
+        {limpiarFiltros}
+    />
+    <div class="hidden grid grid-cols-2 mx-1 lg:mx-10 mt-1 w-11/12">
         <div>
             <button
                 class="bg-transparent border-none flex"
@@ -453,7 +540,7 @@
         </div>
     </div>
     <div
-        class="grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
+        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
     >
         <div class="w-11/12">
             <label
@@ -472,7 +559,7 @@
             <Limpiar {limpiarFiltros} />
         </div>
     </div>
-    <div class="w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
+    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
         <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
             <div class="flex justify-between items-center px-1">
                 <h2 class="font-semibold text-xl py-2">Filtros</h2>
@@ -602,94 +689,30 @@
         {/if}
     </div>
     <div
-        class="hidden w-full md:grid grid-cols-1 justify-items-center mx-1 lg:mx-10 lg:w-11/12 overflow-x-auto"
+        class={`
+            hidden w-full md:grid
+            mx-auto py-6 px-4 max-w-7xl
+        `}
     >
-        <table class="table table-lg w-full">
-            <thead>
-                <tr>
-                    <th class="px-1 py-0 m-0">
-                        <button
-                            aria-label="Todos"
-                            onclick={clickTodos}
-                            class={`
-                                text-base bg-transparent rounded-lg
-                                px-3 py-3 text-base
-                                ${estilos.secundario}
-                            `}
-                        >
-                            {#if todos}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="size-6"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                    />
-                                </svg>
-                            {/if}
-                            {#if ninguno}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="size-6"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                    />
-                                </svg>
-                            {/if}
-                            {#if algunos}
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="size-6"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                    />
-                                </svg>
-                            {/if}
-                        </button>
-                    </th>
-                    <th class="text-base mx-1 px-1">Caravana</th>
-                    <th class="text-base mx-1 px-1">Categoria</th>
-                    <th class="text-base mx-1 px-1">Peso</th>
-                    <th class="text-base mx-1 px-1">Rodeo</th>
-                    <th class="text-base mx-1 px-1">Lote</th>
-                    <th class="text-base mx-1 px-1">Raza</th>
-                    <th class="text-base mx-1 px-1">Color</th>
-                </tr>
-            </thead>
-            <tbody>
-                {#each animalesrows as a}
+        <div
+            class={`
+                    overflow-hidden rounded-xl
+                `}
+        >
+            <table class="table table-lg w-full">
+                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
                     <tr>
-                        <td class="px-1 py-0 m-0">
+                        <th class="px-1 py-0 m-0">
                             <button
-                                aria-label="fila"
-                                onclick={() => clickAnimal(a.id)}
+                                aria-label="Todos"
+                                onclick={clickTodos}
                                 class={`
-                                    font-medium bg-transparent rounded-lg
-                                    px-3 py-3 text-base
-                                    ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
+                                    text-white bg-transparent rounded-lg
+                                    px-3 py-3
+                                    ${estilos.secundario}
                                 `}
                             >
-                                {#if selecthashmap[a.id]}
+                                {#if todos}
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
@@ -701,10 +724,11 @@
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
-                                            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                                         />
                                     </svg>
-                                {:else}
+                                {/if}
+                                {#if ninguno}
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
@@ -716,30 +740,133 @@
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
-                                            d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                            d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                        />
+                                    </svg>
+                                {/if}
+                                {#if algunos}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke-width="1.5"
+                                        stroke="currentColor"
+                                        class="size-6"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
                                         />
                                     </svg>
                                 {/if}
                             </button>
-                        </td>
-                        <td class="text-base mx-1 px-0"
-                            >{shorterWord(a.caravana)}</td
+                        </th>
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
                         >
-                        <td class="text-base mx-1 px-0">{capitalize(a.categoria)}</td>
-                        <td class="text-base mx-1 px-0">{a.peso}</td>
-                        <td class="text-base mx-1 px-0"
-                            >{a.expand?.rodeo?.nombre || ""}</td
+                            Caravana</th
                         >
-                        <td class="text-base mx-1 px-0"
-                            >{a.expand?.lote?.nombre || ""}</td
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
                         >
-                        <td class="text-base mx-1 px-0">{a.raza}</td>
-                        <td class="text-base mx-1 px-0">{a.color}</td>
+                            Categoria</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Peso</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Rodeo</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Lote</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Raza</th
+                        >
+                        <th
+                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                        >
+                            Color</th
+                        >
                     </tr>
-                {/each}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {#each animalesrows as a}
+                        <tr>
+                            <td class="px-1 py-0 m-0">
+                                <button
+                                    aria-label="fila"
+                                    onclick={() => clickAnimal(a.id)}
+                                    class={`
+                                    font-medium bg-transparent rounded-lg
+                                    px-3 py-3 text-base
+                                    ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
+                                `}
+                                >
+                                    {#if selecthashmap[a.id]}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="size-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                            />
+                                        </svg>
+                                    {:else}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="size-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </button>
+                            </td>
+                            <td class="text-base mx-1 px-0"
+                                >{shorterWord(a.caravana)}</td
+                            >
+                            <td class="text-base mx-1 px-0"
+                                >{capitalize(a.categoria)}</td
+                            >
+                            <td class="text-base mx-1 px-0">{a.peso}</td>
+                            <td class="text-base mx-1 px-0"
+                                >{a.expand?.rodeo?.nombre || ""}</td
+                            >
+                            <td class="text-base mx-1 px-0"
+                                >{a.expand?.lote?.nombre || ""}</td
+                            >
+                            <td class="text-base mx-1 px-0">{a.raza}</td>
+                            <td class="text-base mx-1 px-0">{a.color}</td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+        </div>
     </div>
+
     <div class="block md:hidden justify-items-center mx-1">
         <div class="w-full flex justify-start">
             <button
@@ -904,7 +1031,7 @@
             </div>
         {/each}
     </div>
-</Navbarr>
+</Navbar2>
 <dialog id="tratamientoMasivo" class="modal modal-middle rounded-xl">
     <div
         class="

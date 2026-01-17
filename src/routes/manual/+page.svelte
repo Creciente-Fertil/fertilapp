@@ -1,5 +1,6 @@
 <script>
     import Navbarr from '$lib/components/Navbarr.svelte';
+    import Navbar2 from '$lib/components/Navbar2.svelte';
     import { goto } from "$app/navigation";
     import estilos from "$lib/stores/estilos";
     let ruta = import.meta.env.VITE_RUTA
@@ -9,7 +10,7 @@
         goto(`/Manual de Usuario.pdf`)
     }
 </script>
-<Navbarr>
+<Navbar2>
     <div class="bg-transparent p-2">
         <div class="flex items-center justify-center ">
             <div 
@@ -35,4 +36,4 @@
             </div>
         </div>
     </div>
-</Navbarr>
+</Navbar2>

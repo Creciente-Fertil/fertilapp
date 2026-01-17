@@ -1,5 +1,6 @@
 <script>
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import PocketBase from 'pocketbase';
     import { slide } from 'svelte/transition';
     import Swal from "sweetalert2";
@@ -612,7 +613,7 @@
     }
 
 </script>
-<Navbarr>
+<Navbar2>
     <div class="w-full grid justify-items-left mx-1 lg:mx-10 mt-1">
         <h1 class="text-2xl">Reportes</h1>  
     </div>
@@ -839,7 +840,7 @@
         {/if}
     {/if}
     
-</Navbarr>
+</Navbar2>
 <dialog id="nuevoModal" class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle">
     <div class="
     modal-box w-11/12 max-w-xl

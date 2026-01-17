@@ -1,6 +1,7 @@
 <script>
     import { onMount } from "svelte";
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import Mp from "$lib/components/mercadopago/Mp.svelte";
     import PocketBase from 'pocketbase'
     import Swal from "sweetalert2";
@@ -77,13 +78,14 @@
         
         usuarioid =  pb_json.record.id
         
-        const record = await pb.collection('users').getOne(usuarioid);
-        nivel = record.nivel
+        //const record = await pb.collection('users').getOne(usuarioid);
+        //nivel = record.nivel
+        nivel = pb_json.record.nivel
     })
     
 </script>
 
-<Navbarr>
+<Navbar2>
     <div class="min-h-screen font-sans ">
 
         <div class="container mx-auto px-4 py-16">
@@ -189,7 +191,7 @@
         
     </div>
     
-</Navbarr>
+</Navbar2>
 
 <style>
     @keyframes pulse-green {
