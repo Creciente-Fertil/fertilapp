@@ -1,12 +1,15 @@
 <script>
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import PocketBase from "pocketbase";
     import { onMount } from "svelte";
     import { page } from "$app/stores";
     import { goto } from "$app/navigation";
     import estilos from "$lib/stores/estilos";
     import Swal from "sweetalert2";
-    
+
+    import Header from "$lib/components/animal/Header.svelte";
+    import DetalleAnimal from "$lib/components/animal/DetalleAnimal.svelte";
     import CardAnimal from "$lib/components/animal/CardAnimal.svelte";
     import DatosBasicos from "$lib/components/animal/DatosBasicos.svelte";
     import Pariciones from "$lib/components/animal/Pariciones.svelte";
@@ -29,9 +32,18 @@
     import Observaciones from "$lib/components/animal/Observaciones.svelte";
     import Pesajes from "$lib/components/animal/Pesajes.svelte";
     import HistoriaClinica from "$lib/components/animal/HistoriaClinica.svelte";
+    import Eliminar from "$lib/components/animal/Eliminar.svelte";
+    import Movimientos from "$lib/components/animal/Movimientos.svelte";
     import tiponoti from "$lib/stores/tiponoti";
     import Servicios from "$lib/components/animal/Servicios.svelte";
     import SelectTab from "$lib/components/animal/SelectTab.svelte";
+    import HorizontalTabs from "$lib/components/animal/HorizontalTabs.svelte";
+    import Transferir from "$lib/components/animal/Transferir.svelte";
+
+    //Size
+    let innerWidth = $state(0);
+    let innerHeight = $state(0);
+    let esCelu = $derived(innerWidth <= 1250);
 
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
@@ -141,6 +153,17 @@
             );
         }
     }
+    function openEliminarModal() {
+        if (userpermisos[5]) {
+            tab = "eliminar";
+        } else {
+            Swal.fire(
+                "Sin permisos",
+                "No tienes permisos para administrar animales",
+                "error",
+            );
+        }
+    }
     async function eliminar() {
         if (!userpermisos[5]) {
             Swal.fire("Error permisos", getPermisosMessage(5), "error");
@@ -210,6 +233,49 @@
             );
         }
     }
+
+    //*Transferir*/
+    let codigo = $state("");
+    let malcodigo = $state(false);
+    let muchosrenspa = $state("");
+    function openModalTransfer() {
+        codigo = "";
+        transferModal2.showModal();
+    }
+    async function transfer() {
+        const resultList = await pb.collection("cabs").getList(1, 1, {
+            filter: `active = true && renspa = '${codigo}'`,
+        });
+        if (resultList.items.length == 0) {
+            malcodigo = true;
+
+            return;
+        }
+        if (resultList.totalItems > 1) {
+            Swal.fire(
+                "Error transferencia",
+                "Hay varios establecimientos con ese RENSPA",
+                "error",
+            );
+            muchosrenspa = true;
+            return;
+        }
+        transferModal2.close();
+
+        Swal.fire({
+            title: "Transferir animal",
+            text: `¿Seguro que deseas transferir el animal ${caravana} a ${codigo}?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Si",
+            cancelButtonText: "No",
+        }).then(async (result) => {
+            if (result.value) {
+                await transferir(codigo);
+            }
+        });
+    }
+
     async function irPadre(_id) {
         //Revisar si esta en la cabaña
         //Lo idea seria poder ver los datos del animaal este donde este
@@ -286,22 +352,28 @@
             pestañas = [
                 { id: "datos", nombre: "Datos básicos" },
                 { id: "pesajes", nombre: "Pesajes" },
-                { id: "tratamientos", nombre: "Tratamientos" },
-                { id: "observaciones", nombre: "Observaciones" },
-                { id: "pariciones", nombre: "Pariciones" },
-                { id: "tactos", nombre: "Tactos" },
-                { id: "servicios", nombre: "Servicios" },
+                //{ id: "tratamientos", nombre: "Tratamientos" },
+                //{ id: "observaciones", nombre: "Observaciones" },
+                //{ id: "pariciones", nombre: "Pariciones" },
+                //{ id: "tactos", nombre: "Tactos" },
+                //{ id: "servicios", nombre: "Servicios" },
                 { id: "clinica", nombre: "Historia clínica" },
                 { id: "historial", nombre: "Historial" },
+                { id: "eliminar", nombre: "Eliminar" },
+                { id: "movimientos", nombre: "Movimientos" },
+                { id: "transfer", nombre: "Transferencia" },
             ];
         } else {
             pestañas = [
                 { id: "datos", nombre: "Datos básicos" },
                 { id: "pesajes", nombre: "Pesajes" },
-                { id: "tratamientos", nombre: "Tratamientos" },
-                { id: "observaciones", nombre: "Observaciones" },
+                //{ id: "tratamientos", nombre: "Tratamientos" },
+                //{ id: "observaciones", nombre: "Observaciones" },
                 { id: "clinica", nombre: "Historia clínica" },
                 { id: "historial", nombre: "Historial" },
+                { id: "eliminar", nombre: "Eliminar" },
+                { id: "movimientos", nombre: "Movimientos" },
+                { id: "transfer", nombre: "Transferencia" },
             ];
         }
     }
@@ -319,113 +391,251 @@
     });
 </script>
 
-<Navbarr>
-    {#if esdev}
-        premisos {JSON.stringify(userpermisos, null, 2)}
-    {/if}
-    <div class="flex justify-center mt-1">
-        <div class="w-full max-w-7xl px-4">
-            <!-- Combo alineado al borde izquierdo de la card -->
-            <SelectTab bind:pestañas bind:tab />
+<svelte:window bind:innerWidth bind:innerHeight />
+<Navbar2>
+    <DetalleAnimal {caravana}>
+        {#if esdev}
+            premisos {JSON.stringify(userpermisos, null, 2)}
+        {/if}
+        <div class="flex justify-center mt-1">
+            <div class="w-full max-w-7xl px-4">
+                <!-- Combo alineado al borde izquierdo de la card -->
+                {#if esCelu}
+                    <SelectTab bind:pestañas bind:tab />
+                {:else}
+                    <HorizontalTabs bind:pestañas bind:tab />
+                {/if}
+            </div>
+        </div>
+
+        {#if cargado}
+            {#if tab == "datos"}
+                <!--Datos animal-->
+                <CardAnimal cardsize="max-w-7xl" titulo="">
+                    <DatosBasicos
+                        bind:rp
+                        bind:peso
+                        bind:prenada
+                        bind:categoria
+                        bind:lote
+                        bind:rodeo
+                        bind:sexo
+                        bind:caravana
+                        bind:connacimiento
+                        bind:raza
+                        bind:color
+                        bind:nacimiento={nacimientoobj}
+                        bind:padreobj={padre}
+                        bind:madreobj={madre}
+                        bind:fechanacimiento
+                        bind:modohistoria
+                        bind:userpermisos
+                        {irPadre}
+                        {calcularTabs}
+                        {esCelu}
+                        {openEliminarModal}
+                    />
+                </CardAnimal>
+                <div class="hidden">
+                    <CardAnimal cardsize="max-w-7xl" titulo="Acciones">
+                        <Acciones
+                            {caravana}
+                            bind:fechafallecimiento={fechafall}
+                            bind:motivo={motivobaja}
+                            bajar={async (fechafallecimiento, motivo) =>
+                                await darBaja(fechafallecimiento, motivo)}
+                            {eliminar}
+                            transferir={async (codigo) =>
+                                await transferir(codigo)}
+                        />
+                    </CardAnimal>
+                </div>
+            {:else if tab == "pesajes"}
+                <!--Pesajes-->
+                <CardAnimal cardsize="max-w-7xl" titulo="Pesajes">
+                    <Pesajes
+                        pesoanterior={peso}
+                        bind:peso
+                        {caravana}
+                        bind:userpermisos
+                    ></Pesajes>
+                </CardAnimal>
+            {:else if tab == "tratamientos"}
+                <!--Tipos y tratamientos-->
+                <CardAnimal cardsize="max-w-7xl" titulo="Tratamientos">
+                    <Tratamientos cabid={cab.id} {categoria} bind:userpermisos
+                    ></Tratamientos>
+                </CardAnimal>
+            {:else if tab == "observaciones"}
+                <!--Observaciones-->
+                <CardAnimal cardsize="max-w-7xl" titulo="Observaciones">
+                    <Observaciones
+                        cabid={cab.id}
+                        {categoria}
+                        bind:userpermisos
+                    />
+                </CardAnimal>
+            {:else if tab == "pariciones"}
+                <!--Animales nacimientos-->
+                <CardAnimal cardsize="max-w-7xl" titulo="Pariciones">
+                    <Pariciones
+                        cabid={cab.id}
+                        sexoanimal={sexo}
+                        bind:prenada
+                        bind:userpermisos
+                    />
+                </CardAnimal>
+            {:else if tab == "tactos"}
+                <!--Tactos-->
+                <CardAnimal cardsize="max-w-7xl" titulo="Tactos">
+                    <Tactos
+                        cabid={cab.id}
+                        bind:prenadaori={prenada}
+                        {categoria}
+                        bind:userpermisos
+                    />
+                </CardAnimal>
+            {:else if tab == "servicios"}
+                <!--Animales servicios-->
+                <CardAnimal
+                    cardsize="max-w-7xl"
+                    titulo="Inseminaciones y Servicios"
+                >
+                    <Servicios cabid={cab.id} {categoria} bind:userpermisos />
+                </CardAnimal>
+            {:else if tab == "clinica"}
+                <!--Pesajes, tactos, servicios, tratamientos, observaciones,pariciones-->
+                <CardAnimal cardsize="max-w-7xl" titulo="Historia clínica">
+                    <HistoriaClinica />
+                </CardAnimal>
+            {:else if tab == "historial"}
+                <!--Historial del animal-->
+                <CardAnimal cardsize="max-w-7xl" titulo="Historial">
+                    <Historial />
+                </CardAnimal>
+            {:else if tab == "eliminar"}
+                <CardAnimal cardsize="max-w-7xl" titulo="Eliminar">
+                    <Eliminar
+                        {caravana}
+                        bind:fechafallecimiento={fechafall}
+                        bind:motivo={motivobaja}
+                        bajar={async (fechafallecimiento, motivo) =>
+                            await darBaja(fechafallecimiento, motivo)}
+                        {eliminar}
+                    />
+                </CardAnimal>
+            {:else if tab == "movimientos"}
+                <CardAnimal cardsize="max-w-7xl" titulo="Movimientos">
+                    <Movimientos />
+                </CardAnimal>
+            {:else if tab == "transfer"}
+                <CardAnimal cardsize="max-w-7xl" titulo="Transferencia">
+                    <Transferir
+                        {caravana}
+                        openModal={openModalTransfer}
+                        {transfer}
+                        bind:codigo
+                        {muchosrenspa}
+                        {malcodigo}
+                        
+                    />
+                </CardAnimal>
+            {/if}
+        {/if}
+    </DetalleAnimal>
+</Navbar2>
+
+<dialog
+    id="eliminarModal"
+    class="
+            modal modal-top mt-10 ml-5
+            lg:items-start
+            rounded-xl
+            lg:modal-middle
+        "
+>
+    <div
+        class="
+                modal-box w-11/12 max-w-xl
+                bg-gradient-to-br from-white to-gray-100
+                dark:from-gray-900 dark:to-gray-800
+            "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+
+        <h3 class="text-lg font-bold">Eliminar</h3>
+
+        <div class="form-control">Eliminar</div>
+
+        <div class="modal-action justify-end">
+            <form method="dialog">
+                <!-- if there is a button, it will close the modal -->
+                <button class="btn btn-error text-white">Cancelar</button>
+            </form>
         </div>
     </div>
-
-    {#if cargado}
-        {#if tab == "datos"}
-            <!--Datos animal-->
-            <CardAnimal cardsize="max-w-7xl" titulo="Datos básicos">
-                <DatosBasicos
-                    bind:rp
-                    bind:peso
-                    bind:prenada
-                    bind:categoria
-                    bind:lote
-                    bind:rodeo
-                    bind:sexo
-                    bind:caravana
-                    bind:connacimiento
-                    bind:raza
-                    bind:color
-                    bind:nacimiento={nacimientoobj}
-                    bind:padreobj={padre}
-                    bind:madreobj={madre}
-                    bind:fechanacimiento
-                    bind:modohistoria
-                    bind:userpermisos
-                    {irPadre}
-                    {calcularTabs}
-                />
-            </CardAnimal>
-            <CardAnimal cardsize="max-w-7xl" titulo="Acciones">
-                <Acciones
-                    {caravana}
-                    fechafallecimiento={fechafall}
-                    bind:motivo={motivobaja}
-                    bajar={async (fechafallecimiento, motivo) =>
-                        await darBaja(fechafallecimiento, motivo)}
-                    {eliminar}
-                    transferir={async (codigo) => await transferir(codigo)}
-                />
-            </CardAnimal>
-        {:else if tab == "pesajes"}
-            <!--Pesajes-->
-            <CardAnimal cardsize="max-w-7xl" titulo="Pesajes">
-                <Pesajes
-                    pesoanterior={peso}
-                    bind:peso
-                    {caravana}
-                    bind:userpermisos
-                ></Pesajes>
-            </CardAnimal>
-        {:else if tab == "tratamientos"}
-            <!--Tipos y tratamientos-->
-            <CardAnimal cardsize="max-w-7xl" titulo="Tratamientos">
-                <Tratamientos cabid={cab.id} {categoria} bind:userpermisos
-                ></Tratamientos>
-            </CardAnimal>
-        {:else if tab == "observaciones"}
-            <!--Observaciones-->
-            <CardAnimal cardsize="max-w-7xl" titulo="Observaciones">
-                <Observaciones cabid={cab.id} {categoria} bind:userpermisos />
-            </CardAnimal>
-        {:else if tab == "pariciones"}
-            <!--Animales nacimientos-->
-            <CardAnimal cardsize="max-w-7xl" titulo="Pariciones">
-                <Pariciones
-                    cabid={cab.id}
-                    sexoanimal={sexo}
-                    bind:prenada
-                    bind:userpermisos
-                />
-            </CardAnimal>
-        {:else if tab == "tactos"}
-            <!--Tactos-->
-            <CardAnimal cardsize="max-w-7xl" titulo="Tactos">
-                <Tactos
-                    cabid={cab.id}
-                    bind:prenadaori={prenada}
-                    {categoria}
-                    bind:userpermisos
-                />
-            </CardAnimal>
-        {:else if tab == "servicios"}
-            <!--Animales servicios-->
-            <CardAnimal
-                cardsize="max-w-7xl"
-                titulo="Inseminaciones y Servicios"
+</dialog>
+<dialog
+    id="transferModal2"
+    class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"
+>
+    <div class="modal-box w-11/12 max-w-xl bg-white dark:bg-gray-800">
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
             >
-                <Servicios cabid={cab.id} {categoria} bind:userpermisos />
-            </CardAnimal>
-        {:else if tab == "clinica"}
-            <!--Pesajes, tactos, servicios, tratamientos, observaciones,pariciones-->
-            <CardAnimal cardsize="max-w-7xl" titulo="Historia clínica">
-                <HistoriaClinica />
-            </CardAnimal>
-        {:else if tab == "historial"}
-            <!--Historial del animal-->
-            <CardAnimal cardsize="max-w-7xl" titulo="Historial">
-                <Historial />
-            </CardAnimal>
-        {/if}
-    {/if}
-</Navbarr>
+        </form>
+        <!--<h3 class="text-lg font-bold">Buscar cabañas</h3> -->
+        <div class="form-control p-8 w-full">
+            <h2
+                class="text-xl font-bold text-green-700 dark:text-green-400 mb-6 text-start"
+            >
+                RENSPA
+            </h2>
+            <input
+                id="token"
+                type="text"
+                class={`
+                    input 
+                    input-bordered 
+                    border border-gray-300 rounded-md
+                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                    flex-grow
+                    ${estilos.bgdark2}
+                `}
+                bind:value={codigo}
+            />
+            {#if malcodigo}
+                <div class="label">
+                    <span class="label-text-alt text-red-500"
+                        >No existe un establecimiento con ese renspa</span
+                    >
+                </div>
+            {/if}
+            {#if muchosrenspa}
+                <div class="label">
+                    <span class="label-text-alt text-red-500"
+                        >Hay varios establecimientos con ese renspa</span
+                    >
+                </div>
+            {/if}
+            <button
+                class="mt-1 btn btn-success text-white text-xl"
+                onclick={transfer}>Transferir</button
+            >
+        </div>
+        <div class="modal-action justify-start">
+            <form method="dialog">
+                <!-- if there is a button, it will close the modal -->
+
+                <button class="btn btn-error text-white">Cerrar</button>
+            </form>
+        </div>
+    </div>
+</dialog>

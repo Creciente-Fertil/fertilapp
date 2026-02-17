@@ -13,6 +13,7 @@
     import { createUserer } from "$lib/stores/user.svelte";
     import { goto } from "$app/navigation";
 
+    import InfoAnimal from "$lib/components/InfoAnimal.svelte";
     import estilos from "$lib/stores/estilos";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -30,6 +31,7 @@
     let usuarioid = $state("");
     let selectanimales = $state([]);
     let selecthashmap = $state({});
+    
     //movimento
     let defaultmovimiento = {
         selecthashmap: {},
@@ -120,6 +122,9 @@
         }
         setDetalle();
         volver();
+    }
+    function verAnimal(id){
+
     }
     onMount(async () => {
         loadDetalle();

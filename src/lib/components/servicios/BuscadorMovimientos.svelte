@@ -1,16 +1,22 @@
 <script>
     import estilos from "$lib/stores/estilos";
+    import paginacion from "$lib/stores/paginacion";
     import { slide } from "svelte/transition";
-
     import MultiSelect from "../MultiSelect.svelte";
     import { goto } from "$app/navigation";
+    import Filter from "$lib/svgs/filter.svelte";
+    import Sparkies from "$lib/svgs/sparkies.svelte";
+    import Arrowback from "$lib/svgs/arrowback.svelte";
     let pre = import.meta.env.VITE_PRE;
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
     let {
+        esNatural,
         animalesrows,
         selecthashmap,
+        //paginacion
+        pageSize = $bindable(10),
         //filtros
         buscar = $bindable(""),
         rodeos = [],
@@ -34,16 +40,20 @@
         clickFilter = () => {},
         limpiarFiltros = () => {},
     } = $props();
+    function volver() {
+        goto(pre + "/servicios/movimiento/detallemovimento");
+    }
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
-<div class="container mx-auto py-6 px-4 max-w-7xl">
+<div class="container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4">
     <!--Header-->
     <div
         class={`
-        rounded-md p-4 shadow-xl mb-4
-        dark:bg-slate-900 bg-white
-    `}
+        rounded-xl p-1 shadow-2xl mb-1
+            dark:bg-slate-900 bg-white
+            px-6
+        `}
     >
         <div
             class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
@@ -51,16 +61,15 @@
             <div
                 class={`
                 bg-transparent
-                
-                px-4 py-4 
+                px-6 py-2
             `}
             >
-                <button onclick={() => goto(pre + "/servicios")}>
+                <button onclick={volver}>
                     <h1
                         class={`
-                            flex text-left
-                            text-2xl font-bold 
-                            dark:text-white text-gray-900                    
+                            text-4xl font-normal 
+                            dark:text-white text-gray-900
+                            flex
                         `}
                     >
                         <svg
@@ -69,7 +78,7 @@
                             viewBox="0 0 24 24"
                             stroke-width="1.5"
                             stroke="currentColor"
-                            class="size-5 mt-1"
+                            class="size-8 mt-1 md:hidden"
                         >
                             <path
                                 stroke-linecap="round"
@@ -77,51 +86,39 @@
                                 d="M15.75 19.5 8.25 12l7.5-7.5"
                             />
                         </svg>
-                        Servicios múltiples
+                        {#if esCelu}
+                            Seleccionar
+                        {:else}
+                            Seleccionar animales
+                        {/if}
                     </h1>
                 </button>
             </div>
-            <button
-                class={`btn btn-primary rounded-lg ${estilos.btntext2}`}
-                data-theme="forest"
-                onclick={nuevoServicio}
-            >
-                {#if esCelu}
-                    <span class="text-lg">Servicios</span>
-                {:else}
-                    <span class="text-lg">+ Nuevos Servicios</span>
-                {/if}
-            </button>
-            <button
-                class={`btn btn-primary rounded-lg ${estilos.btntext2}`}
-                data-theme="forest"
-                onclick={nuevoInseminacion}
-            >
-                {#if esCelu}
-                    <span class="text-lg">Inseminaciones</span>
-                {:else}
-                    <span class="text-lg">+ Nuevas Inseminaciones</span>
-                {/if}
-            </button>
         </div>
         <!--Filtros-->
         <!-- 🔍 Input de búsqueda -->
         <div
             class={`
             flex items-center flex-1 border
-            rounded-md px-3 py-2
-            dark:border-gray-600 dark:bg-gray-900
-            border-gray-300 bg-white
+            shadow-2xl
+            rounded-full px-3 py-3
+            dark:border-gray-600 
+            border-transparent bg-white dark:bg-gray-900
+            shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
+            dark:shadow-none
           `}
         >
             <input
                 type="text"
-                placeholder="Buscar..."
+                placeholder="Buscar por madre..."
                 class={`
-                    dark:placeholder-gray-500 dark:text-gray-100
-                    placeholder-gray-400 text-gray-800
+                    shadow-2xl
+                    dark:placeholder-gray-500 
+                    dark:text-gray-100
+                    placeholder-gray-600 text-gray-800
                     
                     w-full bg-transparent focus:outline-none
+                    border border-transparent
                 `}
                 bind:value={buscar}
                 oninput={filterUpdate}
@@ -156,22 +153,45 @@
                     onclick={clickFilter}
                     class={`
                         border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-100
-                        dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
                     `}
                 >
+                    <Filter size="size-4" />
                     Filtros
                 </button>
                 <button
-                    onclick={limpiarFiltros}
+                    onclick={volver}
                     class={`
-                        
                         border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-100
-                        dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
                     `}
                 >
-                    Limpiar
+                    <Arrowback size="size-4" />
+                    Volver
+                </button>
+                <button
+                    class={`
+                        ${esNatural ? "" : "hidden"}
+                         rounded-full px-3 py-1 text-md 
+                        flex items-center gap-1
+                        bg-[#115642] text-white  hover:bg-green-700
+                        
+                        
+                    `}
+                    onclick={nuevoServicio}
+                >
+                    Confirmar
+                </button>
+                <button
+                    class={`
+                        ${esNatural ? "hidden" : ""}
+                         rounded-full px-3 py-1 text-md 
+                        flex items-center gap-1
+                        bg-[#115642] text-white  hover:bg-green-700
+                    `}
+                    onclick={nuevoInseminacion}
+                >
+                    Confirmar
                 </button>
             </div>
         </div>
@@ -180,6 +200,51 @@
                 <div
                     class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-10 w-full my-1"
                 >
+                    <div class="lg:col-span-3">
+                        <div class="lg:w-1/3 flex relative">
+                            <div class="flex-1">
+                                <label for="paginacion" class="label">
+                                    <span class="label-text text-base"
+                                        >Paginacion</span
+                                    >
+                                </label>
+                                <label class="input-group">
+                                    <select
+                                        class={`
+                                    select select-bordered
+                                    border border-gray-300 rounded-md
+                                    focus:outline-none focus:ring-2 
+                                    focus:ring-green-500 focus:border-green-500
+                                    ${estilos.bgdark2}
+                                `}
+                                        bind:value={pageSize}
+                                    >
+                                        {#each paginacion as s}
+                                            <option value={s.id}
+                                                >{s.value}</option
+                                            >
+                                        {/each}
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="absolute top-1/2 right-0 md:right-3">
+                                <button
+                                    onclick={limpiarFiltros}
+                                    class={`
+                                        border rounded-full px-3 py-1 
+                                        text-md flex items-center gap-1
+                                        bg-white  border-gray-300  
+                                        hover:bg-gray-300 dark:bg-transparent
+                                        dark:hover:bg-gray-600 dark:border-gray-600 
+                                        dark:text-white
+                                    `}
+                                >
+                                    <Sparkies size="size-4" />
+                                    Limpiar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="mt-1">
                         <MultiSelect
                             opciones={[

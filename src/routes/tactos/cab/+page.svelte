@@ -67,6 +67,19 @@
         ...defaultfiltro,
     });
     let proxy = createStorageProxy("listatactos", defaultfiltro);
+    //detalle
+    let tactovacio = {
+        idtacto: "",
+        animal: "",
+        caravana: "",
+        fecha: "",
+        observacion: "",
+        prenada: 1,
+        tipo: "",
+        categoria:""
+    };
+    let detalletacto = $state({ ...tactovacio });
+    let proxytacto = createStorageProxy("detalletacto", tactovacio);
     //Datos tacto
     let tacto = $state(null);
     let idtacto = $state("");
@@ -155,7 +168,28 @@
             );
         }
     }
+    function irDetalle(id){
+        console.log("detalle")
+        idtacto = id;
+        tacto = tactos.filter((t) => t.id == idtacto)[0];
+        fecha = tacto.fecha.split(" ")[0];
+        observacion = tacto.observacion;
+        animal = tacto.animal;
+        categoria = tacto.categoria;
+        prenada = tacto.prenada;
+        tipo = tacto.tipo;
+        detalletacto.idtacto = idtacto
+        detalletacto.fecha= fecha
+        detalletacto.observacion= observacion
+        detalletacto.animal= animal
+        detalletacto.caravana = tacto.expand.animal.caravana||""
+        detalletacto.categoria= categoria
+        detalletacto.prenada= prenada
+        detalletacto.tipo= tipo
+        proxytacto.save(detalletacto)
+        goto(pre+"/tactos/cab/"+idtacto)
 
+    }
     function openModalEdit(id) {
         if (permisos[4]) {
             botonhabilitado = true;
@@ -263,31 +297,32 @@
                     .toLocaleLowerCase()
                     .includes(buscar.toLocaleLowerCase()),
             );
-            totalTactosEncontrados = tactosrow.length;
+            
         }
         if (fechadesde != "") {
             tactosrow = tactosrow.filter((t) => t.fecha >= fechadesde);
-            totalTactosEncontrados = tactosrow.length;
+            
         }
         if (fechahasta != "") {
             tactosrow = tactosrow.filter((t) => t.fecha <= fechahasta);
-            totalTactosEncontrados = tactosrow.length;
+            
         }
         if (buscarcategoria != "") {
             tactosrow = tactosrow.filter((t) => t.categoria == buscarcategoria);
-            totalTactosEncontrados = tactosrow.length;
+            
         }
         if (buscartipo != "") {
             tactosrow = tactosrow.filter((t) => t.tipo == buscartipo);
-            totalTactosEncontrados = tactosrow.length;
+            
         }
         if (buscarestado != "") {
             tactosrow = tactosrow.filter((t) => t.prenada == buscarestado);
-            totalTactosEncontrados = tactosrow.length;
+            
         }
         tactosrow.sort((t1, t2) => {
             return new Date(t1.fecha) > new Date(t2.fecha) ? -1 : 1;
         });
+        totalTactosEncontrados = tactosrow.length;
     }
     onMount(async () => {
         proxyfiltros = proxy.load();
@@ -980,7 +1015,7 @@
                 <tbody>
                     {#each tactosrow as t}
                         <tr
-                            onclick={() => openModalEdit(t.id)}
+                            onclick={() => irDetalle(t.id)}
                             class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
                         >
                             <td class="text-base">
@@ -1019,7 +1054,7 @@
             <div
                 class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
             >
-                <button onclick={() => openModalEdit(t.id)}>
+                <button onclick={() => irDetalle(t.id)}>
                     <div class="block p-4">
                         <div class="flex justify-between items-start mb-2">
                             <h3 class="font-medium">

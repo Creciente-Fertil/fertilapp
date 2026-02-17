@@ -1,102 +1,136 @@
 <script>
-    
     import estilos from "$lib/stores/estilos";
+    import paginacion from "$lib/stores/paginacion";
     import { slide } from "svelte/transition";
     import ExportarSmall from "../ExportarSmall.svelte";
-    
-    
+    import Arrowdown from "$lib/svgs/arrowdown.svelte";
+    import Sparkies from "$lib/svgs/sparkies.svelte";
+    import Filter from "$lib/svgs/filter.svelte";
+    import Limpiar from "$lib/svgs/limpiar.svelte";
+    import Sticky from "./Sticky.svelte";
+
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
-    let opcionservicio = [{id:0,nombre:"Todos"},{id:1,nombre:"Solo servicios"},{id:2,nombre:"Solo inseminaciones"}]
+    let opcionservicio = [
+        { id: 0, nombre: "Todos" },
+        { id: 1, nombre: "Solo servicios" },
+        { id: 2, nombre: "Solo inseminaciones" },
+    ];
     let {
+        selecthash,
         serviciosrow,
         cabnombre,
+        //paginacion
+        pageSize = $bindable(10),
         //filtros
         totalServicios,
-        isOpenFilter =$bindable(false),
-        fechaservdesdefiltro =$bindable(""),
-        fechaservhastafiltro=$bindable(""),
-        fechapartodesde=$bindable(""),
-        fechapartohasta=$bindable(""),
-        
-        filtroservicio=$bindable(""),
-        buscarpadre=$bindable(""),
-        buscar=$bindable(""),
-        
+        isOpenFilter = $bindable(false),
+        fechaservdesdefiltro = $bindable(""),
+        fechaservhastafiltro = $bindable(""),
+        fechapartodesde = $bindable(""),
+        fechapartohasta = $bindable(""),
+
+        filtroservicio = $bindable(""),
+        buscarpadre = $bindable(""),
+        buscar = $bindable(""),
 
         //funciones
         limpiarFiltros = () => {},
         prepararData = () => {},
         nuevo = () => {},
+        nuevoInseminacion = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
-        
     } = $props();
 
     //buscador
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
-<div class="container mx-auto py-6 px-4 max-w-7xl">
+<div class="container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4">
     <!--Header-->
     <div
         class={`
-            rounded-md p-4 shadow-xl mb-4
+            rounded-xl p-1 shadow-2xl mb-1
             dark:bg-slate-900 bg-white
+            px-6
         `}
     >
         <div
-            class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 mb-2 border-b dark:border-gray-800"
         >
             <div
                 class={`
-                bg-transparent
-                
-                px-4 py-4 
-            `}
+                    bg-transparent
+                    px-6 py-2
+                `}
             >
                 <h1
                     class={`
-                    text-2xl font-bold 
-
+                    text-3xl font-normal 
                     dark:text-white text-gray-900
-                    
                 `}
                 >
                     Servicios
                 </h1>
             </div>
             <button
-                class={`btn btn-primary rounded-lg ${estilos.btntext2}`}
-                data-theme="forest"
+                class={`
+                    ${estilos.btnbuscador}
+                    ${estilos.btntextbuscador}
+                `}
                 onclick={nuevo}
             >
                 {#if esCelu}
-                    <span class="text-lg">Nuevos</span>
+                    Servicio
                 {:else}
-                    <span class="text-lg">+ Nuevos servicios</span>
+                    + Nuevo servicio
+                {/if}
+            </button>
+            <button
+                class={`hidden 
+                    ${estilos.btnbuscador}
+                    ${estilos.btntextbuscador}
+                `}
+                onclick={nuevoInseminacion}
+            >
+                {#if esCelu}
+                    inseminación
+                {:else}
+                    + Nuevo inseminación
                 {/if}
             </button>
         </div>
+
         <!--Filtros-->
+
         <!-- 🔍 Input de búsqueda -->
         <div
             class={`
             flex items-center flex-1 border
-            rounded-md px-3 py-2
-            dark:border-gray-600 dark:bg-gray-900
-            border-gray-300 bg-white
+            shadow-2xl
+            rounded-full 
+            p-3
+            dark:border-gray-600 
+            border-transparent bg-white dark:bg-gray-900
+            shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
+            dark:shadow-none
+            
           `}
         >
             <input
                 type="text"
-                placeholder="Buscar..."
+                placeholder="Buscar por madre ..."
                 class={`
-                    dark:placeholder-gray-500 dark:text-gray-100
-                    placeholder-gray-400 text-gray-800
+                    shadow-2xl
+                    dark:placeholder-gray-500 
+                    dark:text-gray-100
+                    placeholder-gray-600 text-gray-800
                     
                     w-full bg-transparent focus:outline-none
+                    border border-transparent
+                    
                 `}
                 bind:value={buscar}
                 oninput={filterUpdate}
@@ -118,44 +152,40 @@
         </div>
         <!--Servicios encontrados-->
         <div
-            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-transparent rounded-lg"
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-1 md:p-4 bg-transparent rounded-lg"
         >
-            <!-- Izquierda: texto -->
             <div class="text-md text-gray-700 dark:text-white">
-                Total de servicios encontrados: {totalServicios}
+                <span class="hidden xl:block"
+                    >Total de servicios seleccionados: {Object.keys(selecthash)
+                        .length}</span
+                >
+                <span class="xl:hidden">
+                    Servicios seleccionados: {Object.keys(selecthash).length}
+                </span>
             </div>
 
             <!-- Derecha: botones -->
             <div class="flex flex-wrap gap-2">
                 <button
                     class={`
-                        hidden
-                        border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-100
-                        dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
-                    `}
-                >
-                    Importar
-                </button>
-                <button
-                    onclick={limpiarFiltros}
-                    class={`
                         
                         border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-100
-                        dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
+                        dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
                     `}
                 >
-                    Limpiar
+                    <Arrowdown size="size-4" />
+                    Importar
                 </button>
+
                 <button
                     onclick={clickFilter}
                     class={`
                         border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-100
-                        dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
                     `}
                 >
+                    <Filter size="size-4" />
                     Filtros
                 </button>
                 <ExportarSmall
@@ -166,14 +196,59 @@
                     sheetname={"Servicios"}
                     establecimiento={cabnombre}
                     {prepararData}
+                    datahash={selecthash}
+                    conhash={true}
                 />
             </div>
         </div>
         {#if isOpenFilter}
             <div transition:slide>
                 <div
-                    class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-10 w-full"
+                    class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-10 w-full p-1 md:p-4"
                 >
+                    <div class="lg:col-span-3">
+                        <div class="lg:w-1/3 flex relative">
+                            <div class="flex-1">
+                                <label for="paginacion" class="label">
+                                    <span class="label-text text-base"
+                                        >Paginacion</span
+                                    >
+                                </label>
+                                <label class="input-group">
+                                    <select
+                                        class={`
+                                    select select-bordered
+                                    border border-gray-300 rounded-md
+                                    focus:outline-none focus:ring-2 
+                                    focus:ring-green-500 focus:border-green-500
+                                    ${estilos.bgdark2}
+                                `}
+                                        bind:value={pageSize}
+                                    >
+                                        {#each paginacion as s}
+                                            <option value={s.id}
+                                                >{s.value}</option
+                                            >
+                                        {/each}
+                                    </select>
+                                </label>
+                            </div>
+                            <div class="absolute top-1/2 right-0 md:right-3">
+                                <button
+                                    onclick={limpiarFiltros}
+                                    class={`
+                        
+                                        border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent
+                                         dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                                    `}
+                                >
+                                    <Sparkies size="size-4" />
+                                    Limpiar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="">
                         <label
                             class="block tracking-wide text-base font-medium mb-2"
@@ -304,3 +379,4 @@
         <!--Ordenar-->
     </div>
 </div>
+<Sticky total={Object.keys(selecthash).length} />

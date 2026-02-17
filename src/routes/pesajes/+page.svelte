@@ -24,7 +24,7 @@
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
     import { goto } from "$app/navigation";
-    import { formatNumber } from "chart.js/helpers";
+    
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);

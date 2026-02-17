@@ -2,6 +2,7 @@
     //En esta pagina solo se van a crear y ver animales
     //Se pueden crear nuevos animales con un nacimientos
     import Navbarr from "$lib/components/Navbarr.svelte";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import Exportar from "$lib/components/Exportar.svelte";
     import PocketBase from "pocketbase";
     import { slide } from "svelte/transition";
@@ -868,7 +869,7 @@
     }
 </script>
 
-<Navbarr>
+<Navbar2>
     {#if esdev}
         permisos {JSON.stringify(userpermisos, null, 2)}
     {/if}
@@ -1190,5 +1191,5 @@
             />
         </div>
     </div>
-</Navbarr>
+</Navbar2>
 

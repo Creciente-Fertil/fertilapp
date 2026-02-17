@@ -9,7 +9,7 @@
         getEstadoNombre,
         getEstadoColor,
     } from "$lib/components/estadosutils/lib";
-    let { animal = $bindable({}) } = $props();
+    let { animal = $bindable({}),forcedOpen=false } = $props();
     let verAnimal  = $state(false)
     function calcularEdad(fechaNacimiento, fechaReferencia = new Date()) {
         const nacimiento = new Date(fechaNacimiento);
@@ -40,7 +40,7 @@
     
 </script>
 
-{#if verAnimal}
+{#if verAnimal || forcedOpen}
 <div class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900">
     
     <div class="block p-4">
@@ -94,7 +94,7 @@
         </div>
         <dir class="flex justify-start mx-0 px-0">
         <button 
-            class={`${estilos.basico} ${estilos.chico} ${estilos.danger}`} 
+            class={`${estilos.basico} ${estilos.chico} ${estilos.danger} ${forcedOpen?"hidden":""}`} 
             onclick={()=>verAnimal = false}
         >Cerrar</button>
     </dir>

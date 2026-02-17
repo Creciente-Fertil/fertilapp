@@ -68,6 +68,7 @@
         ...defaultfiltro,
     });
     let proxy = createStorageProxy("tactosanimales", defaultfiltro);
+    
     //movimiento
     let defaultmovimiento = {
         selecthashmap: {},
@@ -75,8 +76,10 @@
     let detallemovimento = $state({
         ...defaultmovimiento,
     });
-    let proxymovimiento = createStorageProxy("detallemovimientotacto", defaultmovimiento);
-
+    let proxymovimiento = createStorageProxy(
+        "detallemovimientotacto",
+        defaultmovimiento,
+    );
 
     let lotes = $state([]);
     let rodeos = $state([]);
@@ -106,7 +109,6 @@
         }
     }
     function setDetalle() {
-        
         detallemovimento.selecthashmap = selecthashmap;
         proxymovimiento.save(detallemovimento);
     }
@@ -122,8 +124,7 @@
         algunos = false;
         todos = false;
         ninguno = true;
-        setDetalle()
-
+        setDetalle();
     }
     function setFilters() {
         buscar = proxyfiltros.buscar;
@@ -246,7 +247,7 @@
                 ...a,
             };
         }
-        setDetalle()
+        setDetalle();
     }
     function clickTodos() {
         if (todos) {
@@ -269,7 +270,7 @@
             todos = false;
             ninguno = true;
         }
-        setDetalle()
+        setDetalle();
     }
     async function getLotes() {
         const records = await pb.collection("lotes").getFullList({
@@ -302,14 +303,14 @@
         animalesrows = animales;
     }
 
-    function irDetalle(){
+    function irDetalle() {
         if (ninguno) {
             Swal.fire("Error tacto", "No hay animales seleccionados", "error");
             return;
         }
-        setDetalle()
-        
-        goto(pre+"/tactos/cab/movimiento/detallemovimiento")
+        setDetalle();
+
+        goto(pre + "/tactos/cab/movimiento/detallemovimiento");
     }
     function openNewModal() {
         tipotactoselect = "tacto";
@@ -511,7 +512,7 @@
         detallemovimento = proxy.load();
 
         selecthashmap = detallemovimento.selecthashmap;
-        
+
         selectanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
@@ -523,20 +524,18 @@
                 });
             }
         }
-        if(selectanimales.length == animalesrows.length ){
-            todos = true
-            algunos = false
-            ninguno = false
-        }
-        else if(selectanimales.length>0){
-            todos = false
-            algunos = true
-            ninguno = false
-        }
-        else{
-            todos = false
-            algunos = false
-            ninguno = true
+        if (selectanimales.length == animalesrows.length) {
+            todos = true;
+            algunos = false;
+            ninguno = false;
+        } else if (selectanimales.length > 0) {
+            todos = false;
+            algunos = true;
+            ninguno = false;
+        } else {
+            todos = false;
+            algunos = false;
+            ninguno = true;
         }
     }
     onMount(async () => {
@@ -545,7 +544,7 @@
         await getAnimales();
         await getRodeos();
         await getLotes();
-        loadDetalle()
+        loadDetalle();
     });
 </script>
 

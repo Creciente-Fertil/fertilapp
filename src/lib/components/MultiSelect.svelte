@@ -1,83 +1,96 @@
 <script>
-    import estilos from '$lib/stores/estilos';
-    
-    import { slide } from 'svelte/transition';
-    let {opciones,etiqueta,valores=$bindable([]),filterUpdate,margintop="mt-2",labelmargin="m-0"} = $props()
+    import estilos from "$lib/stores/estilos";
+
+    import { slide } from "svelte/transition";
+    let {
+        opciones,
+        etiqueta,
+        valores = $bindable([]),
+        filterUpdate,
+        clickOption = (idopt) => {
+            if (valores.includes(idopt)) {
+                valores = valores.filter((v) => v != idopt);
+            } else {
+                valores.push(idopt);
+            }
+            filterUpdate();
+        },
+        margintop = "mt-2",
+        labelmargin = "m-0",
+    } = $props();
     //Logica de las opciones
-    let isOpen = $state(false)
+    let isOpen = $state(false);
 
-    function clickOption(idopt){
-        if(valores.includes(idopt)){
-            valores = valores.filter(v =>v != idopt)
-        }
-        else{
-            valores.push(idopt)
-
-        }
-        filterUpdate()
-    }
-    function getNombre(idopt){
-        let op = opciones.filter(o=>o.id==idopt)[0]
-        return op.nombre
+    function getNombre(idopt) {
+        let op = opciones.filter((o) => o.id == idopt)[0];
+        return op.nombre;
     }
 </script>
+
 <div class="">
-    <label for = "" class="label my-0 py-0">
+    <label for="" class="label my-0 py-0">
         <span class="label-text text-base">{etiqueta} </span>
     </label>
-    <button 
+    <button
         class={`
             ${margintop} h-12 w-full p-2 text-left 
             flex items-center justify-between 
             border
             ${estilos.bgdark2}
             rounded-md 
-            shadow-sm focus:outline-none focus:ring-2 
+            shadow-sm 
+            focus:outline-none focus:ring-2 
             focus:ring-green-500 focus:border-green-500
 
         `}
-        onclick={()=>isOpen = !isOpen}
+        onclick={() => (isOpen = !isOpen)}
     >
         {#if valores.length == 0}
-            <span class="block truncate">
-                Todos
-            </span>
+            <span class="block truncate"> Todos </span>
         {:else}
             <div class="flex content-normal gap-2 overflow-x-hidden">
                 {#each valores as v}
-                    
-                    <span 
+                    <span
                         class="
                         truncate
-                        inline-flex items-center rounded-md 
+                        inline-flex items-center rounded-md
                         px-2 py-1 text-base font-medium ring-1 ring-inset
                         bg-green-50 dark:bg-green-700
                         text-green-700 dark:text-green-50
-                        ring-green-600/20 dark:ring-green-50/20 
+                        ring-green-600/20 dark:ring-green-50/20
                         "
                     >
                         {getNombre(v)}
                     </span>
                 {/each}
             </div>
-
         {/if}
-        
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class={`size-6 w-5 h-5 ml-2 -mr-1 text-gray-400 transition-all duration-150 ${isOpen? 'transform rotate-180':''}`}>
-            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
+
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class={`size-6 w-5 h-5 ml-2 -mr-1 text-gray-400 transition-all duration-150 ${isOpen ? "transform rotate-180" : ""}`}
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5"
+            />
         </svg>
     </button>
     {#if isOpen}
-
-        <div 
+        <div
             class={`
                 ${estilos.bgdark2}
                 absolute z-10 mt-0 bg-white rounded-md shadow-lg   
             `}
         >
-            <ul 
+            <ul
                 class="
-                    text-base max-h-40 focus:outline-none sm:text-sm overflow-y-auto 
+                    text-base max-h-40 focus:outline-none sm:text-sm overflow-y-auto
                     w-80
                     sm:w-80
                     md:w-80
@@ -87,26 +100,31 @@
                 "
             >
                 {#each opciones as v}
-                    
-                    <li class={`cursor-default hover:bg-green-100 hover:text-green-800 dark:hover:text-green-800  dark:text-white `}>
+                    <li
+                        class={`cursor-default hover:bg-green-100 hover:text-green-800 dark:hover:text-green-800  dark:text-white `}
+                    >
                         <button
                             class={`text-start w-full relative py-2 pl-3 select-none pr-9 bg-transparent`}
-                            onclick={()=>clickOption(v.id)}
-                        >   
+                            onclick={() => clickOption(v.id)}
+                        >
                             <span
                                 class={`
                                     
                                     truncate
-                                    ${valores.some(item=>item==v.id)?"font-semibold":"font-normal"}
+                                    ${valores.some((item) => item == v.id) ? "font-semibold" : "font-normal"}
                                 `}
                             >
                                 {v.nombre}
                             </span>
-                            {#if valores.some(item=>item == v.id)}
-                                <span 
+                            {#if valores.some((item) => item == v.id)}
+                                <span
                                     class="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600"
                                 >
-                                    <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <svg
+                                        class="w-5 h-5"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                    >
                                         <path
                                             fillRule="evenodd"
                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -115,12 +133,10 @@
                                     </svg>
                                 </span>
                             {/if}
-                            
                         </button>
                     </li>
                 {/each}
             </ul>
         </div>
-
     {/if}
 </div>

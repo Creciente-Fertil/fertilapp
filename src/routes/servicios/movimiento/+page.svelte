@@ -24,11 +24,13 @@
     import PredictSelect from "$lib/components/PredictSelect.svelte";
     import MultiSelect from "$lib/components/MultiSelect.svelte";
     import { shorterWord } from "$lib/stringutil/lib";
+    //tabla animales
+    import TablaMovimiento from "$lib/components/TablaMovimiento.svelte";
     //FILTROS
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
-    import { elements } from "chart.js";
+
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -41,6 +43,7 @@
     let caber = createCaber();
     let cab = caber.cab;
     let cargado = $state(false);
+    let animal = $state({});
     //Datos animales
     let animales = $state([]);
     let animalesrows = $state([]);
@@ -81,10 +84,26 @@
 
     //movimiento
     let defaultmovimiento = {
+        //general
         esNatural: true,
-        padres:[],
+        observacion: "",
+        fechaparto: "",
+        //servicio
+        fechadesdeserv: "",
+        fechahastaserv: "",
+        madre: "",
+        padreslist: [],
+        padresserv: "",
+        
+        //inseminacion
+        fechainseminacion: "",
+        pajuela: "",
+        padre: "",
+        cadenapadre: "",
+        //animales
         selecthashmap: {},
         listapadres: [],
+        padres: [],
     };
     let detallemovimiento = $state({ ...defaultmovimiento });
     let proxyDetalleMovimiento = createStorageProxy(
@@ -92,6 +111,7 @@
         defaultmovimiento,
     );
 
+    let esNatural = $state(true);
     let lotes = $state([]);
     let rodeos = $state([]);
     let isOpenFilter = $state(false);
@@ -107,7 +127,7 @@
     //Datos servicios
     let padreslist = $state([]);
     let padresserv = $state("");
-    let pajuelasserv = $state("");
+    
     //Seria la fecha del parto
     let fechaparto = $state("");
     let fechadesdeserv = $state("");
@@ -176,11 +196,9 @@
         proxyfiltros.loteseleccion = loteseleccion;
         proxyfiltros.categoriaseleccion = categoriaseleccion;
     }
-    function setDetalle(esNatural = false) {
+    function setDetalle() {
         detallemovimiento.selecthashmap = selecthashmap;
-        detallemovimiento.esNatural = esNatural;
-        detallemovimiento.listapadres = listapadres;
-        detallemovimiento.padres = padres
+
         proxyDetalleMovimiento.save(detallemovimiento);
     }
     function setLista() {
@@ -190,27 +208,25 @@
                 selectanimales.push(value);
             }
         }
-        if(selectanimales.length == animales.length){
-            todos = true
-            algunos = false
-            ninguno = false
+        if (selectanimales.length == animales.length) {
+            todos = true;
+            algunos = false;
+            ninguno = false;
+        } else if (selectanimales.length > 0) {
+            todos = false;
+            algunos = true;
+            ninguno = false;
+        } else {
+            todos = false;
+            algunos = false;
+            ninguno = true;
         }
-        else if(selectanimales.length>0){
-            todos = false
-            algunos = true
-            ninguno = false
-        }
-        else{
-            todos = false
-            algunos = false
-            ninguno = true
-        }
-        
     }
     function loadDetalle() {
         detallemovimiento = proxyDetalleMovimiento.load();
 
         selecthashmap = detallemovimiento.selecthashmap;
+        esNatural = defaultmovimiento.esNatural;
         setLista();
     }
     function limpiarFiltros() {
@@ -402,11 +418,19 @@
                 "No hay animales seleccionados",
                 "error",
             );
-            
+
             return;
         }
         setDetalle(esServicio);
         goto(pre + "/servicios/movimiento/detallemovimento");
+    }
+    function verAnimal(id) {
+        let a_idx = animales.findIndex((a) => a.id == id);
+
+        if (a_idx != -1) {
+            animal = animales[a_idx];
+            veranimal.showModal();
+        }
     }
     function openNewModal() {
         esservicio = true;
@@ -428,7 +452,6 @@
         servicioMasivo.showModal();
     }
     function openNewModalInseminacion() {
-        
         esinseminacion = true;
         if (ninguno) {
             Swal.fire(
@@ -891,8 +914,9 @@
 
 <Navbar2>
     <BuscadorMovimientos
+        {esNatural}
         {animalesrows}
-        selecthashmap={selecthashmap}
+        {selecthashmap}
         bind:buscar
         {rodeos}
         bind:rodeoseleccion
@@ -911,179 +935,34 @@
         nuevoInseminacion={() => irServicio(false)}
         {limpiarFiltros}
     />
-    <div
-        class="hidden grid grid-cols-1 lg:grid-cols-2 mx-1 lg:mx-10 mt-1 w-11/12"
-    >
-        <div>
-            <button
-                class="bg-transparent border-none flex"
-                aria-label="volver"
-                onclick={() => goto(pre + "/servicios")}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="size-6 mt-1"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M15.75 19.5 8.25 12l7.5-7.5"
-                    />
-                </svg>
-                <h1 class="text-2xl">Servicios</h1>
-            </button>
-        </div>
+    
 
-        <div class="flex gap-1 justify-start lg:justify-end">
-            <button
-                class={`btn btn-primary rounded-lg ${estilos.btntext}`}
-                data-theme="forest"
-                onclick={() => openNewModal()}
-            >
-                <span class="text-xl">{capitalize("Servicios")}</span>
-            </button>
-            <button
-                class={`btn btn-primary rounded-lg ${estilos.btntext}`}
-                data-theme="forest"
-                onclick={() => openNewModalInseminacion()}
-            >
-                <span class="text-xl">{capitalize("Inseminaciones")}</span>
-            </button>
-        </div>
-    </div>
-
+    
+    
     <div
-        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
+        class={`
+            hidden w-full xl:w-3/4 md:grid
+            mx-auto py-1 px-4 max-w-7xl
+        `}
     >
-        <div class="w-11/12">
-            <label
-                class={`input input-bordered flex items-center gap-2 ${estilos.bgdark2}`}
-            >
-                <input
-                    type="text"
-                    class="grow"
-                    placeholder="Buscar..."
-                    bind:value={buscar}
-                    oninput={filterUpdate}
-                />
-            </label>
+        <div
+            class={`
+                overflow-hidden rounded-xl
+            `}
+        >
+            <TablaMovimiento
+                selecthash={selecthashmap}
+                {animalesrows}
+                clickFila={clickAnimal}
+                {clickTodos}
+                {todos}
+                verFila={verAnimal}
+            />
         </div>
-        <div class="w-11/12">
-            <Limpiar {limpiarFiltros} />
-        </div>
-    </div>
-    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
-        <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
-            <div class="flex justify-between items-center px-1">
-                <h1 class="font-semibold text-lg py-2">Filtros</h1>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class={`h-5 w-5 transition-all duration-300 ${isOpenFilter ? "transform rotate-180" : ""}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
-                    />
-                </svg>
-            </div>
-        </button>
-        <div class="flex justify-between items-center px-1">
-            <h3 class=" text-md py-2">
-                Animales seleccionados: {Object.keys(selecthashmap).length}
-            </h3>
-        </div>
-        {#if isOpenFilter}
-            <div
-                transition:slide
-                class="grid grid-cols-1 lg:grid-cols-4 m-1 gap-2 w-11/12"
-            >
-                <div class="mt-0">
-                    <MultiSelect
-                        opciones={[{ id: "-1", nombre: "Sin rodeo" }].concat(
-                            rodeos,
-                        )}
-                        bind:valores={rodeoseleccion}
-                        etiqueta="Rodeos"
-                        {filterUpdate}
-                    />
-                </div>
-                <div class="mt-0">
-                    <MultiSelect
-                        opciones={[{ id: "-1", nombre: "Sin lote" }].concat(
-                            lotes,
-                        )}
-                        bind:valores={loteseleccion}
-                        etiqueta="Lotes"
-                        {filterUpdate}
-                    />
-                </div>
-                <div class="">
-                    <MultiSelect
-                        opciones={[
-                            { id: "-1", nombre: "Sin categoria" },
-                        ].concat(categorias)}
-                        bind:valores={categoriaseleccion}
-                        etiqueta="Categorias"
-                        {filterUpdate}
-                    />
-                </div>
-                <div class="my-0 py-0">
-                    <label for="raza" class="label mb-0">
-                        <span class="label-text text-base">Raza</span>
-                    </label>
-                    <label class="input-group">
-                        <input
-                            type="text"
-                            class={`
-                                        input input-bordered w-full
-                                        rounded-md
-                                        focus:outline-none focus:ring-2 
-                                        focus:ring-green-500 
-                                        focus:border-green-500
-                                        
-                                        ${estilos.bgdark2}
-                                    `}
-                            bind:value={raza}
-                            oninput={filterUpdate}
-                        />
-                    </label>
-                </div>
-                <div class="my-0 py-0">
-                    <label for="color" class="label mb-0">
-                        <span class="label-text text-base">Color</span>
-                    </label>
-                    <label class="input-group">
-                        <input
-                            type="text"
-                            class={`
-                                        input input-bordered w-full
-                                        rounded-md
-                                        focus:outline-none focus:ring-2 
-                                        focus:ring-green-500 
-                                        focus:border-green-500
-                                        
-                                        ${estilos.bgdark2}
-                                    `}
-                            bind:value={color}
-                            oninput={filterUpdate}
-                        />
-                    </label>
-                </div>
-            </div>
-        {/if}
     </div>
     <div
         class={`
-            hidden w-full md:grid
+            hidden w-full
             mx-auto py-6 px-4 max-w-7xl
         `}
     >
@@ -1796,5 +1675,23 @@
                 >
             </form>
         </div>
+    </div>
+</dialog>
+<dialog id="veranimal" class="modal modal-middle rounded-xl">
+    <div
+        class="
+            modal-box w-11/12 max-w-6xl
+            bg-gradient-to-br from-white to-gray-100
+            dark:from-gray-900 dark:to-gray-800
+            "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-xl font-bold">Ver animal</h3>
+        <InfoAnimal {animal} forcedOpen={true} />
     </div>
 </dialog>

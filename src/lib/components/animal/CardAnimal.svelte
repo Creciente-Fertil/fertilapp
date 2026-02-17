@@ -12,7 +12,9 @@
                 ${cardsize}
             `}
         >
-            <h1 class="text-2xl font-bold text-green-700 dark:text-green-400 mb-3 text-start">{titulo}</h1>
+            {#if titulo.length>0}
+                <h1 class="text-2xl font-bold text-green-700 dark:text-green-400 mb-3 text-start">{titulo}</h1>
+            {/if}
             <slot/>
         </div>
     </div>

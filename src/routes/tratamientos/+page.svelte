@@ -56,6 +56,22 @@
         ...defaultfiltro,
     });
     let proxy = createStorageProxy("listatratamientos", defaultfiltro);
+    //detalle
+    let vaciotratamiento = {
+        idtratamiento: "",
+        animal: "",
+        caravana: "",
+        categoria: "",
+        fecha: "",
+        tipo: "",
+        observacion: "",
+        tipos: [],
+    };
+    let detalletratamiento = $state({ ...vaciotratamiento });
+    let proxydetalletratamiento = createStorageProxy(
+        "detalletratamiento",
+        vaciotratamiento,
+    );
     //Datos tipo tratamiento
     let nombretipotratamiento = $state("");
     let idtipotratamiento = $state("");
@@ -318,6 +334,7 @@
     function openTiposModal() {
         tiposmodal.showModal();
     }
+    
     function openEditTipoModal(id) {
         idtipotratamiento = id;
         let tipotratamiento = tipotratamientos.filter((tp) => tp.id == id)[0];
@@ -438,7 +455,29 @@
             );
         }
     }
+    function irDetalle(id){
+        idtratamiento = id;
+        let tratamiento = tratamientos.filter((t) => t.id == id)[0];
+        fecha = tratamiento.fecha.split(" ")[0];
+        animal = tratamiento.animal;
+        caravaedit = tratamiento.expand.animal.caravana;
 
+        tipo = tratamiento.tipo;
+        categoria = tratamiento.expand.animal.categoria;
+        observacion = tratamiento.observacion;
+
+        detalletratamiento.idtratamiento=idtratamiento
+        detalletratamiento.animal=animal
+        detalletratamiento.caravana=caravaedit
+        detalletratamiento.categoria=categoria
+        detalletratamiento.fecha=fecha
+        detalletratamiento.tipo=tipo
+        detalletratamiento.observacion=observacion
+        detalletratamiento.tipos = tipotratamientos
+        proxydetalletratamiento.save(detalletratamiento)
+        
+        goto(pre+"/tratamientos/"+idtratamiento)
+    }
     function openEditModal(id) {
         idtratamiento = id;
 
@@ -1008,7 +1047,7 @@
                 <tbody>
                     {#each tratamientosrow as t}
                         <tr
-                            onclick={() => openEditModal(t.id)}
+                            onclick={() => irDetalle(t.id)}
                             class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
                         >
                             <td class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
@@ -1035,7 +1074,7 @@
             <div
                 class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
             >
-                <button onclick={() => openEditModal(t.id)}>
+                <button onclick={() => irDetalle(t.id)}>
                     <div class="block p-4">
                         <div class="grid grid-cols-2 gap-y-2">
                             <div class="flex items-start">

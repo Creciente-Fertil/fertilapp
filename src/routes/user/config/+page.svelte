@@ -425,7 +425,7 @@
                                 transition-all duration-150 ease-in-out
                             "
                         >
-                            Eliminar cuenta
+                            Eliminar
                         </button>
                     </div>
                 </div>

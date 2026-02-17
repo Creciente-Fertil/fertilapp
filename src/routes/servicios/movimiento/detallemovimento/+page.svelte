@@ -12,9 +12,12 @@
     import { createUserer } from "$lib/stores/user.svelte";
     import { goto } from "$app/navigation";
     import { isEmpty, addDays } from "$lib/stringutil/lib";
+    import CardMovimiento from "$lib/components/servicios/CardMovimiento.svelte";
     import MultipleToros from "$lib/components/MultipleToros.svelte";
     import PredictSelect from "$lib/components/PredictSelect.svelte";
+    import InfoAnimal from "$lib/components/InfoAnimal.svelte";
 
+    import Eye from "$lib/svgs/eye.svelte";
     import estilos from "$lib/stores/estilos";
     import ListaAnimales from "$lib/components/servicios/ListaAnimales.svelte";
 
@@ -48,7 +51,7 @@
         madre: "",
         padreslist: [],
         padresserv: "",
-        pajuelasserv: "",
+        
         //inseminacion
         fechainseminacion: "",
         pajuela: "",
@@ -68,6 +71,7 @@
     );
     //valores
     //general
+    let animal = $state({});
     let esNatural = $state(true);
     let esservicio = $derived(esNatural);
     let observacion = $state("");
@@ -105,6 +109,15 @@
     }
     function setDetalle() {
         proxymovimiento.selecthashmap = selecthashmap;
+        proxymovimiento.padre = padre;
+        proxymovimiento.padres = padresserv;
+        proxymovimiento.fechaparto = fechaparto;
+        proxymovimiento.fechadesdeserv = fechadesdeserv;
+        proxymovimiento.fechahastaserv = fechahastaserv;
+        proxymovimiento.fechainseminacion = fechainseminacion;
+        proxymovimiento.observacion = observaciongeneral;
+        proxymovimiento.padreslist=padreslist
+        proxymovimiento.padresserv=padresserv
         proxy.save(proxymovimiento);
     }
     function loadDetalle() {
@@ -112,14 +125,38 @@
         esNatural = proxymovimiento.esNatural;
         selecthashmap = proxymovimiento.selecthashmap;
         listapadres = proxymovimiento.listapadres;
-        padres = proxymovimiento.padres;
+        padresserv = proxymovimiento.padresserv;
+        padreslist = proxymovimiento.padreslist;
+        padre = proxymovimiento.padre;
+        
+        fechaparto = proxymovimiento.fechaparto;
+        fechadesdeserv = proxymovimiento.fechadesdeserv;
+        fechahastaserv = proxymovimiento.fechahastaserv;
+        fechainseminacion = proxymovimiento.fechainseminacion;
+        observaciongeneral = proxymovimiento.observacion;
         listaanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
-                listaanimales.push(value);
+                let fila = value;
+                if (esNatural) {
+                    if (fila.padres.length == 0) {
+                        fila.padres = padreslist;
+                    }
+                    
+                } else {
+                    if (fila.padre.length == 0) {
+                        fila.padre = padre;
+                    }
+                }
+                if (fila.observacion.length == 0) {
+                    fila.observacion = observaciongeneral;
+                }
+
+                listaanimales.push(fila);
             }
         }
-        cargadoanimales = true;
+        listaanimales.sort((a1,a2)=>a1.caravana.toLocaleLowerCase()<a2.caravana.toLocaleLowerCase()?-1:1)
+        
     }
     function validarBoton() {
         botonhabilitado = true;
@@ -128,7 +165,6 @@
                 botonhabilitado = false;
             }
         }
-        
     }
     function input(campo) {
         validarBoton();
@@ -169,6 +205,7 @@
     }
     function onInput(campo) {
         input(campo);
+        setDetalle();
     }
     function onelegir(id) {
         let p = listapadres.filter((pa) => pa.id == id)[0];
@@ -192,6 +229,8 @@
                 listaanimales[i].padres.push(id);
             }
         }
+        
+        setDetalle();
     }
     function quitarPadre(id) {
         for (let i = 0; i < listaanimales.length; i++) {
@@ -201,16 +240,33 @@
                 listaanimales[i].padres.splice(idx, 1);
             }
         }
+        
+        
+        setDetalle();
     }
     function inputObsGeneral() {
         for (let i = 0; i < listaanimales.length; i++) {
             listaanimales[i].observacion = observaciongeneral;
         }
+        setDetalle();
+    }
+    function verAnimal(id) {
+        let a_idx = listaanimales.findIndex((a) => a.id == id);
+
+        if (a_idx != -1) {
+            animal = listaanimales[a_idx];
+            veranimal.showModal();
+        }
     }
     async function mover() {
+        if (listaanimales.length == 0) {
+            Swal.fire("Sin madres", "No hay madres seleccionados", "error");
+            return;
+        }
         if (esservicio) {
             if (listapadres.length == 0) {
                 Swal.fire("Sin padres", "No hay padres seleccionados", "error");
+                return;
             }
             let errores = false;
             let serverrores = [];
@@ -240,7 +296,6 @@
                     await pb
                         .collection("animales")
                         .update(servicio.id, { prenada: 3 });
-                    
                 } catch (err) {
                     serverrores.push(servicio.id);
                     console.error(err);
@@ -269,10 +324,7 @@
                     delete selecthashmap[servicio.id];
                 }
             }
-            
-            
-        }
-        else {
+        } else {
             if (fechainseminacion == "") {
                 Swal.fire(
                     "Error inseminaciones",
@@ -306,7 +358,6 @@
                     await pb
                         .collection("animales")
                         .update(inseminacion.id, { prenada: 3 });
-                    
                 } catch (err) {
                     erroresins.push(inseminacion.id);
                     console.error(err);
@@ -325,7 +376,7 @@
                     "success",
                 );
             }
-            
+
             for (let i = 0; i < listaanimales.length; i++) {
                 let inseminacion = listaanimales[i];
                 let i_error = erroresins.findIndex(
@@ -335,14 +386,38 @@
                     delete selecthashmap[inseminacion.id];
                 }
             }
-            
         }
-        setDetalle()
-        volver()
-
+        setDetalle();
+        volver();
+    }
+    function irAnimales() {
+        goto(pre + "/servicios/movimiento");
     }
     function volver() {
-        goto(pre + "/servicios/movimiento");
+        goto(pre + "/servicios");
+    }
+    async function getAnimales() {
+        const recordsa = await pb.collection("Animalestacto").getFullList({
+            filter: `active=true && cab='${cab.id}'`,
+            expand: "rodeo,lote,cab",
+        });
+
+        let animales = recordsa;
+        animales.sort((a1, a2) =>
+            a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase()
+                ? 1
+                : -1,
+        );
+
+        padres = animales.filter((a) => a.sexo == "M");
+        
+        listapadres = padres.map((item) => {
+            return {
+                id: item.id,
+                nombre: item.caravana,
+            };
+        });
+        cargadoanimales = true;
     }
     onMount(async () => {
         loadDetalle();
@@ -352,88 +427,46 @@
 
         per.setPer(respermisos.permisos, usuarioid);
         userpermisos = getPermisosList(per.per.permisos);
+        await getAnimales();
     });
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
-        <!--Header-->
-        <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
-        >
-            <div
-                class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
-            >
-                <div
-                    class={`
-                        bg-transparent        
-                        px-4 py-4 
-                    `}
-                >
-                    <button onclick={volver}>
-                        <h1
+    <CardMovimiento
+        titulo={esNatural ? "Nuevo servicio" : "Nueva inseminación"}
+    >
+        {#if esNatural}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4">
+                <div class="lg:col-span-2 lg:w-1/2">
+                    <label for="tiposervicio" class="label">
+                        <span class="label-text text-base">Tipo servicio</span>
+                    </label>
+                    <label class="input-group">
+                        <select
                             class={`
-                                flex text-left
-                                text-2xl font-bold 
-                                dark:text-white text-gray-900
+                                select select-bordered
+                                border border-gray-300 rounded-md
+                                focus:outline-none focus:ring-2 
+                                focus:ring-green-500 focus:border-green-500
+                                ${estilos.bgdark2}
                             `}
+                            bind:value={esNatural}
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="size-5 mt-1"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M15.75 19.5 8.25 12l7.5-7.5"
-                                />
-                            </svg>
-                            {esNatural ? "Servicios" : "Inseminaciones"}
-                        </h1>
-                    </button>
+                            <option value={true}>Servicio natural</option>
+                            <option value={false}>Inseminación inseminación</option>
+                        </select>
+                    </label>
                 </div>
-                <button
-                    class={`btn btn-primary rounded-lg ${estilos.btntext2}`}
-                    data-theme="forest"
-                    disabled={!botonhabilitado}
-                    onclick={mover}
-                >
-                    {#if esCelu}
-                        <span class="text-lg">Movimientos</span>
-                    {:else}
-                        <span class="text-lg">+ Crear movimientos</span>
-                    {/if}
-                </button>
-            </div>
-        </div>
-    </div>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
-        <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
-        >
-            {#if esNatural}
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-1">
-                    <div>
-                        <label for="fechadesde" class="label">
-                            <span class="label-text text-base">Fecha desde</span
-                            >
-                        </label>
-                        <label class="input-group">
-                            <input
-                                id="fechadesde"
-                                type="date"
-                                class={`
+                <div>
+                    <label for="fechadesde" class="label">
+                        <span class="label-text text-base">Fecha desde</span>
+                    </label>
+                    <label class="input-group">
+                        <input
+                            id="fechadesde"
+                            type="date"
+                            class={`
                                 input input-bordered w-full
                                 border border-gray-300 rounded-md
                                 focus:outline-none focus:ring-2 
@@ -441,29 +474,28 @@
                                 focus:border-green-500
                                 ${estilos.bgdark2} 
                             `}
-                                bind:value={fechadesdeserv}
-                                onchange={() => input("DESDE")}
-                            />
-                            {#if malfechadese}
-                                <div class="label">
-                                    <span class="label-text-alt text-red-500"
-                                        >Debe seleccionar la fecha inicial del
-                                        servicio</span
-                                    >
-                                </div>
-                            {/if}
-                        </label>
-                    </div>
-                    <div>
-                        <label for="fechahasta" class="label">
-                            <span class="label-text text-base">Fecha hasta</span
-                            >
-                        </label>
-                        <label class="input-group">
-                            <input
-                                id="fechahasta"
-                                type="date"
-                                class={`
+                            bind:value={fechadesdeserv}
+                            onchange={() => input("DESDE")}
+                        />
+                        {#if malfechadese}
+                            <div class="label">
+                                <span class="label-text-alt text-red-500"
+                                    >Debe seleccionar la fecha inicial del
+                                    servicio</span
+                                >
+                            </div>
+                        {/if}
+                    </label>
+                </div>
+                <div>
+                    <label for="fechahasta" class="label">
+                        <span class="label-text text-base">Fecha hasta</span>
+                    </label>
+                    <label class="input-group">
+                        <input
+                            id="fechahasta"
+                            type="date"
+                            class={`
                             input input-bordered w-full
                             border border-gray-300 rounded-md
                             focus:outline-none focus:ring-2 
@@ -471,90 +503,113 @@
                             focus:border-green-500
                             ${estilos.bgdark2} 
                         `}
-                                bind:value={fechahastaserv}
+                            onchange={() => input("HASTA")}
+                            bind:value={fechahastaserv}
+                        />
+                    </label>
+                </div>
+                <div class="">
+                    <label for="toros" class="label">
+                        <span class="label-text text-base"
+                            >Seleccionar padres</span
+                        >
+                    </label>
+                    <label class="input-group">
+                        {#if cargadoanimales}
+                            <MultipleToros
+                                toros={padres}
+                                bind:valor={padresserv}
+                                bind:listavalores={padreslist}
+                                agregarElemento={agregarPadre}
+                                quitarElemento={quitarPadre}
                             />
-                        </label>
-                    </div>
-                    <div>
-                        <label for="fechaparto" class="label">
-                            <span class="label-text text-base">Fecha parto</span
-                            >
-                        </label>
-                        <label class="input-group">
-                            <input
-                                id="fechaparto"
-                                type="date"
-                                class={`
-                                    input input-bordered w-full
-                                    border border-gray-300 rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    ${estilos.bgdark2} 
-                                `}
-                                bind:value={fechaparto}
-                            />
-                        </label>
-                    </div>
-                    <div class="lg:col-span-2">
-                        <label for="toros" class="label">
-                            <span class="label-text text-base">Toros</span>
-                        </label>
-                        <label class="input-group">
-                            {#if cargadoanimales}
-                                <MultipleToros
-                                    toros={padres}
-                                    bind:valor={padresserv}
-                                    bind:listavalores={padreslist}
-                                    agregarElemento={agregarPadre}
-                                    quitarElemento={quitarPadre}
-                                />
-                                {#if malpadre}
-                                    <div class="label">
-                                        <span
-                                            class="label-text-alt text-red-500"
-                                            >Debe seleccionar al menos un padre</span
-                                        >
-                                    </div>
-                                {/if}
+                            {#if malpadre}
+                                <div class="label">
+                                    <span class="label-text-alt text-red-500"
+                                        >Debe seleccionar al menos un padre</span
+                                    >
+                                </div>
                             {/if}
-                        </label>
-                    </div>
-                    <div class="lg:col-span-2">
-                        <label for="observacion" class="label">
-                            <span class="label-text text-base">Observación</span
-                            >
-                        </label>
+                        {/if}
+                    </label>
+                </div>
+                <div>
+                    <label for="fechaparto" class="label">
+                        <span class="label-text text-base">Fecha parto</span>
+                    </label>
+                    <label class="input-group">
                         <input
-                            id="obs"
-                            type="text"
+                            id="fechaparto"
+                            type="date"
                             class={`
-                        input 
-                        input-bordered 
-                        border border-gray-300 rounded-md
+                            input input-bordered w-full
+                            border border-gray-300 rounded-md
+                            focus:outline-none focus:ring-2 
+                            focus:ring-green-500 
+                            focus:border-green-500
+                            ${estilos.bgdark2} 
+                        `}
+                            disabled
+                            bind:value={fechaparto}
+                        />
+                    </label>
+                </div>
+                <div class="lg:col-span-2">
+                    <label for="observacion" class="label">
+                        <span class="label-text text-base"
+                            >Observación general</span
+                        >
+                    </label>
+                    <textarea
+                        name="observacion"
+                        id="observacion"
+                        class={`
+                        textarea textarea-bordered textarea-lg
+                        
                         focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
                         w-full
                         ${estilos.bgdark2}
                     `}
-                            bind:value={observaciongeneral}
-                            oninput={inputObsGeneral}
-                        />
-                    </div>
+                        bind:value={observaciongeneral}
+                        oninput={inputObsGeneral}
+                    >
+                    </textarea>
                 </div>
-            {:else}
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-1">
-                    <div>
-                        <label for="fechains" class="label">
-                            <span class="label-text text-base"
-                                >Fecha inseminación</span
-                            >
-                        </label>
-                        <label class="input-group">
-                            <input
-                                id="fechainseminacion"
-                                type="date"
-                                max={HOY}
-                                class={`
+            </div>
+        {:else}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4">
+                <div class="lg:col-span-2 lg:w-1/2">
+                    <label for="tiposervicio" class="label">
+                        <span class="label-text text-base">Tipo servicio</span>
+                    </label>
+                    <label class="input-group">
+                        <select
+                            class={`
+                                select select-bordered
+                                border border-gray-300 rounded-md
+                                focus:outline-none focus:ring-2 
+                                focus:ring-green-500 focus:border-green-500
+                                ${estilos.bgdark2}
+                            `}
+                            bind:value={esNatural}
+                        >
+                            <option value={true}>Servicio natural</option>
+                            <option value={false}>Inseminación artificial</option>
+                        </select>
+                    </label>
+                </div>
+                <div>
+                    <label for="fechains" class="label">
+                        <span class="label-text text-base"
+                            >Fecha inseminación</span
+                        >
+                    </label>
+                    <label class="input-group">
+                        <input
+                            id="fechainseminacion"
+                            type="date"
+                            max={HOY}
+                            class={`
                             input input-bordered w-full
                             border border-gray-300 rounded-md
                             focus:outline-none focus:ring-2 
@@ -562,42 +617,19 @@
                             focus:border-green-500
                             ${estilos.bgdark2} 
                         `}
-                                bind:value={fechainseminacion}
-                                onchange={() => onInput("FECHA")}
-                            />
-                            {#if malfecha}
-                                <div class="label">
-                                    <span class="label-text-alt text-red-500"
-                                        >Debe seleccionar la fecha de
-                                        inseminacion</span
-                                    >
-                                </div>
-                            {/if}
-                        </label>
-                    </div>
-                    <div>
-                        <label for="fechaparto" class="label">
-                            <span class="label-text text-base">Fecha parto</span
-                            >
-                        </label>
-                        <label class="input-group">
-                            <input
-                                id="fechains"
-                                type="date"
-                                max={HOY}
-                                class={`
-                            input input-bordered w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2} 
-                        `}
-                                disabled
-                                bind:value={fechaparto}
-                            />
-                        </label>
-                    </div>
+                            bind:value={fechainseminacion}
+                            onchange={() => onInput("FECHA")}
+                        />
+                        {#if malfecha}
+                            <div class="label">
+                                <span class="label-text-alt text-red-500"
+                                    >Debe seleccionar la fecha de inseminacion</span
+                                >
+                            </div>
+                        {/if}
+                    </label>
+                </div>
+                <div class="">
                     {#if cargadoanimales}
                         <PredictSelect
                             {onwrite}
@@ -606,50 +638,132 @@
                             etiqueta={"Padre"}
                             bind:cadena={pajuela}
                             lista={listapadres}
-                            size="w-1/2"
+                            size="w-full lg:w-1/3"
                         />
                     {/if}
-                    <div class="">
-                        <label for="obs" class="label">
-                            <span class="label-text text-base"
-                                >Observacion
-                            </span>
-                        </label>
-
-                        <input
-                            id="observacion"
-                            type="text"
-                            class={`
-                            input 
-                            input-bordered 
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                            w-full
-                            ${estilos.bgdark2}
-                        `}
-                            bind:value={observaciongeneral}
-                            oninput={inputObsGeneral}
-                        />
-                    </div>
                 </div>
-            {/if}
-        </div>
-    </div>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
+                <div>
+                    <label for="fechaparto" class="label">
+                        <span class="label-text text-base">Fecha parto</span>
+                    </label>
+                    <label class="input-group">
+                        <input
+                            id="fechaparto"
+                            type="date"
+                            class={`
+                            input input-bordered w-full
+                            border border-gray-300 rounded-md
+                            focus:outline-none focus:ring-2 
+                            focus:ring-green-500 
+                            focus:border-green-500
+                            ${estilos.bgdark2} 
+                        `}
+                            disabled
+                            bind:value={fechaparto}
+                        />
+                    </label>
+                </div>
+                <div class="lg:col-span-2">
+                    <label for="obs" class="label">
+                        <span class="label-text text-base"
+                            >Observacion general</span
+                        >
+                    </label>
+
+                    <textarea
+                        name="observacion"
+                        id="observacion"
+                        class={`
+                        textarea textarea-bordered textarea-lg
+                        
+                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                        w-full
+                        ${estilos.bgdark2}
+                    `}
+                        bind:value={observaciongeneral}
+                        oninput={inputObsGeneral}
+                    >
+                    </textarea>
+                </div>
+            </div>
+        {/if}
         <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
+            class="mt-6 flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
         >
-            <ListaAnimales
-                {esNatural}
-                bind:selectanimales={listaanimales}
-                {quitarAnimal}
-                {listapadres}
-                {padres}
-                {cargadoanimales}
-            />
+            <!-- Botón Cancelar -->
+            <button
+                class="
+                        hidden md:block
+                        mt-2 px-10 py-2
+                        dark:bg-transparent
+                        bg-white
+                        text-gray-800
+                        dark:text-white
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors
+                        text-base"
+                onclick={volver}
+            >
+                Volver
+            </button>
+
+            <!-- Botón Editar -->
+            <button
+                class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                onclick={irAnimales}
+            >
+                {#if esCelu}
+                    Animales
+                {:else}
+                    Elegir animales
+                {/if}
+            </button>
+            <!-- Botón Editar -->
+            <button
+                class="
+                    mt-2 px-10 py-2 bg-[#115642] text-white 
+                    font-medium rounded-full 
+                    shadow-sm hover:bg-green-700 
+                    transition-colors text-base
+                    "
+                onclick={mover}
+            >
+                Guardar
+            </button>
         </div>
-    </div>
+        <ListaAnimales
+            {esNatural}
+            bind:selectanimales={listaanimales}
+            {quitarAnimal}
+            {listapadres}
+            {padres}
+            {cargadoanimales}
+            {verAnimal}
+            cambiar={setDetalle}
+            
+        />
+    </CardMovimiento>
 </Navbar2>
+
+<dialog id="veranimal" class="modal modal-middle rounded-xl">
+    <div
+        class="
+            modal-box w-11/12 max-w-6xl
+            bg-gradient-to-br from-white to-gray-100
+            dark:from-gray-900 dark:to-gray-800
+            "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-xl font-bold">Ver animal</h3>
+        <InfoAnimal {animal} forcedOpen={true} />
+    </div>
+</dialog>

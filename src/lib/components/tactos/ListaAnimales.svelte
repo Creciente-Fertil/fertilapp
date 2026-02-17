@@ -10,7 +10,7 @@
 <div class="block justify-items-center mx-1">
     {#each selectanimales as a, i}
         <div
-            class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+            class="card w-full shadow-xl p-2"
         >
             <div class="block p-4">
                 <div class="grid grid-cols-2 gap-y-2">

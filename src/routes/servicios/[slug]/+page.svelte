@@ -38,6 +38,7 @@
     let titulo = $derived(natural ? "servicio" : "inseminación");
     //servicio
     let defaultServicio = {
+        edit: false,
         id: "",
         natural: true,
         fechaparto: "",
@@ -59,6 +60,7 @@
 
     let toros = $state([]);
     let listapadres = $state([]);
+    let edit = $state(false);
     let id = $state("");
     let natural = $state(true);
     let fechaparto = $state("");
@@ -77,7 +79,7 @@
     let categoria = $state("");
     function loadServicio() {
         detalleServicio = proxyServicio.load();
-
+        edit = detalleServicio.edit;
         id = detalleServicio.id;
         natural = detalleServicio.natural;
         fechaparto = detalleServicio.fechaparto;
@@ -125,6 +127,10 @@
         cargado = true;
     });
     async function editar() {
+        if(!edit){
+            edit = true
+            return
+        }
         if (natural) {
             try {
                 let dataser = {
@@ -143,15 +149,11 @@
                     "Se pudo editar el servicio con exito",
                     "success",
                 );
-                volver()
-                
-                
+                volver();
             } catch (err) {
-                
                 console.error(err);
             }
-        }
-        else {
+        } else {
             try {
                 let data = {
                     fechaparto: fechaparto + " 03:00:00",
@@ -164,17 +166,16 @@
                 const record = await pb
                     .collection("inseminacion")
                     .update(id, data);
-                
+
                 Swal.fire(
                     "Éxito editar",
                     "Se pudo editar la inseminación con exito",
                     "success",
                 );
-                volver()
-                
+                volver();
             } catch (err) {
                 console.error(err);
-                
+
                 Swal.fire(
                     "Error editar",
                     "Hubo un error para editar la inseminación",
@@ -183,17 +184,31 @@
             }
         }
     }
+    async function confirmDelete() {
+        Swal.fire({
+            title: "Eliminar servicio",
+            text: "¿Seguro que deseas eliminar el servicio?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Si",
+            cancelButtonText: "No",
+        }).then(async (result) => {
+            if (result.value) {
+                await eliminar();
+            }
+        });
+    }
     async function eliminar() {
         if (natural) {
             try {
                 await pb.collection("servicios").update(id, { active: false });
-                
+
                 Swal.fire(
                     "Éxito eliminar",
                     "Se eliminó con éxito el servicio",
                     "success",
                 );
-                volver()
+                volver();
             } catch (err) {
                 console.error(err);
             }
@@ -202,28 +217,36 @@
                 await pb
                     .collection("inseminacion")
                     .update(id, { active: false });
-                
+
                 filterUpdate();
                 Swal.fire(
                     "Éxito eliminar",
                     "Se eliminó con éxito la inseminación",
                     "success",
                 );
-                volver()
+                volver();
             } catch (err) {
                 console.error(err);
             }
         }
     }
-    function volver(){
-        goto(pre+"/servicios")
+    function volver() {
+        if(edit){
+            edit = false
+            return
+        }
+        goto(pre + "/servicios");
     }
 </script>
 
 <Navbar2>
-    <CardServicio cardsize="max-w-7xl" {titulo}>
+    
+         
+    
+    <CardServicio cardsize="max-w-7xl" {titulo} {edit}>
         {#if natural}
             <ServicioDetalle
+                {edit}
                 {cargado}
                 {caravanamadre}
                 bind:fechadesde
@@ -235,6 +258,7 @@
             />
         {:else}
             <InseminacionDetalle
+                {edit}
                 {cargado}
                 {caravanamadre}
                 bind:fechainseminacion
@@ -246,31 +270,86 @@
                 {tiposanimal}
             />
         {/if}
-        <!-- Botones alineados a la izquierda, más bajos, en la parte inferior -->
-        <div class="mt-6 flex space-x-3">
-            <!-- Botón Eliminar -->
-            <button
-                class="px-4 py-1.5 bg-red-700 text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-sm"
-                onclick={eliminar}
-            >
-                Eliminar
-            </button>
+        <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
+        {#if edit}
+            <div class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
+                <!-- Botón Eliminar -->
 
-            <!-- Botón Cancelar -->
-            <button
-                class="px-4 py-1.5 bg-white text-gray-800 font-medium rounded-full shadow-sm border border-gray-300 hover:bg-gray-50 transition-colors text-sm"
-                onclick={volver}
-            >
-                Cancelar
-            </button>
+                <button
+                    class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+                    onclick={confirmDelete}
+                >
+                    Eliminar
+                </button>
 
-            <!-- Botón Editar -->
-            <button
-                class="px-4 py-1.5 bg-green-800 text-white font-medium rounded-full shadow-sm hover:bg-green-900 transition-colors text-sm"
-                onclick={editar}
-            >
-                Editar
-            </button>
-        </div>
+                <!-- Botón Cancelar -->
+                <button
+                    class="
+                        hidden md:block
+                        mt-2 px-10 py-2 
+                        dark:bg-transparent
+                        bg-white 
+                        text-gray-800 
+                        dark:text-white
+                        font-medium 
+                        rounded-full shadow-sm border 
+                        border-gray-300 
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors 
+                        text-base"  
+                    onclick={volver}
+                >
+                    Cancelar
+                </button>
+
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={editar}
+                >
+                    Guardar
+                </button>
+            </div>
+        {:else}
+            <div class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
+                <button
+                    class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+                    onclick={confirmDelete}
+                >
+                    Eliminar
+                </button>
+
+                <!-- Botón Volver -->
+                <button
+                    class="
+                        hidden md:block
+                        mt-2 px-10 py-2 
+                        dark:bg-transparent
+                        bg-white 
+                        text-gray-800 
+                        dark:text-white
+                        font-medium 
+                        rounded-full shadow-sm border 
+                        border-gray-300 
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors 
+                        text-base"  
+                    onclick={volver}
+                >
+                    Volver
+                </button>
+
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={editar}
+                >
+                    Editar
+                </button>
+            </div>
+        {/if}
     </CardServicio>
+    
 </Navbar2>

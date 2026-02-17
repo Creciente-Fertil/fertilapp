@@ -111,7 +111,7 @@
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
+    <div class="container mx-auto py-1 px-4 max-w-7xl">
         <!--Header-->
         <div
             class={`
@@ -169,7 +169,7 @@
             </div>
         </div>
     </div>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
+    <div class="container mx-auto py-1 px-4 max-w-7xl">
         <div
             class={`
                 rounded-md p-4 shadow-xl mb-4
@@ -283,7 +283,7 @@
         </div>
     </div>
     
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
+    <div class="container mx-auto py-1 px-4 max-w-7xl">
         <div
             class={`
                 rounded-md p-4 shadow-xl mb-4

@@ -1,5 +1,6 @@
 <script>
     import Navbarr from "$lib/components/Navbarr.svelte";
+    
     import PocketBase from "pocketbase";
     import { onMount } from "svelte";
     import { page } from "$app/stores";
@@ -20,6 +21,7 @@
         getEstadoColor,
     } from "$lib/components/estadosutils/lib";
     import { shorterWord, capitalize,getWholeWordButLastLetter } from "$lib/stringutil/lib";
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     
     const genealogiaStorage = createStorageProxy("genealogia_arbol", {
         progenitores: [],
@@ -273,7 +275,7 @@
     });
 </script>
 
-<Navbarr>
+<Navbar2>
     <div class="lg:flex lg:items-center lg:justify-center">
         <div class="p-2 breadcrumbs max-w-md text-lg">
             <ul>
@@ -1034,4 +1036,4 @@
             {/if}
         </div>
     </CardAnimal>
-</Navbarr>
+</Navbar2>

@@ -22,7 +22,7 @@
             goto(pre+"/login")
         }
     })
-    let bgnav = "bg-green-500"
+    let bgnav = "dark:bg-gray-900 bg-gray-50"
     let classtext=`text-lg px-2 font-extrabold`
     let classnavbarr=`navbar ${bgnav}`
     let classtextnavbar = `text-white font-extrabold dark:text-gray-700`

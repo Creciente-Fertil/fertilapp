@@ -13,33 +13,39 @@
     import RadioButton from "$lib/components/RadioButton.svelte";
     //PERMISOS
     import { createPer } from "$lib/stores/permisos.svelte";
-    import {getPermisosMessage, getPermisosList } from "$lib/permisosutil/lib";
+    import { getPermisosMessage, getPermisosList } from "$lib/permisosutil/lib";
 
     import { guardarHistorial } from "$lib/historial/lib";
     import PredictSelect from "../PredictSelect.svelte";
-    import { shorterWord,capitalize } from "$lib/stringutil/lib";
+    import { shorterWord, capitalize } from "$lib/stringutil/lib";
     import InfoAnimal from "../InfoAnimal.svelte";
-    
+    import NacimientoPerfil from "./NacimientoPerfil.svelte";
+    import { elasticIn } from "svelte/easing";
+
     let {
-        caravana=$bindable(""),
-        rodeo=$bindable(""),
-        lote=$bindable(""),
-        connacimiento=$bindable(false),
-        peso=$bindable(""),
-        sexo=$bindable(""),
-        nacimiento=$bindable({}),
-        padreobj=$bindable({}),
-        madreobj=$bindable({}),
-        fechanacimiento=$bindable(""),
-        categoria=$bindable(""),
-        prenada=$bindable(0),
-        rp=$bindable(""),
-        raza=$bindable(""),
-        color=$bindable(""),
+        caravana = $bindable(""),
+        rodeo = $bindable(""),
+        lote = $bindable(""),
+        connacimiento = $bindable(false),
+        peso = $bindable(""),
+        sexo = $bindable(""),
+        nacimiento = $bindable({}),
+        padreobj = $bindable({}),
+        madreobj = $bindable({}),
+        fechanacimiento = $bindable(""),
+        categoria = $bindable(""),
+        prenada = $bindable(0),
+        rp = $bindable(""),
+        raza = $bindable(""),
+        color = $bindable(""),
         modohistoria = $bindable(),
         irPadre,
-        userpermisos=$bindable([]),
-        calcularTabs
+        userpermisos = $bindable([]),
+        calcularTabs,
+        esCelu,
+        //Eliminar
+        openEliminarModal=()=>{}
+
     } = $props();
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -48,12 +54,13 @@
     let caber = createCaber();
     let userer = createUserer();
     let cab = caber.cab;
-    
+
     let userid = userer.userid;
     let id = $state("");
     let nombrerodeo = $state("");
     let nombrelote = $state("");
     let modoedicion = $state(false);
+    let modoedicionnacimiento = $derived(modoedicion);
     let cargadoanimales = $state(false);
     //Datos edicion
     let pesoviejo = $state("");
@@ -120,10 +127,15 @@
     }
     //Animales
     async function getAnimales() {
-        const recordsa = await pb.collection("animales").getFullList({
+        let recordsa = await pb.collection("animales").getFullList({
             filter: `active=true && cab='${cab.id}' `,
             expand: "nacimiento",
         });
+        recordsa = recordsa.sort((a, b) =>
+            a.caravana.toLocaleLowerCase() < b.caravana.toLocaleLowerCase()
+                ? -1
+                : 1,
+        );
         madres = recordsa.filter((a) => a.sexo == "H" && a.delete == false);
         padres = recordsa.filter((a) => a.sexo == "M" && a.delete == false);
         listamadres = madres.map((item) => {
@@ -148,6 +160,14 @@
             return "";
         }
     }
+    function getEstadoNombre(estado) {
+        let obj = estados.filter((s) => s.id == estado)[0];
+        if (obj) {
+            return obj.nombre;
+        } else {
+            return "";
+        }
+    }
 
     function openEditar() {
         if (userpermisos[5]) {
@@ -160,6 +180,14 @@
             categoriavieja = categoria;
             prenadaviejo = prenada;
             rpviejo = rp;
+            fechaviejo = fecha;
+            if (connacimiento) {
+                nombremadreviejo = nombremadre;
+                nombrepadreviejo = nombrepadre;
+                madreviejo = madre;
+                padreviejo = padre;
+                observacionviejo = observacion;
+            }
         } else {
             Swal.fire(
                 "Sin permisos",
@@ -178,6 +206,14 @@
         categoria = categoriavieja;
         prenada = prenadaviejo;
         rp = rpviejo;
+        if (connacimiento) {
+            fecha = fechaviejo;
+            nombremadre = nombremadreviejo;
+            nombrepadre = nombrepadreviejo;
+            madre = madreviejo;
+            padre = padreviejo;
+            observacion = observacionviejo;
+        }
         if (rodeo != "") {
             nombrerodeo = rodeos.filter((t) => t.id == rodeo)[0].nombre;
         } else {
@@ -189,10 +225,11 @@
             nombrelote = "";
         }
     }
+    
     function openNewModal() {
         if (userpermisos[5]) {
             fecha = fechanacimiento;
-            nuevoModal.showModal();
+            nacimientoModal.showModal();
         } else {
             Swal.fire(
                 "Sin permisos",
@@ -210,7 +247,7 @@
             padreviejo = padre;
             observacionviejo = observacion;
 
-            nuevoModal.showModal();
+            nacimientoModal.showModal();
         } else {
             Swal.fire(
                 "Sin permisos",
@@ -221,7 +258,7 @@
     }
     async function guardarNacimiento() {
         if (!userpermisos[4]) {
-            Swal.fire("Error permisos",getPermisosMessage(4),"error")
+            Swal.fire("Error permisos", getPermisosMessage(4), "error");
         }
         try {
             let dataparicion = {
@@ -236,17 +273,15 @@
             const recordparicion = await pb
                 .collection("nacimientos")
                 .create(dataparicion);
-            if(padre !=""){
-                padreobj={id:padre,caravana:nombrepadre}
+            if (padre != "") {
+                padreobj = { id: padre, caravana: nombrepadre };
+            } else {
+                padreobj = { id: -1 };
             }
-            else{
-                padreobj={id:-1}
-            }
-            if(madre !=""){
-                madreobj={id:madre,caravana:nombremadre}
-            }
-            else{
-                madreobj={id:-1}
+            if (madre != "") {
+                madreobj = { id: madre, caravana: nombremadre };
+            } else {
+                madreobj = { id: -1 };
             }
             let datanimal = {
                 nacimiento: recordparicion.id,
@@ -298,7 +333,7 @@
     }
     async function editarNacimiento() {
         if (!userpermisos[4]) {
-            Swal.fire("Error permisos",getPermisosMessage(4),"error")
+            Swal.fire("Error permisos", getPermisosMessage(4), "error");
         }
         let data = {
             madre,
@@ -326,17 +361,15 @@
             const recordparicion = await pb
                 .collection("nacimientos")
                 .update(idnacimiento, data);
-            if(padre !=""){
-                padreobj={id:padre,caravana:nombrepadre}
+            if (padre != "") {
+                padreobj = { id: padre, caravana: nombrepadre };
+            } else {
+                padreobj = { id: -1 };
             }
-            else{
-                padreobj={id:-1}
-            }
-            if(madre !=""){
-                madreobj={id:madre,caravana:nombremadre}
-            }
-            else{
-                madreobj={id:-1}
+            if (madre != "") {
+                madreobj = { id: madre, caravana: nombremadre };
+            } else {
+                madreobj = { id: -1 };
             }
             await pb.collection("historialanimales").create(datahistorial);
         } catch (err) {
@@ -366,25 +399,75 @@
             color,
             rp,
         };
-        //let datahistorial = {
-        //    prenada:prenadaviejo,
-        //    sexo:sexoviejo,
-        //    peso:pesoviejo,
-        //    caravana:caravanavieja,
-        //    active:true,
-        //    delete: false,
-        //    fechanacimiento:fecha+ " 03:00:00",
-        //    lote:loteviejo,
-        //    rodeo:rodeovieja,
-        //    user:userid,
-        //    categoria:categoriavieja,
-        //    rp:rpviejo,
-        //    animal:id
-        //}
+        if (fechaviejo != fecha) {
+            data.fechanacimiento = fecha.length > 0 ? fecha + " 03:00:00" : "";
+        }
+
         try {
+            //nueva fecha
+            let connuevafecha = fechaviejo != fecha && fecha.length > 0;
+            //nueva madre
+            let connuevamadre = madreviejo != madre;
+            //nuevo padre
+            let connuevopadre = padreviejo != padre;
+
+            let nuevonacimiento = connacimiento;
+            //No tiene nacimiento
+            if (!connacimiento) {
+                //Tiene
+                if (connuevamadre || connuevopadre) {
+                    let dataparicion = {
+                        madre,
+                        padre,
+                        fecha: fecha.length > 0 ? fecha + " 03:00:00" : "",
+                        nombremadre,
+                        nombrepadre,
+                        observacion,
+                        cab: cab.id,
+                    };
+                    const recordparicion = await pb
+                        .collection("nacimientos")
+                        .create(dataparicion);
+                    idnacimiento = recordparicion.id;
+                    nuevonacimiento = true;
+                    if (padre != "") {
+                        padreobj = { id: padre, caravana: nombrepadre };
+                    } else {
+                        padreobj = { id: -1 };
+                    }
+                    if (madre != "") {
+                        madreobj = { id: madre, caravana: nombremadre };
+                    } else {
+                        madreobj = { id: -1 };
+                    }
+                }
+            }
+            //tiene nacimietno
+            else {
+                if (connuevamadre || connuevopadre || connuevafecha) {
+                    const recordparicion = await pb
+                        .collection("nacimientos")
+                        .update(idnacimiento, data);
+                    if (padre != "") {
+                        padreobj = { id: padre, caravana: nombrepadre };
+                    } else {
+                        padreobj = { id: -1 };
+                    }
+                    if (madre != "") {
+                        madreobj = { id: madre, caravana: nombremadre };
+                    } else {
+                        madreobj = { id: -1 };
+                    }
+                }
+            }
+
+            if (nuevonacimiento) {
+                data.nacimiento = idnacimiento;
+                connacimiento = true;
+            }
+            //Antes debi verificar el nacimiento
             const record = await pb.collection("animales").update(id, data);
 
-            //await pb.collection("historialanimales").create(datahistorial)
             await guardarHistorial(pb, id);
             sexo = data.sexo;
             peso = data.peso;
@@ -403,7 +486,7 @@
             } else {
                 nombrelote = "";
             }
-            //PEnsar en editar la madre
+
             Swal.fire("Éxito editar", "Se pudo editar el animal", "success");
             modoedicion = false;
         } catch (err) {
@@ -428,7 +511,7 @@
             padre = padreviejo;
             observacion = observacionviejo;
         }
-        nuevoModal.close();
+        nacimientoModal.close();
     }
 
     onMount(async () => {
@@ -446,14 +529,19 @@
             madre = nacimiento.madre;
 
             observacion = nacimiento.observacion;
+        } else {
+            fecha = fechanacimiento;
         }
     });
     //cancelar class="btn btn-error text-white font-medium text-lg "
     //Editar animal class="btn text-lg px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+    function volver(){
+        goto(pre + "/animales")
+    }
 </script>
 
 <div class="grid grid-cols-2 lg:grid-cols-2">
-    <button onclick={() => goto(pre + "/animales")}>
+    <button class="hidden" onclick={volver}>
         <h2 class="flex text-2xl mx-1 font-bold mb-2 text-left mt-2">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -461,7 +549,7 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="size-5 mt-1"
+                class="md:hidden size-5 mt-1"
             >
                 <path
                     stroke-linecap="round"
@@ -472,7 +560,7 @@
             Caravana: {shorterWord(caravana)}
         </h2>
     </button>
-    <div class="flex w-11/12 justify-end">
+    <div class="hidden flex w-11/12 justify-start">
         <button
             onclick={openEditar}
             class={`
@@ -501,6 +589,21 @@
 </div>
 
 <div class="grid grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
+    {#if modoedicion}
+        <div class="mb-1 lg:mb-0 col-span-2 lg:col-span-1">
+            <label for="caravana" class="label">
+                <span class="label-text text-base">Caravana</span>
+            </label>
+            <label class="input-group">
+                <input
+                    id="caravana"
+                    type="text"
+                    class={`input input-bordered w-full ${estilos.bgdark2}`}
+                    bind:value={caravana}
+                />
+            </label>
+        </div>
+    {/if}
     <div class="mb-1 lg:mb-0 col-span-2 lg:col-span-1">
         <label for="peso" class="label">
             <span class="label-text text-base">RP</span>
@@ -534,7 +637,7 @@
                     type="number"
                     class={`input input-bordered w-full ${estilos.bgdark2}`}
                     bind:value={peso}
-                    oninput={()=>peso = Math.max(0,peso)}
+                    oninput={() => (peso = Math.max(0, peso))}
                 />
             </label>
         {:else}
@@ -717,358 +820,230 @@
                 <span class="label-text text-base">Estado</span>
             </label>
             {#if modoedicion}
-                <RadioButton bind:option={prenada} deshabilitado={false} />
+                <label class="input-group">
+                    <select
+                        class={`
+                        select select-bordered
+                        border border-gray-300 rounded-md
+                        focus:outline-none focus:ring-2 
+                        focus:ring-green-500 focus:border-green-500
+                        ${estilos.bgdark2}
+                    `}
+                        bind:value={prenada}
+                    >
+                        {#each estados as s}
+                            <option value={s.id}>{s.nombre}</option>
+                        {/each}
+                    </select>
+                </label>
             {:else}
-                <RadioButton bind:option={prenada} deshabilitado={true} />
+                <label
+                    for="sexo"
+                    class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                >
+                    {getEstadoNombre(prenada)}
+                </label>
             {/if}
-        </div>
-    {/if}
-
-    {#if modoedicion}
-        <div class="mb-1 lg:mb-0">
-            <label for="caravana" class="label">
-                <span class="label-text text-base">Caravana</span>
-            </label>
-            <label class="input-group">
-                <input
-                    id="caravana"
-                    type="text"
-                    class={`input input-bordered w-full ${estilos.bgdark2}`}
-                    bind:value={caravana}
-                />
-            </label>
-        </div>
-    {/if}
-</div>
-<div class="mt-3 flex justify-start gap-2">
-    {#if modoedicion}
-        <div class="grid grid-cols-2 gap-3">
-            <div>
-                <button
-                    aria-label="guardar"
-                    onclick={editarAnimal}
-                    class={`
-                        ${estilos.basico} ${estilos.chico} ${estilos.primario}
-                    `}
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        class="size-4"
-                        viewBox="0 0 16 16"
-                    >
-                        <path d="M11 2H9v3h2z" />
-                        <path
-                            d="M1.5 0h11.586a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13A1.5 1.5 0 0 1 1.5 0M1 1.5v13a.5.5 0 0 0 .5.5H2v-4.5A1.5 1.5 0 0 1 3.5 9h9a1.5 1.5 0 0 1 1.5 1.5V15h.5a.5.5 0 0 0 .5-.5V2.914a.5.5 0 0 0-.146-.353l-1.415-1.415A.5.5 0 0 0 13.086 1H13v4.5A1.5 1.5 0 0 1 11.5 7h-7A1.5 1.5 0 0 1 3 5.5V1H1.5a.5.5 0 0 0-.5.5m3 4a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5V1H4zM3 15h10v-4.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5z"
-                        />
-                    </svg>
-                </button>
-            </div>
-            <div>
-                <button
-                    aria-label="cancelar"
-                    onclick={cancelarEditar}
-                    class={`
-                        ${estilos.basico} ${estilos.chico} ${estilos.danger}
-                    `}
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-4"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M6 18 18 6M6 6l12 12"
-                        />
-                    </svg>
-                </button>
-            </div>
         </div>
     {/if}
 </div>
 {#if connacimiento}
-    <div class="grid grid-cols-2 lg:grid-cols-2">
-        <h3 class="text-2xl font-bold mt-2 mb-1 text-left">Nacimiento</h3>
-        <div class="flex w-11/12 justify-end">
-            <button
-                onclick={openEditModal}
-                class={`
-                    ${estilos.basico} ${estilos.chico}
-                    ${estilos.btnsecondary}
-                    
-                    `}
-                aria-label="Editar"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="size-6"
+    {#if modoedicionnacimiento}
+        <NacimientoPerfil
+            {connacimiento}
+            bind:fecha
+            bind:madre
+            bind:nombremadre
+            {onelegir}
+            {onwrite}
+            {listamadres}
+            {cargadoanimales}
+            bind:padre
+            bind:nombrepadre
+            {listapadres}
+            bind:observacion
+            {modoedicionnacimiento}
+        />
+    {:else}
+        <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
+            <div>
+                <label for="fechanacimiento" class="label">
+                    <span class="label-text text-base">Fecha nacimiento</span>
+                </label>
+                <label
+                    for="fechanacimiento"
+                    class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-2`}
                 >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                    />
-                </svg>
-            </button>
+                    {new Date(fecha + " 03:00:00").toLocaleDateString()}
+                </label>
+            </div>
         </div>
-    </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
+            <div>
+                <label for="nombremadre" class="label">
+                    <span class="label-text text-base"
+                        >Madre: {nombremadre}
+                    </span>
+                </label>
 
-    <div class="grid grid-cols-1 lg:grid-cols-1 gap-1 lg:gap-6 mb-2">
-        <div>
-            <label for="fechanacimiento" class="label">
-                <span class="label-text text-base">Fecha</span>
-            </label>
-            <label
-                for="fechanacimiento"
-                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-2`}
-            >
-                {new Date(fecha + " 03:00:00").toLocaleDateString()}
-            </label>
-        </div>
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
-        <div>
-            <label for="nombremadre" class="label">
-                <span class="label-text text-base"
-                    >Madre: {nombremadre}
-                    </span
-                >
-            </label>
-            
-            {#if madreobj.id != -1 }
-                <div class="flex justify-start mx-0 px-0">
-                    <button 
-                    class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`} 
-                        onclick={async ()=>await irPadre(madreobj.id)}
-                    >Ver animal</button>
-                </div>
-            {/if}
-        </div>
+                {#if madreobj.id != -1}
+                    <div class="flex justify-start mx-0 px-0">
+                        <button
+                            class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
+                            onclick={async () => await irPadre(madreobj.id)}
+                            >Ver animal</button
+                        >
+                    </div>
+                {/if}
+            </div>
 
-        <div >
-            <label for="nombrepadre" class="label">
-                <span class="label-text text-base">Padre: {nombrepadre}</span>
-            </label>
-            
-            {#if padreobj.id != -1}
-                <div class="flex justify-start mx-0 px-0">
-                    <button 
-                    class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`} 
-                        onclick={async ()=>await irPadre(padreobj.id)}
-                    >Ver animal</button>
-                </div>
-            {/if}
+            <div>
+                <label for="nombrepadre" class="label">
+                    <span class="label-text text-base"
+                        >Padre: {nombrepadre}</span
+                    >
+                </label>
+
+                {#if padreobj.id != -1}
+                    <div class="flex justify-start mx-0 px-0">
+                        <button
+                            class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
+                            onclick={async () => await irPadre(padreobj.id)}
+                            >Ver animal</button
+                        >
+                    </div>
+                {/if}
+            </div>
         </div>
-    </div>
+    {/if}
 {:else}
     <div>
-        <div
-            class="grid grid-cols-1 lg:grid-cols-4 gap-2 lg:gap-10 m-1 mb-2 lg:mt-2"
-        >
-            <h3 class="text-xl mx-1 font-bold mb-1 text-left">
-                No tiene un nacimiento registrado
-            </h3>
+        {#if modoedicionnacimiento}
+            <NacimientoPerfil
+                {connacimiento}
+                bind:fecha
+                bind:madre
+                bind:nombremadre
+                {onelegir}
+                {onwrite}
+                {listamadres}
+                {cargadoanimales}
+                bind:padre
+                bind:nombrepadre
+                {listapadres}
+                bind:observacion
+                {modoedicionnacimiento}
+            />
+        {:else}
+            {#if fecha.length > 0}
+                <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
+                    <div>
+                        <label for="fechanacimiento" class="label">
+                            <span class="label-text text-base"
+                                >Fecha nacimiento</span
+                            >
+                        </label>
+                        <label
+                            for="fechanacimiento"
+                            class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-2`}
+                        >
+                            {new Date(fecha + " 03:00:00").toLocaleDateString()}
+                        </label>
+                    </div>
+                </div>
+            {/if}
+            <div class="grid grid-cols-1">
+                <h3 class="text-xl mx-1 font-bold mb-1 text-left">
+                    No tiene un nacimiento registrado
+                </h3>
+            </div>
+        {/if}
+
+        <div class="hidden mt-6 flex space-x-3 justify-end">
             <button
-                class={`w-11/12  ${estilos.basico} ${estilos.medio} ${estilos.primario}`}
-                onclick={() => openNewModal()}
+                onclick={guardarNacimiento}
+                class={`
+                    mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base
+                    ${modoedicionnacimiento ? "" : "hidden"}
+                `}
+                aria-label="Editar"
             >
-                <span class="text-lg">Crear nacimiento</span>
+                Guardar
             </button>
         </div>
     </div>
 {/if}
+{#if modoedicion}
+    <div class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
+        <!-- Botón Cancelar -->
+        <button
+            class="
+                        
+                mt-2 px-5 py-1 md:py-2 md:px-10
+                dark:bg-transparent
+                bg-white
+                text-gray-800
+                dark:text-white
+                font-medium
+                rounded-full shadow-sm border
+                border-gray-300
+                hover:bg-gray-200
+                dark:hover:bg-gray-800
+                transition-colors
+                text-base"
+            onclick={cancelarEditar}
+        >
+            Cancelar
+        </button>
 
-<dialog
-    id="nuevoModal"
-    class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"
->
-    <div
-        class="
-            modal-box w-11/12 max-w-xl
-            bg-gradient-to-br from-white to-gray-100
-            dark:from-gray-900 dark:to-gray-800
-            "
-    >
-        <form method="dialog">
-            <button
-                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
-                >✕</button
-            >
-        </form>
-        {#if connacimiento}
-            <h3 class="text-lg font-bold">Editar nacimiento</h3>
-        {:else}
-            <h3 class="text-lg font-bold">Nuevo nacimiento</h3>
-        {/if}
-        <div class="form-control">
-            <label for="fechanacimiento" class="label">
-                <span class="label-text text-base">Fecha nacimiento</span>
-            </label>
-            <label class="input-group">
-                <input
-                    id="fechanacimiento"
-                    type="date"
-                    max={HOY}
-                    class={`
-                        input input-bordered w-full
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 
-                        focus:border-green-500
-                        ${estilos.bgdark2} 
-                    `}
-                    bind:value={fecha}
-                />
-            </label>
-            <div class="hidden">
-                <label for="nombremadre" class="label">
-                    <span class="label-text text-base">Nombre madre</span>
-                </label>
-                <label class="input-group">
-                    <input
-                        id="nombremadre"
-                        type="text"
-                        class={`
-                            input 
-                            input-bordered 
-                            border border-gray-300 rounded-md
-                            focus:outline-none 
-                            focus:ring-2 focus:ring-green-500 
-                            focus:border-green-500
-                            w-full 
-                            ${estilos.bgdark2} 
-                        `}
-                        bind:value={nombremadre}
-                    />
-                </label>
-                <label for="madre" class="label">
-                    <span class="label-text text-base">Madre</span>
-                </label>
-                <label class="input-group">
-                    <select
-                        class={`
-                            select select-bordered w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 focus:border-green-500
-                            ${estilos.bgdark2} 
-                        `}
-                        bind:value={madre}
-                        onchange={getNombreMadre}
-                    >
-                        {#each madres as m}
-                            <option value={m.id}>{m.caravana}</option>
-                        {/each}
-                    </select>
-                </label>
-            </div>
-            <div class="hidden">
-                <label for="nombrepadre" class="label">
-                    <span class="label-text text-base">Nombre padre</span>
-                </label>
-                <label class="input-group">
-                    <input
-                        id="nombrepadre"
-                        type="text"
-                        class={`
-                            input 
-                            input-bordered 
-                            border border-gray-300 rounded-md
-                            focus:outline-none 
-                            focus:ring-2 focus:ring-green-500 
-                            focus:border-green-500
-                            w-full 
-                            ${estilos.bgdark2} 
-                        `}
-                        bind:value={nombrepadre}
-                    />
-                </label>
-                <label for="padre" class="label">
-                    <span class="label-text text-base">Padre</span>
-                </label>
-                <label class="input-group">
-                    <select
-                        class={`
-                            select select-bordered w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 focus:border-green-500
-                            ${estilos.bgdark2} 
-                        `}
-                        bind:value={padre}
-                        onchange={getNombrePadre}
-                    >
-                        {#each padres as p}
-                            <option value={p.id}>{p.caravana}</option>
-                        {/each}
-                    </select>
-                </label>
-            </div>
-            {#if cargadoanimales}
-                <PredictSelect
-                    bind:valor={madre}
-                    etiqueta={"Madre"}
-                    bind:cadena={nombremadre}
-                    lista={listamadres}
-                    {onelegir}
-                    {onwrite}
-                />
-                <PredictSelect
-                    bind:valor={padre}
-                    etiqueta={"Padre"}
-                    bind:cadena={nombrepadre}
-                    lista={listapadres}
-                    {onelegir}
-                    {onwrite}
-                />
-            {/if}
-            <label class="form-control">
-                <div class="label">
-                    <span class="label-text">Observacion</span>
-                </div>
-                <input
-                    id="observacion"
-                    type="text"
-                    class={`
-                        input 
-                        input-bordered 
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                        w-full
-                        ${estilos.bgdark2}
-                    `}
-                    bind:value={observacion}
-                />
-            </label>
-        </div>
-        <div class="modal-action justify-start">
-            <form method="dialog">
-                <!-- if there is a button, it will close the modal -->
-                {#if connacimiento}
-                    <button
-                        class="btn btn-success text-white"
-                        onclick={editarNacimiento}>Editar</button
-                    >
-                {:else}
-                    <button
-                        class="btn btn-success text-white"
-                        onclick={guardarNacimiento}>Guardar</button
-                    >
-                {/if}
-
-                <button class="btn btn-error text-white" onclick={cerrarModal}
-                    >Cancelar</button
-                >
-            </form>
-        </div>
+        <!-- Botón Editar -->
+        <button
+            class="mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+            onclick={editarAnimal}
+        >
+            Guardar
+        </button>
     </div>
-</dialog>
+{/if}
+<div
+    class={`mt-6 flex space-x-3 justify-end border-t dark:border-gray-800 ${modoedicion ? "hidden" : ""}`}
+>
+    <button
+        onclick={openEliminarModal}
+        class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+    >
+        Eliminar
+    </button>
+    <!-- Botón Volver -->
+    <button
+        class="
+            hidden md:block
+            mt-2 px-10 py-2
+            dark:bg-transparent
+            bg-white
+            text-gray-800
+            dark:text-white
+            font-medium
+            rounded-full shadow-sm border
+            border-gray-300
+            hover:bg-gray-200
+            dark:hover:bg-gray-800
+            transition-colors
+            text-base"
+        onclick={volver}
+    >
+        Volver
+    </button>
+    <button
+        class={`
+            mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base
+            
+        `}
+        onclick={openEditar}
+    >
+        Editar
+    </button>
+</div>
+
+
+
