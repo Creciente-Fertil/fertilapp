@@ -432,6 +432,7 @@
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
+<!--Este va a ser el componente confirmar-->
 <Navbar2>
     <CardMovimiento
         titulo={esNatural ? "Nuevo servicio" : "Nueva inseminación"}

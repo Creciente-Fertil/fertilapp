@@ -11,10 +11,10 @@ export default {
     btntext: "text-white",
     btntext2: "text-white dark:text-gray-900 disabled:text-gray-900 dark:disabled:text-white",
     btntextbuscador:"text-white justify-center text-md",
-    btnbuscador: `bg-[#115642]  hover:bg-[#0f4537] disabled:bg-[#24a579] disabled:cursor-not-allowed font-medium py-1.5 px-5 rounded-full shadow-sm flex items-center gap-2 transition-all duration-200 `,
+    btnbuscador: `bg-[#115642]  hover:bg-[#0f4537] disabled:bg-[#24a579] disabled:cursor-not-allowed font-medium py-1.5 px-5 rounded-full shadow-md flex items-center gap-2 transition-all duration-200 `,
 
     tableheader: "bg-[#115642BD] text-white",
-    tableth: "text-base p-3 border-b border-emerald-700 hover:cursor-pointer hover:bg-[#0f4537]",
+    tableth: "text-base p-3  hover:cursor-pointer hover:bg-[#0f4537] text-center uppercase",
 
     bgdark1: "dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800",
     bgdark2: "border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-gray-900 dark:text-gray-100",

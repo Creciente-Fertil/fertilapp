@@ -1,26 +1,32 @@
 <script>
     import estilos from "$lib/stores/estilos";
     import Eye from "$lib/svgs/eye.svelte";
+    import Paginacion from "./paginacion.svelte";
+    import estados from "$lib/stores/estados";
+    import Badge from "./Badge.svelte";
+    import {
+        getEstadoNombre,
+        getEstadoColor,
+        getEstadoBadgeColor,
+    } from "./estadosutils/lib";
+    import AccionesMovimiento from "./AccionesMovimiento.svelte";
     let {
-        pageSize = 10,
+        pageSize = $bindable(10),
+        paginaActual = $bindable(1),
+        conEstado = false,
         selecthash,
         animalesrows = [],
-        clickTodos = ()=>{},
-        clickFila = (id)=>{},
-        verFila= (id)=>{},
+        clickTodos = () => {},
+        clickFila = (id) => {},
+        verFila = (id) => {},
         todos = $bindable(false),
-    } = $props()
-    let firstRun = true;
+        cancelar = () => {},
+        siguiente = () => {},
+    } = $props();
 
-    $effect(() => {
-        if (firstRun) {
-            firstRun = false;
-            return;
-        }
+    function onChangePageSize() {
         paginaActual = 1;
-    });
-
-    let paginaActual = $state(1);
+    }
 
     let paginaAnterior = $derived(paginaActual - 1);
 
@@ -32,15 +38,59 @@
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
 </script>
-<table class="table table-lg w-full">
+
+<table class="table table-lg w-full bg-white dark:bg-slate-900">
     <thead class={`${estilos.tableheader}`}>
         <tr>
-            <th class="text-base mx-2 px-2 border-b border-emerald-700">
-                <input type="checkbox" checked={todos} onchange={clickTodos}/>
+            <th class="hidden text-base mx-2 px-2 border-b border-emerald-700">
+                <input type="checkbox" checked={todos} onchange={clickTodos} />
+            </th>
+            <th class="text-base mx-2 px-2 w-16">
+                <label class="flex items-center justify-center cursor-pointer">
+                    <!-- El input real (oculto pero funcional) -->
+                    <input
+                        type="checkbox"
+                        checked={todos}
+                        onchange={clickTodos}
+                        class="peer sr-only"
+                    />
+
+                    <!-- La caja circular personalizada -->
+                    <span
+                        class="
+                            w-5 h-5
+                            flex items-center justify-center
+                            rounded-full
+                            border-2 border-gray-300 dark:border-gray-500
+                            bg-white dark:bg-gray-800
+                            transition-all duration-200 ease-in-out
+                            peer-checked:bg-emerald-700
+                            peer-checked:border-emerald-700
+                            hover:border-emerald-500 dark:hover:border-emerald-400
+                        "
+                    >
+                        <!-- El icono de check (solo visible cuando está marcado) -->
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="3"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+                    </span>
+                </label>
             </th>
             <th
                 class={`
                     ${estilos.tableth}   
+                    uppercase
                 `}
             >
                 RP
@@ -48,13 +98,26 @@
             <th
                 class={`
                     ${estilos.tableth}   
+                    uppercase
                 `}
             >
                 Caravana
             </th>
+            {#if conEstado}
+                <th
+                    class={`
+                    ${estilos.tableth}   
+                    uppercase
+                `}
+                >
+                    Estado
+                </th>
+            {/if}
             <th
                 class={`
                     ${estilos.tableth}   
+                    
+                    
                 `}
             >
                 Acción
@@ -63,114 +126,91 @@
     </thead>
     <tbody>
         {#each rows as a}
-        <tr>
-                <td class="text-base mx-2 px-2 border-b dark:border-gray-600">
-                    <input type="checkbox" checked = {selecthash[a.id]?true:false} onchange={()=>clickFila(a.id)}/>
+            <tr>
+                <td class="hidden text-base mx-2 px-2">
+                    <input
+                        type="checkbox"
+                        checked={selecthash[a.id] ? true : false}
+                        onchange={() => clickFila(a.id)}
+                    />
                 </td>
-                <td class="text-base mx-1 px-1 border-b dark:border-gray-600">
+                <td class="text-base mx-2 px-2 w-16">
+                    <label
+                        class="flex items-center justify-center cursor-pointer"
+                    >
+                        <!-- Input real (oculto pero funcional) -->
+                        <input
+                            type="checkbox"
+                            checked={selecthash[a.id] ? true : false}
+                            onchange={() => clickFila(a.id)}
+                            class="peer sr-only"
+                        />
+
+                        <!-- La caja circular personalizada -->
+                        <span
+                            class="
+                                w-5 h-5
+                                flex items-center justify-center
+                                rounded-full
+                                border-2 border-gray-300 dark:border-gray-500
+                                bg-white dark:bg-gray-800
+                                transition-all duration-200 ease-in-out
+                                peer-checked:bg-emerald-700
+                                peer-checked:border-emerald-700
+                                hover:border-emerald-500 dark:hover:border-emerald-400
+                            "
+                        >
+                            <!-- Icono de check (visible solo cuando está marcado) -->
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="3"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                        </span>
+                    </label>
+                </td>
+                <td class="text-base mx-1 px-1 text-center">
                     {a.rp}
-                    
                 </td>
-                <td class="text-base mx-1 px-1 border-b dark:border-gray-600">
+                <td class="text-base mx-1 px-1 text-center">
                     {a.caravana}
                 </td>
-                <td class="text-base mx-1 px-1 border-b dark:border-gray-600">
-                    <button
-                        onclick={()=>verFila(a.id)}
-                    >
+                {#if conEstado}
+                    <td class="text-base mx-1 px-1 text-center">
+                        <div
+                            class={`badge badge-outline badge-${getEstadoColor(a.prenada)}`}
+                        >
+                            {getEstadoNombre(a.prenada)}
+                        </div>
+                    </td>
+                {/if}
+                <td class=" flex items-center justify-center gap-2 px-1">
+                    <button onclick={() => verFila(a.id)}>
                         <Eye size="size-5" />
                     </button>
                 </td>
-        </tr>
+            </tr>
         {/each}
     </tbody>
 </table>
-<!-- Texto del total de filas -->
-<div class="mb-3 text-sm text-gray-600 dark:text-gray-400">
-    Total: <span class="font-medium">{animalesrows.length}</span> {animalesrows.length === 1 ? 'fila' : 'filas'}
-</div>
-<!-- Paginación estilo "barra minimalista" -->
-<div
-    class="mt-6 rounded-xl bg-transparent border border-gray-300 dark:border-gray-700 p-4"
->
-
-    <div class="flex items-center justify-between">
-        <!-- Previous -->
-        <button
-            disabled={paginaActual === 1}
-            onclick={() => (paginaActual -= 1)}
-            class={`
-        flex items-center gap-1 text-base 
-        font-medium text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white 
-        transition-colors 
-        ${paginaActual === 1 ? "opacity-50 cursor-not-allowed" : ""}`}
-            aria-label="Página anterior"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 19l-7-7 7-7"
-                />
-            </svg>
-            <span>Antes</span>
-        </button>
-
-        <!-- Números de página (centrados) -->
-        <div class="flex items-center space-x-1">
-            {#each { length: totalPaginas } as _, num}
-                <button
-                    onclick={() => (paginaActual = num)}
-                    class={`w-8 h-8 flex items-center justify-center text-base font-medium rounded-md transition-colors
-                ${
-                    num === paginaActual
-                        ? "text-white bg-[#115642] shadow-sm"
-                        : "text-gray-600 dark:text-gray-300 hover:text-white hover:bg-gray-600/50 dark:hover:bg-gray-700/50"
-                }
-                ${num == 0 ? "hidden" : ""} 
-            `}
-                >
-                    {num}
-                </button>
-            {/each}
-        </div>
-
-        <!-- Next -->
-        <button
-            disabled={paginaActual === totalPaginas}
-            onclick={() => (paginaActual += 1)}
-            class={`
-        flex items-center gap-1 text-base 
-        font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white 
-        transition-colors 
-        ${
-            paginaActual === totalPaginas ? "opacity-50 cursor-not-allowed" : ""
-        }`}
-            aria-label="Página siguiente"
-        >
-            <span>Siguiente</span>
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                />
-            </svg>
-        </button>
-    </div>
-    
-</div>
+<Paginacion
+    rows={animalesrows}
+    bind:paginaActual
+    bind:pageSize
+    {totalPaginas}
+    {onChangePageSize}
+    rounded={""}
+/>
+<AccionesMovimiento
+    {cancelar}
+    {siguiente}
+/>

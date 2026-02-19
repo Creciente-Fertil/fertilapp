@@ -7,6 +7,8 @@
     import Filter from "$lib/svgs/filter.svelte";
     import Sparkies from "$lib/svgs/sparkies.svelte";
     import Arrowback from "$lib/svgs/arrowback.svelte";
+    import Sticky from "./Sticky.svelte";
+    import Rubber from "$lib/svgs/rubber.svelte";
     let pre = import.meta.env.VITE_PRE;
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -46,28 +48,28 @@
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
-<div class="container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4">
+<div class="container px-2 max-w-7xl w-full">
     <!--Header-->
     <div
         class={`
         rounded-xl p-1 shadow-2xl mb-1
             dark:bg-slate-900 bg-white
-            px-6
+            px-3
         `}
     >
         <div
-            class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-1"
         >
             <div
                 class={`
                 bg-transparent
-                px-6 py-2
+                px-2 py-1   
             `}
             >
                 <button onclick={volver}>
                     <h1
                         class={`
-                            text-4xl font-normal 
+                            text-2xl font-semibold
                             dark:text-white text-gray-900
                             flex
                         `}
@@ -87,164 +89,87 @@
                             />
                         </svg>
                         {#if esCelu}
-                            Seleccionar
+                            Madres
                         {:else}
-                            Seleccionar animales
+                            Seleccción de madres
                         {/if}
                     </h1>
                 </button>
             </div>
         </div>
         <!--Filtros-->
-        <!-- 🔍 Input de búsqueda -->
         <div
-            class={`
-            flex items-center flex-1 border
-            shadow-2xl
-            rounded-full px-3 py-3
-            dark:border-gray-600 
-            border-transparent bg-white dark:bg-gray-900
-            shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
-            dark:shadow-none
-          `}
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-1 md:p-2 bg-transparent rounded-lg"
         >
-            <input
-                type="text"
-                placeholder="Buscar por madre..."
+            <!-- Input de búsqueda -->
+            <div
                 class={`
-                    shadow-2xl
-                    dark:placeholder-gray-500 
-                    dark:text-gray-100
-                    placeholder-gray-600 text-gray-800
-                    
-                    w-full bg-transparent focus:outline-none
-                    border border-transparent
+                  flex items-center flex-1 border
+                  shadow-2xl
+                  rounded-full p-3
+                  dark:border-gray-600 
+                  border-transparent bg-white dark:bg-gray-900
+                  shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
+                  dark:shadow-none
                 `}
-                bind:value={buscar}
-                oninput={filterUpdate}
-            />
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-5 h-5 text-gray-400 dark:text-gray-500 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
             >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 103 10.5a7.5 7.5 0 0013.15 6.15z"
+                <input
+                    type="text"
+                    placeholder="Buscar por madre..."
+                    class={`
+                        shadow-2xl
+                        dark:placeholder-gray-500 
+                        dark:text-gray-100
+                        placeholder-gray-600 text-gray-800
+                        
+                        w-full bg-transparent focus:outline-none
+                        border border-transparent
+                    `}
+                    bind:value={buscar}
+                    oninput={filterUpdate}
                 />
-            </svg>
-        </div>
-        <!--Animales seleccionados-->
-        <div
-            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-transparent rounded-lg"
-        >
-            <!-- Izquierda: texto -->
-            <div class="text-md text-gray-700 dark:text-white">
-                Total de animales seleccionados: {Object.keys(selecthashmap)
-                    .length}
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5 text-gray-400 dark:text-gray-500 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 103 10.5a7.5 7.5 0 0013.15 6.15z"
+                    />
+                </svg>
             </div>
             <!-- Derecha: botones -->
             <div class="flex flex-wrap gap-2">
                 <button
                     onclick={clickFilter}
                     class={`
-                        border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                        border rounded-xl px-3 py-3 text-md flex 
+                        items-center gap-1
+                        
+                        ${
+                            isOpenFilter
+                                ? "bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white"
+                                : "bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white"
+                        }
                     `}
                 >
                     <Filter size="size-4" />
                     Filtros
                 </button>
-                <button
-                    onclick={volver}
-                    class={`
-                        border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
-                    `}
-                >
-                    <Arrowback size="size-4" />
-                    Volver
-                </button>
-                <button
-                    class={`
-                        ${esNatural ? "" : "hidden"}
-                         rounded-full px-3 py-1 text-md 
-                        flex items-center gap-1
-                        bg-[#115642] text-white  hover:bg-green-700
-                        
-                        
-                    `}
-                    onclick={nuevoServicio}
-                >
-                    Confirmar
-                </button>
-                <button
-                    class={`
-                        ${esNatural ? "hidden" : ""}
-                         rounded-full px-3 py-1 text-md 
-                        flex items-center gap-1
-                        bg-[#115642] text-white  hover:bg-green-700
-                    `}
-                    onclick={nuevoInseminacion}
-                >
-                    Confirmar
-                </button>
             </div>
         </div>
+
+        <!--Animales seleccionados-->
         {#if isOpenFilter}
             <div transition:slide>
                 <div
-                    class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-10 w-full my-1"
+                    class="grid grid-cols-1 lg:grid-cols-2 gap-2 w-full my-1"
                 >
-                    <div class="lg:col-span-3">
-                        <div class="lg:w-1/3 flex relative">
-                            <div class="flex-1">
-                                <label for="paginacion" class="label">
-                                    <span class="label-text text-base"
-                                        >Paginacion</span
-                                    >
-                                </label>
-                                <label class="input-group">
-                                    <select
-                                        class={`
-                                    select select-bordered
-                                    border border-gray-300 rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 focus:border-green-500
-                                    ${estilos.bgdark2}
-                                `}
-                                        bind:value={pageSize}
-                                    >
-                                        {#each paginacion as s}
-                                            <option value={s.id}
-                                                >{s.value}</option
-                                            >
-                                        {/each}
-                                    </select>
-                                </label>
-                            </div>
-                            <div class="absolute top-1/2 right-0 md:right-3">
-                                <button
-                                    onclick={limpiarFiltros}
-                                    class={`
-                                        border rounded-full px-3 py-1 
-                                        text-md flex items-center gap-1
-                                        bg-white  border-gray-300  
-                                        hover:bg-gray-300 dark:bg-transparent
-                                        dark:hover:bg-gray-600 dark:border-gray-600 
-                                        dark:text-white
-                                    `}
-                                >
-                                    <Sparkies size="size-4" />
-                                    Limpiar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                     <div class="mt-1">
                         <MultiSelect
                             opciones={[
@@ -346,7 +271,40 @@
                         </label>
                     </div>
                 </div>
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-transparent rounded-lg"
+                >
+                    <!-- Izquierda: texto -->
+                    <div class="text-md text-gray-700 dark:text-white">
+                        Total de animales seleccionados: {Object.keys(
+                            selecthashmap,
+                        ).length}
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button
+                            onclick={limpiarFiltros}
+                            class={`
+                                rounded-xl px-0 md:px-3 py-1 text-md flex items-center gap-1
+                                bg-white  hover:bg-gray-300 dark:bg-transparent
+                                dark:hover:bg-gray-600 dark:text-white
+                            `}
+                        >
+                            <Rubber size="size-4" />
+                            Limpiar
+                        </button>
+                        <button
+                            onclick={filterUpdate}
+                            class={`
+                                border rounded-xl px-3 py-1 text-md flex items-center gap-1
+                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
+                            `}
+                        >
+                            Aplicar filtros
+                        </button>
+                    </div>
+                </div>
             </div>
         {/if}
     </div>
 </div>
+<Sticky total={Object.keys(selecthashmap).length} />

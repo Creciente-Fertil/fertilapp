@@ -41,6 +41,7 @@
     let cab = caber.cab;
     let caravana = $state("");
     let cargado = $state(false);
+    let cargadoservicios = $state(false);
     let esservicio = $state(false);
     let esinseminacion = $state(false);
     let filtroservicio = $state(0);
@@ -376,6 +377,8 @@
             expand: "animal",
         });
         inseminaciones = records;
+        console.log("inseminaciones")
+        console.log(inseminaciones)
         //inseminacionesrow = inseminaciones
     }
     async function getServicios() {
@@ -385,6 +388,8 @@
             expand: "madre",
         });
         servicios = records;
+        console.log("servicios")
+        console.log(servicios)
         serviciosrow = servicios;
     }
     async function getAnimales() {
@@ -522,8 +527,12 @@
         }
 
         ordenarServicios(forma);
+
         totalServicios = serviciosrow.length;
+        console.log("serviciosrow")
+        console.log(serviciosrow)
     }
+
     function prepararData(item) {
         return {
             FECHA: item.fechadesde
@@ -561,17 +570,24 @@
 
         return getWholeWordButLastLetter(nombres);
     }
-    onMount(async () => {
-        proxyfiltros = proxy.load();
-        setFilters();
+    async function cargarDatos() {
         await getAnimales();
         await getServicios();
         await getInseminaciones();
+        cargadoservicios = true
+    }
+    onMount(async () => {
+        proxyfiltros = proxy.load();
+        setFilters();
+        
+        await cargarDatos()
+
         filterUpdate();
         //ordenarServicios("fecha")
     });
     //Paginacion
-    let pageSize = $state(10)
+    let pageSize = $state(10);
+
     //Para el collapse de los ordenar
     let isOpenOrdenar = $state(false);
     function clickOrdenar() {
@@ -629,7 +645,6 @@
         if (!mantener) {
             if (p_forma == forma) {
                 ascendente = !ascendente;
-                
             } else {
                 ascendente = true;
             }
@@ -644,7 +659,7 @@
     function nuevo() {
         detallemovimiento.esNatural = true;
         proxyDetalleMovimiento.save(detallemovimiento);
-        goto(pre + "/servicios/movimiento/detallemovimento");
+        goto(pre + "/servicios/movimiento");
     }
     function nuevoInseminacion() {
         detallemovimiento.esNatural = false;
@@ -702,7 +717,6 @@
 
 <Navbar2>
     <Buscador
-        bind:pageSize
         {selecthash}
         {serviciosrow}
         cabnombre={cab.nombre}
@@ -788,91 +802,82 @@
             </div>
         {/if}
     </div>
-    <!--Tabla-->
-    <div
-        class={`
-            hidden w-full xl:w-3/4 md:grid
-            mx-auto py-1 px-4 max-w-7xl
-        `}
-    >
+    {#if cargadoservicios}
+        <!--Tabla-->
         <div
             class={`
-                overflow-hidden rounded-xl
-            `}
+            hidden w-full xl:w-3/4 md:grid
+            mx-auto py-1 px-4 max-w-7xl
+            
+        `}
         >
-            <TablaServicios
-                {pageSize}
-                {serviciosrow}
-                {ordenarServicios}
-                {openEditModal}
-                {openEditModalIns}
-                {openViewModal}
-                {openViewModalIns}
-                {openDelModal}
-                {openDelModalIns}
-                {shorterWord}
-                {getNombrePadres}
-                {forma}
-                {ascendente}
-                {selecthash}
-                {clickFila}
-                {clickTodos}
-                bind:todos
-            />
-        </div>
-    </div>
-    <div class="block w-full md:hidden justify-items-center mx-1">
-        {#each serviciosrow as s}
             <div
-                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                class={`
+                overflow-hidden rounded-xl
+                border dark:border-gray-700
+
+            `}
             >
-                <button
-                    onclick={() =>
-                        s.fechadesde
-                            ? openEditModal(s.id)
-                            : openEditModalIns(s.id)}
+                <TablaServicios
+                    {pageSize}
+                    {serviciosrow}
+                    {ordenarServicios}
+                    {openEditModal}
+                    {openEditModalIns}
+                    {openViewModal}
+                    {openViewModalIns}
+                    {openDelModal}
+                    {openDelModalIns}
+                    {shorterWord}
+                    {getNombrePadres}
+                    {forma}
+                    {ascendente}
+                    {selecthash}
+                    {clickFila}
+                    {clickTodos}
+                    bind:todos
+                />
+            </div>
+        </div>
+        <div class="block w-full md:hidden justify-items-center mx-1">
+            {#each serviciosrow as s}
+                <div
+                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
                 >
-                    <div class="block p-4">
-                        <div class="grid grid-cols-2 gap-y-2">
-                            <div class="flex items-start">
-                                <span>Tipo:</span>
-                                <span class="mx-1 font-semibold">
-                                    {s.fechadesde ? "Natural" : "Artificial"}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Fecha parto:</span>
-                                <span class="mx-1 font-semibold">
-                                    {s.fechaparto
-                                        ? new Date(
-                                              s.fechaparto,
-                                          ).toLocaleDateString()
-                                        : ""}
-                                </span>
-                            </div>
-                            <div
-                                class={`flex items-start ${s.fechadesde ? "" : "col-span-2"}`}
-                            >
-                                <span>
-                                    Fecha {s.fechadesde
-                                        ? "desde"
-                                        : "de inseminación"}:
-                                </span>
-                                <span class="mx-1 font-semibold">
-                                    {s.fechadesde
-                                        ? new Date(
-                                              s.fechadesde,
-                                          ).toLocaleDateString()
-                                        : s.fechainseminacion
-                                          ? new Date(
-                                                s.fechainseminacion,
-                                            ).toLocaleDateString()
-                                          : ""}
-                                </span>
-                            </div>
-                            {#if s.fechadesde}
+                    <button
+                        onclick={() =>
+                            s.fechadesde
+                                ? openEditModal(s.id)
+                                : openEditModalIns(s.id)}
+                    >
+                        <div class="block p-4">
+                            <div class="grid grid-cols-2 gap-y-2">
                                 <div class="flex items-start">
-                                    <span>Fecha hasta:</span>
+                                    <span>Tipo:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {s.fechadesde
+                                            ? "Natural"
+                                            : "Artificial"}
+                                    </span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span>Fecha parto:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {s.fechaparto
+                                            ? new Date(
+                                                  s.fechaparto,
+                                              ).toLocaleDateString()
+                                            : ""}
+                                    </span>
+                                </div>
+                                <div
+                                    class={`flex items-start ${s.fechadesde ? "" : "col-span-2"}`}
+                                >
+                                    <span>
+                                        Fecha {s.fechadesde
+                                            ? "desde"
+                                            : "de inseminación"}:
+                                    </span>
                                     <span class="mx-1 font-semibold">
                                         {s.fechadesde
                                             ? new Date(
@@ -885,34 +890,48 @@
                                               : ""}
                                     </span>
                                 </div>
-                            {/if}
-                            <div class="flex items-start">
-                                <span>Madre:</span>
-                                <span class="mx-1 font-semibold">
-                                    {s.fechadesde
-                                        ? shorterWord(s.expand.madre.caravana)
-                                        : shorterWord(s.expand.animal.caravana)}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>
-                                    {s.fechadesde ? "Padres" : "Padre"}
-                                </span>
-                                <span class="mx-1 font-semibold">
-                                    {s.fechadesde
-                                        ? getNombrePadres(s.padres)
-                                        : s.pajuela}
-                                </span>
-                            </div>
-                            <div class="col-span-2 flex items-start">
-                                <span>{`${s.observacion}`}</span>
+                                {#if s.fechadesde}
+                                    <div class="flex items-start">
+                                        <span>Fecha hasta:</span>
+                                        <span class="mx-1 font-semibold">
+                                            {s.fechadesde
+                                                ? new Date(
+                                                      s.fechadesde,
+                                                  ).toLocaleDateString()
+                                                : s.fechainseminacion
+                                                  ? new Date(
+                                                        s.fechainseminacion,
+                                                    ).toLocaleDateString()
+                                                  : ""}
+                                        </span>
+                                    </div>
+                                {/if}
+                                <div class="flex items-start">
+                                    <span>Madre:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {"caravana"}
+                                    </span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span>
+                                        {s.fechadesde ? "Padres" : "Padre"}
+                                    </span>
+                                    <span class="mx-1 font-semibold">
+                                        {s.fechadesde
+                                            ? getNombrePadres(s.padres)
+                                            : s.pajuela}
+                                    </span>
+                                </div>
+                                <div class="col-span-2 flex items-start">
+                                    <span>{`${s.observacion}`}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </button>
-            </div>
-        {/each}
-    </div>
+                    </button>
+                </div>
+            {/each}
+        </div>
+    {/if}
 </Navbar2>
 <dialog
     id="nuevoModal"

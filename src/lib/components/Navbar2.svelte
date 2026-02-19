@@ -189,6 +189,10 @@
     function toggleDatos() {
         datosOpen = !datosOpen;
     }
+    //estadisticas
+    function estadisticas() {
+        goto(pre + "/animales/estadisticas");
+    }
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
@@ -232,7 +236,7 @@
         />
     </div>
     <div class="w-full ">
-        <main class={`py-16 ${estilos.bgmain} ml-16 pl-16`}>
+        <main class={`py-16 ${estilos.bgmain} ml-10 pl-10`}>
             {@render children()}
             
         </main>
