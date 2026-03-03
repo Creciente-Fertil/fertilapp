@@ -169,7 +169,7 @@
         }
     }
     function irDetalle(id){
-        console.log("detalle")
+
         idtacto = id;
         tacto = tactos.filter((t) => t.id == idtacto)[0];
         fecha = tacto.fecha.split(" ")[0];

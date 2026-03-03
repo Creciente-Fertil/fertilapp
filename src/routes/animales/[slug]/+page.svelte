@@ -38,6 +38,7 @@
     import Servicios from "$lib/components/animal/Servicios.svelte";
     import SelectTab from "$lib/components/animal/SelectTab.svelte";
     import HorizontalTabs from "$lib/components/animal/HorizontalTabs.svelte";
+    import AccionesTab from "$lib/components/animal/AccionesTab.svelte";
     import Transferir from "$lib/components/animal/Transferir.svelte";
 
     //Size
@@ -359,9 +360,10 @@
                 //{ id: "servicios", nombre: "Servicios" },
                 { id: "clinica", nombre: "Historia clínica" },
                 { id: "historial", nombre: "Historial" },
-                { id: "eliminar", nombre: "Eliminar" },
+                //{ id: "eliminar", nombre: "Eliminar" },
                 { id: "movimientos", nombre: "Movimientos" },
-                { id: "transfer", nombre: "Transferencia" },
+                //{ id: "transfer", nombre: "Transferencia" },
+                { id: "acciones", nombre: "Acciones" },
             ];
         } else {
             pestañas = [
@@ -371,9 +373,10 @@
                 //{ id: "observaciones", nombre: "Observaciones" },
                 { id: "clinica", nombre: "Historia clínica" },
                 { id: "historial", nombre: "Historial" },
-                { id: "eliminar", nombre: "Eliminar" },
+                //{ id: "eliminar", nombre: "Eliminar" },
                 { id: "movimientos", nombre: "Movimientos" },
-                { id: "transfer", nombre: "Transferencia" },
+                //{ id: "transfer", nombre: "Transferencia" },
+                { id: "acciones", nombre: "Acciones" },
             ];
         }
     }
@@ -505,8 +508,10 @@
                 </CardAnimal>
             {:else if tab == "clinica"}
                 <!--Pesajes, tactos, servicios, tratamientos, observaciones,pariciones-->
-                <CardAnimal cardsize="max-w-7xl" titulo="Historia clínica">
-                    <HistoriaClinica />
+                <CardAnimal cardsize="max-w-7xl" titulo="">
+                    <HistoriaClinica 
+                        {caravana}
+                    />
                 </CardAnimal>
             {:else if tab == "historial"}
                 <!--Historial del animal-->
@@ -537,7 +542,25 @@
                         bind:codigo
                         {muchosrenspa}
                         {malcodigo}
-                        
+                    />
+                </CardAnimal>
+            {:else if tab == "acciones"}
+                <CardAnimal cardsize="max-w-7xl" titulo="Acciones">
+                    
+                    <AccionesTab
+                        {caravana}
+
+                        bind:fechafallecimiento={fechafall}
+                        bind:motivo={motivobaja}
+                        bajar={async (fechafallecimiento, motivo) =>
+                            await darBaja(fechafallecimiento, motivo)}
+                        {eliminar}
+
+                        openModal={openModalTransfer}
+                        {transfer}
+                        bind:codigo
+                        {muchosrenspa}
+                        {malcodigo}
                     />
                 </CardAnimal>
             {/if}

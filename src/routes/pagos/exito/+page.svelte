@@ -33,7 +33,7 @@
             goto(pre+"/user/nivel")
         }
         catch(err){
-            console.log(err)
+            console.error(err)
             Swal.fire("Error nivel","No se pudo cambiar nivel","error")
         }
         

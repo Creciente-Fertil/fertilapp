@@ -48,7 +48,7 @@
 <table class="table table-lg w-full">
     <thead class={`${estilos.tableheader}`}>
         <tr>
-            <th class="text-base mx-2 px-2 border-b border-emerald-700">
+            <th class="text-base mx-2 px-2 ">
                 <input type="checkbox" checked={todos} onchange={clickTodos} />
             </th>
             <th
@@ -218,7 +218,7 @@
                 <div class="flex flex-row justify-between">Edad</div>
             </th>
             
-            <th class="text-base mx-1 px-1 border-b border-emerald-700">
+            <th class="text-base mx-1 px-1">
                 Acciones
             </th>
         </tr>

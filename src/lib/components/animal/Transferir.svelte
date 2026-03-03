@@ -18,8 +18,8 @@
         openModal = () => {},
         transfer = () => {},
     } = $props();
-    let ruta = import.meta.env.VITE_RUTA;
-    const pb = new PocketBase(ruta);
+    
+    
 </script>
 
 <div class="p-2">

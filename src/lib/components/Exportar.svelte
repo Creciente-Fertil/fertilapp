@@ -44,7 +44,7 @@
         //await workbook.xlsx.writeFile(`${titulo.replace(/\//g, "-")}.xlsx`);
         workbook.xlsx.writeBuffer()
             .then(buffer => FileSaver.saveAs(new Blob([buffer]), `${titulo.replace(/\//g, "-")}.xlsx`))
-            .catch(err => console.log('Error writing excel export', err))
+            .catch(err => console.error('Error writing excel export', err))
     }
     function exportar(){
         let csvdata = data.map(prepararData)

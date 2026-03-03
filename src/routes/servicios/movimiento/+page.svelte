@@ -8,7 +8,7 @@
     import { onMount } from "svelte";
     import { slide } from "svelte/transition";
     import estilos from "$lib/stores/estilos";
-    import estados from "$lib/stores/estados";
+    
     import { createCaber } from "$lib/stores/cab.svelte";
     import categorias from "$lib/stores/categorias";
     import sexos from "$lib/stores/sexos";
@@ -32,6 +32,7 @@
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
     import NuevoServicio from "$lib/components/servicios/NuevoServicio.svelte";
     import AnimalesSeleccionados from "$lib/components/servicios/AnimalesSeleccionados.svelte";
+    import SelectToros from "$lib/components/SelectToros.svelte";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -47,7 +48,7 @@
     let cab = caber.cab;
     let cargado = $state(false);
     //paginacon
-    let pageSize = $state(5)
+    let pageSize = $state(10)
     let paginaActual = $state(1)
     //Datos animales
     let animales = $state([]);
@@ -71,6 +72,7 @@
     let padreslist = $state([]);
     let padresserv = $state("");
     let pajuelasserv = $state("");
+    let padreslist2=$state([])
     //inseminacion
     let fechainseminacion = $state("");
     let pajuela = $state("");
@@ -95,7 +97,7 @@
         rodeo: "",
         categoria: "",
         sexo: "",
-        estado: "",
+        estado: -1,
         raza: "",
         color: "",
         rodeoseleccion: [],
@@ -206,9 +208,47 @@
         proxyfiltros.categoriaseleccion = categoriaseleccion;
     }
     function setDetalle() {
-        detallemovimiento.selecthashmap = selecthashmap;
 
+        detallemovimiento.selecthashmap = selecthashmap;
+        /*
+         //general
+        esNatural: true,
+        observacion: "",
+        fechaparto: "",
+        //servicio
+        fechadesdeserv: "",
+        fechahastaserv: "",
+        madre: "",
+        padreslist: [],
+        padresserv: "",
+
+        //inseminacion
+        fechainseminacion: "",
+        pajuela: "",
+        padre: "",
+        cadenapadre: "",
+        //animales
+        selecthashmap: {},
+        listapadres: [],
+        padres: [],
+        */
+        detallemovimiento.esNatural = esNatural ;
+        detallemovimiento.observacion = observaciongeneral
+        detallemovimiento.fechaparto = fechaparto;
+        detallemovimiento.fechadesdeserv = fechadesdeserv ;
+        detallemovimiento.fechahastaserv = fechahastaserv ;
+        detallemovimiento.padreslist = padreslist;
+        detallemovimiento.padresserv = padresserv;
+
+        detallemovimiento.fechainseminacion = fechainseminacion;
+        detallemovimiento.padre = padre;
+        detallemovimiento.pajuela = pajuela;
+        detallemovimiento.selecthashmap = selecthashmap;
         proxyDetalleMovimiento.save(detallemovimiento);
+    }
+    function setDetalleDefault(){
+        proxyDetalleMovimiento.save(defaultmovimiento)
+        loadDetalle()
     }
     function setLista() {
         selectanimales = [];
@@ -233,9 +273,41 @@
     }
     function loadDetalle() {
         detallemovimiento = proxyDetalleMovimiento.load();
+        /*
+         //general
+        esNatural: true,
+        observacion: "",
+        fechaparto: "",
+        //servicio
+        fechadesdeserv: "",
+        fechahastaserv: "",
+        madre: "",
+        padreslist: [],
+        padresserv: "",
 
+        //inseminacion
+        fechainseminacion: "",
+        pajuela: "",
+        padre: "",
+        cadenapadre: "",
+        //animales
+        selecthashmap: {},
+        listapadres: [],
+        padres: [],
+        */
+        esNatural = detallemovimiento.esNatural;
+        observaciongeneral =detallemovimiento.observacion
+        fechaparto = detallemovimiento.fechaparto;
+        fechadesdeserv = detallemovimiento.fechadesdeserv;
+        fechahastaserv = detallemovimiento.fechahastaserv;
+        padreslist = detallemovimiento.padreslist;
+        padresserv = detallemovimiento.padresserv;
+
+        fechainseminacion = detallemovimiento.fechainseminacion;
+        padre = detallemovimiento.padre;
+        pajuela = detallemovimiento.pajuela;
         selecthashmap = detallemovimiento.selecthashmap;
-        esNatural = defaultmovimiento.esNatural;
+                
         setLista();
     }
     function limpiarFiltros() {
@@ -246,6 +318,7 @@
     }
     function filterUpdate() {
         setProxyFilter();
+        
         proxy.save(proxyfiltros);
         animalesrows = madres;
         if (buscar != "") {
@@ -277,7 +350,8 @@
         if (categoria != "") {
             animalesrows = animalesrows.filter((a) => a.categoria == categoria);
         }
-        if (estado != "") {
+        if (estado == 0  || estado == 2 ||estado == 3   ) {
+            
             animalesrows = animalesrows.filter((a) => a.prenada == estado);
         }
         if (rodeoseleccion.length != 0) {
@@ -311,7 +385,7 @@
             }
         }
         paginaActual = 1
-        pageSize = 5
+        pageSize = 10
     }
     function ordenarNombre(lista) {
         lista.sort((r1, r2) =>
@@ -324,6 +398,7 @@
         for (let i = 0; i < selectanimales.length; i++) {
             selectanimales[i].observacion = observaciongeneral;
         }
+        setDetalle()
     }
 
     function clickAnimal(id) {
@@ -352,6 +427,7 @@
                 padre: "",
                 pajuela: "",
                 observacion: "",
+                abierto:false
             };
         }
         setDetalle();
@@ -374,6 +450,7 @@
                     padre: "",
                     pajuela: "",
                     observacion: "",
+                    abierto:false
                 };
             }
         } else if (algunos) {
@@ -480,6 +557,7 @@
                     padre: "",
                     pajuela: "",
                     observacion: "",
+                    abierto:false
                 });
             }
         }
@@ -497,6 +575,7 @@
         }
     }
     function input(campo) {
+        
         validarBoton();
         if (esservicio) {
             if (campo == "DESDE") {
@@ -532,6 +611,7 @@
                 }
             }
         }
+        setDetalle()
     }
     function onInput(campo) {
         input(campo);
@@ -544,6 +624,7 @@
                 selectanimales[i].padres.push(id);
             }
         }
+        setDetalle()
     }
     function quitarPadre(id) {
         for (let i = 0; i < selectanimales.length; i++) {
@@ -553,6 +634,7 @@
                 selectanimales[i].padres.splice(idx, 1);
             }
         }
+        setDetalle()
     }
     async function guardarBulk() {
         if (esservicio) {
@@ -899,7 +981,9 @@
             selectanimales[i].padre = id;
         }
         pajuela = p.caravana;
+        
         onInput("PAJUELA");
+        
     }
     function onwrite() {
         for (let i = 0; i < selectanimales.length; i++) {
@@ -917,6 +1001,7 @@
 
         cargado = true;
         loadDetalle();
+        filterUpdate()
     });
     function cancelar(){
         goto(pre+"/servicios")
@@ -939,8 +1024,31 @@
                 <NuevoServicio
                     bind:esNatural
                     bind:fechadesdeserv
+                    bind:fechahastaserv
+                    bind:padresserv
+                    bind:padreslist
+                    bind:padreslist2
+                    bind:fechaparto
+                    bind:observaciongeneral
+                    bind:fechainseminacion
+                    bind:padre
+                    bind:pajuela
+
+                    {listapadres}
+                    {agregarPadre}
+                    {quitarPadre}
+                    {cargadoanimales}
+                    {padres}
+
                     {malfechadese}
+                    {malpadre}
+                    {malfecha}
+
                     {input}
+                    {onInput}
+                    {inputObsGeneral}
+                    {onwrite}
+                    {onelegir}
                 />
                 <AnimalesSeleccionados 
                     {selecthashmap}
@@ -979,7 +1087,7 @@
                     {lotes}
                     bind:loteseleccion
                     {categorias}
-                    {estados}
+                    
                     bind:estado
                     bind:categoriaseleccion
                     bind:raza
@@ -1295,6 +1403,7 @@
                             agregarElemento={agregarPadre}
                             quitarElemento={quitarPadre}
                         />
+                        
                         {#if malpadre}
                             <div class="label">
                                 <span class="label-text-alt text-red-500"

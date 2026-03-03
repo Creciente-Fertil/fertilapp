@@ -9,6 +9,7 @@
     import Arrowback from "$lib/svgs/arrowback.svelte";
     import Sticky from "./Sticky.svelte";
     import Rubber from "$lib/svgs/rubber.svelte";
+    import estados from "$lib/stores/estados";
     let pre = import.meta.env.VITE_PRE;
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -28,7 +29,6 @@
         loteseleccion = $bindable([]),
         categorias = [],
         categoriaseleccion = $bindable([]),
-        estados = [],
         estado = $bindable(""),
         raza = $bindable(""),
         color = $bindable(""),
@@ -199,7 +199,7 @@
                                 bind:value={estado}
                                 onchange={filterUpdate}
                             >
-                                <option value="" class="rounded">Todos</option>
+                                
                                 {#each estados as s}
                                     <option value={s.id} class="rounded"
                                         >{s.nombre}</option
@@ -307,4 +307,3 @@
         {/if}
     </div>
 </div>
-<Sticky total={Object.keys(selecthashmap).length} />

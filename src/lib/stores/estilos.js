@@ -2,9 +2,12 @@
 const greenpea = "#115642"
 let darkgreenpea = "[#0f4537]"
 let lightpea = "[#24a579]"
+let green700pea="[#126a50]"
+let green600pea="[#168561]"
 
 export default {
     //Detalees
+    crecientecolor:"text-[#126a50] dark:text-[#24a579]",
     labelcolor:"text-[#333333] dark:text-white",
     subtitle:"text-[#1E1E1E] dark:text-white",
 
@@ -12,12 +15,14 @@ export default {
     btntext2: "text-white dark:text-gray-900 disabled:text-gray-900 dark:disabled:text-white",
     btntextbuscador:"text-white justify-center text-md",
     btnbuscador: `bg-[#115642]  hover:bg-[#0f4537] disabled:bg-[#24a579] disabled:cursor-not-allowed font-medium py-1.5 px-5 rounded-full shadow-md flex items-center gap-2 transition-all duration-200 `,
+    btnbuscadorunrounded: `bg-[#115642]  hover:bg-[#0f4537] disabled:bg-[#24a579] disabled:cursor-not-allowed font-medium py-1.5 px-5 shadow-md flex items-center gap-2 transition-all duration-200 `,
 
     tableheader: "bg-[#115642BD] text-white",
     tableth: "text-base p-3  hover:cursor-pointer hover:bg-[#0f4537] text-center uppercase",
 
     bgdark1: "dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800",
     bgdark2: "border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-gray-900 dark:text-gray-100",
+    bgdark2untext:"border-gray-300 dark:border-gray-600 dark:bg-gray-900",
     btnsecondary: "border-gray-800 text-gray-800 hover:bg-gray-800 hover:text-gray-100 dark:border-gray-200 dark:text-gray-200 dark:hover:bg-gray-200 dark:hover:text-gray-800 focus:ring-gray-400 dark:focus:ring-gray-600 dark:focus:ring-offset-gray-800 bg-transparent",
     primario: "text-[#115642] border-green-500 hover:bg-green-500 hover:bg-opacity-10 focus:ring-green-500  dark:text-green-400 dark:border-green-400 dark:hover:bg-green-400 dark:hover:bg-opacity-10 dark:focus:ring-offset-gray-800",
     secundario: "text-gray-600 border-gray-400 hover:bg-gray-200 hover:bg-opacity-50 focus:ring-gray-500  dark:text-gray-300 dark:border-gray-500 dark:hover:bg-gray-700 dark:hover:bg-opacity-50 dark:focus:ring-offset-gray-900",

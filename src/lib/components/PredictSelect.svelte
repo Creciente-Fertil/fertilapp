@@ -8,12 +8,17 @@
         etiqueta,
         valor = $bindable(""),
         cadena = $bindable(""),
-        cambiar =( )=>{},
+        cambiar = () => {},
         onelegir = () => {},
         onwrite = () => {},
         validarAnimal = () => {},
+        px = "px-2",
+        py = "py-2",
         size = "w-4/5",
         campo = "nombre",
+        etiquetaDefault = true,
+        
+        children,
     } = $props();
 
     let containerPredict = $state(null);
@@ -24,6 +29,8 @@
         ),
     );
     let isOpen = $state(false);
+    let inputWidth = $state("0px");
+    let inputRef = $state(null);
     let nombre = $state("");
 
     function clickOption(id) {
@@ -38,7 +45,7 @@
         if (validarAnimal) {
             validarAnimal();
         }
-        cambiar()
+        cambiar();
     }
     //si me arrepiento
     //$effect(()=>{
@@ -56,26 +63,46 @@
         if (!isOpen) {
             isOpen = true;
         }
-        cambiar()
+        cambiar();
     }
     onDestroy(() => {
         document.removeEventListener("click", handleClickOutside);
     });
     onMount(() => {
         document.addEventListener("click", handleClickOutside);
+
         if (valor.length != 0) {
             cadena = listarow.filter((l) => l.id == valor)[0][campo];
             nombre = cadena;
         }
     });
-</script>
+    // Función para actualizar el ancho
+    function updateWidth() {
+        if (inputRef) {
+            inputWidth = `${inputRef.offsetWidth}px`;
+        }
+    }
 
-<div class="w-full" bind:this={containerPredict}>
-    <label for="" class="label">
-        <span class="label-text text-base">{etiqueta} </span>
-    </label>
+    // En Svelte 5, usamos $effect para reaccionar cuando se abre
+    $effect(() => {
+        if (isOpen) {
+            // Pequeño timeout para asegurar que el DOM del botón está listo si acaba de renderizarse
+            setTimeout(() => updateWidth(), 0);
+        }
+    });
+</script>
+{#if etiquetaDefault}
+        <label for="" class="label my-0 py-0">
+            <span class="label-text text-base">{etiqueta} </span>
+        </label>
+    {:else}
+        {@render children()}
+    {/if}
+<div class={`w-full ${px} ${py}`} bind:this={containerPredict}>
+    
     {#if edit}
         <input
+            bind:this={inputRef}
             type="text"
             class={`
             input 
@@ -84,14 +111,22 @@
             focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
             w-full
             mb-0
+            
             ${estilos.bgdark2} 
         `}
             oninput={onChangeCadena}
-            onclick={() => (isOpen = !isOpen)}
+            onclick={() => {
+                isOpen = !isOpen;
+                if (!isOpen) updateWidth(); // Asegurar ancho al abrir
+            }}
             bind:value={cadena}
         />
         {#if isOpen}
-            <div class={`mt-0 absolute z-10 max-h-40 overflow-auto ${size}`}>
+            <div
+                style="width: {inputWidth}"
+                class={`
+                mt-0 absolute z-10 max-h-40 overflow-auto w-full`}
+            >
                 {#if listarow.length == 0}
                     <div
                         class={`

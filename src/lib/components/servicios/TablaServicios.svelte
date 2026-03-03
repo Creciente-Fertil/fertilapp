@@ -301,7 +301,10 @@
                         : ""}</td
                 >
                 <td class="text-base mx-1 px-1 ">
-                    {"caravana"}
+                    {s.fechadesde
+                        ? shorterWord(s.expand.madre.caravana)
+                        : shorterWord(s.expand.animal.caravana)
+                    }
                 </td>
                 <td class="text-base mx-1 px-1 ">
                     {s.fechadesde ? getNombrePadres(s.padres) : s.pajuela}
@@ -315,7 +318,7 @@
                     {:else}
                         <Badge
                             color="purple"
-                            text = "Artifical"
+                            text = "Artificial"
                         />
                     {/if}
                     

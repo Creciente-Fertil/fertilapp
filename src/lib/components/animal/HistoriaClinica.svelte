@@ -11,8 +11,12 @@
     import { getEstadoNombre } from "../estadosutils/lib";
     import Secciones from "./Secciones.svelte";
     import MultiSelect from "../MultiSelect.svelte";
+    import CustomCheck from "../CustomCheck.svelte";
+    import BuscadorHistorial from "./BuscadorHistorial.svelte";
+    import TablaEventos from "./TablaEventos.svelte";
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
+    let { caravana = "" } = $props();
 
     let id = $state("");
     let todos = $state([]);
@@ -25,12 +29,17 @@
     let pesajes = $state([]);
     let servicios = $state([]);
     let historialeventos = $state([]);
-    let contactos = $state(true);
-    let coninse = $state(true);
-    let conser = $state(true);
-    let conobser = $state(true);
-    let contrata = $state(true);
-    let conpari = $state(true);
+
+    let fechadesde = $state("");
+    let fechahasta = $state("");
+
+    let contodos = $state(true);
+    let contactos = $state(false);
+    let coninse = $state(false);
+    let conser = $state(false);
+    let conobser = $state(false);
+    let contrata = $state(false);
+    let conpari = $state(false);
 
     async function getHistorial() {
         historial = await pb.collection("historialanimales").getFullList({
@@ -82,22 +91,22 @@
         });
     }
     function filterHistorial(fila) {
-        if (!coninse && fila.coleccion == "inse") {
+        if (!contodos && !coninse && fila.coleccion == "inse") {
             return false;
         }
-        if (!conser && fila.coleccion == "ser") {
+        if (!contodos && !conser && fila.coleccion == "ser") {
             return false;
         }
-        if (!conpari && fila.coleccion == "pari") {
+        if (!contodos && !conpari && fila.coleccion == "pari") {
             return false;
         }
-        if (!conobser && fila.coleccion == "obser") {
+        if (!contodos && !conobser && fila.coleccion == "obser") {
             return false;
         }
-        if (!contactos && fila.coleccion == "tacto") {
+        if (!contodos && !contactos && fila.coleccion == "tacto") {
             return false;
         }
-        if (!contrata && fila.coleccion == "trata") {
+        if (!contodos && !contrata && fila.coleccion == "trata") {
             return false;
         }
 
@@ -116,9 +125,10 @@
             todos = todos.concat(
                 inseminaciones.map((i) => {
                     return {
+                        id:i.id,
                         fecha: i.fechainseminacion,
                         nombre: "Inseminación",
-                        info: i.observacion,
+                        info: i.observacion.length>0?i.observacion:"Sin observación",
                         //caravana: historial[0].caravana,
                         coleccion: "inse",
                     };
@@ -130,9 +140,10 @@
             todos = todos.concat(
                 servicios.map((i) => {
                     return {
+                        id:i.id,
                         fecha: i.fecha,
                         nombre: "Servicio",
-                        info: i.observacion,
+                        info: i.observacion.length>0?i.observacion:"Sin observación",
                         //caravana: historial[0].caravana,
                         coleccion: "ser",
                     };
@@ -144,9 +155,10 @@
             todos = todos.concat(
                 pariciones.map((i) => {
                     return {
+                        id:i.id,
                         fecha: i.fecha,
                         nombre: "Parición",
-                        info: i.observacion,
+                        info: i.observacion.length>0?i.observacion:"Sin observación",
                         //caravana: historial[0].caravana,
                         coleccion: "pari",
                     };
@@ -158,9 +170,10 @@
             todos = todos.concat(
                 tactos.map((i) => {
                     return {
+                        id:i.id,
                         fecha: i.fecha,
                         nombre: "Tacto",
-                        info: getEstadoNombre(i.prenada),
+                        info: `Estado <b>${getEstadoNombre(i.prenada)}</b> ${i.observacion.length>0?" : "+i.observacion:""}`,
                         //caravana: historial[0].caravana,
                         coleccion: "tacto",
                     };
@@ -171,9 +184,10 @@
             todos = todos.concat(
                 tratamientos.map((i) => {
                     return {
+                        id:i.id,
                         fecha: i.fecha,
                         nombre: "Tratamiento",
-                        info: i.expand.tipo.nombre,
+                        info: `Tratamiento <b>${i.expand.tipo.nombre}</b> ${i.observacion.length>0?" : "+i.observacion:""} `,
                         //caravana: historial[0].caravana,
                         coleccion: "trata",
                     };
@@ -184,6 +198,7 @@
             todos = todos.concat(
                 observaciones.map((i) => {
                     return {
+                        id:i.id,
                         fecha: i.fecha,
                         nombre: "Observación",
                         info: i.observacion,
@@ -210,6 +225,19 @@
     }
     function changeCampo() {
         historialeventos = todos.filter(filterHistorial);
+    }
+    function filterUpdate() {
+        changeCampo();
+        if (fechadesde != "") {
+            historialeventos = historialeventos.filter(
+                (e) => new Date(e.fecha) > new Date(fechadesde),
+            );
+        }
+        if (fechahasta != "") {
+            historialeventos = historialeventos.filter(
+                (e) => new Date(e.fecha) < new Date(fechahasta),
+            );
+        }
     }
     function clickOpcion(p_var) {
         if (p_var == "inse") {
@@ -285,13 +313,13 @@
     let isOpen = $state(false);
     let valores = $state(["inse", "ser", "pari", "obser", "tacto", "trata"]);
     let opciones = [
-        {id:"inse",nombre:"Inseminación"}, 
-        {id:"ser",nombre:"Servicio"},
-        {id:"pari",nombre:"Parición"},
-        {id:"obser",nombre:"Observación"},
-        {id:"tacto",nombre:"Tacto"},
-        {id:"trata",nombre:"Tratamiento"},
-    ]
+        { id: "inse", nombre: "Inseminación" },
+        { id: "ser", nombre: "Servicio" },
+        { id: "pari", nombre: "Parición" },
+        { id: "obser", nombre: "Observación" },
+        { id: "tacto", nombre: "Tacto" },
+        { id: "trata", nombre: "Tratamiento" },
+    ];
 
     function prepararData(item) {
         return {
@@ -301,6 +329,7 @@
             INFO: item.info,
         };
     }
+
     onMount(async () => {
         id = $page.params.slug;
         //await getHistorial()
@@ -322,15 +351,27 @@
     });
 </script>
 
-
-<MultiSelect
-    {opciones}
-    etiqueta={"Tipos"}
-    bind:valores
-    clickOption={clickOpcion}
-/>
-
-<Secciones
+<div class="hidden">
+    <MultiSelect
+        {opciones}
+        etiqueta={"Tipos"}
+        bind:valores
+        clickOption={clickOpcion}
+    />
+    <Secciones
+        bind:contactos
+        bind:coninse
+        bind:conser
+        bind:conobser
+        bind:contrata
+        bind:conpari
+        {changeCampo}
+    />
+</div>
+<BuscadorHistorial
+    bind:fechadesde
+    bind:fechahasta
+    bind:contodos
     bind:contactos
     bind:coninse
     bind:conser
@@ -338,11 +379,32 @@
     bind:contrata
     bind:conpari
     {changeCampo}
+    {filterUpdate}
+    data={historialeventos}
+    {caravana}
 />
-
-
+<!--Tabla-->
 <div
-    class="hidden w-full md:block justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
+    class={`
+        hidden w-full md:grid
+        mx-auto py-1 px-4 max-w-7xl
+        
+    `}
+>
+    <div
+        class={`
+                overflow-hidden rounded-xl
+                border dark:border-gray-700
+
+            `}
+    >
+        <TablaEventos
+            data = {historialeventos}
+        />
+    </div>
+</div>
+<div
+    class="hidden w-full justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
 >
     {#if historialeventos.length == 0}
         <p class="mt-5 text-lg">No se encontraron eventos asociados</p>
@@ -372,7 +434,7 @@
             </tbody>
         </table>
     {/if}
-    <div>
+    <div class="hidden">
         <Exportar
             titulo={"Historia clinica"}
             filtros={[]}
@@ -382,6 +444,7 @@
         />
     </div>
 </div>
+
 <div class="block md:hidden justify-items-center mx-1">
     {#if historialeventos.length == 0}
         <p class="mt-5 text-lg">No se encontraron eventos asociados</p>

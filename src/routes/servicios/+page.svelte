@@ -377,8 +377,7 @@
             expand: "animal",
         });
         inseminaciones = records;
-        console.log("inseminaciones")
-        console.log(inseminaciones)
+
         //inseminacionesrow = inseminaciones
     }
     async function getServicios() {
@@ -388,8 +387,7 @@
             expand: "madre",
         });
         servicios = records;
-        console.log("servicios")
-        console.log(servicios)
+
         serviciosrow = servicios;
     }
     async function getAnimales() {
@@ -529,8 +527,7 @@
         ordenarServicios(forma);
 
         totalServicios = serviciosrow.length;
-        console.log("serviciosrow")
-        console.log(serviciosrow)
+
     }
 
     function prepararData(item) {

@@ -416,7 +416,7 @@
                     );
 
                     //const recorda = await pb.collection('animales').getFirstListItem(`nacimiento='${idnacimiento}'`, {});
-                    //console.log(recorda)
+                    
                     //const recordupdate = await pb.collection('animales').update(recorda.id, {nacimiento:""});
                     filterUpdate();
                     Swal.fire(
@@ -425,7 +425,7 @@
                         "success",
                     );
                 } catch (e) {
-                    console.log(e);
+                    console.error(e);
                     Swal.fire(
                         "Acción cancelada",
                         "No se pudo eliminar al nacimiento",

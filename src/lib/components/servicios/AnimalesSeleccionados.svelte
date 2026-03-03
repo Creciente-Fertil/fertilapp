@@ -2,6 +2,7 @@
     import estilos from "$lib/stores/estilos";
     import X from "$lib/svgs/x.svelte";
     import Badge from "../Badge.svelte";
+    import TagsInput from "../TagsInput.svelte";
     let {
         selecthashmap = $bindable({}),
         seleccionados = $bindable([]),
@@ -46,15 +47,20 @@
             </h3>
         </div>
     </div>
-    <div class="flex flex-wrap gap-2">
-        {#each Object.entries(selecthashmap) as [key, animal]}
-            <button
-                onclick={() => quitarAnimal(animal.id)}
-                class="ml-0.5 rounded-sm hover:text-destructive"
-                aria-label={`Quitar ${animal.caravana}`}
-            >
-                <Badge text="#{animal.caravana} X" color="creciente" />
-            </button>
-        {/each}
+    <div
+        class="
+            max-h-64
+            overflow-y-auto
+            pr-2
+            custom-scrollbar
+        "
+    >
+        <div class="flex flex-wrap gap-2">
+            <TagsInput
+                campo="caravana"
+                tags={Object.values(selecthashmap)}
+                eliminarTag={quitarAnimal}
+            />
+        </div>
     </div>
 </div>

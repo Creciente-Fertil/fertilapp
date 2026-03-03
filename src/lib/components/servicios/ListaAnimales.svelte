@@ -4,23 +4,27 @@
     import { shorterWord } from "$lib/stringutil/lib";
     import PredictSelect from "../PredictSelect.svelte";
     import MultipleToros from "../MultipleToros.svelte";
+    import SelectToros from "../SelectToros.svelte";
 
     import Arrowdownsimple from "$lib/svgs/arrowdownsimple.svelte";
     import estilos from "$lib/stores/estilos";
+
     let {
         selectanimales = $bindable([]),
+        abierta = false,
         listapadres,
         padres,
         cambiar = () => {},
         quitarAnimal = (id) => {},
         verAnimal = (id) => {},
-        cargadoanimales = true,
+        cargadoanimales = false,
         esNatural = true,
     } = $props();
-    let verLista = $state(true);
+    let verLista = $state(abierta);
     function toggleLista() {
         verLista = !verLista;
     }
+    
 </script>
 
 {#if selectanimales.length > 0}
@@ -34,7 +38,7 @@
                     dark:text-white text-gray-900
                 `}
         >
-            Lista animales
+            Madres seleccionadas
         </h1>
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -67,10 +71,12 @@
                         </button>
                         <div class="block p-4">
                             <div class="grid grid-cols-1 gap-y-2">
-                                <div class="flex items-start justify-between px-1 md:px-4">
-                                    <div >
+                                <div
+                                    class="flex items-start justify-between px-1 md:px-4"
+                                >
+                                    <div>
                                         <span>Caravana:</span>
-                                        <br>
+                                        <br />
                                         <span class="font-semibold"
                                             >{shorterWord(a.caravana)}</span
                                         >
@@ -79,11 +85,12 @@
                                         class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
                                         onclick={() => verAnimal(a.id)}
                                     >
-                                        Ver 
+                                        Ver
                                     </button>
                                 </div>
-
-                                <div>
+                                <div
+                                    class="hidden"
+                                >
                                     {#if cargadoanimales}
                                         <MultipleToros
                                             toros={padres}
@@ -94,6 +101,23 @@
                                             bind:listavalores={
                                                 selectanimales[i].padres
                                             }
+                                        />
+                                    {/if}
+                                </div>
+                                <div>
+                                    {#if cargadoanimales}
+                                        <SelectToros
+                                            opciones={padres}
+                                            
+                                            bind:valores={
+                                                selectanimales[i].padres
+                                            }
+                                            agregarElemento={cambiar}
+                                            quitarElemento={cambiar}
+                                            margintop=""
+                                            py="py-2"
+                                            px="px-1"
+                                            campo="caravana"
                                         />
                                     {/if}
                                 </div>
@@ -133,10 +157,12 @@
                         </button>
                         <div class="block p-4">
                             <div class="grid grid-cols-1 gap-y-2">
-                                <div class="flex items-start justify-between px-1 md:px-4">
-                                    <div >
+                                <div
+                                    class="flex items-start justify-between px-1 md:px-4"
+                                >
+                                    <div>
                                         <span>Caravana:</span>
-                                        <br>
+                                        <br />
                                         <span class="font-semibold"
                                             >{shorterWord(a.caravana)}</span
                                         >
@@ -145,7 +171,7 @@
                                         class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
                                         onclick={() => verAnimal(a.id)}
                                     >
-                                        Ver 
+                                        Ver
                                     </button>
                                 </div>
 

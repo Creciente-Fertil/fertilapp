@@ -2,6 +2,7 @@
     import estilos from "$lib/stores/estilos";
     import MultipleToros from "../MultipleToros.svelte";
     import PredictSelect from "../PredictSelect.svelte";
+    import SelectToros from "../SelectToros.svelte";
     let {
         //natural
         esNatural = $bindable(true),
@@ -9,13 +10,16 @@
         fechahastaserv = $bindable(""),
         padresserv = $bindable(""),
         padreslist = $bindable([]),
+        padreslist2 = $bindable([]),
         fechaparto = $bindable(""),
         observaciongeneral = $bindable(""),
         //inseminacion
         fechainseminacion = $bindable(""),
         padre = $bindable(""),
         pajuela = $bindable(""),
+        //general
         listapadres = $bindable([]),
+
         agregarPadre,
         quitarPadre,
         cargadoanimales = false,
@@ -80,6 +84,7 @@
                         ${estilos.bgdark2}
                     `}
                         bind:value={esNatural}
+                        onchange={() => input("TIPO")}
                     >
                         <option value={true}>Servicio natural</option>
                         <option value={false}>Inseminación artificial</option>
@@ -143,7 +148,7 @@
                     />
                 </label>
             </div>
-            <div class="">
+            <div class="hidden">
                 <label for="toros" class="label">
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
@@ -170,6 +175,36 @@
                     {/if}
                 </label>
             </div>
+            {#if cargadoanimales}
+                <SelectToros
+                    opciones={listapadres}
+                    etiqueta="Padres"
+                    bind:valores={padreslist}
+                    etiquetaDefault={false}
+                    py="py-1"
+                    px="px-3"
+                    margintop=""
+                    wlen="w-2/3"
+                    agregarElemento={agregarPadre}
+                    quitarElemento={quitarPadre}
+                    
+                >
+                    <label for="Padres" class="label">
+                        <span
+                            class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                        >
+                            Padres</span
+                        >
+                    </label>
+                </SelectToros>
+                {#if malpadre}
+                    <div class="label">
+                        <span class="label-text-alt text-red-500"
+                            >Debe seleccionar al menos un padre</span
+                        >
+                    </div>
+                {/if}
+            {/if}
             <div>
                 <label for="fechaparto" class="label">
                     <span
@@ -229,7 +264,8 @@
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
                     >
-                        Tipo servicio</span>
+                        Tipo servicio</span
+                    >
                 </label>
                 <label class="input-group px-3">
                     <select
@@ -242,6 +278,7 @@
                                 ${estilos.bgdark2}
                             `}
                         bind:value={esNatural}
+                        onchange={() => input("TIPO")}
                     >
                         <option value={true}>Servicio natural</option>
                         <option value={false}>Inseminación artificial</option>
@@ -253,7 +290,8 @@
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
                     >
-                        Fecha inseminación</span>
+                        Fecha inseminación</span
+                    >
                 </label>
                 <label class="input-group px-3">
                     <input
@@ -290,7 +328,17 @@
                         bind:cadena={pajuela}
                         lista={listapadres}
                         size="w-full lg:w-1/3"
-                    />
+                        etiquetaDefault={false}
+                        px="px-3"
+                    >
+                        <label for="Padres" class="label">
+                            <span
+                                class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                            >
+                                Padre</span
+                            >
+                        </label>
+                    </PredictSelect>
                 {/if}
             </div>
             <div>
@@ -298,7 +346,8 @@
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
                     >
-                        Fecha parto</span>
+                        Fecha parto</span
+                    >
                 </label>
                 <label class="input-group px-3">
                     <input
@@ -326,22 +375,21 @@
                     >
                 </label>
                 <div class="px-3">
-<textarea
-                    name="observacion"
-                    id="observacion"
-                    class={`
+                    <textarea
+                        name="observacion"
+                        id="observacion"
+                        class={`
                         textarea textarea-bordered textarea-lg
                         
                         focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
                         w-full
                         ${estilos.bgdark2}
                     `}
-                    bind:value={observaciongeneral}
-                    oninput={inputObsGeneral}
-                >
-                </textarea>
+                        bind:value={observaciongeneral}
+                        oninput={inputObsGeneral}
+                    >
+                    </textarea>
                 </div>
-                
             </div>
         </div>
     {/if}

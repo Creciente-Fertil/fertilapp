@@ -39,25 +39,37 @@
     let totalPaginas = $derived(Math.ceil(count / pageSize));
 </script>
 
-<table class="table table-lg w-full bg-white dark:bg-slate-900">
-    <thead class={`${estilos.tableheader}`}>
-        <tr>
-            <th class="hidden text-base mx-2 px-2 border-b border-emerald-700">
-                <input type="checkbox" checked={todos} onchange={clickTodos} />
-            </th>
-            <th class="text-base mx-2 px-2 w-16">
-                <label class="flex items-center justify-center cursor-pointer">
-                    <!-- El input real (oculto pero funcional) -->
-                    <input
-                        type="checkbox"
-                        checked={todos}
-                        onchange={clickTodos}
-                        class="peer sr-only"
-                    />
+<div
+    class="relative w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
+>
+    <div class="max-h-[700px] overflow-y-auto custom-scrollbar">
+        <table class="table table-lg w-full bg-white dark:bg-slate-900">
+            <thead class={`${estilos.tableheader} sticky top-0 z-10 shadow-sm`}>
+                <tr>
+                    <th
+                        class="hidden text-base mx-2 px-2 border-b border-emerald-700"
+                    >
+                        <input
+                            type="checkbox"
+                            checked={todos}
+                            onchange={clickTodos}
+                        />
+                    </th>
+                    <th class="text-base mx-2 px-2 w-16">
+                        <label
+                            class="flex items-center justify-center cursor-pointer"
+                        >
+                            <!-- El input real (oculto pero funcional) -->
+                            <input
+                                type="checkbox"
+                                checked={todos}
+                                onchange={clickTodos}
+                                class="peer sr-only"
+                            />
 
-                    <!-- La caja circular personalizada -->
-                    <span
-                        class="
+                            <!-- La caja circular personalizada -->
+                            <span
+                                class="
                             w-5 h-5
                             flex items-center justify-center
                             rounded-full
@@ -68,87 +80,87 @@
                             peer-checked:border-emerald-700
                             hover:border-emerald-500 dark:hover:border-emerald-400
                         "
+                            >
+                                <!-- El icono de check (solo visible cuando está marcado) -->
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    stroke-width="3"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                            </span>
+                        </label>
+                    </th>
+                    <th
+                        class={`
+                    ${estilos.tableth}   
+                    uppercase
+                `}
                     >
-                        <!-- El icono de check (solo visible cuando está marcado) -->
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="3"
+                        RP
+                    </th>
+                    <th
+                        class={`
+                    ${estilos.tableth}   
+                    uppercase
+                `}
+                    >
+                        Caravana
+                    </th>
+                    {#if conEstado}
+                        <th
+                            class={`
+                    ${estilos.tableth}   
+                    uppercase
+                `}
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M5 13l4 4L19 7"
-                            />
-                        </svg>
-                    </span>
-                </label>
-            </th>
-            <th
-                class={`
-                    ${estilos.tableth}   
-                    uppercase
-                `}
-            >
-                RP
-            </th>
-            <th
-                class={`
-                    ${estilos.tableth}   
-                    uppercase
-                `}
-            >
-                Caravana
-            </th>
-            {#if conEstado}
-                <th
-                    class={`
-                    ${estilos.tableth}   
-                    uppercase
-                `}
-                >
-                    Estado
-                </th>
-            {/if}
-            <th
-                class={`
+                            Estado
+                        </th>
+                    {/if}
+                    <th
+                        class={`
                     ${estilos.tableth}   
                     
                     
                 `}
-            >
-                Acción
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        {#each rows as a}
-            <tr>
-                <td class="hidden text-base mx-2 px-2">
-                    <input
-                        type="checkbox"
-                        checked={selecthash[a.id] ? true : false}
-                        onchange={() => clickFila(a.id)}
-                    />
-                </td>
-                <td class="text-base mx-2 px-2 w-16">
-                    <label
-                        class="flex items-center justify-center cursor-pointer"
                     >
-                        <!-- Input real (oculto pero funcional) -->
-                        <input
-                            type="checkbox"
-                            checked={selecthash[a.id] ? true : false}
-                            onchange={() => clickFila(a.id)}
-                            class="peer sr-only"
-                        />
+                        Acción
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each rows as a}
+                    <tr>
+                        <td class="hidden text-base mx-2 px-2">
+                            <input
+                                type="checkbox"
+                                checked={selecthash[a.id] ? true : false}
+                                onchange={() => clickFila(a.id)}
+                            />
+                        </td>
+                        <td class="text-base mx-2 px-2 w-16">
+                            <label
+                                class="flex items-center justify-center cursor-pointer"
+                            >
+                                <!-- Input real (oculto pero funcional) -->
+                                <input
+                                    type="checkbox"
+                                    checked={selecthash[a.id] ? true : false}
+                                    onchange={() => clickFila(a.id)}
+                                    class="peer sr-only"
+                                />
 
-                        <!-- La caja circular personalizada -->
-                        <span
-                            class="
+                                <!-- La caja circular personalizada -->
+                                <span
+                                    class="
                                 w-5 h-5
                                 flex items-center justify-center
                                 rounded-full
@@ -159,49 +171,53 @@
                                 peer-checked:border-emerald-700
                                 hover:border-emerald-500 dark:hover:border-emerald-400
                             "
+                                >
+                                    <!-- Icono de check (visible solo cuando está marcado) -->
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        stroke-width="3"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M5 13l4 4L19 7"
+                                        />
+                                    </svg>
+                                </span>
+                            </label>
+                        </td>
+                        <td class="text-base mx-1 px-1 text-center">
+                            {a.rp}
+                        </td>
+                        <td class="text-base mx-1 px-1 text-center">
+                            {a.caravana}
+                        </td>
+                        {#if conEstado}
+                            <td class="text-base mx-1 px-1 text-center">
+                                <div
+                                    class={`badge badge-outline badge-${getEstadoColor(a.prenada)}`}
+                                >
+                                    {getEstadoNombre(a.prenada)}
+                                </div>
+                            </td>
+                        {/if}
+                        <td
+                            class=" flex items-center justify-center gap-2 px-1"
                         >
-                            <!-- Icono de check (visible solo cuando está marcado) -->
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                stroke-width="3"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
-                        </span>
-                    </label>
-                </td>
-                <td class="text-base mx-1 px-1 text-center">
-                    {a.rp}
-                </td>
-                <td class="text-base mx-1 px-1 text-center">
-                    {a.caravana}
-                </td>
-                {#if conEstado}
-                    <td class="text-base mx-1 px-1 text-center">
-                        <div
-                            class={`badge badge-outline badge-${getEstadoColor(a.prenada)}`}
-                        >
-                            {getEstadoNombre(a.prenada)}
-                        </div>
-                    </td>
-                {/if}
-                <td class=" flex items-center justify-center gap-2 px-1">
-                    <button onclick={() => verFila(a.id)}>
-                        <Eye size="size-5" />
-                    </button>
-                </td>
-            </tr>
-        {/each}
-    </tbody>
-</table>
+                            <button onclick={() => verFila(a.id)}>
+                                <Eye size="size-5" />
+                            </button>
+                        </td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    </div>
+</div>
 <Paginacion
     rows={animalesrows}
     bind:paginaActual
@@ -210,7 +226,26 @@
     {onChangePageSize}
     rounded={""}
 />
-<AccionesMovimiento
-    {cancelar}
-    {siguiente}
-/>
+<AccionesMovimiento {cancelar} {siguiente} />
+
+<style>
+    /* Estilos personalizados para el scrollbar (opcional pero recomendado) */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 4px;
+        border: 2px solid transparent; /* Para dar espacio alrededor */
+        background-clip: content-box;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #475569;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #94a3b8;
+    }
+</style>
