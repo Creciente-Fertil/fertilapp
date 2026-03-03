@@ -97,6 +97,7 @@
     let madre = $state("");
     let observacion = $state("");
     //Filtro de serv
+    //desde creciente fetil
     let fechaservhastafiltro = $state("");
     let fechaservdesdefiltro = $state("");
     let fechapartodesde = $state("");

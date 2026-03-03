@@ -39,7 +39,7 @@
     },
   };
 
-  let styles = $state(colorMap[color] || colorMap.gray);
+  let styles = $derived(colorMap[color] || colorMap.gray);
 </script>
 
 <span
