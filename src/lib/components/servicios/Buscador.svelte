@@ -157,7 +157,7 @@
                 <button
                     class={`
                         
-                        border rounded-xl px-3 py-3 text-md flex items-center gap-1
+                        border rounded-full px-3 py-1 text-md flex items-center gap-1
                         bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
                         dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
                     `}
@@ -169,7 +169,7 @@
                 <button
                     onclick={clickFilter}
                     class={`
-                        border rounded-xl px-3 py-3 text-md flex 
+                        border rounded-full px-3 py-1 text-md flex 
                         items-center gap-1
                         
                         ${
@@ -192,8 +192,8 @@
                     {prepararData}
                     datahash={selecthash}
                     conhash={true}
-                    py="py-3"
-                    rounded="rounded-xl"
+                    py="py-1"
+                    rounded="rounded-full"
                 />
             </div>
         </div>
@@ -348,7 +348,7 @@
                         <button
                             onclick={limpiarFiltros}
                             class={`
-                            rounded-xl px-0 md:px-3 py-1 text-md flex items-center gap-1
+                            rounded-full px-0 md:px-3 py-1 text-md flex items-center gap-1
                             bg-white  hover:bg-gray-300 dark:bg-transparent
                             dark:hover:bg-gray-600 dark:text-white
                         `}
@@ -359,9 +359,9 @@
                         <button
                             onclick={filterUpdate}
                             class={`
-                            border rounded-xl px-3 py-1 text-md flex items-center gap-1
-                            bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
-                        `}
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
+                            `}
                         >
                             Aplicar filtros
                         </button>
