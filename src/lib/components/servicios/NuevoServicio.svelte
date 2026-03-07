@@ -10,7 +10,6 @@
         fechahastaserv = $bindable(""),
         padresserv = $bindable(""),
         padreslist = $bindable([]),
-        padreslist2 = $bindable([]),
         fechaparto = $bindable(""),
         observaciongeneral = $bindable(""),
         //inseminacion
@@ -243,6 +242,9 @@
                         name="observacion"
                         id="observacion"
                         class={`
+                        p-2 m-1
+                        min-h-32
+                        leading-tight
                         textarea textarea-bordered textarea-lg
                         
                         focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
@@ -379,6 +381,9 @@
                         name="observacion"
                         id="observacion"
                         class={`
+                        p-2 m-1
+                        min-h-32
+                        leading-tight
                         textarea textarea-bordered textarea-lg
                         
                         focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500

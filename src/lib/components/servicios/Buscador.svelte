@@ -219,7 +219,7 @@
                                 ${estilos.bgdark2}
                             `}
                             bind:value={fechaservdesdefiltro}
-                            onchange={filterUpdate}
+                            
                         />
                     </div>
                     <div class="">
@@ -238,7 +238,7 @@
                                 ${estilos.bgdark2}
                             `}
                             bind:value={fechaservhastafiltro}
-                            onchange={filterUpdate}
+                            
                         />
                     </div>
                     <div class="">
@@ -257,7 +257,7 @@
                                 ${estilos.bgdark2}
                             `}
                             bind:value={fechapartodesde}
-                            onchange={filterUpdate}
+                            
                         />
                     </div>
                     <div class="">
@@ -276,7 +276,7 @@
                                 ${estilos.bgdark2}
                             `}
                             bind:value={fechapartohasta}
-                            onchange={filterUpdate}
+                            
                         />
                     </div>
                     <div class="">
@@ -297,7 +297,7 @@
                                     ${estilos.bgdark2}
                                 `}
                                 bind:value={filtroservicio}
-                                onchange={filterUpdate}
+                                
                             >
                                 {#each opcionservicio as s}
                                     <option value={s.id}>{s.nombre}</option>
@@ -324,7 +324,7 @@
                                     ${estilos.bgdark2} 
                                 `}
                                 bind:value={buscarpadre}
-                                oninput={filterUpdate}
+                                
                             />
                         </label>
                     </div>

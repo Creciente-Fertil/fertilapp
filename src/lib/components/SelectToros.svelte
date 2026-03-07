@@ -15,7 +15,7 @@
                 valores = valores.filter((v) => v != idopt);
                 quitarElemento(idopt);
             } else {
-                valores.push(idopt);
+                valores = [...valores, idopt]
                 agregarElemento(idopt);
             }
             filterUpdate();
@@ -29,6 +29,7 @@
         py = "py-2",
         wlen = "w-full",
         children,
+        flotante=true
     } = $props();
     //Logica de las opciones
     let isOpen = $state(false);
@@ -104,34 +105,18 @@
                             {#each chunk as v}
                                 <span
                                     class="
-                                truncate
-                                inline-flex items-center rounded-md
-                                px-2 py-1 text-base font-medium ring-1 ring-inset
-                                bg-transparent
-                                text-gray-700 dark:text-gray-50
-                                ring-gray-600/20 dark:ring-gray-50/20
-                            "
+                                        truncate
+                                        inline-flex items-center rounded-md
+                                        px-2 py-1 text-base font-medium ring-1 ring-inset
+                                        bg-transparent
+                                        text-gray-700 dark:text-gray-50
+                                        ring-gray-600/20 dark:ring-gray-50/20
+                                    "
                                 >
                                     {getNombre(v)}
                                 </span>
                             {/each}
                         </div>
-                    {/each}
-                </div>
-                <div class="hidden flex content-normal gap-2 overflow-x-hidden">
-                    {#each valores as v}
-                        <span
-                            class="
-                        truncate
-                        inline-flex items-center rounded-md
-                        px-2 py-1 text-base font-medium ring-1 ring-inset
-                        bg-green-50 dark:bg-green-700
-                        text-green-700 dark:text-green-50
-                        ring-green-600/20 dark:ring-green-50/20
-                        "
-                        >
-                            {getNombre(v)}
-                        </span>
                     {/each}
                 </div>
             {/if}
@@ -155,7 +140,7 @@
             <div
                 style="width: {buttonWidth}"
                 class={`
-                absolute
+                ${flotante?"absolute":"relative"}
                 ${estilos.bgdark2}
                  z-10 mt-0 bg-white rounded-md shadow-lg   
                 ${px} ${py}

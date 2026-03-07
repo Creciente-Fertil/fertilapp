@@ -15,6 +15,7 @@
     import CardMovimiento from "$lib/components/servicios/CardMovimiento.svelte";
     import DetalleMovimiento from "$lib/components/servicios/DetalleMovimiento.svelte";
     import DetalleAnimalesMovimiento from "$lib/components/servicios/DetalleAnimalesMovimiento.svelte";
+    import Buscador from "$lib/components/servicios/Buscador.svelte";
     import MultipleToros from "$lib/components/MultipleToros.svelte";
     import SelectToros from "$lib/components/SelectToros.svelte";
     import PredictSelect from "$lib/components/PredictSelect.svelte";
@@ -121,6 +122,7 @@
         proxymovimiento.observacion = observaciongeneral;
         proxymovimiento.padreslist = padreslist;
         proxymovimiento.padresserv = padresserv;
+        
         proxy.save(proxymovimiento);
     }
     function loadDetalle() {
@@ -128,7 +130,6 @@
         esNatural = proxymovimiento.esNatural;
 
         selecthashmap = proxymovimiento.selecthashmap;
-        
 
         padresserv = proxymovimiento.padresserv;
         padreslist = proxymovimiento.padreslist;
@@ -398,7 +399,7 @@
             }
         }
         setDetalleDefault();
-        volver();
+        goto(pre + "/servicios");
     }
     function irAnimales() {
         goto(pre + "/servicios/movimiento");
@@ -440,49 +441,51 @@
         await getAnimales();
         loadDetalle();
     });
+    let classbuscador = "container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4";
+    let classmove = "container mx-auto py-3 px-4 max-w-6xl w-full";
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <!--Este va a ser el componente confirmar-->
 <Navbar2>
-<div
-        class="container mx-auto py-3 px-4 max-w-6xl w-full"
-    >
-    <DetalleMovimiento
-        {esNatural}
-        {observaciongeneral}
-        {fechaparto}
-        {listapadres}
-        {padres}
-        {input}
-        {onInput}
-        {agregarPadre}
-        {quitarPadre}
-        {inputObsGeneral}
-        {onwrite}
-        {onelegir}
-        {cargadoanimales}
-        {mover}
-        {volver}
-        {fechadesdeserv}
-        {fechahastaserv}
-        {padreslist}
-        {fechainseminacion}
-        {padre}
-        {pajuela}
-    />
-    <DetalleAnimalesMovimiento
-        {esNatural}
-        bind:selectanimales={listaanimales}
-        {quitarAnimal}
-        {listapadres}
-        {padres}
-        {cargadoanimales}
-        {verAnimal}
-        cambiar={setDetalle}
-        abierta={false}
-    />
     
+    <div class={classmove}>
+        <DetalleMovimiento
+            {esNatural}
+            {observaciongeneral}
+            {fechaparto}
+            {listapadres}
+            {padres}
+            {input}
+            {onInput}
+            {agregarPadre}
+            {quitarPadre}
+            {inputObsGeneral}
+            {onwrite}
+            {onelegir}
+            {cargadoanimales}
+            {mover}
+            {volver}
+            {fechadesdeserv}
+            {fechahastaserv}
+            {padreslist}
+            {fechainseminacion}
+            {padre}
+            {pajuela}
+        />
+        
+        <DetalleAnimalesMovimiento
+            {esNatural}
+            bind:selectanimales={listaanimales}
+            {quitarAnimal}
+            {listapadres}
+            {padres}
+            {cargadoanimales}
+            {verAnimal}
+            cambiar={setDetalle}
+            abierta={false}
+        />
+
         <div
             class="mt-6 flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
         >
@@ -521,414 +524,6 @@
         </div>
     </div>
 
-    <div class="hidden">
-        <CardMovimiento
-            titulo={esNatural ? "Nuevo servicio" : "Nueva inseminación"}
-        >
-            {#if esNatural}
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4">
-                    <div class="lg:col-span-2 lg:w-1/2">
-                        <label for="tiposervicio" class="label">
-                            <span class="label-text text-base"
-                                >Tipo servicio</span
-                            >
-                        </label>
-                        <label class="input-group">
-                            <select
-                                class={`
-                                select select-bordered
-                                border border-gray-300 rounded-md
-                                focus:outline-none focus:ring-2 
-                                focus:ring-green-500 focus:border-green-500
-                                ${estilos.bgdark2}
-                            `}
-                                bind:value={esNatural}
-                                disabled
-                            >
-                                <option value={true}>Servicio natural</option>
-                                <option value={false}
-                                    >Inseminación inseminación</option
-                                >
-                            </select>
-                        </label>
-                    </div>
-                    <div>
-                        <label for="fechadesde" class="label">
-                            <span class="label-text text-base">Fecha desde</span
-                            >
-                        </label>
-                        <label class="hidden input-group">
-                            <input
-                                id="fechadesde"
-                                type="date"
-                                class={`
-                                input input-bordered w-full
-                                border border-gray-300 rounded-md
-                                focus:outline-none focus:ring-2 
-                                focus:ring-green-500 
-                                focus:border-green-500
-                                ${estilos.bgdark2} 
-                            `}
-                                bind:value={fechadesdeserv}
-                                onchange={() => input("DESDE")}
-                            />
-                            {#if malfechadese}
-                                <div class="label">
-                                    <span class="label-text-alt text-red-500"
-                                        >Debe seleccionar la fecha inicial del
-                                        servicio</span
-                                    >
-                                </div>
-                            {/if}
-                        </label>
-                        {#if fechadesdeserv.length > 0}
-                            <span
-                                class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
-                                >{new Date(
-                                    fechadesdeserv,
-                                ).toLocaleDateString()}</span
-                            >
-                        {/if}
-                    </div>
-                    <div>
-                        <label for="fechahasta" class="label">
-                            <span class="label-text text-base">Fecha hasta</span
-                            >
-                        </label>
-                        <label class="hidden input-group">
-                            <input
-                                id="fechahasta"
-                                type="date"
-                                class={`
-                            input input-bordered w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2} 
-                        `}
-                                onchange={() => input("HASTA")}
-                                bind:value={fechahastaserv}
-                            />
-                        </label>
-                        {#if fechahastaserv.length > 0}
-                            <span
-                                class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
-                                >{new Date(
-                                    fechahastaserv,
-                                ).toLocaleDateString()}</span
-                            >
-                        {/if}
-                    </div>
-                    {#if cargadoanimales}
-                        <div>
-                            <SelectToros
-                                opciones={listapadres}
-                                etiqueta="Padres"
-                                bind:valores={padreslist}
-                                agregarElemento={agregarPadre}
-                                quitarElemento={quitarPadre}
-                                margintop=""
-                                py="py-2"
-                                px="px-1"
-                            />
-                        </div>
-                    {/if}
-                    <div class="hidden">
-                        <label for="toros" class="label">
-                            <span class="label-text text-base"
-                                >Seleccionar padres</span
-                            >
-                        </label>
-                        <label class="input-group">
-                            {#if cargadoanimales}
-                                <MultipleToros
-                                    toros={padres}
-                                    bind:valor={padresserv}
-                                    bind:listavalores={padreslist}
-                                    agregarElemento={agregarPadre}
-                                    quitarElemento={quitarPadre}
-                                />
-                                {#if malpadre}
-                                    <div class="label">
-                                        <span
-                                            class="label-text-alt text-red-500"
-                                            >Debe seleccionar al menos un padre</span
-                                        >
-                                    </div>
-                                {/if}
-                            {/if}
-                        </label>
-                    </div>
-                    <div>
-                        <label for="fechaparto" class="label">
-                            <span class="label-text text-base">Fecha parto</span
-                            >
-                        </label>
-                        <label class="hidden input-group">
-                            <input
-                                id="fechaparto"
-                                type="date"
-                                class={`
-                            input input-bordered w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2} 
-                        `}
-                                disabled
-                                bind:value={fechaparto}
-                            />
-                        </label>
-                        {#if fechaparto.length > 0}
-                            <span
-                                class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
-                                >{new Date(fechaparto).toLocaleDateString() ||
-                                    ""}</span
-                            >
-                        {/if}
-                    </div>
-                    <div class="lg:col-span-2">
-                        <label for="observacion" class="label">
-                            <span class="label-text text-base"
-                                >Observación general</span
-                            >
-                        </label>
-                        <textarea
-                            name="observacion"
-                            id="observacion"
-                            class={`
-                            hidden
-                            textarea textarea-bordered textarea-lg
-                            
-                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                            w-full
-                            ${estilos.bgdark2}
-                        `}
-                            bind:value={observaciongeneral}
-                            oninput={inputObsGeneral}
-                        >
-                        </textarea>
-                        <p
-                            class={`
-                            px-4
-                            
-                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                            w-full
-                            ${estilos.bgdark2}
-                        `}
-                        >
-                            {observaciongeneral}
-                        </p>
-                    </div>
-                </div>
-            {:else}
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-1 px-4">
-                    <div class="lg:col-span-2 lg:w-1/2">
-                        <label for="tiposervicio" class="label">
-                            <span class="label-text text-base"
-                                >Tipo servicio</span
-                            >
-                        </label>
-                        <label class="input-group">
-                            <select
-                                class={`
-                                select select-bordered
-                                border border-gray-300 rounded-md
-                                focus:outline-none focus:ring-2 
-                                focus:ring-green-500 focus:border-green-500
-                                ${estilos.bgdark2}
-                            `}
-                                disabled
-                                bind:value={esNatural}
-                            >
-                                <option value={true}>Servicio natural</option>
-                                <option value={false}
-                                    >Inseminación artificial</option
-                                >
-                            </select>
-                        </label>
-                    </div>
-                    <div>
-                        <label for="fechains" class="label">
-                            <span class="label-text text-base"
-                                >Fecha inseminación</span
-                            >
-                        </label>
-                        <label class="hidden input-group">
-                            <input
-                                id="fechainseminacion"
-                                type="date"
-                                max={HOY}
-                                class={`
-                            input input-bordered w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2} 
-                        `}
-                                bind:value={fechainseminacion}
-                                onchange={() => onInput("FECHA")}
-                            />
-                            {#if malfecha}
-                                <div class="label">
-                                    <span class="label-text-alt text-red-500"
-                                        >Debe seleccionar la fecha de
-                                        inseminacion</span
-                                    >
-                                </div>
-                            {/if}
-                        </label>
-                        {#if fechainseminacion.length > 0}
-                            <span
-                                class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
-                                >{new Date(
-                                    fechainseminacion,
-                                ).toLocaleDateString() || ""}</span
-                            >
-                        {/if}
-                    </div>
-                    <div class="">
-                        {#if cargadoanimales}
-                            <PredictSelect
-                                {onwrite}
-                                {onelegir}
-                                bind:valor={padre}
-                                etiqueta={"Padre"}
-                                bind:cadena={pajuela}
-                                lista={listapadres}
-                                size="w-full lg:w-1/3"
-                            />
-                        {/if}
-                    </div>
-                    <div>
-                        <label for="fechaparto" class="label">
-                            <span class="label-text text-base">Fecha parto</span
-                            >
-                        </label>
-                        <label class="hidden input-group">
-                            <input
-                                id="fechaparto"
-                                type="date"
-                                class={`
-                            input input-bordered w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2} 
-                        `}
-                                disabled
-                                bind:value={fechaparto}
-                            />
-                        </label>
-                        {#if fechaparto.length > 0}
-                            <span
-                                class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
-                                >{new Date(fechaparto).toLocaleDateString() ||
-                                    ""}</span
-                            >
-                        {/if}
-                    </div>
-                    <div class="lg:col-span-2">
-                        <label for="obs" class="label">
-                            <span class="label-text text-base"
-                                >Observacion general</span
-                            >
-                        </label>
-
-                        <textarea
-                            name="observacion"
-                            id="observacion"
-                            class={`
-                        hidden 
-                        textarea textarea-bordered textarea-lg
-                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                        w-full
-                        ${estilos.bgdark2}
-                    `}
-                            bind:value={observaciongeneral}
-                            oninput={inputObsGeneral}
-                        >
-                        </textarea>
-                        <p
-                            class={`
-                            px-4
-                            
-                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                            w-full
-                            ${estilos.bgdark2}
-                        `}
-                        >
-                            {observaciongeneral}
-                        </p>
-                    </div>
-                </div>
-            {/if}
-
-            <ListaAnimales
-                {esNatural}
-                bind:selectanimales={listaanimales}
-                {quitarAnimal}
-                {listapadres}
-                {padres}
-                {cargadoanimales}
-                {verAnimal}
-                cambiar={setDetalle}
-                abierta={false}
-            />
-            <div
-                class="mt-6 flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
-            >
-                <!-- Botón Cancelar -->
-                <button
-                    class="
-                        hidden md:block
-                        mt-2 px-10 py-2
-                        dark:bg-transparent
-                        bg-white
-                        text-gray-800
-                        dark:text-white
-                        font-medium
-                        rounded-full shadow-sm border
-                        border-gray-300
-                        hover:bg-gray-200
-                        dark:hover:bg-gray-800
-                        transition-colors
-                        text-base"
-                    onclick={volver}
-                >
-                    Volver
-                </button>
-
-                <!-- Botón Editar -->
-                <button
-                    class="hidden mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
-                    onclick={irAnimales}
-                >
-                    {#if esCelu}
-                        Animales
-                    {:else}
-                        Elegir animales
-                    {/if}
-                </button>
-                <!-- Botón Editar -->
-                <button
-                    class="
-                    mt-2 px-10 py-2 bg-[#115642] text-white
-                    font-medium rounded-full
-                    shadow-sm hover:bg-green-700
-                    transition-colors text-base
-                    "
-                    onclick={mover}
-                >
-                    Guardar
-                </button>
-            </div>
-        </CardMovimiento>
-    </div>
 </Navbar2>
 
 <dialog id="veranimal" class="modal modal-middle rounded-xl">

@@ -6,7 +6,7 @@
         opciones,
         etiqueta,
         valores = $bindable([]),
-        filterUpdate,
+        filterUpdate = ()=>{},
         clickOption = (idopt) => {
             if (valores.includes(idopt)) {
                 valores = valores.filter((v) => v != idopt);

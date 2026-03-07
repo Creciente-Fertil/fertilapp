@@ -48,7 +48,7 @@
     let cab = caber.cab;
     let cargado = $state(false);
     //paginacon
-    let pageSize = $state(10)
+    let pageSize = $state(15)
     let paginaActual = $state(1)
     //Datos animales
     let animales = $state([]);
@@ -72,7 +72,6 @@
     let padreslist = $state([]);
     let padresserv = $state("");
     let pajuelasserv = $state("");
-    let padreslist2=$state([])
     //inseminacion
     let fechainseminacion = $state("");
     let pajuela = $state("");
@@ -385,7 +384,7 @@
             }
         }
         paginaActual = 1
-        pageSize = 10
+        pageSize = 15
     }
     function ordenarNombre(lista) {
         lista.sort((r1, r2) =>
@@ -406,6 +405,7 @@
             if (todos) {
                 todos = false;
                 algunos = true;
+                
             }
             delete selecthashmap[id];
             if (Object.keys(selecthashmap).length == 0) {
@@ -459,6 +459,7 @@
             todos = false;
             ninguno = true;
         }
+        
         setDetalle();
     }
     async function getLotes() {
@@ -616,13 +617,28 @@
     function onInput(campo) {
         input(campo);
     }
-
+    function cambiar(){
+        for (let i = 0; i < selectanimales.length; i++) {
+            let servicio = selectanimales[i];
+            
+            for(let j=0;j<padreslist.length;j++){
+                let id = padreslist[j]
+                if (!servicio.padres.includes(id)) {
+                    selectanimales[i].padres.push(id);
+                }
+            }
+            
+        }
+        setDetalle()
+    }
     function agregarPadre(id) {
         for (let i = 0; i < selectanimales.length; i++) {
             let servicio = selectanimales[i];
+            
             if (!servicio.padres.includes(id)) {
                 selectanimales[i].padres.push(id);
             }
+
         }
         setDetalle()
     }
@@ -1002,6 +1018,11 @@
         cargado = true;
         loadDetalle();
         filterUpdate()
+        if(Object.entries(selecthashmap).length == animalesrows.length){
+            todos = true
+            ninguno = false
+            algunos = false
+        }
     });
     function cancelar(){
         goto(pre+"/servicios")
@@ -1015,10 +1036,10 @@
 <Navbar2>
     <div
         class="
-            container mx-auto py-1 px-4 max-w-6xl w-full 
+            container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4
             "
     >
-        <div class="grid grid-cols-1 md:grid-cols-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 max-h-screen">
             <!--Lado izquierd-->
             <div>
                 <NuevoServicio
@@ -1027,7 +1048,6 @@
                     bind:fechahastaserv
                     bind:padresserv
                     bind:padreslist
-                    bind:padreslist2
                     bind:fechaparto
                     bind:observaciongeneral
                     bind:fechainseminacion
@@ -1035,8 +1055,8 @@
                     bind:pajuela
 
                     {listapadres}
-                    {agregarPadre}
-                    {quitarPadre}
+                    agregarPadre = {cambiar}
+                    quitarPadre ={cambiar}
                     {cargadoanimales}
                     {padres}
 
@@ -1055,7 +1075,7 @@
                     quitarAnimal = {clickAnimal}
                 />
             </div>
-            <!--Lado derechi-->
+            <!--Lado derecho-->
             <div class="md:col-span-2">
                 <div
                     class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3"
@@ -1103,7 +1123,7 @@
                 <div
                     class={`
                         hidden w-full md:grid
-                        mx-auto  px-3 max-w-7xl
+                        mx-auto  px-2 max-w-7xl
                     `}
                 >
                     <div
@@ -1111,6 +1131,7 @@
                             overflow-hidden rounded-t-xl
                         `}
                     >
+                        
                         <TablaMovimiento
                             bind:paginaActual
                             bind:pageSize
@@ -1119,6 +1140,8 @@
                             clickFila={clickAnimal}
                             {clickTodos}
                             {todos}
+                            {ninguno}
+                            {algunos}
                             verFila={verAnimal}
                             conEstado = {true}
                             {cancelar}

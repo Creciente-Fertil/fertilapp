@@ -48,9 +48,9 @@
         <div class="md:col-span-3">
             <PredictSelect
                 {cambiar}
-                bind:valor={selectanimales[i].padre}
+                valor={selectanimales[i].padre}
                 etiqueta={""}
-                bind:cadena={selectanimales[i].pajuela}
+                cadena={selectanimales[i].pajuela}
                 edit={false}
                 lista={listapadres}
             />
@@ -69,11 +69,8 @@
                 inline-flex items-center gap-1.5 px-3 py-1.5
                 text-xs font-medium rounded-lg
                 border transition-colors duration-200
-                ${
-                    animal.estado
-                        ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300"
-                        : "bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
-                }
+                bg-slate-100 dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600
+                
               `}
         >
             {animal.estado ? "Cerrar" : "Ver"}
@@ -122,7 +119,7 @@
             <div class="">
                 <label for="observacion" class="label">
                     <span
-                        class="label-text text-base uppercase font-semibold dark:text-gray-400 text-gray-500"
+                        class="label-text text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
                     >
                         Editar observación</span
                     >
@@ -131,12 +128,16 @@
                     bind:value={selectanimales[i].observacion}
                     placeholder="Observación"
                     class={`
+                        p-2 m-1
+                        min-h-32
+                        leading-tight
                         textarea textarea-bordered textarea-lg
                         
                         focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
                         w-full
                         ${estilos.bgdark2}
                     `}
+                    onchange={cambiar}
                 >
                 </textarea>
             </div>
@@ -153,10 +154,11 @@
                             px="px-1"
                             campo="caravana"
                             etiquetaDefault={false}
+                            flotante={false}
                         >
                             <label for="Padres" class="label">
                                 <span
-                                    class="label-text text-base uppercase font-semibold dark:text-gray-400 text-gray-500"
+                                    class="label-text text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
                                 >
                                     Editar padres</span
                                 >
@@ -164,19 +166,23 @@
                         </SelectToros>
                     {/if}
                 {:else if cargadoanimales}
+                    
                     <PredictSelect
-                        {cambiar}
+                        
                         bind:valor={selectanimales[i].padre}
                         etiqueta={"Editar padre"}
                         bind:cadena={selectanimales[i].pajuela}
                         lista={listapadres}
                         etiquetaDefault={false}
+                        flotante={false}
+                        {cambiar}
                     >
                         <label for="Padres" class="label">
                             <span
                                 class="label-text text-base uppercase font-semibold dark:text-gray-400 text-gray-500"
                             >
-                                Editar padre</span
+                                Editar padre
+                                </span
                             >
                         </label>
                     </PredictSelect>

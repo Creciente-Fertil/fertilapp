@@ -9,7 +9,7 @@
         valor = $bindable(""),
         cadena = $bindable(""),
         cambiar = () => {},
-        onelegir = () => {},
+        onelegir = (valor) => {},
         onwrite = () => {},
         validarAnimal = () => {},
         px = "px-2",
@@ -17,7 +17,7 @@
         size = "w-4/5",
         campo = "nombre",
         etiquetaDefault = true,
-        
+        flotante = true,
         children,
     } = $props();
 
@@ -91,15 +91,15 @@
         }
     });
 </script>
+
 {#if etiquetaDefault}
-        <label for="" class="label my-0 py-0">
-            <span class="label-text text-base">{etiqueta} </span>
-        </label>
-    {:else}
-        {@render children()}
-    {/if}
+    <label for="" class="label my-0 py-0">
+        <span class="label-text text-base">{etiqueta} </span>
+    </label>
+{:else}
+    {@render children()}
+{/if}
 <div class={`w-full ${px} ${py}`} bind:this={containerPredict}>
-    
     {#if edit}
         <input
             bind:this={inputRef}
@@ -125,7 +125,9 @@
             <div
                 style="width: {inputWidth}"
                 class={`
-                mt-0 absolute z-10 max-h-40 overflow-auto w-full`}
+                    ${flotante ? "absolute" : "relative"}
+                    mt-0  z-10 max-h-40 overflow-auto w-full`
+                }
             >
                 {#if listarow.length == 0}
                     <div
@@ -134,6 +136,7 @@
                         focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
                         w-full
                         mb-0
+                        bg-white
                         ${estilos.bgdark2} 
                     `}
                     >
@@ -141,7 +144,7 @@
                             class={`
                                 text-start w-full 
                                 relative py-2 pl-3 
-                                select-none pr-9 bg-transparent
+                                select-none pr-9 
                                 hover:bg-green-100 hover:text-green-800 dark:hover:text-green-800 dark:text-white
                             `}
                         >
@@ -214,6 +217,6 @@
             <span class="text-sm mt-1">Elegiste a {nombre}</span>
         {/if}
     {:else}
-        <span class="text-sm mt-1 mx-1 font-normal">{nombre}</span>
+        <span class="text-sm mt-1 mx-1 font-normal">{cadena}</span>
     {/if}
 </div>

@@ -126,7 +126,7 @@
                         border border-transparent
                     `}
                     bind:value={buscar}
-                    oninput={filterUpdate}
+                    
                 />
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -177,7 +177,7 @@
                             ].concat(rodeos)}
                             bind:valores={rodeoseleccion}
                             etiqueta="Rodeos"
-                            {filterUpdate}
+                            
                         />
                     </div>
 
@@ -197,7 +197,7 @@
                                         ${estilos.bgdark2}
                                     `}
                                 bind:value={estado}
-                                onchange={filterUpdate}
+                                
                             >
                                 
                                 {#each estados as s}
@@ -215,7 +215,7 @@
                             )}
                             bind:valores={loteseleccion}
                             etiqueta="Lotes"
-                            {filterUpdate}
+                            
                         />
                     </div>
                     <div class="mt-1">
@@ -225,7 +225,7 @@
                             ].concat(categorias)}
                             bind:valores={categoriaseleccion}
                             etiqueta="Categorias"
-                            {filterUpdate}
+                            
                         />
                     </div>
                     <div class="my-0 py-0">
@@ -245,7 +245,7 @@
                                         ${estilos.bgdark2}
                                     `}
                                 bind:value={raza}
-                                oninput={filterUpdate}
+                                
                             />
                         </label>
                     </div>
@@ -266,7 +266,7 @@
                                         ${estilos.bgdark2}
                                     `}
                                 bind:value={color}
-                                oninput={filterUpdate}
+                                
                             />
                         </label>
                     </div>

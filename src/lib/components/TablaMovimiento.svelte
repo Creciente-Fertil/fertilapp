@@ -19,7 +19,9 @@
         clickTodos = () => {},
         clickFila = (id) => {},
         verFila = (id) => {},
-        todos = $bindable(false),
+        todos = false,
+        algunos = false,
+        ninguno = true,
         cancelar = () => {},
         siguiente = () => {},
     } = $props();
@@ -37,100 +39,72 @@
     let count = $derived(animalesrows.length);
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
+    let pyfila = "py-2";
+    
 </script>
 
 <div
     class="relative w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
 >
-    <div class="max-h-[700px] overflow-y-auto custom-scrollbar">
+    <div class="max-h-[500px] overflow-y-auto custom-scrollbar">
         <table class="table table-lg w-full bg-white dark:bg-slate-900">
             <thead class={`${estilos.tableheader} sticky top-0 z-10 shadow-sm`}>
                 <tr>
-                    <th
-                        class="hidden text-base mx-2 px-2 border-b border-emerald-700"
-                    >
-                        <input
-                            type="checkbox"
-                            checked={todos}
-                            onchange={clickTodos}
-                        />
-                    </th>
-                    <th class="text-base mx-2 px-2 w-16">
-                        <label
-                            class="flex items-center justify-center cursor-pointer"
+                    
+                    <th class="text-base mx-2 px-2 w-16 flex items-center justify-center">
+                        <button
+                            type="button"
+                            onclick={clickTodos}
+                            class={`
+                                w-5 h-5
+                                flex items-center justify-center
+                                rounded-full
+                                border-2
+                                transition-all duration-200 ease-in-out
+                                focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900
+                                ${todos
+                                    ? 'bg-emerald-700 border-emerald-700'
+                                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-500 hover:border-emerald-500 dark:hover:border-emerald-400'}
+                            `}
+                            aria-label={todos
+                                ? "Deseleccionar todos"
+                                : "Seleccionar todos"}
                         >
-                            <!-- El input real (oculto pero funcional) -->
-                            <input
-                                type="checkbox"
-                                checked={todos}
-                                onchange={clickTodos}
-                                class="peer sr-only"
-                            />
-
-                            <!-- La caja circular personalizada -->
-                            <span
-                                class="
-                            w-5 h-5
-                            flex items-center justify-center
-                            rounded-full
-                            border-2 border-gray-300 dark:border-gray-500
-                            bg-white dark:bg-gray-800
-                            transition-all duration-200 ease-in-out
-                            peer-checked:bg-emerald-700
-                            peer-checked:border-emerald-700
-                            hover:border-emerald-500 dark:hover:border-emerald-400
-                        "
-                            >
-                                <!-- El icono de check (solo visible cuando está marcado) -->
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    stroke-width="3"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M5 13l4 4L19 7"
-                                    />
-                                </svg>
-                            </span>
-                        </label>
+                            <!-- El icono de check (solo visible cuando todos es true) -->
+                            
+                            
+                        </button>
                     </th>
                     <th
                         class={`
-                    ${estilos.tableth}   
-                    uppercase
-                `}
+                            ${estilos.tableth}   
+                            uppercase
+                        `}
                     >
                         RP
                     </th>
                     <th
                         class={`
-                    ${estilos.tableth}   
-                    uppercase
-                `}
+                            ${estilos.tableth}   
+                            uppercase
+                        `}
                     >
                         Caravana
                     </th>
                     {#if conEstado}
                         <th
                             class={`
-                    ${estilos.tableth}   
-                    uppercase
-                `}
+                            ${estilos.tableth}   
+                            uppercase
+                        `}
                         >
                             Estado
                         </th>
                     {/if}
                     <th
                         class={`
-                    ${estilos.tableth}   
-                    
-                    
-                `}
+                            ${estilos.tableth} 
+                        `}
                     >
                         Acción
                     </th>
@@ -146,7 +120,7 @@
                                 onchange={() => clickFila(a.id)}
                             />
                         </td>
-                        <td class="text-base mx-2 px-2 w-16">
+                        <td class={`text-base mx-2 px-2 w-16 ${pyfila}`}>
                             <label
                                 class="flex items-center justify-center cursor-pointer"
                             >
@@ -161,16 +135,16 @@
                                 <!-- La caja circular personalizada -->
                                 <span
                                     class="
-                                w-5 h-5
-                                flex items-center justify-center
-                                rounded-full
-                                border-2 border-gray-300 dark:border-gray-500
-                                bg-white dark:bg-gray-800
-                                transition-all duration-200 ease-in-out
-                                peer-checked:bg-emerald-700
-                                peer-checked:border-emerald-700
-                                hover:border-emerald-500 dark:hover:border-emerald-400
-                            "
+                                        w-5 h-5
+                                        flex items-center justify-center
+                                        rounded-full
+                                        border-2 border-gray-300 dark:border-gray-500
+                                        bg-white dark:bg-gray-800
+                                        transition-all duration-200 ease-in-out
+                                        peer-checked:bg-emerald-700
+                                        peer-checked:border-emerald-700
+                                        hover:border-emerald-500 dark:hover:border-emerald-400
+                                    "
                                 >
                                     <!-- Icono de check (visible solo cuando está marcado) -->
                                     <svg
@@ -190,14 +164,16 @@
                                 </span>
                             </label>
                         </td>
-                        <td class="text-base mx-1 px-1 text-center">
+                        <td class={`text-base mx-1 px-1 text-center ${pyfila}`}>
                             {a.rp}
                         </td>
-                        <td class="text-base mx-1 px-1 text-center">
+                        <td class={`text-base mx-1 px-1 text-center ${pyfila}`}>
                             {a.caravana}
                         </td>
                         {#if conEstado}
-                            <td class="text-base mx-1 px-1 text-center">
+                            <td
+                                class={`text-base mx-1 px-1 text-center ${pyfila}`}
+                            >
                                 <div
                                     class={`badge badge-outline badge-${getEstadoColor(a.prenada)}`}
                                 >
@@ -206,7 +182,7 @@
                             </td>
                         {/if}
                         <td
-                            class=" flex items-center justify-center gap-2 px-1"
+                            class={`flex items-center justify-center gap-2 px-1 ${pyfila}`}
                         >
                             <button onclick={() => verFila(a.id)}>
                                 <Eye size="size-5" />

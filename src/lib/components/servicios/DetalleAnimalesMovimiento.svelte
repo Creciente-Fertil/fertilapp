@@ -9,6 +9,7 @@
     import Arrowdownsimple from "$lib/svgs/arrowdownsimple.svelte";
     import estilos from "$lib/stores/estilos";
     import FilaDetalleMovimiento from "./FilaDetalleMovimiento.svelte";
+    import { onMount } from "svelte";
     let pre = import.meta.env.VITE_PRE;
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -24,12 +25,13 @@
         cargadoanimales = false,
         esNatural = true,
     } = $props();
-    let mostrarfilas = $state(3);
+    let minimo = 3
+    let mostrarfilas = $state(minimo);
     function mostrarmas() {
-        mostrarfilas = Math.min(mostrarfilas + 3, rows.length);
+        mostrarfilas = Math.min(mostrarfilas + minimo, rows.length);
     }
     function mostrarmenos() {
-        mostrarfilas = Math.max(mostrarfilas - 3, 3);
+        mostrarfilas = Math.max(mostrarfilas - minimo, minimo);
     }
     let buscar = $state("");
     let rows = $derived(
@@ -38,16 +40,20 @@
         ),
     );
     let rowsmostrar = $derived(rows.slice(0, mostrarfilas));
-    let verLista = $state(abierta);
+    let verLista = $state(false);
     function toggleLista() {
         verLista = !verLista;
     }
+    onMount(()=>{
+        verLista = abierta
+    })
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <div
     class="
         container mx-auto py-3 px-4 max-w-7xl
+        max-h-[500px] overflow-y-auto custom-scrollbar  
         "
 >
     <div
@@ -143,7 +149,7 @@
 
             <div class="divide-y divide-slate-200 dark:divide-slate-700">
                 {#if cargadoanimales}
-                    {#each rowsmostrar as a, i}
+                    {#each rows as a, i}
                         <FilaDetalleMovimiento
                             {cargadoanimales}
                             animal={a}
@@ -158,31 +164,7 @@
                             {i}
                         />
                     {/each}
-                    {#if rowsmostrar.length < rows.length}
-                        <div
-                            class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 text-center"
-                        >
-                            <button
-                                onclick={mostrarmas}
-                                class="text-sm text-slate-500 dark:text-slate-400  hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors duration-150"
-                            >
-                                ↓ Cargar más madres
-                            </button>
-                        </div>
-                    {/if}
-                    {#if rowsmostrar.length > 3}
-                        <div
-                            class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 text-center"
-                        >
-                            
-                            <button
-                                onclick={mostrarmenos}
-                                class="text-sm text-slate-500 dark:text-slate-400  hover:text-emerald-700 dark:hover:text-emerald-300 font-medium transition-colors duration-150"
-                            >
-                                ↑ Cargar menos madres
-                            </button>
-                        </div>
-                    {/if}
+                    
                 {/if}
             </div>
             <div class="hidden" transition:slide>

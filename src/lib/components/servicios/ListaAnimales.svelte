@@ -8,6 +8,7 @@
 
     import Arrowdownsimple from "$lib/svgs/arrowdownsimple.svelte";
     import estilos from "$lib/stores/estilos";
+    import { onMount } from "svelte";
 
     let {
         selectanimales = $bindable([]),
@@ -20,11 +21,13 @@
         cargadoanimales = false,
         esNatural = true,
     } = $props();
-    let verLista = $state(abierta);
+    let verLista = $state(false);
     function toggleLista() {
         verLista = !verLista;
     }
-    
+    onMount(()=>{
+         verLista = abierta
+    })
 </script>
 
 {#if selectanimales.length > 0}

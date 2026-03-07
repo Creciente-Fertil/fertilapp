@@ -273,14 +273,7 @@
         <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
         {#if edit}
             <div class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
-                <!-- Botón Eliminar -->
-
-                <button
-                    class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
-                    onclick={confirmDelete}
-                >
-                    Eliminar
-                </button>
+                
 
                 <!-- Botón Cancelar -->
                 <button

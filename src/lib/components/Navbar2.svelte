@@ -236,7 +236,7 @@
         />
     </div>
     <div class="w-full ">
-        <main class={`py-16 ${estilos.bgmain} ml-10 pl-10`}>
+        <main class={`pt-16 ${estilos.bgmain} ml-10 pl-10`}>
             {@render children()}
             
         </main>
@@ -272,7 +272,7 @@
             {salir}
         />
 
-        <main class={`py-16 ${estilos.bgmain}`}>
+        <main class={`pt-16 ${estilos.bgmain}`}>
             {@render children()}
             {#if esCelu}
                 <NavegacionBottom />

@@ -1,8 +1,9 @@
 <script>
     import estilos from "$lib/stores/estilos";
+    import { onMount } from "svelte";
 
     let {lista,etiqueta,valor=$bindable(""),cadena=$bindable("")} = $props()
-    let listarow = $state(lista)
+    let listarow = $state([])
     let isOpen = $state(false)
     let nombre = $state("")
     function cambioCadena(){
@@ -29,7 +30,9 @@
         nombre = cadena
     }
     
-    
+    onMount(()=>{
+        listarow = lista
+    })
 </script>
 <div class="w-full">
     <label for="" class={estilos.labelForm}>{etiqueta}</label>

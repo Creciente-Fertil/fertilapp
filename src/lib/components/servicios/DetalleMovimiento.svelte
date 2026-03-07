@@ -37,7 +37,7 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <div
     class="
-        container mx-auto py-3 px-4 max-w-7xl
+        container  py-3 px-4 max-w-7xl
         "
 >
     <!--Header-->
@@ -72,32 +72,26 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <!--Tipo y padres-->
             <div class="grid grid-cols-1">
-                <div>
-                    <label for="tiposervicio" class="label">
-                        <span
-                            class="label-text text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
-                            >Tipo servicio</span
-                        >
-                    </label>
-                    <label class="input-group px-3">
-                        <select
-                            class={`
-                                
-                                select select-bordered
-                                border border-gray-300 rounded-md
-                                focus:outline-none focus:ring-2 
-                                focus:ring-green-500 focus:border-green-500
-                                ${estilos.bgdark2}
-                            `}
-                            value={esNatural}
-                        >
-                            <option value={true}>Servicio natural</option>
-                            <option value={false}
-                                >Inseminación inseminación</option
+                <div class="">
+                        <label for="fechadesde" class="label">
+                            <span
+                                class="label-text tracking-wide text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
                             >
-                        </select>
-                    </label>
-                </div>
+                                Tipo de servicio</span
+                            >
+                        </label>
+                        
+                        <span
+                            class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+                            >
+                            {#if esNatural}
+                                Servicio natural
+                            {:else}
+                                Inseminación artificial
+                            {/if}</span
+                        >
+                        
+                    </div>
                 {#if cargadoanimales}
                     <div>
                         {#if esNatural}
@@ -105,13 +99,13 @@
                                 <SelectToros
                                     opciones={listapadres}
                                     etiqueta="Padres"
-                                    bind:valores={padreslist}
+                                    valores={padreslist}
                                     etiquetaDefault={false}
                                     agregarElemento={agregarPadre}
                                     quitarElemento={quitarPadre}
                                     margintop=""
                                     py="py-1"
-                                    px="px-1"
+                                    px="px-3"
                                     edit={false}
                                 >
                                     <label for="Padres" class="label">
@@ -127,9 +121,9 @@
                             <PredictSelect
                                 {onwrite}
                                 {onelegir}
-                                bind:valor={padre}
+                                valor={padre}
                                 etiqueta={"Padre"}
-                                bind:cadena={pajuela}
+                                cadena={pajuela}
                                 lista={listapadres}
                                 size="w-full lg:w-1/3"
                                 etiquetaDefault={false}

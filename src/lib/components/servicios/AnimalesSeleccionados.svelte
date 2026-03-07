@@ -49,7 +49,8 @@
     </div>
     <div
         class="
-            max-h-64
+            hidden
+            max-h-32
             overflow-y-auto
             pr-2
             custom-scrollbar

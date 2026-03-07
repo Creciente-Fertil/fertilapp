@@ -2,7 +2,7 @@
     import paginacion from "$lib/stores/paginacion";
     let {
         rows = [],
-        pageSize = $bindable(10),
+        pageSize = $bindable(30),
         paginaActual = $bindable(1),
         totalPaginas,
         onChangePageSize = () => {},
@@ -20,7 +20,7 @@
     <div class="flex items-center justify-between flex-wrap gap-4">
         <!-- Texto "Mostrando X a Y de Z resultados" -->
         <div class="text-sm text-gray-700 dark:text-gray-300 font-medium">
-            Mostrando
+            
             <span class="font-bold">
                 {minimo}
             </span>
@@ -36,7 +36,7 @@
         <div
             class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
         >
-            <span>Filas por página:</span>
+            <span>Filas:</span>
             <select
                 class="
                 bg-white dark:bg-slate-900
@@ -76,7 +76,7 @@
                 <button
                     onclick={() => (paginaActual = 1)}
                     class={`
-                    w-8 h-8 flex items-center
+                    w-6 h-8 flex items-center
                     justify-center text-sm font-semibold 
                     rounded-md shadow-sm
                 `}
@@ -87,7 +87,7 @@
             {#if puntosanterior}
                 <div
                     class={`
-                    w-8 h-8 flex items-center
+                    w-6 h-8 flex items-center
                     justify-center text-sm font-semibold 
                     
                 `}
@@ -99,7 +99,7 @@
                 <button
                     onclick={() => (paginaActual = anterior)}
                     class={`
-                    w-8 h-8 flex items-center
+                    w-6 h-8 flex items-center
                     justify-center text-sm font-semibold 
                     rounded-md shadow-sm
                 `}
@@ -109,7 +109,7 @@
             {/if}
             <button
                 class={`
-                    w-8 h-8 flex items-center
+                    w-6 h-8 flex items-center
                     justify-center text-sm font-semibold 
                     rounded-md shadow-sm
                     text-white bg-[#115642] dark:bg-green-700
@@ -121,7 +121,7 @@
                 <button
                     onclick={() => (paginaActual = posterior)}
                     class={`
-                    w-8 h-8 flex items-center
+                    w-6 h-8 flex items-center
                     justify-center text-sm font-semibold 
                     rounded-md shadow-sm
                 `}
@@ -132,7 +132,7 @@
             {#if puntosposterior}
                 <div
                     class={`
-                    w-8 h-8 flex items-center
+                    w-6 h-8 flex items-center
                     justify-center text-sm font-semibold 
                     
                 `}
@@ -144,7 +144,7 @@
                 <button
                     onclick={() => (paginaActual = totalPaginas)}
                     class={`
-                    w-8 h-8 flex items-center
+                    w-6 h-8 flex items-center
                     justify-center text-sm font-semibold 
                     rounded-md shadow-sm
                 `}
