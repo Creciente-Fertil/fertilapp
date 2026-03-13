@@ -40,17 +40,13 @@
         fechadesde = $bindable(""),
         fechahasta = $bindable(""),
         contodos = $bindable(true),
-        contactos = $bindable(true),
-        coninse = $bindable(true),
-        conser = $bindable(true),
-        conobser = $bindable(true),
-        contrata = $bindable(true),
-        conpari = $bindable(true),
+        concate = $bindable(false),
+        conlote = $bindable(false),
+        conrodeo = $bindable(false),
         filterUpdate = () => {},
         changeCampo = () => {},
     } = $props();
 </script>
-
 <svelte:window bind:innerWidth bind:innerHeight />
 <div class=" py-1 px-4 w-full">
     <!--Header-->
@@ -75,12 +71,12 @@
                         dark:text-white text-gray-900
                     `}
                 >
-                    Historia clínica
+                    Movimientos
                 </h1>
             </div>
             <Secondary onclick={exportar} conhijo={true}>
                 <Arrowdown size="size-4" margenes="" />
-                Exportar Historial
+                Exportar movimientos
             </Secondary>
             
         </div>
@@ -133,33 +129,18 @@
                     onchange={changeCampo}
                 />
                 <CustomCheck
-                    bind:activo={coninse}
-                    etiqueta="Inseminación"
+                    bind:activo={concate}
+                    etiqueta="Categorias"
                     onchange={changeCampo}
                 />
                 <CustomCheck
-                    bind:activo={conser}
-                    etiqueta="Servicio"
+                    bind:activo={conlote}
+                    etiqueta="Lotes"
                     onchange={changeCampo}
                 />
                 <CustomCheck
-                    bind:activo={conpari}
-                    etiqueta="Parición"
-                    onchange={changeCampo}
-                />
-                <CustomCheck
-                    bind:activo={conobser}
-                    etiqueta="Observación"
-                    onchange={changeCampo}
-                />
-                <CustomCheck
-                    bind:activo={contactos}
-                    etiqueta="Tacto"
-                    onchange={changeCampo}
-                />
-                <CustomCheck
-                    bind:activo={contrata}
-                    etiqueta="Tratamiento"
+                    bind:activo={conrodeo}
+                    etiqueta="Rodeos"
                     onchange={changeCampo}
                 />
             </div>

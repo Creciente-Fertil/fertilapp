@@ -27,6 +27,7 @@ const config = {
 				"/nacimientos",
 				"/nacimientos/reporte",
 				"/rodeos",
+				"/rodeos/1",
 				"/rol",
 				"/notfind",
 				"/opciones",
@@ -43,6 +44,7 @@ const config = {
 				"/tratamientos/1",
 				"/importar",
 				"/lotes",
+				"/lotes/1",
 				"/movimientos",
 				"/movimientos/detalle",
 				"/user/new",
@@ -77,3 +79,4 @@ const config = {
 };
 
 export default config;
+

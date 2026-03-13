@@ -2,9 +2,19 @@
     let {
         texto = "",
         onclick=()=>{},
-        disabled = false
+        disabled = false,
+        rounded="rounded-full",
+        fuentepeso="font-normal",
+        fuentesize="text-base",
+        py="py-1",
+        px="px-3",
+        btn="",
+        mt="mt-1",
+        mb="mb-1"
+
+
     } = $props()
-    const base = "border rounded-full px-3 py-1 text-md flex items-center gap-1 transition-colors";
+    const base = $derived(`${btn} ${rounded} ${fuentepeso} ${px} ${py} ${fuentesize} flex items-center gap-1 ${mt} ${mb}`);
 
 </script>
 <button
@@ -12,11 +22,11 @@
     {disabled}
     class={`
         ${base}
-        bg-red-500 border-red-600 text-white hover:bg-red-600
-        dark:bg-red-600 dark:border-red-700 dark:hover:bg-red-700
+        bg-[#A94442]  text-white hover:bg-[#813034]
+        dark:bg-[#813034] dark:hover:bg-[#6f2c31]
         
         disabled:opacity-50 disabled:cursor-not-allowed
-        disabled:hover:bg-red-700 disabled:dark:hover:bg-red-600
+        disabled:hover:bg-[#993738]
     `}
 >
     {texto}

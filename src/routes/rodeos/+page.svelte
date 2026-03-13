@@ -12,7 +12,8 @@
     //FILTROS
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
-
+    import { shorterWord } from "$lib/stringutil/lib";
+    import TablaRodeos from "$lib/components/rodeos/TablaRodeos.svelte";
     let ruta = import.meta.env.VITE_RUTA;
 
     const pb = new PocketBase(ruta);
@@ -23,8 +24,15 @@
     //Datos para mostrar
     let rodeos = $state([]);
     let rodeosrows = $state([]);
+    let selecthash = $state({});
     let buscar = $state("");
     let mostrarVacios = $state(true);
+    let cargadorodeos = $state(false);
+    let todos = $state(false);
+    let ninguno = $state(false);
+    let algunos = $state(false);
+    //Paginacion
+    let pageSize = $state(15);
 
     let defaultfiltro = {
         buscar: "",
@@ -51,6 +59,14 @@
         ...defaultfiltroanimales,
     });
     let proxyanimales = createStorageProxy("listaanimales", defaultfiltro);
+    //rodeo
+    let defaultRodeo = {
+        id:"",
+        nombre:"",
+        edit:false
+    }
+    let detalleRodeo = $state({...defaultRodeo})
+    let proxyLote = createStorageProxy("detalleRodeo", defaultRodeo);
     //Guardar
     let idrodeo = $state("");
     let nombre = $state("");
@@ -77,6 +93,8 @@
             let total = await getAnimalesTotal(rodeos[i].id);
             rodeos[i].total = total;
         }
+
+        cargadorodeos = true;
     }
     function openNewModal() {
         idrodeo = "";
@@ -105,8 +123,17 @@
         idrodeo = id;
         let rodeo = rodeos.filter((r) => r.id == idrodeo)[0];
         nombre = rodeo.nombre;
-
-        nuevoModal.showModal();
+        proxyLote.save({id,edit:true,nombre})
+        goto(pre+"/rodeos/"+id)
+        //nuevoModal.showModal();
+    }
+    function openViewModal(id) {
+        idrodeo = id;
+        let rodeo = rodeos.filter((r) => r.id == idrodeo)[0];
+        nombre = rodeo.nombre;
+        proxyLote.save({id,edit:false,nombre})
+        goto(pre+"/rodeos/"+id)
+        //nuevoModal.showModal();
     }
     async function editar(id) {
         try {
@@ -237,6 +264,8 @@
     function nuevo() {
         openNewModal();
     }
+    function clickTodos() {}
+    function clickFila(id) {}
 </script>
 
 <Navbar2>
@@ -246,98 +275,39 @@
         {nuevo}
         {limpiarFiltros}
         {filterUpdate}
+        {selecthash}
+        cabnombre={cab.nombre}
     />
-    <div class="hidden grid grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12">
-        <div>
-            <h1 class="text-2xl">Rodeo</h1>
-        </div>
-        <div class="flex col-span-2 gap-1 justify-end">
-            <button
-                class={` btn btn-primary rounded-lg ${estilos.btntext} px-2 mx-1`}
-                data-theme="forest"
-                onclick={() => openNewModal()}
+    {#if cargadorodeos}
+        <!--Tabla-->
+        <div
+            class={`
+                w-full xl:w-3/4 md:grid
+                mx-auto py-1 px-4 max-w-7xl  
+            `}
+        >
+            <div
+                class={`
+                overflow-hidden rounded-xl
+                border dark:border-gray-700
+
+            `}
             >
-                <span class="text-xl">Nuevo</span>
-            </button>
-        </div>
-    </div>
-    <div
-        class="hidden grid grid-cols-3 lg:grid-cols-4 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
-    >
-        <div class="col-span-2">
-            <label
-                class={`input input-bordered flex items-center gap-2 ${estilos.bgdark2}`}
-            >
-                <input
-                    type="text"
-                    class="grow"
-                    placeholder="Buscar..."
-                    bind:value={buscar}
-                    oninput={filterUpdate}
+                <TablaRodeos
+                    bind:pageSize
+                    {selecthash}
+                    {rodeosrows}
+                    openView={openViewModal}
+                    openEdit={openEditModal}
+                    openEliminar={eliminar}
+                    {clickFila}
+                    {clickTodos}
+                    {todos}
+                    {shorterWord}
                 />
-            </label>
-        </div>
-        <div>
-            <div class="form-control">
-                <label class="label cursor-pointer flex justify-start gap-2">
-                    <span class="label-text text-lg">Vacios</span>
-                    <input
-                        type="checkbox"
-                        class="checkbox"
-                        bind:checked={mostrarVacios}
-                    />
-                </label>
             </div>
         </div>
-    </div>
-    <div
-        class="hidden flex w-11/12 justify-start lg:w-1/2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
-    >
-        <Limpiar {limpiarFiltros} />
-    </div>
-    <div
-        class={`
-            w-full grid grid-cols-1
-            mx-auto py-6 px-4 max-w-7xl
-        `}
-    >
-        <div
-            class="overflow-hidden rounded-xl"
-        >
-            <table class="table table-lg w-full">
-                <thead
-                    class="bg-emerald-600 text-white dark:bg-emerald-700"
-                >
-                    <tr>
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >Nombre</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >Total</th
-                        >
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each rodeosrows as r}
-                        {#if r.total != 0 || mostrarVacios}
-                            <tr
-                                onclick={() => openEditModal(r.id)}
-                                class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
-                            >
-                                <td
-                                    class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                    >{r.nombre}</td
-                                >
-                                <td class="text-base mx-1 px-1">{r.total}</td>
-                            </tr>
-                        {/if}
-                    {/each}
-                </tbody>
-            </table>
-        </div>
-    </div>
+    {/if}
 </Navbar2>
 <dialog
     id="nuevoModal"

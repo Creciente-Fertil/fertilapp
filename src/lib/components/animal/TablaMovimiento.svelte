@@ -5,14 +5,11 @@
     
     let { data = [] } = $props();
     const colorMap = {
-        "inse": "blue",
-        "ser":  "purple",
-        "pari": "green",
-        "obser":"red",
-        "tacto":"yellow",
-        "trata":"gray"
+        "Lote": "blue",
+        "Rodeo":  "purple",
+        "Categoria": "green"
     }
-    let pageSize = $state(10);
+    let pageSize = $state(15);
     let paginaActual = $state(1);
 
     let paginaAnterior = $derived(paginaActual - 1);
@@ -27,7 +24,7 @@
     function onChangePageSize(){
         paginaActual = 1
     }
-    let pyfila = "py-2";
+    let pyfila = "py-1";
 </script>
 
 <table class="table table-lg w-full bg-white dark:bg-slate-900">
@@ -55,12 +52,12 @@
 
                 `}
             >
-                Informacion
+                Detalle
             </th>
         </tr>
     </thead>
     <tbody>
-        {#each rows as h (h.id)}
+        {#each rows as h }
             
             <tr>
                 <td class={`text-base mx-1 px-1 text-center ${pyfila}`}>
@@ -68,13 +65,13 @@
                 </td>
                 <td class={`text-base mx-1 px-1 text-center ${pyfila}`}>
                     <Badge 
-                        text = {h.nombre}
-                        color = {colorMap[h.coleccion]}
+                        text = {`Cambio de ${h.nombre}`}
+                        color = {colorMap[h.nombre]}
                     />
                     
                 </td>
                 <td class={`text-base mx-1 px-1 text-center ${pyfila}`}>
-                    {@html h.info}
+                    {h.info}
                 </td>
             </tr>
         {/each}

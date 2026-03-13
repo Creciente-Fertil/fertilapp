@@ -11,7 +11,7 @@
         <!-- Botón Volver -->
         <button
             class="
-                        hidden md:block
+                        hidden
                         mt-2 px-10 py-2
                         dark:bg-transparent
                         bg-white

@@ -557,7 +557,7 @@
                 : "",
         };
     }
-    let pageSize = $state(10);
+    let pageSize = $state(15);
     //Para el collapse de los filtros
     let isOpenFilter = $state(false);
     function clickFilter() {

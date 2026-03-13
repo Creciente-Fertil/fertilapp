@@ -122,7 +122,7 @@
         proxymovimiento.observacion = observaciongeneral;
         proxymovimiento.padreslist = padreslist;
         proxymovimiento.padresserv = padresserv;
-        
+        proxymovimiento.pajuela  = pajuela
         proxy.save(proxymovimiento);
     }
     function loadDetalle() {
@@ -134,7 +134,7 @@
         padresserv = proxymovimiento.padresserv;
         padreslist = proxymovimiento.padreslist;
         padre = proxymovimiento.padre;
-
+        pajuela= proxymovimiento.pajuela;
         fechaparto = proxymovimiento.fechaparto;
         fechadesdeserv = proxymovimiento.fechadesdeserv;
         fechahastaserv = proxymovimiento.fechahastaserv;
@@ -450,6 +450,7 @@
 <Navbar2>
     
     <div class={classmove}>
+        
         <DetalleMovimiento
             {esNatural}
             {observaciongeneral}

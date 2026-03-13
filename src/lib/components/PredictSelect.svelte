@@ -1,5 +1,6 @@
 <script>
     import estilos from "$lib/stores/estilos";
+
     import { onDestroy, onMount } from "svelte";
 
     let {
@@ -18,6 +19,7 @@
         campo = "nombre",
         etiquetaDefault = true,
         flotante = true,
+        margintop="mt-1",
         children,
     } = $props();
 
@@ -72,8 +74,13 @@
         document.addEventListener("click", handleClickOutside);
 
         if (valor.length != 0) {
-            cadena = listarow.filter((l) => l.id == valor)[0][campo];
-            nombre = cadena;
+            let idx_valor = listarow.findIndex((v) => v.id == valor);
+            if (idx_valor != -1) {
+                let fila = listarow[idx_valor];
+                cadena = fila[campo];
+
+                nombre = cadena;
+            }
         }
     });
     // Función para actualizar el ancho
@@ -101,33 +108,60 @@
 {/if}
 <div class={`w-full ${px} ${py}`} bind:this={containerPredict}>
     {#if edit}
-        <input
-            bind:this={inputRef}
-            type="text"
+        <div
             class={`
+        relative
+        ${margintop}
+    `}
+        >
+            <input
+                bind:this={inputRef}
+                type="text"
+                class={`
             input 
             input-bordered 
             border border-gray-300 rounded-md
             focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
             w-full
+            pr-10
             mb-0
-            
             ${estilos.bgdark2} 
         `}
-            oninput={onChangeCadena}
-            onclick={() => {
-                isOpen = !isOpen;
-                if (!isOpen) updateWidth(); // Asegurar ancho al abrir
-            }}
-            bind:value={cadena}
-        />
+                oninput={onChangeCadena}
+                onclick={() => {
+                    isOpen = !isOpen;
+                    if (!isOpen) updateWidth();
+                }}
+                bind:value={cadena}
+            />
+
+            <!-- Flechita a la derecha -->
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class={`
+            absolute right-3 top-1/2 -translate-y-1/2
+            w-5 h-5 text-gray-400 
+            transition-transform duration-150 
+            ${isOpen ? "rotate-180" : ""}
+        `}
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5"
+                />
+            </svg>
+        </div>
         {#if isOpen}
             <div
                 style="width: {inputWidth}"
                 class={`
                     ${flotante ? "absolute" : "relative"}
-                    mt-0  z-10 max-h-40 overflow-auto w-full`
-                }
+                    mt-0  z-10 max-h-40 overflow-auto w-full`}
             >
                 {#if listarow.length == 0}
                     <div
@@ -213,7 +247,7 @@
                 {/if}
             </div>
         {/if}
-        {#if valor.length != 0}
+        {#if valor.length != 0 && nombre.length > 0}
             <span class="text-sm mt-1">Elegiste a {nombre}</span>
         {/if}
     {:else}

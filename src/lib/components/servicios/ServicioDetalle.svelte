@@ -1,6 +1,8 @@
 <script>
     import estilos from "$lib/stores/estilos";
     import MultipleToros from "../MultipleToros.svelte";
+    import MultiSelect from "../MultiSelect.svelte";
+    import SelectToros from "../SelectToros.svelte";
 
     let {
         edit,
@@ -129,7 +131,7 @@
         </label>
     </div>
 
-    <div>
+    <div class="hidden">
         <label for="padres" class="label">
             <span class="label-text text-sm font-normal">Padres</span>
         </label>
@@ -141,9 +143,24 @@
                     bind:valor={padresserv}
                     bind:listavalores={padreslist}
                 />
+                
             {/if}
         </label>
     </div>
+    {#if cargado}
+        <div>
+            <SelectToros
+                opciones={toros}
+                campo="caravana"
+                bind:valores={padreslist}
+                {edit}
+            >
+            <label for="padres" class="label">
+                <span class="label-text text-sm font-normal">Padres</span>
+            </label>
+            </SelectToros>
+        </div>
+    {/if}
 
     <!--Observacion-->
     <div class="col-span-1 md:col-span-2 border-t dark:border-gray-800">

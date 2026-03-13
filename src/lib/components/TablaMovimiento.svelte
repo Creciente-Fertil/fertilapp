@@ -113,13 +113,7 @@
             <tbody>
                 {#each rows as a}
                     <tr>
-                        <td class="hidden text-base mx-2 px-2">
-                            <input
-                                type="checkbox"
-                                checked={selecthash[a.id] ? true : false}
-                                onchange={() => clickFila(a.id)}
-                            />
-                        </td>
+                        
                         <td class={`text-base mx-2 px-2 w-16 ${pyfila}`}>
                             <label
                                 class="flex items-center justify-center cursor-pointer"

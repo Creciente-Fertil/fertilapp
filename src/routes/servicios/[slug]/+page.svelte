@@ -240,9 +240,6 @@
 </script>
 
 <Navbar2>
-    
-         
-    
     <CardServicio cardsize="max-w-7xl" {titulo} {edit}>
         {#if natural}
             <ServicioDetalle
@@ -311,27 +308,6 @@
                     onclick={confirmDelete}
                 >
                     Eliminar
-                </button>
-
-                <!-- Botón Volver -->
-                <button
-                    class="
-                        hidden md:block
-                        mt-2 px-10 py-2 
-                        dark:bg-transparent
-                        bg-white 
-                        text-gray-800 
-                        dark:text-white
-                        font-medium 
-                        rounded-full shadow-sm border 
-                        border-gray-300 
-                        hover:bg-gray-200
-                        dark:hover:bg-gray-800
-                        transition-colors 
-                        text-base"  
-                    onclick={volver}
-                >
-                    Volver
                 </button>
 
                 <!-- Botón Editar -->

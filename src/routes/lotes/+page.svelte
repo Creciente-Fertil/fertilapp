@@ -13,6 +13,9 @@
     //filtros
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
+    import TablaLotes from "$lib/components/lotes/TablaLotes.svelte";
+    import { shorterWord } from "$lib/stringutil/lib";
+    
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -25,9 +28,17 @@
     //Datos para mostrar
     let lotes = $state([]);
     let lotesrows = $state([]);
+    let selecthash = $state({});
     let buscar = $state("");
     let mostrarVacios = $state(true);
+    let cargadolotes = $state(false);
+    let todos = $state(false)
+    let ninguno = $state(false)
+    let algunos = $state(false)
+    //Paginacion
+    let pageSize = $state(15);
     //filtros
+
     let defaultfiltro = {
         buscar: "",
         mostrarVacios: true,
@@ -54,6 +65,15 @@
         ...defaultfiltroanimales,
     });
     let proxyanimales = createStorageProxy("listaanimales", defaultfiltro);
+
+    //lote
+    let defaultLote = {
+        id:"",
+        nombre:"",
+        edit:false
+    }
+    let detalleLote = $state({...defaultLote})
+    let proxyLote = createStorageProxy("detalleLote", defaultLote);
     //Guardar
     let idlote = $state("");
     let nombre = $state("");
@@ -89,6 +109,7 @@
             lotes[i].total = total;
         }
         filterUpdate();
+        cargadolotes = true;
     }
     function openNewModal() {
         if (userpermisos[1]) {
@@ -138,8 +159,25 @@
         idlote = id;
         let lote = lotes.filter((r) => r.id == idlote)[0];
         nombre = lote.nombre;
+        proxyLote.save({id,nombre,edit:true})
+        goto(pre+"/lotes/"+idlote)
 
-        nuevoModal.showModal();
+        
+        
+        
+        //nuevoModal.showModal();
+    }
+    function openViewModal(id) {
+        idlote = id;
+        let lote = lotes.filter((r) => r.id == idlote)[0];
+        nombre = lote.nombre;
+        proxyLote.save({id,nombre,edit:false})
+        goto(pre+"/lotes/"+idlote)
+
+        
+        
+        
+        //nuevoModal.showModal();
     }
     async function editar(id) {
         try {
@@ -249,101 +287,99 @@
     function nuevo() {
         openNewModal();
     }
+    function clickTodos(){
+
+    }
+    function clickFila(id){
+
+    }
 </script>
 
 <Navbar2>
-    <Buscador {lotesrows} bind:buscar {limpiarFiltros} {filterUpdate} {nuevo} />
-    <div class="hidden grid grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12">
-        <div>
-            <h1 class="text-2xl">Lote</h1>
-        </div>
-        <div class="flex col-span-2 gap-1 justify-end">
-            <button
-                class={` btn btn-primary rounded-lg ${estilos.btntext} px-2 mx-1`}
-                data-theme="forest"
-                onclick={() => openNewModal()}
+    <Buscador
+        cabnombre={cab.nombre}
+        {selecthash}
+        {lotesrows}
+        bind:buscar
+        {limpiarFiltros}
+        {filterUpdate}
+        {nuevo}
+    />
+
+    {#if cargadolotes}
+        <!--Tabla-->
+        <div
+            class={`
+                w-full xl:w-3/4 md:grid
+                mx-auto py-1 px-4 max-w-7xl  
+            `}
+        >
+            <div
+                class={`
+                overflow-hidden rounded-xl
+                border dark:border-gray-700
+
+            `}
             >
-                <span class="text-xl">Nuevo</span>
-            </button>
-        </div>
-    </div>
-    <div
-        class="hidden grid grid-cols-3 lg:grid-cols-4 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
-    >
-        <div class="col-span-2">
-            <label
-                class={`input input-bordered flex items-center gap-2 ${estilos.bgdark2}`}
-            >
-                <input
-                    type="text"
-                    class="grow"
-                    placeholder="Buscar..."
-                    bind:value={buscar}
-                    oninput={filterUpdate}
+                <TablaLotes
+                    bind:pageSize
+                    {selecthash}
+                    {lotesrows}
+                    openView = {openViewModal}
+                    openEdit = {openEditModal}
+                    openEliminar = {eliminar}
+                    {clickFila}
+                    {clickTodos}
+                    {todos}
+                    {shorterWord}
                 />
-            </label>
-        </div>
-        <div>
-            <div class="form-control">
-                <label class="label cursor-pointer flex justify-start gap-2">
-                    <span class="label-text text-lg">Vacios</span>
-                    <input
-                        type="checkbox"
-                        class="checkbox"
-                        bind:checked={mostrarVacios}
-                    />
-                </label>
             </div>
         </div>
-    </div>
-    <div
-        class="hidden flex w-11/12 justify-start lg:w-1/2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
-    >
-        <Limpiar {limpiarFiltros} />
-    </div>
-    <div
-        class={`
+        <div
+            class={`
+            hidden
             w-full grid grid-cols-1
             mx-auto py-6 px-4 max-w-7xl
         `}
-    >
-        <div
-            class="overflow-hidden rounded-xl"
         >
-            <table class="table table-lg w-full">
-                <thead
-                    class="bg-emerald-600 text-white dark:bg-emerald-700"
-                >
-                    <tr>
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >Nombre</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >Total</th
-                        >
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each lotesrows as r}
-                        {#if r.total != 0 || mostrarVacios}
-                            <tr
-                                onclick={() => openEditModal(r.id)}
-                                class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
+            <div class="overflow-hidden rounded-xl">
+                <table class="table table-lg w-full">
+                    <thead
+                        class="bg-emerald-600 text-white dark:bg-emerald-700"
+                    >
+                        <tr>
+                            <th
+                                class="text-base mx-1 px-1 border-b border-emerald-700"
+                                >Nombre</th
                             >
-                                <td
-                                    class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                    >{r.nombre}</td
+                            <th
+                                class="text-base mx-1 px-1 border-b border-emerald-700"
+                                >Total</th
+                            >
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {#each lotesrows as r}
+                            {#if r.total != 0 || mostrarVacios}
+                                <tr
+                                    onclick={() => openEditModal(r.id)}
+                                    class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
                                 >
-                                <td class="text-base mx-1 px-1">{r.total}</td>
-                            </tr>
-                        {/if}
-                    {/each}
-                </tbody>
-            </table>
+                                    <td
+                                        class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
+                                        >{r.nombre}</td
+                                    >
+                                    <td class="text-base mx-1 px-1"
+                                        >{r.total}</td
+                                    >
+                                </tr>
+                            {/if}
+                        {/each}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    {/if}
 </Navbar2>
 <dialog
     id="nuevoModal"

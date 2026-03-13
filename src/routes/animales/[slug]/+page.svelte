@@ -359,7 +359,7 @@
                 //{ id: "tactos", nombre: "Tactos" },
                 //{ id: "servicios", nombre: "Servicios" },
                 { id: "clinica", nombre: "Historia clínica" },
-                { id: "historial", nombre: "Historial" },
+                //{ id: "historial", nombre: "Historial" },
                 //{ id: "eliminar", nombre: "Eliminar" },
                 { id: "movimientos", nombre: "Movimientos" },
                 //{ id: "transfer", nombre: "Transferencia" },
@@ -372,7 +372,7 @@
                 //{ id: "tratamientos", nombre: "Tratamientos" },
                 //{ id: "observaciones", nombre: "Observaciones" },
                 { id: "clinica", nombre: "Historia clínica" },
-                { id: "historial", nombre: "Historial" },
+                //{ id: "historial", nombre: "Historial" },
                 //{ id: "eliminar", nombre: "Eliminar" },
                 { id: "movimientos", nombre: "Movimientos" },
                 //{ id: "transfer", nombre: "Transferencia" },
@@ -455,7 +455,7 @@
                 </div>
             {:else if tab == "pesajes"}
                 <!--Pesajes-->
-                <CardAnimal cardsize="max-w-7xl" titulo="Pesajes">
+                <CardAnimal cardsize="max-w-7xl">
                     <Pesajes
                         pesoanterior={peso}
                         bind:peso
@@ -530,8 +530,11 @@
                     />
                 </CardAnimal>
             {:else if tab == "movimientos"}
-                <CardAnimal cardsize="max-w-7xl" titulo="Movimientos">
-                    <Movimientos />
+                <CardAnimal cardsize="max-w-7xl">
+                    <Movimientos 
+                        {caravana}
+                        {animal}
+                    />
                 </CardAnimal>
             {:else if tab == "transfer"}
                 <CardAnimal cardsize="max-w-7xl" titulo="Transferencia">

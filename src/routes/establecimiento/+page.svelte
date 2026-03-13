@@ -12,8 +12,10 @@
     import CardBase from "$lib/components/CardBase.svelte";
     import Colaboradores from "$lib/components/establecimiento/Colaboradores.svelte";
     import ListaColabs from "$lib/components/establecimiento/ListaColabs.svelte";
+    import DetalleEstablecimiento from "$lib/components/establecimiento/DetalleEstablecimiento.svelte";
     //botones
     import Success from "$lib/components/botones/Success.svelte";
+    import Danger from "$lib/components/botones/Danger.svelte";
     //permisos
     import { getPermisosMessage, getPermisosList } from "$lib/permisosutil/lib";
     import { createPer } from "$lib/stores/permisos.svelte";
@@ -25,7 +27,12 @@
     import provincias from "$lib/stores/geo/provincias";
     import localidades from "$lib/stores/geo/localidades";
     import estilos from "$lib/stores/estilos";
-    
+    import HorizontalTab from "$lib/components/establecimiento/HorizontalTab.svelte";
+    //Size
+    let innerWidth = $state(0);
+    let innerHeight = $state(0);
+    let esCelu = $derived(innerWidth <= 1250);
+
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -41,6 +48,12 @@
     let permisos = $state({});
     let colabs = $state([]);
     let modoedicion = $state(false);
+    let pestañas = $state([
+        { id: "datos", nombre: "Establecimiento" },
+        { id: "colaboradores", nombre: "Colaboradores" },
+    ]);
+    let tab = $state("datos");
+    let textodetalle = $state("Registra tu establecimiento")
     //Datos cabaña
     let nombre = $state("");
     let direccion = $state("");
@@ -103,6 +116,7 @@
                 .getFirstListItem(`id='${cab.id}' && active=true`, {});
             datosviejos = { ...record };
             nombre = record.nombre;
+            textodetalle = nombre
             direccion = record.direccion;
             contacto = record.contacto;
             codigo = record.codigo;
@@ -112,7 +126,7 @@
             provincia = record.provincia;
             telefono = record.telefono;
             mail = record.mail;
-            
+
             localidadesProv = localidades.filter(
                 (lo) => lo.idProv == provincia,
             );
@@ -203,7 +217,7 @@
             mail,
             codigo,
         };
-
+        textodetalle = nombre
         try {
             const record = await pb.collection("cabs").create(data);
             Swal.fire(
@@ -230,6 +244,7 @@
         provincia = datosviejos.provincia;
         telefono = datosviejos.telefono;
         mail = datosviejos.mail;
+        textodetalle = nombre
     }
     async function editarCabaña() {
         let listapermisos = getPermisosList(permisos.permisos);
@@ -249,6 +264,7 @@
             telefono,
             mail,
         };
+        textodetalle = nombre
         try {
             const record = await pb.collection("cabs").update(cab.id, data);
             Swal.fire(
@@ -359,445 +375,457 @@
     });
 </script>
 
+<svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
-    {#if cab.exist}
-        <CardBase titulo={`Bienvenido a ${nombre}`} cardsize="max-w-5xl">
-            <div class="space-y-6">
-                <div>
-                    <label
-                        for="RENSPA"
-                        class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                    >
-                        RENSPA:
-                    </label>
-                    {#if !modoedicion}
-                        <label
-                            for="renspa"
-                            class={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                        >
-                            {renspa}
-                        </label>
-                    {:else}
-                        <label class="form-control">
-                            <input
-                                type="text"
-                                id="renspa"
-                                bind:value={renspa}
-                                required
-                                class={`
+    <DetalleEstablecimiento {textodetalle}>
+        {#if cab.exist}
+            <HorizontalTab bind:pestañas bind:tab />
+            {#if tab == "datos"}
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2">
+                        <div class="pr-3">
+                            <label for="renspa" class="label">
+                                <span
+                                    class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                                >
+                                    RENSPA
+                                </span>
+                            </label>
+                            {#if !modoedicion}
+                                <label
+                                    for="renspa"
+                                    class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
+                                >
+                                    {renspa}
+                                </label>
+                            {:else}
+                                <label class="form-control">
+                                    <input
+                                        type="text"
+                                        id="renspa"
+                                        bind:value={renspa}
+                                        required
+                                        class={`
                                     w-full px-3 py-2 border rounded-md shadow-sm
                                     focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
                                     transition duration-150 ease-in-out
                                     border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                                    pl-2
                                 `}
-                            />
-                            <div class="label">
-                                <span class="label-text-alt"
-                                    >Formato: 00.000.0.00000.00</span
+                                    />
+                                    <div class="label">
+                                        <span class="label-text-alt"
+                                            >Formato: 00.000.0.00000.00</span
+                                        >
+                                    </div>
+                                </label>
+                            {/if}
+                        </div>
+                        <div class="pr-3">
+                            <label for="nombre" class="label">
+                                <span
+                                    class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
                                 >
-                            </div>
-                        </label>
-                    {/if}
-                </div>
-                <div>
-                    <label
-                        for="nombre"
-                        class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                    >
-                        Nombre*
-                    </label>
-                    {#if !modoedicion}
-                        <label
-                            for="nombre"
-                            class={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                        >
-                            {nombre}
-                        </label>
-                    {:else}
-                        <input
-                            type="text"
-                            id="nombre"
-                            bind:value={nombre}
-                            required
-                            class={`
+                                    NOMBRE*
+                                </span>
+                            </label>
+
+                            {#if !modoedicion}
+                                <label
+                                    for="nombre"
+                                    class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
+                                >
+                                    {nombre}
+                                </label>
+                            {:else}
+                                <input
+                                    type="text"
+                                    id="nombre"
+                                    bind:value={nombre}
+                                    required
+                                    class={`
                                 w-full px-3 py-2 border rounded-md shadow-sm
                                 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
                                 transition duration-150 ease-in-out
                                 border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100
                             `}
-                            oninput={() => onChangeEdit("NOMBRE")}
+                                    oninput={() => onChangeEdit("NOMBRE")}
+                                />
+                            {/if}
+                            {#if malnombre}
+                                <div class="label">
+                                    <span class="label-text-alt text-red-500"
+                                        >Debe escribir algún nombre</span
+                                    >
+                                </div>
+                            {/if}
+                        </div>
+                        <div class="pr-3">
+                            <label for="Provincia" class="label">
+                                <span
+                                    class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                                >
+                                    Provincia
+                                </span>
+                            </label>
+                            {#if !modoedicion}
+                                <label
+                                    for="Provincia"
+                                    class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
+                                >
+                                    {getNombreProvincia(provincia)}
+                                </label>
+                            {:else}
+                                <label class="input-group">
+                                    <select
+                                        class={`
+                                            select select-bordered w-full
+                                            rounded-md
+                                            focus:outline-none focus:ring-2 
+                                            focus:ring-green-500 
+                                            focus:border-green-500  
+                                            ${estilos.bgdark2}
+                                            pl-2
+                                        `}
+                                        bind:value={provincia}
+                                        onchange={() =>
+                                            getLocalidades(provincia)}
+                                    >
+                                        <option value="" class="rounded"
+                                        ></option>
+                                        {#each provincias as p}
+                                            <option value={p.id} class="rounded"
+                                                >{p.nombre}</option
+                                            >
+                                        {/each}
+                                    </select>
+                                </label>
+                            {/if}
+                        </div>
+                        <div class="pr-3">
+                            <label for="Localidad" class="label">
+                                <span
+                                    class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                                >
+                                    Localidad
+                                </span>
+                            </label>
+                            {#if !modoedicion}
+                                <label
+                                    for="Localidad"
+                                    class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
+                                >
+                                    {getNombreLocalidad(localidad)}
+                                </label>
+                            {:else}
+                                <label class="input-group">
+                                    <select
+                                        class={`
+                                    select select-bordered w-full
+                                    rounded-md
+                                    focus:outline-none focus:ring-2 
+                                    focus:ring-green-500 
+                                    focus:border-green-500
+                                    
+                                    ${estilos.bgdark2}
+                                `}
+                                        bind:value={localidad}
+                                    >
+                                        <option value="" class="rounded"
+                                        ></option>
+                                        {#each localidadesProv as l}
+                                            <option
+                                                value={l.nombre}
+                                                class="rounded"
+                                                >{l.nombre}</option
+                                            >
+                                        {/each}
+                                    </select>
+                                </label>
+                            {/if}
+                        </div>
+                        <div class="pr-3">
+                            <label for="direccion" class="label">
+                                <span
+                                    class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                                >
+                                    Dirección
+                                </span>
+                            </label>
+                            {#if !modoedicion}
+                                <label
+                                    for="direccion"
+                                    class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
+                                >
+                                    {direccion}
+                                </label>
+                            {:else}
+                                <input
+                                    type="text"
+                                    id="direccion"
+                                    disabled={!modoedicion}
+                                    bind:value={direccion}
+                                    required
+                                    class={`
+                                w-full px-3 py-2 border rounded-md shadow-sm
+                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                transition duration-150 ease-in-out
+                                ${
+                                    modoedicion
+                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                }
+                            `}
+                                />
+                            {/if}
+                        </div>
+                        <div class="pr-3">
+                            <label for="contacto" class="label">
+                                <span
+                                    class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                                >
+                                    REDES
+                                </span>
+                            </label>
+                            {#if !modoedicion}
+                                <label
+                                    for="contacto"
+                                    class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
+                                >
+                                    {contacto}
+                                </label>
+                            {:else}
+                                <input
+                                    type="text"
+                                    id="contacto"
+                                    disabled={!modoedicion}
+                                    bind:value={contacto}
+                                    required
+                                    class={`
+                                w-full px-3 py-2 border rounded-md shadow-sm
+                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                transition duration-150 ease-in-out
+                                ${
+                                    modoedicion
+                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                }
+                            `}
+                                />
+                            {/if}
+                        </div>
+                        <div class="pr-3">
+                            <label for="Teléfono" class="label">
+                                <span
+                                    class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                                >
+                                    TELÉFONO
+                                </span>
+                            </label>
+                            {#if !modoedicion}
+                                <label
+                                    for="Teléfono"
+                                    class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
+                                >
+                                    {telefono}
+                                </label>
+                            {:else}
+                                <input
+                                    type="text"
+                                    id="telefono"
+                                    bind:value={telefono}
+                                    required
+                                    class={`
+                                w-full px-3 py-2 border rounded-md shadow-sm
+                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                transition duration-150 ease-in-out
+                                ${
+                                    modoedicion
+                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                }
+                            `}
+                                />
+                            {/if}
+                        </div>
+                        <div class="pr-3">
+                            <label for="Correo" class="label">
+                                <span
+                                    class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                                >
+                                    CORREO
+                                </span>
+                            </label>
+                            {#if !modoedicion}
+                                <label
+                                    for="Correo"
+                                    class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
+                                >
+                                    {mail}
+                                </label>
+                            {:else}
+                                <input
+                                    type="text"
+                                    id="mail"
+                                    bind:value={mail}
+                                    required
+                                    class={`
+                                w-full px-3 py-2 border rounded-md shadow-sm
+                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                transition duration-150 ease-in-out
+                                ${
+                                    modoedicion
+                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                }
+                            `}
+                                />
+                            {/if}
+                        </div>
+                        <div class="pr-3">
+                            <label for="codigo" class="label">
+                                <span
+                                    class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                                >
+                                    CÓDIGO TRANSFERENCIA
+                                </span>
+                            </label>
+                            <label
+                                for="codigo"
+                                class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
+                            >
+                                {codigo}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    {#if !modoedicion}
+                        <Success
+                            texto={"Editar establecimiento"}
+                            onclick={() => {
+                                modoedicion = true;
+                                botonhabilitado = true;
+                            }}
+                            disabled={false}
+                            fuentesize="text-md"
+                            fuentepeso="font-bold"
+                            px="px-6"
+                            py="py-2"
+                            btn="btn"
+                        />
+                    {:else}
+                        <Danger
+                            onclick={() => {
+                                reestablercerCabaña();
+                                modoedicion = false;
+                                botonhabilitado = false;
+                            }}
+                            texto="Cancelar"
+                            fuentesize="text-md"
+                            fuentepeso="font-bold"
+                            px="px-6"
+                            py="py-2"
+                            btn="btn"
+                        />
+                        <Success
+                            texto={"Editar establecimiento"}
+                            onclick={async () => {
+                                modoedicion = false;
+                                await editarCabaña();
+                            }}
+                            disabled={!botonhabilitado}
+                            fuentesize="text-md"
+                            fuentepeso="font-bold"
+                            px="px-6"
+                            py="py-2"
+                            btn="btn"
                         />
                     {/if}
-                    {#if malnombre}
-                        <div class="label">
-                            <span class="label-text-alt text-red-500"
-                                >Debe escribir algún nombre</span
-                            >
-                        </div>
-                    {/if}
                 </div>
-                <div>
-                    <label
-                        for="Provincia"
-                        class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                    >
-                        Provincia
-                    </label>
-                    {#if !modoedicion}
+            {:else}
+                <Colaboradores
+                    bind:colabs
+                    {mostrarcolab}
+                    {guardarColab}
+                    {desasociar}
+                    {asociado}
+                    cabid={cab.id}
+                    {cab}
+                    bind:permisos
+                />
+                <ListaColabs bind:colabs />
+            {/if}
+            
+        {:else}
+            <div class="space-y-4">
+                    <div>
                         <label
-                            for="Provincia"
-                            class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1`}
+                            for="nombre"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            {getNombreProvincia(provincia)}
+                            Nombre*
                         </label>
-                    {:else}
-                        <label class="input-group">
-                            <select
-                                class={`
-                                    select select-bordered w-full
-                                    rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    
-                                    ${estilos.bgdark2}
-                                `}
-                                bind:value={provincia}
-                                onchange={() => getLocalidades(provincia)}
-                            >
-                                <option value="" class="rounded"></option>
-                                {#each provincias as p}
-                                    <option value={p.id} class="rounded"
-                                        >{p.nombre}</option
-                                    >
-                                {/each}
-                            </select>
-                        </label>
-                    {/if}
-                </div>
-                <div>
-                    <label
-                        for="Localidad"
-                        class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                    >
-                        Localidad
-                    </label>
-                    {#if !modoedicion}
-                        <label
-                            for="Provincia"
-                            class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                        >
-                            {getNombreLocalidad(localidad)}
-                        </label>
-                    {:else}
-                        <label class="input-group">
-                            <select
-                                class={`
-                                    select select-bordered w-full
-                                    rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    
-                                    ${estilos.bgdark2}
-                                `}
-                                bind:value={localidad}
-                            >
-                                <option value="" class="rounded"></option>
-                                {#each localidadesProv as l}
-                                    <option value={l.nombre} class="rounded"
-                                        >{l.nombre}</option
-                                    >
-                                {/each}
-                            </select>
-                        </label>
-                    {/if}
-                </div>
-                <div>
-                    <label
-                        for="direccion"
-                        class="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >
-                        Dirección
-                    </label>
-                    {#if !modoedicion}
+                        <input
+                            type="nombre"
+                            id="nombre"
+                            oninput={() => onChangeNuevo("NOMBRE")}
+                            bind:value={nombre}
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+                        />
+                        {#if malnombre}
+                            <div class="label">
+                                <span class="label-text-alt text-red-500"
+                                    >Debe escribir algún nombre</span
+                                >
+                            </div>
+                        {/if}
+                    </div>
+                    <div>
                         <label
                             for="direccion"
-                            class={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1`}
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            {direccion}
+                            Dirección
                         </label>
-                    {:else}
                         <input
-                            type="text"
+                            type="direccion"
                             id="direccion"
-                            disabled={!modoedicion}
                             bind:value={direccion}
                             required
-                            class={`
-                                w-full px-3 py-2 border rounded-md shadow-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                                transition duration-150 ease-in-out
-                                ${
-                                    modoedicion
-                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                                }
-                            `}
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
                         />
-                    {/if}
-                </div>
-                <div>
-                    <label
-                        for="contacto"
-                        class="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >
-                        Redes
-                    </label>
-                    {#if !modoedicion}
+                    </div>
+                    <div>
                         <label
                             for="contacto"
-                            class={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1`}
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            {contacto}
+                            Redes
                         </label>
-                    {:else}
                         <input
-                            type="text"
+                            type="contacto"
                             id="contacto"
-                            disabled={!modoedicion}
                             bind:value={contacto}
                             required
-                            class={`
-                                w-full px-3 py-2 border rounded-md shadow-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                                transition duration-150 ease-in-out
-                                ${
-                                    modoedicion
-                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                                }
-                            `}
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
                         />
-                    {/if}
+                    </div>
                 </div>
-                <div>
-                    <label
-                        for="Teléfono"
-                        class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                    >
-                        Teléfono
-                    </label>
-                    {#if !modoedicion}
-                        <label
-                            for="Teléfono"
-                            class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                        >
-                            {telefono}
-                        </label>
-                    {:else}
-                        <input
-                            type="text"
-                            id="telefono"
-                            bind:value={telefono}
-                            required
-                            class={`
-                                w-full px-3 py-2 border rounded-md shadow-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                                transition duration-150 ease-in-out
-                                ${
-                                    modoedicion
-                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                                }
-                            `}
-                        />
-                    {/if}
-                </div>
-                <div>
-                    <label
-                        for="Correo"
-                        class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                    >
-                        Correo
-                    </label>
-                    {#if !modoedicion}
-                        <label
-                            for="Correo"
-                            class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                        >
-                            {mail}
-                        </label>
-                    {:else}
-                        <input
-                            type="text"
-                            id="mail"
-                            bind:value={mail}
-                            required
-                            class={`
-                                w-full px-3 py-2 border rounded-md shadow-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                                transition duration-150 ease-in-out
-                                ${
-                                    modoedicion
-                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                                }
-                            `}
-                        />
-                    {/if}
-                </div>
-                <div>
-                    <label
-                        for="codigo"
-                        class="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >
-                        Codigo de transferencia
-                    </label>
-                    <label
-                        for="codigo"
-                        class={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1`}
-                    >
-                        {codigo}
-                    </label>
-                </div>
-            </div>
-            <div class="mt-8 flex justify-end">
-                {#if !modoedicion}
+                <div class="mt-8 flex justify-end">
+                    
                     <Success
-                        texto ={"Editar establecimiento"}
-                        onclick={() => {modoedicion = true;botonhabilitado = true}}
-                        disabled = {false}
-                        rounded="rounded-md"
+                        texto={"Guardar establecimiento"}
+                        onclick={guardarCabaña}
+                        disabled={!botonhabilitado}
                         fuentesize="text-md"
                         fuentepeso="font-bold"
                         px="px-6"
                         py="py-2"
                         btn="btn"
                     />
-                    <button
-                        onclick={() => {modoedicion = true;botonhabilitado = true}}
-                        class=" 
-                            hidden
-                            btn px-6 py-2 bg-green-600 
-                            hover:bg-green-700 rounded-md
-                            text-white font-bold font-lg focus:outline-none
-                            focus:ring-2 focus:ring-offset-2 focus:ring-green-500
-                        "
-                    >
-                        Editar establecimiento
-                    </button>
-                {:else}
-                    <button
-                        onclick={() => {
-                            reestablercerCabaña();
-                            modoedicion = false;
-                            botonhabilitado = false
-                        }}
-                        class="
-                            btn btn-error
-                            text-white
-                            font-bold font-lg
-                        "
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        onclick={async () => {
-                            modoedicion = false;
-                            await editarCabaña();
-                        }}
-                        class="btn px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md text-white font-bold font-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                        disabled={!botonhabilitado}
-                    >
-                        Guardar
-                    </button>
-                {/if}
-            </div>
-            <Colaboradores
-                bind:colabs
-                {mostrarcolab}
-                {guardarColab}
-                {desasociar}
-                {asociado}
-                cabid={cab.id}
-                {cab}
-                bind:permisos
-            />
-            <ListaColabs bind:colabs />
-        </CardBase>
-    {:else}
-        <CardBase titulo="Registra tu establecimiento">
-            <div class="space-y-4">
-                <div>
-                    <label
-                        for="nombre"
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >
-                        Nombre*
-                    </label>
-                    <input
-                        type="nombre"
-                        id="nombre"
-                        oninput={() => onChangeNuevo("NOMBRE")}
-                        bind:value={nombre}
-                        required
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                    />
-                    {#if malnombre}
-                        <div class="label">
-                            <span class="label-text-alt text-red-500"
-                                >Debe escribir algún nombre</span
-                            >
-                        </div>
-                    {/if}
                 </div>
-                <div>
-                    <label
-                        for="direccion"
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >
-                        Dirección
-                    </label>
-                    <input
-                        type="direccion"
-                        id="direccion"
-                        bind:value={direccion}
-                        required
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                    />
-                </div>
-                <div>
-                    <label
-                        for="contacto"
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >
-                        Redes
-                    </label>
-                    <input
-                        type="contacto"
-                        id="contacto"
-                        bind:value={contacto}
-                        required
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                    />
-                </div>
-            </div>
-            <div class="mt-8 flex justify-end">
-                <button
-                    onclick={guardarCabaña}
-                    class="
-                        btn px-6 py-2
-                        bg-green-600 hover:bg-green-700
-                        rounded-md text-white font-bold text-lg
-                        focus:outline-none focus:ring-2
-                        focus:ring-offset-2 focus:ring-green-500
-                    "
-                    disabled={!botonhabilitado}
-                >
-                    Guardar establecimiento
-                </button>
-            </div>
-        </CardBase>
-    {/if}
+        {/if}
+    </DetalleEstablecimiento>
 </Navbar2>

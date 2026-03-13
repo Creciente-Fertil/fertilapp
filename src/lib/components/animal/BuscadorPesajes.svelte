@@ -3,8 +3,11 @@
     import CustomCheck from "../CustomCheck.svelte";
     import ExportarSmall from "../ExportarSmall.svelte";
     import Arrowdown from "$lib/svgs/arrowdown.svelte";
+    import Plus from "$lib/svgs/plus.svelte";
+    import Trend from "$lib/svgs/trend.svelte";
     import * as XLSX from "xlsx";
     import Secondary from "../botones/Secondary.svelte";
+    import Success from "../botones/Success.svelte";
     let pre = import.meta.env.VITE_PRE;
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -12,13 +15,13 @@
     function prepararData(item) {
         return {
             FECHA: item.fecha ? new Date(item.fecha).toLocaleDateString() : "",
-            CARAVANA: caravana,
-            EVENTO: item.nombre,
-            INFO: item.info,
+            PESO: item.peso,
+            
+            
         };
     }
     function exportar() {
-        let sheetname = "Historia Clínica";
+        let sheetname = "Pesajes";
         let csvdata = data.map(prepararData);
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet([]);
@@ -39,26 +42,17 @@
         caravana = "",
         fechadesde = $bindable(""),
         fechahasta = $bindable(""),
-        contodos = $bindable(true),
-        contactos = $bindable(true),
-        coninse = $bindable(true),
-        conser = $bindable(true),
-        conobser = $bindable(true),
-        contrata = $bindable(true),
-        conpari = $bindable(true),
         filterUpdate = () => {},
-        changeCampo = () => {},
+        
+        nuevo = ()=>{},
+        evolucion=()=>{}
     } = $props();
 </script>
-
 <svelte:window bind:innerWidth bind:innerHeight />
 <div class=" py-1 px-4 w-full">
     <!--Header-->
     <div
-        class={`
-            
-            
-        `}
+        class={``}
     >
         <div
             class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 mb-2 border-b dark:border-gray-800"
@@ -75,14 +69,25 @@
                         dark:text-white text-gray-900
                     `}
                 >
-                    Historia clínica
+                    Pesajes
                 </h1>
             </div>
+            <div class="flex flex-wrap gap-2">
+            <Success onclick={nuevo} conhijo={true}>
+                <Plus size="size-4" margenes="" />
+                Nuevo
+            </Success>
+            {#if data.length>0}
+                <Secondary onclick={evolucion} conhijo={true}>
+                    <Trend size="size-4" margenes="" />
+                    Evolucion
+                </Secondary>
+            {/if}
             <Secondary onclick={exportar} conhijo={true}>
                 <Arrowdown size="size-4" margenes="" />
-                Exportar Historial
+                Exportar pesajes
             </Secondary>
-            
+            </div>
         </div>
         <div class="grid grid-cols-1 w-full p-1 md:p-4">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-1">
@@ -124,44 +129,6 @@
                         onchange={filterUpdate}
                     />
                 </div>
-            </div>
-            
-            <div class="flex flex-wrap gap-2 my-2">
-                <CustomCheck
-                    bind:activo={contodos}
-                    etiqueta="Todos"
-                    onchange={changeCampo}
-                />
-                <CustomCheck
-                    bind:activo={coninse}
-                    etiqueta="Inseminación"
-                    onchange={changeCampo}
-                />
-                <CustomCheck
-                    bind:activo={conser}
-                    etiqueta="Servicio"
-                    onchange={changeCampo}
-                />
-                <CustomCheck
-                    bind:activo={conpari}
-                    etiqueta="Parición"
-                    onchange={changeCampo}
-                />
-                <CustomCheck
-                    bind:activo={conobser}
-                    etiqueta="Observación"
-                    onchange={changeCampo}
-                />
-                <CustomCheck
-                    bind:activo={contactos}
-                    etiqueta="Tacto"
-                    onchange={changeCampo}
-                />
-                <CustomCheck
-                    bind:activo={contrata}
-                    etiqueta="Tratamiento"
-                    onchange={changeCampo}
-                />
             </div>
         </div>
     </div>

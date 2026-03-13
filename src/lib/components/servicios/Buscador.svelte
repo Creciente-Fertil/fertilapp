@@ -112,14 +112,13 @@
             <!-- Input de búsqueda -->
             <div
                 class={`
-                  flex items-center flex-1 border
+                  flex items-center flex-1
                   shadow-2xl
-                  rounded-full 
-                  p-3
-                  dark:border-gray-600 
-                  border-transparent bg-white dark:bg-gray-900
+                  rounded-full p-3
+                
+                  bg-white dark:bg-gray-900
                   shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
-                  dark:shadow-none
+                  dark:shadow-[0_4px_8px_-2px_rgba(255,255,255,0.1)]
                 `}
             >
                 <input
@@ -280,10 +279,8 @@
                         />
                     </div>
                     <div class="">
-                        <label for="tiposer" class="tracking-wide label">
-                            <span class="label-text text-base"
-                                >Tipo servicio</span
-                            >
+                        <label for="tiposer" class="block tracking-wide text-base font-medium mb-2">
+                            Tipo servicio
                         </label>
                         <label class="input-group">
                             <select
@@ -306,8 +303,8 @@
                         </label>
                     </div>
                     <div class="">
-                        <label for="nombrepadre" class="label">
-                            <span class="label-text text-base">Pajuela</span>
+                        <label for="nombrepadre" class="block tracking-wide text-base font-medium mb-2">
+                            Pajuela
                         </label>
                         <label class="input-group md:flex">
                             <input

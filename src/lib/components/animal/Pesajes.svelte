@@ -7,7 +7,10 @@
     import Chart from "chart.js/auto";
     import { guardarHistorial } from "$lib/historial/lib";
     import Swal from "sweetalert2";
-    import {getPermisosMessage, getPermisosList } from "$lib/permisosutil/lib";
+    import { getPermisosMessage, getPermisosList } from "$lib/permisosutil/lib";
+    import BuscadorPesajes from "./BuscadorPesajes.svelte";
+    import TablaPesajes from "./TablaPesajes.svelte";
+
     let ruta = import.meta.env.VITE_RUTA;
     const HOY = new Date().toISOString().split("T")[0];
     const pb = new PocketBase(ruta);
@@ -25,6 +28,8 @@
     let pesonuevo = $state("");
     let xs = $state([]);
     let ys = $state([]);
+    let fechadesde = $state("");
+    let fechahasta = $state("");
 
     //detalle
     let fechaedit = $state("");
@@ -41,11 +46,10 @@
     let canvas;
     let chart;
     async function guardarPesaje() {
-        
         if (!userpermisos[4]) {
             nuevoPesaje.close();
             Swal.fire("Error permisos", getPermisosMessage(4), "error");
-            return
+            return;
         }
         let data = {
             fecha: fecha + " 03:00:00",
@@ -199,15 +203,25 @@
             if (isEmpty(pesonuevo)) {
                 malpeso = true;
             } else {
-                pesonuevo = Math.max(0,pesonuevo)
+                pesonuevo = Math.max(0, pesonuevo);
                 malpeso = false;
             }
         }
     }
+    function filterUpdate() {}
 </script>
 
 <div class="w-full flex justify-items-start gap-2">
-    <div>
+    <BuscadorPesajes
+        data={pesajes}
+        {caravana}
+        bind:fechadesde
+        bind:fechahasta
+        {filterUpdate}
+        nuevo={openNewModal}
+        evolucion={() => chartpesaje.showModal()}
+    />
+    <div class="hidden">
         <button
             aria-label="Nuevo"
             onclick={openNewModal}
@@ -219,7 +233,7 @@
         </button>
     </div>
     {#if pesajes.length != 0}
-        <div>
+        <div class="hidden">
             <button
                 aria-label="Evolucion"
                 onclick={() => chartpesaje.showModal()}
@@ -232,7 +246,29 @@
         </div>
     {/if}
 </div>
-<div class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto">
+<div
+    class={`
+                w-full 
+                mx-auto py-1 px-4 
+            `}
+>
+    <div
+        class={`
+                overflow-hidden rounded-xl
+                border dark:border-gray-700
+
+            `}
+    >
+        {#if pesajes.length == 0}
+            <p class="mt-5 text-lg">No hay pesajes</p>
+        {:else}
+            <TablaPesajes pesajesrows={pesajes} {openDetalle} />
+        {/if}
+    </div>
+</div>
+<div
+    class="hidden w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
+>
     {#if pesajes.length == 0}
         <p class="mt-5 text-lg">No hay pesajes</p>
     {:else}

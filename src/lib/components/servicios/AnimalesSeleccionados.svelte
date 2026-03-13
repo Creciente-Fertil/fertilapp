@@ -41,6 +41,7 @@
             <h3
                 class={`
                     text-4xl uppercase font-semibold dark:text-[#24a579] text-[#115642]
+                    pl-3
                 `}
             >
                 {Object.entries(selecthashmap).length}

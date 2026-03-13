@@ -48,13 +48,14 @@
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
-<div class="container px-2 max-w-7xl w-full">
+<div class="container px-0 md:px-1 max-w-7xl w-full">
     <!--Header-->
     <div
         class={`
-        rounded-xl p-1 shadow-2xl mb-1
+            rounded-xl p-1 shadow-2xl mb-1
             dark:bg-slate-900 bg-white
-            px-3
+            px-2
+            mt-2 md:mt-0
         `}
     >
         <div
@@ -69,30 +70,13 @@
                 <button onclick={volver}>
                     <h1
                         class={`
-                            text-2xl font-semibold
-                            dark:text-white text-gray-900
+                            text-xl font-semibold
+                            dark:text-gray-300 text-gray-700
                             flex
                         `}
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            class="size-8 mt-1 md:hidden"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M15.75 19.5 8.25 12l7.5-7.5"
-                            />
-                        </svg>
-                        {#if esCelu}
-                            Madres
-                        {:else}
-                            Seleccción de madres
-                        {/if}
+                        
+                        Seleccción de madres
                     </h1>
                 </button>
             </div>
@@ -104,13 +88,12 @@
             <!-- Input de búsqueda -->
             <div
                 class={`
-                  flex items-center flex-1 border
+                  flex items-center flex-1 
                   shadow-2xl
                   rounded-full p-3
-                  dark:border-gray-600 
-                  border-transparent bg-white dark:bg-gray-900
+                   bg-white dark:bg-gray-900
                   shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
-                  dark:shadow-none
+                  dark:shadow-[0_4px_8px_-2px_rgba(255,255,255,0.1)]
                 `}
             >
                 <input
@@ -307,3 +290,4 @@
         {/if}
     </div>
 </div>
+<Sticky total={Object.keys(selecthashmap).length} />

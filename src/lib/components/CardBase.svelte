@@ -1,6 +1,7 @@
 <script>
     import { fade, fly } from 'svelte/transition';
     import { quintOut } from 'svelte/easing';
+    import estilos from '$lib/stores/estilos';
     export let titulo = ""
     export let cardsize = "max-w-5xl"
 </script>
@@ -19,7 +20,17 @@
             `}
             
         >
-            <h1 class="text-2xl font-bold text-green-700 dark:text-green-400 mb-6 text-start">{titulo}</h1>
+            {#if titulo.length>0}
+                <h1 
+                    class="
+                        text-2xl font-bold mb-6 text-start
+                        
+                        text-[#115642] dark:text-[#24a579]
+                    "
+                >
+                    {titulo}
+                </h1>
+            {/if}
             <slot/>
         </div>
     </div>

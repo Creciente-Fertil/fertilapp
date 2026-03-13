@@ -55,7 +55,7 @@
             <h1
                 class={`
                     text-xl font-semibold 
-                    dark:text-[#24a579] text-[#115642]
+                    dark:text-gray-300 text-gray-700
                 `}
             >
                 Detalles servicio
@@ -64,7 +64,7 @@
     </div>
     {#if esNatural}
         <div class="grid grid-cols-1">
-            <div class="">
+            <div class="pr-3">
                 <label for="tiposervicio" class="label">
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
@@ -72,7 +72,7 @@
                         Tipo servicio
                     </span>
                 </label>
-                <label class="input-group px-3">
+                <label class="input-group pl-3">
                     <select
                         class={`
                         w-full
@@ -81,6 +81,7 @@
                         focus:outline-none focus:ring-2 
                         focus:ring-green-500 focus:border-green-500
                         ${estilos.bgdark2}
+                        pr-3
                     `}
                         bind:value={esNatural}
                         onchange={() => input("TIPO")}
@@ -90,7 +91,7 @@
                     </select>
                 </label>
             </div>
-            <div>
+            <div class="pr-3">
                 <label for="fechadesde" class="label">
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
@@ -103,7 +104,8 @@
                         id="fechadesde"
                         type="date"
                         class={`
-                                input input-bordered w-full
+                                w-full
+                                input input-bordered 
                                 border border-gray-300 rounded-md
                                 focus:outline-none focus:ring-2 
                                 focus:ring-green-500 
@@ -122,7 +124,7 @@
                     {/if}
                 </label>
             </div>
-            <div>
+            <div class="pr-3">
                 <label for="fechahasta" class="label">
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
@@ -135,7 +137,8 @@
                         id="fechahasta"
                         type="date"
                         class={`
-                            input input-bordered w-full
+                            w-full
+                            input input-bordered 
                             border border-gray-300 rounded-md
                             focus:outline-none focus:ring-2 
                             focus:ring-green-500 
@@ -147,33 +150,6 @@
                     />
                 </label>
             </div>
-            <div class="hidden">
-                <label for="toros" class="label">
-                    <span
-                        class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
-                    >
-                        Seleccionar padres</span
-                    >
-                </label>
-                <label class="input-group px-3">
-                    {#if cargadoanimales}
-                        <MultipleToros
-                            toros={padres}
-                            bind:valor={padresserv}
-                            bind:listavalores={padreslist}
-                            agregarElemento={agregarPadre}
-                            quitarElemento={quitarPadre}
-                        />
-                        {#if malpadre}
-                            <div class="label">
-                                <span class="label-text-alt text-red-500"
-                                    >Debe seleccionar al menos un padre</span
-                                >
-                            </div>
-                        {/if}
-                    {/if}
-                </label>
-            </div>
             {#if cargadoanimales}
                 <SelectToros
                     opciones={listapadres}
@@ -181,9 +157,9 @@
                     bind:valores={padreslist}
                     etiquetaDefault={false}
                     py="py-1"
-                    px="px-3"
+                    px="pl-3"
                     margintop=""
-                    wlen="w-2/3"
+                    
                     agregarElemento={agregarPadre}
                     quitarElemento={quitarPadre}
                     
@@ -204,7 +180,7 @@
                     </div>
                 {/if}
             {/if}
-            <div>
+            <div class="pr-3">
                 <label for="fechaparto" class="label">
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
@@ -217,7 +193,8 @@
                         id="fechaparto"
                         type="date"
                         class={`
-                            input input-bordered w-full
+                            w-full
+                            input input-bordered 
                             border border-gray-300 rounded-md
                             focus:outline-none focus:ring-2 
                             focus:ring-green-500 
@@ -237,18 +214,20 @@
                         Observación general</span
                     >
                 </label>
-                <div class="px-3">
+                <div class="pl-3">
                     <textarea
                         name="observacion"
                         id="observacion"
                         class={`
-                        p-2 m-1
+                        w-full
+                        px-2 m-0
+                        py-1
                         min-h-32
                         leading-tight
                         textarea textarea-bordered textarea-lg
                         
                         focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                        w-full
+                        
                         ${estilos.bgdark2}
                         
                     `}
@@ -261,7 +240,7 @@
         </div>
     {:else}
         <div class="grid grid-cols-1">
-            <div class="">
+            <div class="pl-3">
                 <label for="tiposervicio" class="label">
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
@@ -269,7 +248,7 @@
                         Tipo servicio</span
                     >
                 </label>
-                <label class="input-group px-3">
+                <label class="input-group pr-3">
                     <select
                         class={`
                                 w-full  
@@ -287,7 +266,7 @@
                     </select>
                 </label>
             </div>
-            <div>
+            <div class="pr-3">
                 <label for="fechains" class="label">
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
@@ -295,7 +274,7 @@
                         Fecha inseminación</span
                     >
                 </label>
-                <label class="input-group px-3">
+                <label class="input-group pl-3">
                     <input
                         id="fechainseminacion"
                         type="date"
@@ -325,13 +304,14 @@
                     <PredictSelect
                         {onwrite}
                         {onelegir}
+                        cambiar = {()=>input("PAJUELA")}
                         bind:valor={padre}
                         etiqueta={"Padre"}
                         bind:cadena={pajuela}
                         lista={listapadres}
                         size="w-full lg:w-1/3"
                         etiquetaDefault={false}
-                        px="px-3"
+                        px="pl-3"
                     >
                         <label for="Padres" class="label">
                             <span
@@ -343,7 +323,7 @@
                     </PredictSelect>
                 {/if}
             </div>
-            <div>
+            <div class="pr-3">
                 <label for="fechaparto" class="label">
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
@@ -351,7 +331,7 @@
                         Fecha parto</span
                     >
                 </label>
-                <label class="input-group px-3">
+                <label class="input-group pl-3">
                     <input
                         id="fechaparto"
                         type="date"
@@ -376,17 +356,18 @@
                         Observacion general</span
                     >
                 </label>
-                <div class="px-3">
+                <div class="pl-3">
                     <textarea
                         name="observacion"
                         id="observacion"
                         class={`
-                        p-2 m-1
+                        px-2 m-0
+                        py-1
                         min-h-32
                         leading-tight
-                        textarea textarea-bordered textarea-lg
-                        
-                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                        textarea textarea-bordered textarea-lg                        
+                        focus:outline-none focus:ring-2 
+                        focus:ring-[#115642] 
                         w-full
                         ${estilos.bgdark2}
                     `}

@@ -136,7 +136,10 @@
                             aria-label="confirmar baja"
                             onclick={darBaja}
                             disabled={fechafallecimiento == ""}
-                            class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+                            class={`
+                                mt-2 px-10 py-2  text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base
+                                bg-[#A94442] disabled:bg-[#dd978f]
+                            `}
                         >
                             <span>Confirmar</span>
                         </button>

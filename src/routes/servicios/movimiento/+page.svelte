@@ -8,7 +8,7 @@
     import { onMount } from "svelte";
     import { slide } from "svelte/transition";
     import estilos from "$lib/stores/estilos";
-    
+
     import { createCaber } from "$lib/stores/cab.svelte";
     import categorias from "$lib/stores/categorias";
     import sexos from "$lib/stores/sexos";
@@ -48,8 +48,8 @@
     let cab = caber.cab;
     let cargado = $state(false);
     //paginacon
-    let pageSize = $state(15)
-    let paginaActual = $state(1)
+    let pageSize = $state(15);
+    let paginaActual = $state(1);
     //Datos animales
     let animales = $state([]);
     let animalesrows = $state([]);
@@ -207,7 +207,6 @@
         proxyfiltros.categoriaseleccion = categoriaseleccion;
     }
     function setDetalle() {
-
         detallemovimiento.selecthashmap = selecthashmap;
         /*
          //general
@@ -231,23 +230,24 @@
         listapadres: [],
         padres: [],
         */
-        detallemovimiento.esNatural = esNatural ;
-        detallemovimiento.observacion = observaciongeneral
+        detallemovimiento.esNatural = esNatural;
+        detallemovimiento.observacion = observaciongeneral;
         detallemovimiento.fechaparto = fechaparto;
-        detallemovimiento.fechadesdeserv = fechadesdeserv ;
-        detallemovimiento.fechahastaserv = fechahastaserv ;
+        detallemovimiento.fechadesdeserv = fechadesdeserv;
+        detallemovimiento.fechahastaserv = fechahastaserv;
         detallemovimiento.padreslist = padreslist;
         detallemovimiento.padresserv = padresserv;
 
         detallemovimiento.fechainseminacion = fechainseminacion;
         detallemovimiento.padre = padre;
+
         detallemovimiento.pajuela = pajuela;
         detallemovimiento.selecthashmap = selecthashmap;
         proxyDetalleMovimiento.save(detallemovimiento);
     }
-    function setDetalleDefault(){
-        proxyDetalleMovimiento.save(defaultmovimiento)
-        loadDetalle()
+    function setDetalleDefault() {
+        proxyDetalleMovimiento.save(defaultmovimiento);
+        loadDetalle();
     }
     function setLista() {
         selectanimales = [];
@@ -295,7 +295,7 @@
         padres: [],
         */
         esNatural = detallemovimiento.esNatural;
-        observaciongeneral =detallemovimiento.observacion
+        observaciongeneral = detallemovimiento.observacion;
         fechaparto = detallemovimiento.fechaparto;
         fechadesdeserv = detallemovimiento.fechadesdeserv;
         fechahastaserv = detallemovimiento.fechahastaserv;
@@ -306,7 +306,7 @@
         padre = detallemovimiento.padre;
         pajuela = detallemovimiento.pajuela;
         selecthashmap = detallemovimiento.selecthashmap;
-                
+
         setLista();
     }
     function limpiarFiltros() {
@@ -317,7 +317,7 @@
     }
     function filterUpdate() {
         setProxyFilter();
-        
+
         proxy.save(proxyfiltros);
         animalesrows = madres;
         if (buscar != "") {
@@ -349,8 +349,7 @@
         if (categoria != "") {
             animalesrows = animalesrows.filter((a) => a.categoria == categoria);
         }
-        if (estado == 0  || estado == 2 ||estado == 3   ) {
-            
+        if (estado == 0 || estado == 2 || estado == 3) {
             animalesrows = animalesrows.filter((a) => a.prenada == estado);
         }
         if (rodeoseleccion.length != 0) {
@@ -383,8 +382,8 @@
                 );
             }
         }
-        paginaActual = 1
-        pageSize = 15
+        paginaActual = 1;
+        pageSize = 15;
     }
     function ordenarNombre(lista) {
         lista.sort((r1, r2) =>
@@ -397,7 +396,7 @@
         for (let i = 0; i < selectanimales.length; i++) {
             selectanimales[i].observacion = observaciongeneral;
         }
-        setDetalle()
+        setDetalle();
     }
 
     function clickAnimal(id) {
@@ -405,7 +404,6 @@
             if (todos) {
                 todos = false;
                 algunos = true;
-                
             }
             delete selecthashmap[id];
             if (Object.keys(selecthashmap).length == 0) {
@@ -425,9 +423,9 @@
                 padres: [],
                 padresserv: "",
                 padre: "",
-                pajuela: "",
+                pajuela: pajuela,
                 observacion: "",
-                abierto:false
+                abierto: false,
             };
         }
         setDetalle();
@@ -448,9 +446,9 @@
                     padresserv: "",
                     padres: [],
                     padre: "",
-                    pajuela: "",
+                    pajuela: pajuela,
                     observacion: "",
-                    abierto:false
+                    abierto: false,
                 };
             }
         } else if (algunos) {
@@ -459,7 +457,7 @@
             todos = false;
             ninguno = true;
         }
-        
+
         setDetalle();
     }
     async function getLotes() {
@@ -558,7 +556,7 @@
                     padre: "",
                     pajuela: "",
                     observacion: "",
-                    abierto:false
+                    abierto: false,
                 });
             }
         }
@@ -576,7 +574,6 @@
         }
     }
     function input(campo) {
-        
         validarBoton();
         if (esservicio) {
             if (campo == "DESDE") {
@@ -612,35 +609,33 @@
                 }
             }
         }
-        setDetalle()
+        setDetalle();
     }
     function onInput(campo) {
         input(campo);
     }
-    function cambiar(){
+    function cambiar() {
         for (let i = 0; i < selectanimales.length; i++) {
             let servicio = selectanimales[i];
-            
-            for(let j=0;j<padreslist.length;j++){
-                let id = padreslist[j]
+
+            for (let j = 0; j < padreslist.length; j++) {
+                let id = padreslist[j];
                 if (!servicio.padres.includes(id)) {
                     selectanimales[i].padres.push(id);
                 }
             }
-            
         }
-        setDetalle()
+        setDetalle();
     }
     function agregarPadre(id) {
         for (let i = 0; i < selectanimales.length; i++) {
             let servicio = selectanimales[i];
-            
+
             if (!servicio.padres.includes(id)) {
                 selectanimales[i].padres.push(id);
             }
-
         }
-        setDetalle()
+        setDetalle();
     }
     function quitarPadre(id) {
         for (let i = 0; i < selectanimales.length; i++) {
@@ -650,7 +645,7 @@
                 selectanimales[i].padres.splice(idx, 1);
             }
         }
-        setDetalle()
+        setDetalle();
     }
     async function guardarBulk() {
         if (esservicio) {
@@ -997,9 +992,8 @@
             selectanimales[i].padre = id;
         }
         pajuela = p.caravana;
-        
+
         onInput("PAJUELA");
-        
     }
     function onwrite() {
         for (let i = 0; i < selectanimales.length; i++) {
@@ -1017,18 +1011,18 @@
 
         cargado = true;
         loadDetalle();
-        filterUpdate()
-        if(Object.entries(selecthashmap).length == animalesrows.length){
-            todos = true
-            ninguno = false
-            algunos = false
+        filterUpdate();
+        if (Object.entries(selecthashmap).length == animalesrows.length) {
+            todos = true;
+            ninguno = false;
+            algunos = false;
         }
     });
-    function cancelar(){
-        goto(pre+"/servicios")
+    function cancelar() {
+        goto(pre + "/servicios");
     }
-    function siguiente(){
-        goto(pre+"/servicios/movimiento/detallemovimento")
+    function siguiente() {
+        goto(pre + "/servicios/movimiento/detallemovimento");
     }
 </script>
 
@@ -1039,46 +1033,53 @@
             container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4
             "
     >
+        <a
+            href={`${pre + "/servicios"}`}
+            class="
+        inline-flex items-center text-sm
+        text-gray-700 hover:text-gray-900 dark:text-gray-400
+        dark:hover:text-gray-200 mb-4"
+        >
+            <svg
+                class="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+            </svg>
+            Volver a servicios
+        </a>
+        <div
+            class="hidden md:block flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3"
+        >
+            <div
+                class={`
+                            bg-transparent
+                            px-2 py-1
+                        `}
+            >
+                <h1
+                    class={`
+                            text-4xl font-semibold 
+                            dark:text-[#24a579] text-[#115642]
+                            
+                        `}
+                >
+                    Nuevo servicios
+                </h1>
+            </div>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-3 max-h-screen">
             <!--Lado izquierd-->
             <div>
-                <NuevoServicio
-                    bind:esNatural
-                    bind:fechadesdeserv
-                    bind:fechahastaserv
-                    bind:padresserv
-                    bind:padreslist
-                    bind:fechaparto
-                    bind:observaciongeneral
-                    bind:fechainseminacion
-                    bind:padre
-                    bind:pajuela
-
-                    {listapadres}
-                    agregarPadre = {cambiar}
-                    quitarPadre ={cambiar}
-                    {cargadoanimales}
-                    {padres}
-
-                    {malfechadese}
-                    {malpadre}
-                    {malfecha}
-
-                    {input}
-                    {onInput}
-                    {inputObsGeneral}
-                    {onwrite}
-                    {onelegir}
-                />
-                <AnimalesSeleccionados 
-                    {selecthashmap}
-                    quitarAnimal = {clickAnimal}
-                />
-            </div>
-            <!--Lado derecho-->
-            <div class="md:col-span-2">
                 <div
-                    class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3"
+                    class="md:hidden flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3"
                 >
                     <div
                         class={`
@@ -1097,6 +1098,38 @@
                         </h1>
                     </div>
                 </div>
+                <NuevoServicio
+                    bind:esNatural
+                    bind:fechadesdeserv
+                    bind:fechahastaserv
+                    bind:padresserv
+                    bind:padreslist
+                    bind:fechaparto
+                    bind:observaciongeneral
+                    bind:fechainseminacion
+                    bind:padre
+                    bind:pajuela
+                    {listapadres}
+                    agregarPadre={cambiar}
+                    quitarPadre={cambiar}
+                    {cargadoanimales}
+                    {padres}
+                    {malfechadese}
+                    {malpadre}
+                    {malfecha}
+                    {input}
+                    {onInput}
+                    {inputObsGeneral}
+                    {onwrite}
+                    {onelegir}
+                />
+                <AnimalesSeleccionados
+                    {selecthashmap}
+                    quitarAnimal={clickAnimal}
+                />
+            </div>
+            <!--Lado derecho-->
+            <div class="md:col-span-2">
                 <BuscadorMovimientos
                     {esNatural}
                     {animalesrows}
@@ -1107,7 +1140,6 @@
                     {lotes}
                     bind:loteseleccion
                     {categorias}
-                    
                     bind:estado
                     bind:categoriaseleccion
                     bind:raza
@@ -1123,7 +1155,7 @@
                 <div
                     class={`
                         hidden w-full md:grid
-                        mx-auto  px-2 max-w-7xl
+                        mx-auto  px-2 md:px-1 max-w-7xl
                     `}
                 >
                     <div
@@ -1131,7 +1163,6 @@
                             overflow-hidden rounded-t-xl
                         `}
                     >
-                        
                         <TablaMovimiento
                             bind:paginaActual
                             bind:pageSize
@@ -1143,14 +1174,12 @@
                             {ninguno}
                             {algunos}
                             verFila={verAnimal}
-                            conEstado = {true}
+                            conEstado={true}
                             {cancelar}
                             {siguiente}
-                            
                         />
                     </div>
                 </div>
-
 
                 <div class="block md:hidden justify-items-center mx-1">
                     <div class="w-full flex justify-start">
@@ -1426,7 +1455,7 @@
                             agregarElemento={agregarPadre}
                             quitarElemento={quitarPadre}
                         />
-                        
+
                         {#if malpadre}
                             <div class="label">
                                 <span class="label-text-alt text-red-500"

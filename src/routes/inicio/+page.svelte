@@ -87,8 +87,16 @@
     let tipotratamientos = $state([]);
     let cargadoanimales = $state(false);
     //Datos cabaña
-    let classbutton =
-        "w-full flex items-center justify-center space-x-4 bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 dark:bg-green-700 dark:hover:bg-green-600";
+    let classbutton =`
+        w-full flex items-center justify-center space-x-4 
+        text-white font-bold py-6 px-4 rounded-lg shadow-lg 
+        transition duration-300 ease-in-out transform 
+        hover:scale-105 focus:outline-none focus:ring-2 
+        focus:ring-opacity-50
+        focus:ring-green-500 
+        dark:bg-[#0f4537] dark:hover:bg-[#168561]
+        bg-[#115642] hover:bg-[#126a50]
+    `;
         //"w-full flex items-center justify-center space-x-4 bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 dark:bg-green-700 dark:hover:bg-green-600";
     //Tacto
     let tacto = $state({
@@ -1055,9 +1063,9 @@
         
     {/if}
     {#if cab.exist}
-        <CardBase titulo="Bienvenido a Creciente Fértil" cardsize="max-w-5xl">
+        <CardBase titulo="Información general" cardsize="max-w-5xl">
             <div
-                class="mx-1 my-2 lg:mx-10 grid grid-cols-2 lg:grid-cols-3 gap-1"
+                class="mx-1 my-2 lg:mx-10 grid grid-cols-2 lg:grid-cols-3 gap-2"
             >
                 <StatCard
                     urlto={"/animales"}
@@ -1122,7 +1130,10 @@
             </div>
             <div>
                 <h2
-                    class="text-xl font-bold text-green-700 dark:text-green-400 mb-6 text-start"
+                    class="
+                        text-xl font-bold mb-6 text-start
+                        text-[#115642] dark:text-[#24a579] 
+                    "
                 >
                     Acciones rapidas
                 </h2>
@@ -1193,7 +1204,7 @@
             </div>
         </CardBase>
     {:else}
-        <CardBase titulo="Bienvenido a Creciente Fértil">
+        <CardBase titulo="Sin establecimiento">
             <div class="grid grid-cols-1 gap-6">
                 <a class={classbutton} href={pre + "/establecimiento"}>
                     <Estable></Estable>

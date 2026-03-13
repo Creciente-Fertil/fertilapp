@@ -8,11 +8,18 @@
         fuentesize="text-base",
         py="py-1",
         px="px-3",
-        btn=""
+        mt="mt-1",
+        mb="mb-1",
+        btn="",
+        conhijo=false,
+        children
+        
 
 
     } = $props()
-    const base = `border ${btn} ${rounded} ${fuentepeso} ${px} ${py} ${fuentesize} flex items-center gap-1 transition-colors`;
+    const base = $derived(
+        `${btn} ${rounded} ${fuentepeso} ${px} ${py} ${fuentesize} flex items-center gap-1 ${mt} ${mb}`
+);
 
 </script>
 <button
@@ -20,12 +27,16 @@
     {disabled}
     class={`
         ${base}
-        bg-green-600 border-green-500 text-white hover:bg-green-700
-        dark:bg-green-600 dark:border-green-700 dark:hover:bg-green-700
+        bg-[#115642] text-white hover:bg-[#126a50]
+        dark:bg-[#168561]  dark:hover:bg-[#115642]
         
         disabled:opacity-50 disabled:cursor-not-allowed
-        disabled:hover:bg-green-700 disabled:dark:hover:bg-green-600
+        disabled:hover:bg-[#126a50] disabled:dark:hover:bg-[#168561]
     `}
->
+>   
+    {#if conhijo}
+    {@render children()}
+    {:else}
     {texto}
+    {/if}
 </button>

@@ -8,6 +8,7 @@
     import Filter from "$lib/svgs/filter.svelte";
     import Limpiar from "$lib/svgs/limpiar.svelte";
     import Sticky from "./Sticky.svelte";
+    import Rubber from "$lib/svgs/rubber.svelte";
 
     import MultiSelect from "../MultiSelect.svelte";
     let innerWidth = $state(0);
@@ -62,15 +63,14 @@
             <div
                 class={`
                     bg-transparent
-                    px-6 py-2
+                    py-2
                 `}
             >
                 <h1
                     class={`
-                    text-4xl font-normal 
-                    dark:text-white text-gray-900
-                    
-                `}
+                        text-3xl font-semibold 
+                        dark:text-white text-gray-900
+                    `}
                 >
                     Animales
                 </h1>
@@ -102,23 +102,26 @@
             </button>
         </div>
         <!--Filtros-->
-        <!-- 🔍 Input de búsqueda -->
         <div
-            class={`
-            flex items-center flex-1 border
-            shadow-2xl
-            rounded-full 
-            p-3
-            dark:border-gray-600 
-            border-transparent bg-white dark:bg-gray-900
-            shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
-            dark:shadow-none
-          `}
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-1 md:p-2 bg-transparent rounded-lg"
         >
-            <input
-                type="text"
-                placeholder="Buscar por caravana..."
+            <!-- 🔍 Input de búsqueda -->
+            <div
                 class={`
+                  flex items-center flex-1 border
+                  shadow-2xl
+                  rounded-full 
+                  p-3
+                  dark:border-gray-600 
+                  border-transparent bg-white dark:bg-gray-900
+                  shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
+                  dark:shadow-[0_4px_8px_-2px_rgba(255,255,255,0.1)]
+                `}
+            >
+                <input
+                    type="text"
+                    placeholder="Buscar por caravana..."
+                    class={`
                     shadow-2xl
                     dark:placeholder-gray-500 
                     dark:text-gray-100
@@ -127,37 +130,23 @@
                     w-full bg-transparent focus:outline-none
                     border border-transparent
                 `}
-                bind:value={buscar}
-                oninput={filterUpdate}
-            />
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-5 h-5 text-gray-400 dark:text-gray-500 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 103 10.5a7.5 7.5 0 0013.15 6.15z"
+                    bind:value={buscar}
+                    oninput={filterUpdate}
                 />
-            </svg>
-        </div>
-        <!--Animales encontrados-->
-        <div
-            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-transparent rounded-lg"
-        >
-            
-            <div class="text-md text-gray-700 dark:text-white">
-                <span class="hidden xl:block"
-                    >Total de animales seleccionados: {Object.keys(selecthash)
-                        .length}</span
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5 text-gray-400 dark:text-gray-500 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                 >
-                <span class="xl:hidden">
-                    Animales seleccionados: {Object.keys(selecthash).length}
-                </span>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 103 10.5a7.5 7.5 0 0013.15 6.15z"
+                    />
+                </svg>
             </div>
             <!-- Derecha: botones -->
             <div class="flex flex-wrap gap-2">
@@ -200,51 +189,7 @@
                 <div
                     class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-10 w-full my-1"
                 >
-                    <div class="lg:col-span-3 ">
-                        <div class="lg:w-1/3 flex relative">
-                            <div class="flex-1">
-                                <label for="paginacion" class="label">
-                                    <span class="label-text text-base"
-                                        >Paginacion</span
-                                    >
-                                </label>
-                                <label class="input-group">
-                                    <select
-                                        class={`
-                                    select select-bordered
-                                    border border-gray-300 rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 focus:border-green-500
-                                    ${estilos.bgdark2}
-                                `}
-                                        bind:value={pageSize}
-                                    >
-                                        {#each paginacion as s}
-                                            <option value={s.id}
-                                                >{s.value}</option
-                                            >
-                                        {/each}
-                                    </select>
-                                </label>
-                            </div>
-                            <div class="absolute top-1/2 right-0 md:right-3">
-                                <button
-                                    onclick={limpiarFiltros}
-                                    class={`
-                                        border rounded-full px-3 py-1 
-                                        text-md flex items-center gap-1
-                                        bg-white  border-gray-300  
-                                        hover:bg-gray-300 dark:bg-transparent
-                                        dark:hover:bg-gray-600 dark:border-gray-600 
-                                        dark:text-white
-                                    `}
-                                >
-                                    <Sparkies size="size-4" />
-                                    Limpiar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    
 
                     <div class="mt-1">
                         <MultiSelect
@@ -394,6 +339,44 @@
                                 {/each}
                             </select>
                         </label>
+                    </div>
+                </div>
+                <!--Animales encontrados-->
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-1 md:p-4 bg-transparent rounded-lg"
+                >
+                    <div class="text-md text-gray-700 dark:text-white">
+                        <span class="hidden xl:block"
+                            >Total de animales seleccionados: {Object.keys(
+                                selecthash,
+                            ).length}</span
+                        >
+                        <span class="xl:hidden">
+                            animales seleccionados: {Object.keys(selecthash)
+                                .length}
+                        </span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button
+                            onclick={limpiarFiltros}
+                            class={`
+                            rounded-full px-0 md:px-3 py-1 text-md flex items-center gap-1
+                            bg-white  hover:bg-gray-300 dark:bg-transparent
+                            dark:hover:bg-gray-600 dark:text-white
+                        `}
+                        >
+                            <Rubber size="size-4" />
+                            Limpiar
+                        </button>
+                        <button
+                            onclick={filterUpdate}
+                            class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
+                            `}
+                        >
+                            Aplicar filtros
+                        </button>
                     </div>
                 </div>
             </div>

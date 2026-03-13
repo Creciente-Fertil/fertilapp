@@ -1,6 +1,6 @@
 <script>
-    import { fade, fly } from "svelte/transition";
-    import { quintOut } from "svelte/easing";
+    
+    
     import Servicio from "$lib/svgs/servicio.svelte";
     import { goto } from "$app/navigation";
     import estilos from "$lib/stores/estilos";
@@ -16,8 +16,31 @@
     class="
         container mx-auto py-6 px-4 max-w-7xl
         w-full xl:w-3/4
+        pb-16
         "
 >
+    <a
+        href={`${pre + "/servicios"}`}
+        class="
+        inline-flex items-center text-sm
+        text-gray-700 hover:text-gray-900 dark:text-gray-400
+        dark:hover:text-gray-200 mb-4"
+    >
+        <svg
+            class="w-4 h-4 mr-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+        </svg>
+        Volver a servicios
+    </a>
     <!--Header-->
     <div
         class={`
@@ -46,30 +69,13 @@
                             ${estilos.subtitle}
                         `}
                     >
-                        <div class="md:hidden">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="size-5 mt-1"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M15.75 19.5 8.25 12l7.5-7.5"
-                                />
-                            </svg>
-                        </div>
-
                         {edit ? "Editar" : "Ver"}
                         {titulo}
                     </h1>
                 </button>
             </div>
 
-            <div class="hidden md:block text-[#115642] ">
+            <div class="hidden md:block text-[#115642]">
                 <Servicio size="size-12" />
             </div>
         </div>

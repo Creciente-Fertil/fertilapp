@@ -40,7 +40,9 @@
             menu 
             text-base-content min-h-screen
             w-2/3
-            md:w-1/3  
+            md:w-1/3
+            lg:w-1/4
+            xl:w-1/6
             2xl:w-full p-4
             ${estilos.sidebarbg}
             ${estilos.sidebartextocolor}
@@ -49,7 +51,7 @@
     <div
         class="border-b border-gray-700 dark:text-white flex justify-center items-center"
     >
-        <h1 class={`text-lg italic  `}>
+        <h1 class={`text-2xl font-bold `}>
             {` ${nombreestablecimiento}`}
         </h1>
     </div>
@@ -88,6 +90,7 @@
             <span
                 class="flex items-start text-lg font-bold text-[#115642] dark:text-green-500 "
             >
+                <Rodeo size={"size-8"} margenes=""></Rodeo>
                 Establecimiento
             </span>
             <svg
@@ -140,7 +143,7 @@
                     <Lote size="size-8" margenes=""></Lote>
                     <span class=""> Lotes </span>
                 </div>
-            {/if}
+            {/if}       
         </li>
         <!--Rodeos-->
         <li
@@ -175,6 +178,7 @@
             <span
                 class="flex items-start text-lg font-bold text-[#115642] dark:text-green-500"
             >
+            <Animal size="size-8" margenes=""></Animal>
                 Animales
             </span>
             <svg
@@ -365,7 +369,8 @@
             <span
                 class="flex items-start text-lg font-bold text-[#115642] dark:text-green-500"
             >
-                Datos y estadísticas
+            <Reportes size="size-8" margenes=""></Reportes>
+                Estadísticas
             </span>
             <svg
                 xmlns="http://www.w3.org/2000/svg"

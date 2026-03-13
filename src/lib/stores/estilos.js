@@ -1,4 +1,11 @@
 //url https://uicolors.app/generate/115642
+const redpea = "#A94442"
+const redpea800 = "#813034"
+const redpea900 = "#6f2c31"
+const redpea400 = "#dd978f"
+const redpea700 = "#993738"
+
+
 const greenpea = "#115642"
 let darkgreenpea = "[#0f4537]"
 let lightpea = "[#24a579]"
@@ -18,7 +25,7 @@ export default {
     btnbuscadorunrounded: `bg-[#115642]  hover:bg-[#0f4537] disabled:bg-[#24a579] disabled:cursor-not-allowed font-medium py-1.5 px-5 shadow-md flex items-center gap-2 transition-all duration-200 `,
 
     tableheader: "bg-[#115642BD] text-white",
-    tableth: "text-base p-3  hover:cursor-pointer hover:bg-[#0f4537] text-center uppercase",
+    tableth: "text-base p-3  text-center uppercase",
 
     bgdark1: "dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800",
     bgdark2: "border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-gray-900 dark:text-gray-100",

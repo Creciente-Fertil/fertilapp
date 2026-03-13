@@ -198,10 +198,10 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <!--Escritorio-->
 <div class={`
-    hidden 2xl:block min-h-screen
-    dark:bg-gradient-to-br 
-    dark:from-gray-900 
-    dark:to-gray-800
+        hidden 2xl:block min-h-screen
+        dark:bg-gradient-to-br 
+        dark:from-gray-900 
+        dark:to-gray-800
     `}
 >
     <Topbar
