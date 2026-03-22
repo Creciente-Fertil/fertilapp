@@ -15,6 +15,8 @@ RUN pnpm install
 # 3) now copy source
 COPY . .
 
+RUN pnpm svelte-kit sync
+
 # 4) build static site (SvelteKit + adapter-static)
 RUN pnpm run build
 
