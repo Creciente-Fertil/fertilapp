@@ -298,7 +298,7 @@
                     class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                     onclick={editar}
                 >
-                    Guardar
+                    Editar
                 </button>
             </div>
         {:else}
@@ -315,7 +315,7 @@
                     class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                     onclick={editar}
                 >
-                    Editar
+                    Guardar cambios
                 </button>
             </div>
         {/if}

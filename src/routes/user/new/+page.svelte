@@ -1,4 +1,5 @@
 <script>
+    import estilos from "$lib/stores/estilos";
     import { enabled } from "$lib/stores/enabled";
     import { usuario } from "$lib/stores/usuario";
     import Swal from "sweetalert2";
@@ -200,7 +201,11 @@
             out:fade
         >
             <h1
-                class="text-3xl font-bold text-green-700 dark:text-green-400 mb-6 text-center"
+                class={`
+                    text-3xl font-bold 
+                    text-[#115642] dark:text-[#126a50]
+                    mb-6 text-center
+                `}
             >
                 Crear usuario
             </h1>
@@ -330,7 +335,7 @@
                         <label class="cursor-pointer label">
                             <button
                                 id="terminosBtn"
-                                class="px-0 mx-0 underline decoration-green-500 hover:decoration-green-700 cursor-pointer"
+                                class="px-0 mx-0 underline decoration-[#115642] hover:decoration-[#126a50] cursor-pointer"
                                 onclick={() => condmodal.showModal()}
                             >
                                 Acepto términos y condiciones
@@ -362,7 +367,7 @@
                     <button
                         onclick={guardar}
                         class={`
-                            w-full  ${botonhabilitado && condiciones ? "bg-green-600" : "bg-gray-600"} 
+                            w-full  ${botonhabilitado && condiciones ? "bg-[#115642]" : "bg-[#126a50]"} 
                             text-white rounded-md py-2 px-4 
                             ${
                                 botonhabilitado && condiciones ?
@@ -396,7 +401,13 @@
                     Ya tienes cuenta?
                     <a
                         href={pre + "/"}
-                        class="font-medium text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition"
+                        class={`
+                            font-medium 
+                            text-md text-[#115642] dark:text-[#168561]
+                            hover:text-[#24a579] dark:hover:text-[#126a50] 
+                            transition
+                            `
+                        }
                     >
                         Volver
                     </a>

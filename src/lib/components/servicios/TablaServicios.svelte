@@ -7,7 +7,7 @@
     import Badge from "../Badge.svelte";
     let pre = import.meta.env.VITE_PRE;
     let {
-        pageSize = $bindable(10),
+        pageSize = $bindable(15),
         selecthash,
         serviciosrow,
         ordenarServicios = (campo, mantener) => {},
@@ -50,6 +50,7 @@
     let count = $derived(serviciosrow.length);
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
+    let pyfila = "py-1"
 </script>
 
 <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
@@ -194,8 +195,7 @@
         <tbody>
             {#each rows as s}
                 <tr>
-                    
-                    <td class="text-base mx-2 px-2 w-16">
+                    <td class={`text-base mx-2 px-2 w-16 ${pyfila}`}>
                         <label
                             class="flex items-center justify-center cursor-pointer"
                         >
@@ -239,7 +239,7 @@
                             </span>
                         </label>
                     </td>
-                    <td class="text-base ml-3 pl-3 mr-1 pr-1">
+                    <td class={`text-base ml-3 pl-3 mr-1 pr-1 ${pyfila}`}>
                         {s.fechadesde
                             ? new Date(s.fechadesde).toLocaleDateString()
                             : s.fechainseminacion
@@ -248,32 +248,35 @@
                                 ).toLocaleDateString()
                               : ""}
                     </td>
-                    <td class="text-base mx-1 px-1"
+                    <td class={`text-base mx-1 px-1 ${pyfila}`}
                         >{s.fechahasta
                             ? new Date(s.fechahasta).toLocaleDateString()
                             : "-"}</td
                     >
-                    <td class="text-base mx-1 px-1"
+                    <td class={`text-base mx-1 px-1 ${pyfila}`}
                         >{s.fechaparto
                             ? new Date(s.fechaparto).toLocaleDateString()
                             : ""}</td
                     >
-                    <td class="text-base mx-1 px-1">
+                    <td class={`text-base mx-1 px-1 ${pyfila}`}>
                         {s.fechadesde
                             ? shorterWord(s.expand.madre.caravana)
                             : shorterWord(s.expand.animal.caravana)}
                     </td>
-                    <td class="text-base mx-1 px-1">
+                    <td class={`text-base mx-1 px-1 ${pyfila}`}>
                         {s.fechadesde ? getNombrePadres(s.padres) : s.pajuela}
                     </td>
-                    <td class="text-base mx-1 px-1">
+                    <td class={`text-base mx-1 px-1 ${pyfila}`}>
                         {#if s.fechadesde}
                             <Badge color="blue" text="Natural" />
                         {:else}
                             <Badge color="purple" text="Artificial" />
                         {/if}
                     </td>
-                    <td class=" flex items-center justify-center gap-2 px-1">
+                    <td 
+                        class={`flex items-center justify-center gap-2 px-1 ${pyfila}`}
+                    >
+
                         <button
                             onclick={() => {
                                 s.fechadesde

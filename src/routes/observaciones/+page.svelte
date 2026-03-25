@@ -18,6 +18,7 @@
     //FILTROS
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
+    import TablaObservaciones from "$lib/components/observaciones/TablaObservaciones.svelte";
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
     import PredictSelect from "$lib/components/PredictSelect.svelte";
     import { capitalize } from "$lib/stringutil/lib";
@@ -39,6 +40,14 @@
     );
     let observaciones = $state([]);
     let observacionesrow = $state([]);
+    let cargadosobservaciones = $state(false);
+    //seleccionados
+    let todos = $state(false);
+    let algunos = $state(false);
+    let ninguno = $state(true);
+    let selectfilas = $state([]);
+    let selecthash = $state({});
+    let pageSize = $state(15);
     let caravana = $state("");
     let malcaravana = $state(false);
     let sexo = $state("");
@@ -114,6 +123,7 @@
         });
         observaciones = records;
         observacionesrow = observaciones;
+        cargadosobservaciones = true;
     }
     function openNewModal() {
         idobservacion = "";
@@ -512,6 +522,8 @@
     function nuevo() {
         openNewModal();
     }
+    function clickTodos() {}
+    function clickFila(id) {}
 </script>
 
 <Navbar2>
@@ -745,168 +757,201 @@
             </div>
         {/if}
     </div>
-    <div
-        class={`
-            hidden w-full md:grid
-            mx-auto py-6 px-4 max-w-7xl
-        `}
-    >
+    {#if cargadosobservaciones}
+        <!--Tabla-->
         <div
             class={`
-                overflow-hidden rounded-xl
+                hidden w-full xl:w-3/4 md:grid
+                mx-auto py-1 px-4 max-w-7xl  
             `}
         >
-            <table class="table table-lg w-full">
-                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
-                    <tr>
-                        <th
-                            onclick={() => ordenarObservaciones("fecha")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Fecha
-                                {#if forma == "fecha"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <th
-                            onclick={() => ordenarObservaciones("animal")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Animal
-                                {#if forma == "animal"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <th
-                            onclick={() => ordenarObservaciones("categoria")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Categoria
-                                {#if forma == "categoria"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <th 
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Observacion
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each observacionesrow as o}
-                        <tr
-                            onclick={() => openModalEditar(o.id)}
-                            class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
-                        >
-                            <td class="text-base">
-                                {`${new Date(o.fecha).toLocaleDateString()}`}
-                            </td>
-                            <td class="text-base">
-                                {`${o.expand.animal.caravana}`}
-                            </td>
-                            <td class="text-base">
-                                {`${capitalize(o.categoria)}`}
-                            </td>
-                            <td class="text-base">
-                                {`${o.observacion}`}
-                            </td>
-                        </tr>
-                    {/each}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="block w-full md:hidden justify-items-center mx-1">
-        {#each observacionesrow as o}
             <div
-                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                class={`
+                overflow-hidden rounded-xl
+                border dark:border-gray-700
+
+            `}
             >
-                <button onclick={() => openModalEditar(o.id)}>
-                    <div class="block p-4">
-                        <div class="grid grid-cols-2 gap-y-2">
-                            <div class="flex items-start">
-                                <span>Fecha:</span>
-                                <span class="mx-1 font-semibold">
-                                    {new Date(o.fecha).toLocaleDateString()}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Caravana:</span>
-                                <span class="mx-1 font-semibold">
+                <TablaObservaciones
+                    bind:pageSize
+                    {selecthash}
+                    observacionesrows={observacionesrow}
+                    {ordenarObservaciones}
+                    openEditModal={openModalEditar}
+                    openViewModal={openModalEditar}
+                    openDelModal={eliminar}
+                    {clickFila}
+                    {clickTodos}
+                />
+            </div>
+        </div>
+
+        <div
+            class={`
+            hidden w-full 
+            mx-auto py-6 px-4 max-w-7xl
+        `}
+        >
+            <div
+                class={`
+                overflow-hidden rounded-xl
+            `}
+            >
+                <table class="table table-lg w-full">
+                    <thead
+                        class="bg-emerald-600 text-white dark:bg-emerald-700"
+                    >
+                        <tr>
+                            <th
+                                onclick={() => ordenarObservaciones("fecha")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Fecha
+                                    {#if forma == "fecha"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                onclick={() => ordenarObservaciones("animal")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Animal
+                                    {#if forma == "animal"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                onclick={() =>
+                                    ordenarObservaciones("categoria")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Categoria
+                                    {#if forma == "categoria"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                class="text-base mx-1 px-1 border-b border-emerald-700"
+                            >
+                                Observacion
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {#each observacionesrow as o}
+                            <tr
+                                onclick={() => openModalEditar(o.id)}
+                                class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
+                            >
+                                <td class="text-base">
+                                    {`${new Date(o.fecha).toLocaleDateString()}`}
+                                </td>
+                                <td class="text-base">
                                     {`${o.expand.animal.caravana}`}
-                                </span>
-                            </div>
-                            <div class="col-span-2 flex items-start">
-                                <span>{`${o.observacion}`}</span>
+                                </td>
+                                <td class="text-base">
+                                    {`${capitalize(o.categoria)}`}
+                                </td>
+                                <td class="text-base">
+                                    {`${o.observacion}`}
+                                </td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="block w-full md:hidden justify-items-center mx-1">
+            {#each observacionesrow as o}
+                <div
+                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                >
+                    <button onclick={() => openModalEditar(o.id)}>
+                        <div class="block p-4">
+                            <div class="grid grid-cols-2 gap-y-2">
+                                <div class="flex items-start">
+                                    <span>Fecha:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {new Date(o.fecha).toLocaleDateString()}
+                                    </span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span>Caravana:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {`${o.expand.animal.caravana}`}
+                                    </span>
+                                </div>
+                                <div class="col-span-2 flex items-start">
+                                    <span>{`${o.observacion}`}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </button>
-            </div>
-        {/each}
-    </div>
+                    </button>
+                </div>
+            {/each}
+        </div>
+    {/if}
 </Navbar2>
 <dialog
     id="nuevoModal"

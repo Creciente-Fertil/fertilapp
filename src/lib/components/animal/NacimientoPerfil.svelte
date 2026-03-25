@@ -22,8 +22,13 @@
 <div class="">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2 form-control">
         <div class="lg:col-span-2 lg:w-1/2">
-            <label for="fechanacimiento" class="label">
-                <span class="label-text text-base">Fecha nacimiento</span>
+            <label for="fechanacimiento" class="label mb-0 pb-0">
+                <span class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                ">Fecha nacimiento</span>
             </label>
             <label class="input-group">
                 <input

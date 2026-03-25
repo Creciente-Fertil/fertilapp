@@ -25,7 +25,7 @@
         //paginacion
         pageSize = $bindable(10),
         //filtros
-        totalServicios,
+        totalServicios = 0,
         isOpenFilter = $bindable(false),
         fechaservdesdefiltro = $bindable(""),
         fechaservhastafiltro = $bindable(""),

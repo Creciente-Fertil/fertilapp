@@ -2,6 +2,7 @@
     let {
         activo = $bindable(false),
         onchange = (e) => {},
+        onclick = (e)=>{},
         etiqueta = "",
     } = $props();
     function handleChange(e) {
@@ -20,6 +21,7 @@
         onchange={handleChange}
         class="peer sr-only"
         aria-label={etiqueta}
+        {onclick}
     />
 
     <!-- Botón con estilos condicionales vía peer-checked -->

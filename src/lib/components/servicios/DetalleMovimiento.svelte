@@ -54,8 +54,7 @@
             <div
                 class={`
                 bg-transparent
-                
-                 py-1 
+                py-1 
             `}
             >
                 <h1
@@ -73,16 +72,21 @@
             <!--Tipo y padres-->
             <div class="grid grid-cols-1">
                 <div class="">
-                        <label for="fechadesde" class="label">
+                        <label for="fechadesde" class="label mb-0 pb-0">
                             <span
-                                class="label-text tracking-wide text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
+                                class="
+                                    label-text tracking-wide 
+                                    text-md uppercase 
+                                    font-semibold dark:text-gray-400 
+                                    text-gray-500 
+                                "
                             >
                                 Tipo de servicio</span
                             >
                         </label>
                         
                         <span
-                            class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+                            class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3 `}
                             >
                             {#if esNatural}
                                 Servicio natural
@@ -108,7 +112,7 @@
                                     px="px-3"
                                     edit={false}
                                 >
-                                    <label for="Padres" class="label">
+                                    <label for="Padres" class="label mb-0 pb-0">
                                         <span
                                             class="label-text text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
                                         >
@@ -130,7 +134,7 @@
                                 px="px-3"
                                 edit={false}
                             >
-                                <label for="Padres" class="label">
+                                <label for="Padres" class="label mb-0 pb-0">
                                     <span
                                         class="label-text text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
                                     >
@@ -143,10 +147,10 @@
                 {/if}
             </div>
             <!--Fechas-->
-            <div class="grid grid-cols-1 md:grid-cols-2 mb-6 pb-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 pb-1 mb-1 md:mb-6 md:pb-4">
                 {#if esNatural}
                     <div class="">
-                        <label for="fechadesde" class="label">
+                        <label for="fechadesde" class="label mb-0 pb-0">
                             <span
                                 class="label-text tracking-wide text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
                             >
@@ -155,7 +159,7 @@
                         </label>
                         {#if fechadesdeserv.length > 0}
                             <span
-                                class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-1`}
+                                class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
                                 >{new Date(
                                     fechadesdeserv,
                                 ).toLocaleDateString()}</span
@@ -163,7 +167,7 @@
                         {/if}
                     </div>
                     <div class="">
-                        <label for="fechahasta" class="label">
+                        <label for="fechahasta" class="label mb-0 pb-0">
                             <span
                                 class="label-text tracking-wide text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
                             >
@@ -172,7 +176,7 @@
                         </label>
                         {#if fechahastaserv.length > 0}
                             <span
-                                class={`text-lg tracking-wide font-semibold  ${estilos.labelcolor} py-0 my-0 px-1`}
+                                class={`text-lg tracking-wide font-semibold  ${estilos.labelcolor} py-0 my-0 px-3`}
                                 >{new Date(
                                     fechahastaserv,
                                 ).toLocaleDateString()}</span
@@ -181,7 +185,7 @@
                     </div>
                 {:else}
                     <div>
-                        <label for="fechains" class="label">
+                        <label for="fechains" class="label mb-0 pb-0">
                             <span
                                 class="label-text tracking-wide text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
                                 >Fecha inseminación</span
@@ -189,7 +193,7 @@
                         </label>
                         {#if fechainseminacion.length > 0}
                             <span
-                                class={`text-lg  tracking-wide font-semibold  ${estilos.labelcolor} py-0 my-0 px-1`}
+                                class={`text-lg  tracking-wide font-semibold  ${estilos.labelcolor} py-0 my-0 px-3`}
                                 >{new Date(
                                     fechainseminacion,
                                 ).toLocaleDateString() || ""}</span
@@ -198,7 +202,7 @@
                     </div>
                 {/if}
                 <div>
-                    <label for="fechaparto" class="label">
+                    <label for="fechaparto" class="label mb-0 pb-0 pt-4">
                         <span
                             class="label-text tracking-wide text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
                         >
@@ -207,7 +211,7 @@
                     </label>
                     {#if fechaparto.length > 0}
                         <span
-                            class={`text-lg tracking-wide font-semibold  ${estilos.crecientecolor} py-0 my-0 px-1 bg-green-100/80 dark:bg-green-900/20 rounded-2xl`}
+                            class={`text-lg tracking-wide font-semibold  ${estilos.crecientecolor} py-0 my-0 px-1 bg-green-100/80 dark:bg-green-900/20 rounded-2xl px-3`}
                             >{new Date(fechaparto).toLocaleDateString() ||
                                 ""}</span
                         >
@@ -216,7 +220,7 @@
             </div>
             <!--Observacion general-->
             <div>
-                <label for="observacion" class="label">
+                <label for="observacion" class="label mb-0 pb-0">
                     <span
                         class="label-text text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
                     >

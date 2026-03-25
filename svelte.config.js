@@ -25,6 +25,7 @@ const config = {
 				"/inicio/vet",
 				"/login",
 				"/nacimientos",
+				"/nacimientos/1",
 				"/nacimientos/reporte",
 				"/rodeos",
 				"/rodeos/1",

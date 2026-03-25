@@ -123,13 +123,17 @@
 </script>
 
 <Navbar2>
-    <div class="mx-9 mt-1">
+    <div
+        class="
+            container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4
+            "
+    >
         <a
             href={`${pre + "/establecimiento"}`}
             class="
-        inline-flex items-center text-sm
-        text-gray-700 hover:text-gray-900 dark:text-gray-400
-        dark:hover:text-gray-200 mb-4"
+            inline-flex items-center text-sm
+            text-gray-700 hover:text-gray-900 dark:text-gray-400
+            dark:hover:text-gray-200 mb-4"
         >
             <svg
                 class="w-4 h-4 mr-1"
@@ -146,121 +150,123 @@
             </svg>
             Volver a colaboradores
         </a>
-    </div>
-    <dir class="mb-1">
-        <h1 class="text-2xl font-bold">{apellido},{nombre}</h1>
-    </dir>
-    <dir class="mb-1">
-        <h1 class="text-lg font-semibold">Permisos</h1>
-    </dir>
-    <div class="grid grid-cols-1 px-9">
-        <div class="">
-            <div class="form-control w-11/12 lg:w-1/2">
-                <label class="label cursor-pointer">
-                    <span class="label-text text-base"
-                        >Administar los datos del establecimiento y sus
-                        colaboradores</span
+
+        <div class="mb-1">
+            <h1 class="text-2xl font-bold">{apellido},{nombre}</h1>
+        </div>
+        <div class="mb-1">
+            <h1 class="text-lg font-semibold">Permisos</h1>
+        </div>
+        <div class="grid grid-cols-1">
+            <div class="">
+                <div class="form-control w-11/12 lg:w-1/2">
+                    <label class="label cursor-pointer">
+                        <span class="label-text text-base"
+                            >Administar los datos del establecimiento y sus
+                            colaboradores</span
+                        >
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-md toggle-success"
+                            bind:checked={userpermisos[0]}
+                        />
+                    </label>
+                </div>
+            </div>
+            <div class="">
+                <div class="form-control w-11/12 lg:w-1/2">
+                    <label class="label cursor-pointer">
+                        <span class="label-text text-base"
+                            >Crear grupos de animales como lotes y rodeos</span
+                        >
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-md toggle-success"
+                            bind:checked={userpermisos[1]}
+                        />
+                    </label>
+                </div>
+            </div>
+            <div class="">
+                <div class="form-control w-11/12 lg:w-1/2">
+                    <label class="label cursor-pointer">
+                        <span class="label-text text-base"
+                            >Importar archivos para cargas masivas</span
+                        >
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-md toggle-success"
+                            bind:checked={userpermisos[2]}
+                        />
+                    </label>
+                </div>
+            </div>
+            <div class="">
+                <div class="form-control w-11/12 lg:w-1/2">
+                    <label class="label cursor-pointer">
+                        <span class="label-text text-base"
+                            >Realizar movimientos de múltiples animales</span
+                        >
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-md toggle-success"
+                            bind:checked={userpermisos[3]}
+                        />
+                    </label>
+                </div>
+            </div>
+            <div class="">
+                <div class="form-control w-11/12 lg:w-1/2">
+                    <label class="label cursor-pointer">
+                        <span class="label-text text-base"
+                            >Registrar los diferentes eventos del
+                            establecimiento</span
+                        >
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-md toggle-success"
+                            bind:checked={userpermisos[4]}
+                        />
+                    </label>
+                </div>
+            </div>
+            <div class="">
+                <div class="form-control w-11/12 lg:w-1/2">
+                    <label class="label cursor-pointer">
+                        <span class="label-text text-base"
+                            >Administrar la información básica de los animales</span
+                        >
+                        <input
+                            type="checkbox"
+                            class="toggle toggle-md toggle-success"
+                            bind:checked={userpermisos[5]}
+                        />
+                    </label>
+                </div>
+            </div>
+            <div
+                class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
+                <div class="mt-1">
+                    <Danger onclick={desasociar} texto="Desasociar" />
+                </div>
+                <div class="mt-1">
+                    <Success onclick={guardarPermiso} texto="Guardar" />
+                </div>
+            </div>
+            <div class="hidden grid grid-cols-2">
+                <dir class="w-11/12 lg:w-1/2 flex justify-start">
+                    <button
+                        class={estilos.mediumsolidgreen}
+                        onclick={guardarPermiso}>Guardar permisos</button
                     >
-                    <input
-                        type="checkbox"
-                        class="toggle toggle-md toggle-success"
-                        bind:checked={userpermisos[0]}
-                    />
-                </label>
-            </div>
-        </div>
-        <div class="">
-            <div class="form-control w-11/12 lg:w-1/2">
-                <label class="label cursor-pointer">
-                    <span class="label-text text-base"
-                        >Crear grupos de animales como lotes y rodeos</span
+                </dir>
+                <dir class="w-11/12 lg:w-1/2 flex justify-start">
+                    <button class={estilos.mediumsolidred} onclick={desasociar}
+                        >Desasociar</button
                     >
-                    <input
-                        type="checkbox"
-                        class="toggle toggle-md toggle-success"
-                        bind:checked={userpermisos[1]}
-                    />
-                </label>
+                </dir>
             </div>
-        </div>
-        <div class="">
-            <div class="form-control w-11/12 lg:w-1/2">
-                <label class="label cursor-pointer">
-                    <span class="label-text text-base"
-                        >Importar archivos para cargas masivas</span
-                    >
-                    <input
-                        type="checkbox"
-                        class="toggle toggle-md toggle-success"
-                        bind:checked={userpermisos[2]}
-                    />
-                </label>
-            </div>
-        </div>
-        <div class="">
-            <div class="form-control w-11/12 lg:w-1/2">
-                <label class="label cursor-pointer">
-                    <span class="label-text text-base"
-                        >Realizar movimientos de múltiples animales</span
-                    >
-                    <input
-                        type="checkbox"
-                        class="toggle toggle-md toggle-success"
-                        bind:checked={userpermisos[3]}
-                    />
-                </label>
-            </div>
-        </div>
-        <div class="">
-            <div class="form-control w-11/12 lg:w-1/2">
-                <label class="label cursor-pointer">
-                    <span class="label-text text-base"
-                        >Registrar los diferentes eventos del establecimiento</span
-                    >
-                    <input
-                        type="checkbox"
-                        class="toggle toggle-md toggle-success"
-                        bind:checked={userpermisos[4]}
-                    />
-                </label>
-            </div>
-        </div>
-        <div class="">
-            <div class="form-control w-11/12 lg:w-1/2">
-                <label class="label cursor-pointer">
-                    <span class="label-text text-base"
-                        >Administrar la información básica de los animales</span
-                    >
-                    <input
-                        type="checkbox"
-                        class="toggle toggle-md toggle-success"
-                        bind:checked={userpermisos[5]}
-                    />
-                </label>
-            </div>
-        </div>
-        <div
-            class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
-        >
-            <div class="mt-1">
-                <Danger onclick={desasociar} texto="Desasociar" />
-            </div>
-            <div class="mt-1">
-                <Success onclick={guardarPermiso} texto="Guardar" />
-            </div>
-        </div>
-        <div class="hidden grid grid-cols-2">
-            <dir class="w-11/12 lg:w-1/2 flex justify-start">
-                <button
-                    class={estilos.mediumsolidgreen}
-                    onclick={guardarPermiso}>Guardar permisos</button
-                >
-            </dir>
-            <dir class="w-11/12 lg:w-1/2 flex justify-start">
-                <button class={estilos.mediumsolidred} onclick={desasociar}
-                    >Desasociar</button
-                >
-            </dir>
         </div>
     </div>
 </Navbar2>

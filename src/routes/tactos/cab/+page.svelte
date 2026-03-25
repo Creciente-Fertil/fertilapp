@@ -27,6 +27,7 @@
     //FILTROS
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
+    import TablaTactos from "$lib/components/tactos/TablaTactos.svelte";
 
     let caber = createCaber();
     let cab = caber.cab;
@@ -43,6 +44,14 @@
     let tactos = $state([]);
     let animales = $state([]);
     let tactosrow = $state([]);
+    let cargadostactos = $state(false);
+    //seleccionados
+    let todos = $state(false);
+    let algunos = $state(false);
+    let ninguno = $state(true);
+    let selectfilas = $state([]);
+    let selecthash = $state({});
+    let pageSize = $state(15)
     let isOpenFilter = $state(false);
     let caravana = $state("");
     let malcaravana = $state(false);
@@ -76,12 +85,13 @@
         observacion: "",
         prenada: 1,
         tipo: "",
-        categoria:""
+        categoria: "",
     };
     let detalletacto = $state({ ...tactovacio });
     let proxytacto = createStorageProxy("detalletacto", tactovacio);
     //Datos tacto
     let tacto = $state(null);
+
     let idtacto = $state("");
     let fecha = $state("");
     let observacion = $state("");
@@ -112,6 +122,7 @@
         });
         tactos = recordst;
         tactosrow = tactos;
+        cargadostactos = true;
     }
     function isEmpty(str) {
         return !str || str.length === 0;
@@ -168,8 +179,7 @@
             );
         }
     }
-    function irDetalle(id){
-
+    function irDetalle(id) {
         idtacto = id;
         tacto = tactos.filter((t) => t.id == idtacto)[0];
         fecha = tacto.fecha.split(" ")[0];
@@ -178,17 +188,16 @@
         categoria = tacto.categoria;
         prenada = tacto.prenada;
         tipo = tacto.tipo;
-        detalletacto.idtacto = idtacto
-        detalletacto.fecha= fecha
-        detalletacto.observacion= observacion
-        detalletacto.animal= animal
-        detalletacto.caravana = tacto.expand.animal.caravana||""
-        detalletacto.categoria= categoria
-        detalletacto.prenada= prenada
-        detalletacto.tipo= tipo
-        proxytacto.save(detalletacto)
-        goto(pre+"/tactos/cab/"+idtacto)
-
+        detalletacto.idtacto = idtacto;
+        detalletacto.fecha = fecha;
+        detalletacto.observacion = observacion;
+        detalletacto.animal = animal;
+        detalletacto.caravana = tacto.expand.animal.caravana || "";
+        detalletacto.categoria = categoria;
+        detalletacto.prenada = prenada;
+        detalletacto.tipo = tipo;
+        proxytacto.save(detalletacto);
+        goto(pre + "/tactos/cab/" + idtacto);
     }
     function openModalEdit(id) {
         if (permisos[4]) {
@@ -297,27 +306,21 @@
                     .toLocaleLowerCase()
                     .includes(buscar.toLocaleLowerCase()),
             );
-            
         }
         if (fechadesde != "") {
             tactosrow = tactosrow.filter((t) => t.fecha >= fechadesde);
-            
         }
         if (fechahasta != "") {
             tactosrow = tactosrow.filter((t) => t.fecha <= fechahasta);
-            
         }
         if (buscarcategoria != "") {
             tactosrow = tactosrow.filter((t) => t.categoria == buscarcategoria);
-            
         }
         if (buscartipo != "") {
             tactosrow = tactosrow.filter((t) => t.tipo == buscartipo);
-            
         }
         if (buscarestado != "") {
             tactosrow = tactosrow.filter((t) => t.prenada == buscarestado);
-            
         }
         tactosrow.sort((t1, t2) => {
             return new Date(t1.fecha) > new Date(t2.fecha) ? -1 : 1;
@@ -545,6 +548,12 @@
     }
     function nuevo() {
         goto(pre + "/tactos/cab/movimiento");
+    }
+    function clickTodos(){
+
+    }
+    function clickFila(id){
+
     }
 </script>
 
@@ -847,9 +856,82 @@
             </div>
         {/if}
     </div>
+
+    {#if cargadostactos}
+        <!--Tabla-->
+        <div
+            class={`
+                hidden w-full xl:w-3/4 md:grid
+                mx-auto py-1 px-4 max-w-7xl  
+            `}
+        >
+            <div
+                class={`
+                overflow-hidden rounded-xl
+                border dark:border-gray-700
+
+            `}
+            >
+                <TablaTactos
+                    bind:pageSize
+                    {selecthash}
+                    {tactosrow}
+                    {ordenarTactos}
+                    openViewModal={irDetalle}
+                    openEditModal={openModalEdit}
+                    openDelModal = {eliminar}
+                    {clickTodos}
+                    {clickFila}
+                    {todos}
+                />
+            </div>
+        </div>
+        <div class="block w-full md:hidden justify-items-center mx-1">
+            {#each tactosrow as t}
+                <div
+                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                >
+                    <button onclick={() => irDetalle(t.id)}>
+                        <div class="block p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-medium">
+                                    {`${new Date(t.fecha).toLocaleDateString()}`}
+                                </h3>
+                                {#if t.prenada != 1}
+                                    <div
+                                        class={`badge badge-outline badge-${getEstadoColor(t.prenada)}`}
+                                    >
+                                        {getEstadoNombre(t.prenada)}
+                                    </div>
+                                {/if}
+                            </div>
+                            <div class="grid grid-cols-2 gap-y-2">
+                                <div class="flex items-start">
+                                    <span>Caravana:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {t.expand.animal.caravana}
+                                    </span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span>Tipo:</span>
+                                    <span class="mx-2 font-semibold">
+                                        {`${t.tipo == "eco" ? "Ecografía" : "Tacto"}`}
+                                    </span>
+                                </div>
+                                <div class="col-span-2 flex items-start">
+                                    <span>{`${t.observacion}`}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            {/each}
+        </div>
+    {/if}
+
     <div
         class={`
-            hidden w-full md:grid
+            hidden w-full 
             mx-auto py-6 px-4 max-w-7xl
         `}
     >
@@ -1047,48 +1129,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
-
-    <div class="block w-full md:hidden justify-items-center mx-1">
-        {#each tactosrow as t}
-            <div
-                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-            >
-                <button onclick={() => irDetalle(t.id)}>
-                    <div class="block p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-medium">
-                                {`${new Date(t.fecha).toLocaleDateString()}`}
-                            </h3>
-                            {#if t.prenada != 1}
-                                <div
-                                    class={`badge badge-outline badge-${getEstadoColor(t.prenada)}`}
-                                >
-                                    {getEstadoNombre(t.prenada)}
-                                </div>
-                            {/if}
-                        </div>
-                        <div class="grid grid-cols-2 gap-y-2">
-                            <div class="flex items-start">
-                                <span>Caravana:</span>
-                                <span class="mx-1 font-semibold">
-                                    {t.expand.animal.caravana}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Tipo:</span>
-                                <span class="mx-2 font-semibold">
-                                    {`${t.tipo == "eco" ? "Ecografía" : "Tacto"}`}
-                                </span>
-                            </div>
-                            <div class="col-span-2 flex items-start">
-                                <span>{`${t.observacion}`}</span>
-                            </div>
-                        </div>
-                    </div>
-                </button>
-            </div>
-        {/each}
     </div>
 </Navbar2>
 <dialog

@@ -3,7 +3,7 @@
     import estilos from "$lib/stores/estilos";
     import Badge from "../Badge.svelte";
     
-    let { data = [] } = $props();
+    let { data = [],ordenarFecha = ()=>{} } = $props();
     const colorMap = {
         "Lote": "blue",
         "Rodeo":  "purple",
@@ -31,12 +31,17 @@
     <thead class={`${estilos.tableheader}`}>
         <tr>
             <th
+                onclick={ordenarFecha}
                 class={`
                     ${estilos.tableth}   
-
+                    hover:bg-[#168561]
+                    hover:cursor-pointer
                 `}
             >
-                Fecha
+                
+                    Fecha
+                
+                
             </th>
             <th
                 class={`
@@ -57,7 +62,7 @@
         </tr>
     </thead>
     <tbody>
-        {#each rows as h }
+        {#each rows as h (h.id)}
             
             <tr>
                 <td class={`text-base mx-1 px-1 text-center ${pyfila}`}>
@@ -71,7 +76,7 @@
                     
                 </td>
                 <td class={`text-base mx-1 px-1 text-center ${pyfila}`}>
-                    {h.info}
+                    {@html h.info}
                 </td>
             </tr>
         {/each}

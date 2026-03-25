@@ -47,7 +47,7 @@
     function onChangePageSize() {
         paginaActual = 1;
     }
-    let pyfila = "py-2";
+    let pyfila = "py-1";
 </script>
 
 <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
@@ -295,7 +295,7 @@
                         </label>
                     </td>
                     <td
-                        class={`text-base mx-1 px-1 border-b dark:border-gray-600 ${pyfila}`}
+                        class={`text-base mx-1 px-1  ${pyfila}`}
                     >
                         <div class="flex gap-1">
                             {`${shorterWord(a.caravana)}`}
@@ -325,17 +325,17 @@
                         </div>
                     </td>
                     <td
-                        class={`text-base mx-1 px-1 border-b dark:border-gray-600 ${pyfila}`}
+                        class={`text-base mx-1 px-1  ${pyfila}`}
                     >
                         {a.sexo}</td
                     >
                     <td
-                        class={`text-base mx-1 px-1 border-b dark:border-gray-600 ${pyfila}`}
+                        class={`text-base mx-1 px-1  ${pyfila}`}
                     >
                         {capitalize(a.categoria)}</td
                     >
                     <td
-                        class={`text-base mx-1 px-1 border-b dark:border-gray-600 ${pyfila}`}
+                        class={`text-base mx-1 px-1  ${pyfila}`}
                     >
                         {#if a.sexo == "H"}
                             {getEstadoNombre(a.prenada)}
@@ -344,7 +344,7 @@
                         {/if}
                     </td>
                     <td
-                        class={`text-base mx-1 px-1 border-b dark:border-gray-600 ${pyfila}`}
+                        class={`text-base mx-1 px-1  ${pyfila}`}
                     >
                         {a.expand
                             ? a.expand.lote
@@ -353,7 +353,7 @@
                             : ""}
                     </td>
                     <td
-                        class={`text-base mx-1 px-1 border-b dark:border-gray-600 ${pyfila}`}
+                        class={`text-base mx-1 px-1  ${pyfila}`}
                     >
                         {a.expand
                             ? a.expand.rodeo
@@ -362,14 +362,14 @@
                             : ""}
                     </td>
                     <td
-                        class={`text-base mx-1 px-1 border-b dark:border-gray-600 ${pyfila}`}
+                        class={`text-base mx-1 px-1  ${pyfila}`}
                     >
                         {a.fechanacimiento != ""
                             ? calcularEdad(a.fechanacimiento)
                             : "-"}
                     </td>
 
-                    <td class={`border-b dark:border-gray-600 gap-1 ${pyfila}`}>
+                    <td class={` gap-1 ${pyfila}`}>
                         <button onclick={() => goto(`${pre}/animales/${a.id}`)}>
                             <Eye size="size-5" />
                         </button>

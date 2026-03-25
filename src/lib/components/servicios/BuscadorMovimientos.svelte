@@ -41,6 +41,7 @@
         filterUpdate = () => {},
         clickFilter = () => {},
         limpiarFiltros = () => {},
+        
     } = $props();
     function volver() {
         goto(pre + "/servicios/movimiento/detallemovimento");
@@ -52,7 +53,7 @@
     <!--Header-->
     <div
         class={`
-            rounded-xl p-1 shadow-2xl mb-1
+            rounded-xl p-1 shadow-2xl mb-0
             dark:bg-slate-900 bg-white
             px-2
             mt-2 md:mt-0
@@ -64,7 +65,7 @@
             <div
                 class={`
                 bg-transparent
-                px-2 py-1   
+                px-2 py-0   
             `}
             >
                 <button onclick={volver}>
@@ -90,7 +91,7 @@
                 class={`
                   flex items-center flex-1 
                   shadow-2xl
-                  rounded-full p-3
+                  rounded-t-full p-3
                    bg-white dark:bg-gray-900
                   shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
                   dark:shadow-[0_4px_8px_-2px_rgba(255,255,255,0.1)]
@@ -255,7 +256,7 @@
                     </div>
                 </div>
                 <div
-                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-transparent rounded-lg"
+                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-transparent "
                 >
                     <!-- Izquierda: texto -->
                     <div class="text-md text-gray-700 dark:text-white">

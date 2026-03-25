@@ -275,7 +275,12 @@
         <main class={`pt-16 ${estilos.bgmain}`}>
             {@render children()}
             {#if esCelu}
-                <NavegacionBottom />
+                <div
+                    class="pt-16"
+                >
+<NavegacionBottom />
+                </div>
+                
             {/if}
         </main>
     </div>

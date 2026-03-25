@@ -222,7 +222,7 @@
                         w-full
                         px-2 m-0
                         py-1
-                        min-h-32
+                        min-h-16
                         leading-tight
                         textarea textarea-bordered textarea-lg
                         
@@ -361,16 +361,16 @@
                         name="observacion"
                         id="observacion"
                         class={`
-                        px-2 m-0
-                        py-1
-                        min-h-32
-                        leading-tight
-                        textarea textarea-bordered textarea-lg                        
-                        focus:outline-none focus:ring-2 
-                        focus:ring-[#115642] 
-                        w-full
-                        ${estilos.bgdark2}
-                    `}
+                            px-2 m-0
+                            py-1
+                            min-h-16
+                            leading-tight
+                            textarea textarea-bordered textarea-lg                        
+                            focus:outline-none focus:ring-2 
+                            focus:ring-[#115642] 
+                            w-full
+                            ${estilos.bgdark2}
+                        `}
                         bind:value={observaciongeneral}
                         oninput={inputObsGeneral}
                     >

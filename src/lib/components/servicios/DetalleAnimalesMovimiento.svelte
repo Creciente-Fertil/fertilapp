@@ -52,7 +52,8 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <div
     class="
-        container mx-auto py-3 px-4 max-w-7xl
+    pt-1 md:pt-2 lg:pt-5
+        container mx-auto  px-4 max-w-7xl
         max-h-[500px] overflow-y-auto custom-scrollbar  
         "
 >

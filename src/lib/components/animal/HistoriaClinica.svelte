@@ -34,12 +34,12 @@
     let fechahasta = $state("");
 
     let contodos = $state(true);
-    let contactos = $state(false);
-    let coninse = $state(false);
-    let conser = $state(false);
-    let conobser = $state(false);
-    let contrata = $state(false);
-    let conpari = $state(false);
+    let contactos = $state(true);
+    let coninse = $state(true);
+    let conser = $state(true);
+    let conobser = $state(true);
+    let contrata = $state(true);
+    let conpari = $state(true);
 
     async function getHistorial() {
         historial = await pb.collection("historialanimales").getFullList({
@@ -125,10 +125,13 @@
             todos = todos.concat(
                 inseminaciones.map((i) => {
                     return {
-                        id:i.id,
+                        id: i.id,
                         fecha: i.fechainseminacion,
                         nombre: "Inseminación",
-                        info: i.observacion.length>0?i.observacion:"Sin observación",
+                        info:
+                            i.observacion.length > 0
+                                ? i.observacion
+                                : "Sin observación",
                         //caravana: historial[0].caravana,
                         coleccion: "inse",
                     };
@@ -140,10 +143,13 @@
             todos = todos.concat(
                 servicios.map((i) => {
                     return {
-                        id:i.id,
+                        id: i.id,
                         fecha: i.fecha,
                         nombre: "Servicio",
-                        info: i.observacion.length>0?i.observacion:"Sin observación",
+                        info:
+                            i.observacion.length > 0
+                                ? i.observacion
+                                : "Sin observación",
                         //caravana: historial[0].caravana,
                         coleccion: "ser",
                     };
@@ -155,10 +161,13 @@
             todos = todos.concat(
                 pariciones.map((i) => {
                     return {
-                        id:i.id,
+                        id: i.id,
                         fecha: i.fecha,
                         nombre: "Parición",
-                        info: i.observacion.length>0?i.observacion:"Sin observación",
+                        info:
+                            i.observacion.length > 0
+                                ? i.observacion
+                                : "Sin observación",
                         //caravana: historial[0].caravana,
                         coleccion: "pari",
                     };
@@ -170,10 +179,10 @@
             todos = todos.concat(
                 tactos.map((i) => {
                     return {
-                        id:i.id,
+                        id: i.id,
                         fecha: i.fecha,
                         nombre: "Tacto",
-                        info: `Estado <b>${getEstadoNombre(i.prenada)}</b> ${i.observacion.length>0?" : "+i.observacion:""}`,
+                        info: `Estado <b>${getEstadoNombre(i.prenada)}</b> ${i.observacion.length > 0 ? " : " + i.observacion : ""}`,
                         //caravana: historial[0].caravana,
                         coleccion: "tacto",
                     };
@@ -184,10 +193,10 @@
             todos = todos.concat(
                 tratamientos.map((i) => {
                     return {
-                        id:i.id,
+                        id: i.id,
                         fecha: i.fecha,
                         nombre: "Tratamiento",
-                        info: `Tratamiento <b>${i.expand.tipo.nombre}</b> ${i.observacion.length>0?" : "+i.observacion:""} `,
+                        info: `Tratamiento <b>${i.expand.tipo.nombre}</b> ${i.observacion.length > 0 ? " : " + i.observacion : ""} `,
                         //caravana: historial[0].caravana,
                         coleccion: "trata",
                     };
@@ -198,7 +207,7 @@
             todos = todos.concat(
                 observaciones.map((i) => {
                     return {
-                        id:i.id,
+                        id: i.id,
                         fecha: i.fecha,
                         nombre: "Observación",
                         info: i.observacion,
@@ -223,7 +232,39 @@
         );
         historialeventos = todos.filter(filterHistorial);
     }
+    function onClickBuscador(customcheck = "") {
+        if (customcheck == "todos") {
+            if (!contodos) {
+                coninse = true;
+                conser = true;
+                conpari = true;
+                conobser = true;
+                contrata = true;
+                contactos = true;
+            }
+        }
+
+        if (contodos && coninse) {
+            contodos = false;
+        }
+        if (contodos && conser) {
+            contodos = false;
+        }
+        if (contodos && conpari) {
+            contodos = false;
+        }
+        if (contodos && conobser) {
+            contodos = false;
+        }
+        if (contodos && contactos) {
+            contodos = false;
+        }
+        if (contodos && contrata) {
+            contodos = false;
+        }
+    }
     function changeCampo() {
+        
         historialeventos = todos.filter(filterHistorial);
     }
     function filterUpdate() {
@@ -380,6 +421,7 @@
     bind:conpari
     {changeCampo}
     {filterUpdate}
+    onclick={onClickBuscador}
     data={historialeventos}
     {caravana}
 />
@@ -398,14 +440,10 @@
 
             `}
     >
-        <TablaEventos
-            data = {historialeventos}
-        />
+        <TablaEventos data={historialeventos} />
     </div>
 </div>
-<div
-    class="hidden w-full justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
->
+<div class="hidden w-full justify-items-center mx-1 lg:w-3/4 overflow-x-auto">
     {#if historialeventos.length == 0}
         <p class="mt-5 text-lg">No se encontraron eventos asociados</p>
     {:else}

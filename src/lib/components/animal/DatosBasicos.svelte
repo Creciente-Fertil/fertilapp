@@ -44,8 +44,7 @@
         calcularTabs,
         esCelu,
         //Eliminar
-        openEliminarModal=()=>{}
-
+        openEliminarModal = () => {},
     } = $props();
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -225,7 +224,7 @@
             nombrelote = "";
         }
     }
-    
+
     function openNewModal() {
         if (userpermisos[5]) {
             fecha = fechanacimiento;
@@ -535,8 +534,8 @@
     });
     //cancelar class="btn btn-error text-white font-medium text-lg "
     //Editar animal class="btn text-lg px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-    function volver(){
-        goto(pre + "/animales")
+    function volver() {
+        goto(pre + "/animales");
     }
 </script>
 
@@ -591,8 +590,16 @@
 <div class="grid grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
     {#if modoedicion}
         <div class="mb-1 lg:mb-0 col-span-2 lg:col-span-1">
-            <label for="caravana" class="label">
-                <span class="label-text text-base">Caravana</span>
+            <label for="caravana" class="label mb-0 pb-0">
+                <span
+                    class="
+                        label-text tracking-wide
+                        text-md uppercase
+                        font-semibold dark:text-gray-400
+                        text-gray-500
+                        
+                    ">Caravana</span
+                >
             </label>
             <label class="input-group">
                 <input
@@ -605,8 +612,17 @@
         </div>
     {/if}
     <div class="mb-1 lg:mb-0 col-span-2 lg:col-span-1">
-        <label for="peso" class="label">
-            <span class="label-text text-base">RP</span>
+        <label for="rp" class="label mb-0 pb-0">
+            <span
+                class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+            >
+                RP</span
+            >
         </label>
         {#if modoedicion}
             <label class="input-group">
@@ -620,15 +636,24 @@
         {:else}
             <label
                 for="rp"
-                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
             >
                 {shorterWord(rp)}
             </label>
         {/if}
     </div>
     <div class="mb-1 lg:mb-0">
-        <label for="peso" class="label">
-            <span class="label-text text-base">Peso(KG)</span>
+        <label for="peso" class="label mb-0 pb-0">
+            <span
+                class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+            >
+                Peso(KG)
+            </span>
         </label>
         {#if modoedicion}
             <label class="input-group">
@@ -642,16 +667,25 @@
             </label>
         {:else}
             <label
-                for="nombre"
-                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                for="peso"
+                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
             >
                 {peso}
             </label>
         {/if}
     </div>
     <div class="mb-1 lg:mb-0">
-        <label for="sexo" class="label">
-            <span class="label-text text-base">Sexo</span>
+        <label for="sexo" class="label mb-0 pb-0">
+            <span
+                class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+            >
+                Sexo</span
+            >
         </label>
         {#if modoedicion}
             <label class="input-group">
@@ -674,15 +708,24 @@
         {:else}
             <label
                 for="sexo"
-                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
             >
                 {getSexo(sexo)}
             </label>
         {/if}
     </div>
     <div class="mb-1 lg:mb-0">
-        <label for="rodeo" class="label">
-            <span class="label-text text-base">Rodeo</span>
+        <label for="rodeo" class="label mb-0 pb-0">
+            <span
+                class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+            >
+                Rodeo</span
+            >
         </label>
         {#if modoedicion}
             <label class="input-group">
@@ -704,15 +747,24 @@
         {:else}
             <label
                 for="rodeo"
-                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
             >
                 {nombrerodeo}
             </label>
         {/if}
     </div>
     <div class="mb-1 lg:mb-0">
-        <label for="lote" class="label">
-            <span class="label-text text-base">Lote</span>
+        <label for="lote" class="label mb-0 pb-0">
+            <span
+                class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+            >
+                Lote</span
+            >
         </label>
         {#if modoedicion}
             <label class="input-group">
@@ -734,15 +786,24 @@
         {:else}
             <label
                 for="lote"
-                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
             >
                 {nombrelote}
             </label>
         {/if}
     </div>
     <div class="mb-1 lg:mb-0">
-        <label for="categoria" class="label">
-            <span class="label-text text-base">Categoria</span>
+        <label for="categoria" class="label mb-0 pb-0">
+            <span
+                class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+            >
+                Categoria</span
+            >
         </label>
         {#if modoedicion}
             <label class="input-group">
@@ -764,15 +825,24 @@
         {:else}
             <label
                 for="categoria"
-                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
             >
                 {capitalize(categoria)}
             </label>
         {/if}
     </div>
-    <div class="mb-1 lg:mb-0 col-span-2 lg:col-span-1">
-        <label for="raza" class="label">
-            <span class="label-text text-base">Raza</span>
+    <div class="mb-1 lg:mb-0">
+        <label for="raza" class="label mb-0 pb-0">
+            <span
+                class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+            >
+                Raza</span
+            >
         </label>
         {#if modoedicion}
             <label class="input-group">
@@ -786,15 +856,24 @@
         {:else}
             <label
                 for="raza"
-                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
             >
                 {shorterWord(raza)}
             </label>
         {/if}
     </div>
-    <div class="mb-1 lg:mb-0 col-span-2 lg:col-span-1">
-        <label for="peso" class="label">
-            <span class="label-text text-base">Color</span>
+    <div class="mb-1 lg:mb-0">
+        <label for="peso" class="label mb-0 pb-0">
+            <span
+                class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+            >
+                Color</span
+            >
         </label>
         {#if modoedicion}
             <label class="input-group">
@@ -808,7 +887,7 @@
         {:else}
             <label
                 for="color"
-                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
             >
                 {shorterWord(color)}
             </label>
@@ -816,8 +895,17 @@
     </div>
     {#if sexo == "H"}
         <div class="mb-1 lg:mb-0 col-span-2 lg:w-1/2">
-            <label for="prenada" class="label">
-                <span class="label-text text-base">Estado</span>
+            <label for="prenada" class="label mb-0 pb-0">
+                <span
+                    class="
+                        label-text tracking-wide
+                        text-md uppercase
+                        font-semibold dark:text-gray-400
+                        text-gray-500
+                    "
+                >
+                    Estado</span
+                >
             </label>
             {#if modoedicion}
                 <label class="input-group">
@@ -839,7 +927,7 @@
             {:else}
                 <label
                     for="sexo"
-                    class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                    class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
                 >
                     {getEstadoNombre(prenada)}
                 </label>
@@ -867,12 +955,21 @@
     {:else}
         <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
             <div>
-                <label for="fechanacimiento" class="label">
-                    <span class="label-text text-base">Fecha nacimiento</span>
+                <label for="fechanacimiento" class="label mb-0 pb-0">
+                    <span
+                        class="
+                            label-text tracking-wide
+                            text-md uppercase
+                            font-semibold dark:text-gray-400
+                            text-gray-500
+                        "
+                    >
+                        Fecha nacimiento</span
+                    >
                 </label>
                 <label
                     for="fechanacimiento"
-                    class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-2`}
+                    class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
                 >
                     {new Date(fecha + " 03:00:00").toLocaleDateString()}
                 </label>
@@ -881,8 +978,12 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
             <div>
                 <label for="nombremadre" class="label">
-                    <span class="label-text text-base"
-                        >Madre: {nombremadre}
+                    <span class="label-text text-base">
+                        <span
+                            class="label-text tracking-wide text-md uppercase font-semibold dark:text-gray-400 text-gray-500"
+                        >
+                            Madre
+                        </span>: {nombremadre}
                     </span>
                 </label>
 
@@ -899,9 +1000,14 @@
 
             <div>
                 <label for="nombrepadre" class="label">
-                    <span class="label-text text-base"
-                        >Padre: {nombrepadre}</span
-                    >
+                    <span class="label-text text-base">
+                        <span
+                            class="label-text tracking-wide text-md uppercase font-semibold dark:text-gray-400 text-gray-500"
+                        >
+                            Padre:
+                        </span>
+                        {nombrepadre}
+                    </span>
                 </label>
 
                 {#if padreobj.id != -1}
@@ -1017,7 +1123,7 @@
     <!-- Botón Volver -->
     <button
         class="
-            hidden 
+            hidden
             mt-2 px-10 py-2
             dark:bg-transparent
             bg-white
@@ -1044,6 +1150,3 @@
         Editar
     </button>
 </div>
-
-
-

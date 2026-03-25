@@ -31,6 +31,7 @@
     let count = $derived(colabs.length);
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
+    let pyfila = "py-1"
     function getColab(id) {
         goto(pre + "/colaboradores/" + id);
     }
@@ -70,14 +71,14 @@
                 <tbody>
                     {#each colabs as c}
                         <tr>
-                            <td class="text-base mx-1 px-1 text-center"
+                            <td class={`text-base mx-1 px-1 text-center ${pyfila}`}
                                 >{c.expand.colab.nombre}</td
                             >
-                            <td class="text-base mx-1 px-1 text-center"
+                            <td class={`text-base mx-1 px-1 text-center ${pyfila}`}
                                 >{c.expand.colab.apellido}</td
                             >
                             <td
-                                class=" flex items-center justify-center gap-2 px-1"
+                                class={`flex items-center justify-center gap-2 px-1 ${pyfila}`}
                             >
                                 <button onclick={() => getColab(c.id)}>
                                     <Eye size="size-5" />

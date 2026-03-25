@@ -20,6 +20,7 @@
     //FILTROS
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
+    import TablaTratamientos from "$lib/components/tratamientos/TablaTratamientos.svelte";
     let caber = createCaber();
     let cab = caber.cab;
     let ruta = import.meta.env.VITE_RUTA;
@@ -34,6 +35,14 @@
     let tipotratamientos = $state([]);
     let tratamientos = $state([]);
     let tratamientosrow = $state([]);
+    let cargadostratamientos = $state(false);
+    //seleccionados
+    let todos = $state(false);
+    let algunos = $state(false);
+    let ninguno = $state(true);
+    let selectfilas = $state([]);
+    let selecthash = $state({});
+    let pageSize = $state(15);
     let caravana = $state("");
     let malcaravana = $state(false);
     let sexo = $state("");
@@ -199,6 +208,7 @@
         });
         tratamientos = records;
         tratamientosrow = records;
+        cargadostratamientos = true
     }
     async function getTiposTratamientos() {
         const records = await pb.collection("tipotratamientos").getFullList({
@@ -334,7 +344,7 @@
     function openTiposModal() {
         tiposmodal.showModal();
     }
-    
+
     function openEditTipoModal(id) {
         idtipotratamiento = id;
         let tipotratamiento = tipotratamientos.filter((tp) => tp.id == id)[0];
@@ -455,7 +465,7 @@
             );
         }
     }
-    function irDetalle(id){
+    function irDetalle(id) {
         idtratamiento = id;
         let tratamiento = tratamientos.filter((t) => t.id == id)[0];
         fecha = tratamiento.fecha.split(" ")[0];
@@ -466,17 +476,17 @@
         categoria = tratamiento.expand.animal.categoria;
         observacion = tratamiento.observacion;
 
-        detalletratamiento.idtratamiento=idtratamiento
-        detalletratamiento.animal=animal
-        detalletratamiento.caravana=caravaedit
-        detalletratamiento.categoria=categoria
-        detalletratamiento.fecha=fecha
-        detalletratamiento.tipo=tipo
-        detalletratamiento.observacion=observacion
-        detalletratamiento.tipos = tipotratamientos
-        proxydetalletratamiento.save(detalletratamiento)
-        
-        goto(pre+"/tratamientos/"+idtratamiento)
+        detalletratamiento.idtratamiento = idtratamiento;
+        detalletratamiento.animal = animal;
+        detalletratamiento.caravana = caravaedit;
+        detalletratamiento.categoria = categoria;
+        detalletratamiento.fecha = fecha;
+        detalletratamiento.tipo = tipo;
+        detalletratamiento.observacion = observacion;
+        detalletratamiento.tipos = tipotratamientos;
+        proxydetalletratamiento.save(detalletratamiento);
+
+        goto(pre + "/tratamientos/" + idtratamiento);
     }
     function openEditModal(id) {
         idtratamiento = id;
@@ -623,7 +633,13 @@
         goto(pre + "/tratamientos/movimiento");
     }
     function nuevotipo() {
-        openTiposModal()
+        openTiposModal();
+    }
+    function clickTodos(){
+
+    }
+    function clickFila(id){
+
     }
 </script>
 
@@ -646,204 +662,6 @@
         {filterUpdate}
         {clickFilter}
     />
-    <div
-        class="hidden grid grid-cols-3 lg:grid-cols-4 mx-1 lg:mx-10 mt-1 w-11/12"
-    >
-        <div>
-            <h1 class="text-2xl">Tratamientos</h1>
-        </div>
-        <div class="flex col-span-3 gap-1 justify-start lg:justify-end">
-            <div>
-                <button
-                    class={`btn btn-primary rounded-lg ${estilos.btntext}`}
-                    data-theme="forest"
-                    onclick={() => goto(pre + "/tratamientos/movimiento")}
-                >
-                    <span class="text-xl">Nuevo</span>
-                </button>
-            </div>
-            <div>
-                <button
-                    class={`btn btn-primary rounded-lg ${estilos.btntext}`}
-                    data-theme="forest"
-                    onclick={() => openTiposModal()}
-                >
-                    <span class="text-xl">Tipos</span>
-                </button>
-            </div>
-            <div>
-                <Exportar
-                    titulo={"Tratamientos"}
-                    filtros={[]}
-                    confiltros={false}
-                    data={tratamientosrow}
-                    sheetname={"Tratamientos"}
-                    establecimiento={cab.nombre}
-                    {prepararData}
-                />
-            </div>
-        </div>
-
-        <div class="hidden">
-            <button
-                onclick={() => goto(pre + "/tratamientos/movimiento")}
-                class={`
-                    bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                    ${estilos.btnsecondary}
-                    rounded-full
-                    px-4 pt-2 pb-3
-                `}
-                aria-label="Exportar"
-            >
-                <span class="text-xl font-semibold">Múltiples</span>
-            </button>
-        </div>
-    </div>
-    <div
-        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10 w-11/12"
-    >
-        <div class="w-11/12">
-            <label
-                class={`
-                    input 
-                    input-bordered 
-                    flex 
-                    items-center gap-2
-                    ${estilos.bgdark2}
-                `}
-            >
-                <input
-                    type="text"
-                    class="grow"
-                    placeholder="Buscar..."
-                    bind:value={buscar}
-                    oninput={filterUpdate}
-                />
-            </label>
-        </div>
-        <div class="w-11/12">
-            <Limpiar {limpiarFiltros} />
-        </div>
-    </div>
-    <!--Filtrar-->
-    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
-        <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
-            <div class="flex justify-between items-center px-2">
-                <h1 class="font-bold text-lg py-2">Filtros</h1>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class={`h-5 w-5 transition-all duration-300 ${isOpenFilter ? "transform rotate-180" : ""}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
-                    />
-                </svg>
-            </div>
-        </button>
-        <div>
-            <span class="text-lg mx-1"
-                >Total de tratamientos encontrados: {totalTratamientosEncontrados}</span
-            >
-        </div>
-        {#if isOpenFilter}
-            <div transition:slide>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-1">
-                    <div class="">
-                        <label
-                            class="block tracking-wide mb-2"
-                            for="grid-first-name"
-                        >
-                            Fecha desde
-                        </label>
-                        <input
-                            id="fechadesde"
-                            type="date"
-                            class={`
-                            w-full md:w-1/2
-                                input input-bordered
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={fechadesde}
-                            onchange={filterUpdate}
-                        />
-                    </div>
-                    <div class="">
-                        <label
-                            class="block tracking-wide mb-2"
-                            for="grid-first-name"
-                        >
-                            Fecha Hasta
-                        </label>
-                        <input
-                            id="fechadesde"
-                            type="date"
-                            class={`
-                            w-full md:w-1/2
-                                input input-bordered
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={fechahasta}
-                            onchange={filterUpdate}
-                        />
-                    </div>
-                    <div>
-                        <label for="categoria" class="tracking-wide label">
-                            <span class="label-text text-base">Categoria</span>
-                        </label>
-                        <label class="input-group">
-                            <select
-                                class={`
-                                    select select-bordered w-full
-                                    rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    ${estilos.bgdark2}
-                                `}
-                                bind:value={buscarcategoria}
-                                onchange={filterUpdate}
-                            >
-                                <option value="">Todos</option>
-                                {#each categorias as s}
-                                    <option value={s.id}>{s.nombre}</option>
-                                {/each}
-                            </select>
-                        </label>
-                    </div>
-                    <div>
-                        <label for="tipo" class="tracking-wide label">
-                            <span class="label-text text-base">Tipo</span>
-                        </label>
-                        <label class="input-group">
-                            <select
-                                class={`
-                                    select select-bordered w-full
-                                    rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    ${estilos.bgdark2}
-                                `}
-                                bind:value={buscartipo}
-                                onchange={filterUpdate}
-                            >
-                                <option value="">Todos</option>
-                                {#each tipotratamientos as t}
-                                    <option value={t.id}>{t.nombre}</option>
-                                {/each}
-                            </select>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        {/if}
-    </div>
     <!--Ordenar-->
     <div
         class="block md:hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
@@ -911,199 +729,234 @@
             </div>
         {/if}
     </div>
-    <div
-        class={`
-            hidden w-full md:grid
-            mx-auto py-6 px-4 max-w-7xl
-        `}
-    >
+    {#if cargadostratamientos}
+    <!--Tabla-->
         <div
             class={`
-                overflow-hidden rounded-xl
+                hidden w-full xl:w-3/4 md:grid
+                mx-auto py-1 px-4 max-w-7xl  
             `}
         >
-            <table class="table table-lg w-full">
-                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
-                    <tr>
-                        <th
-                            onclick={() => ordenarTratamientos("fecha")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Fecha
-                                {#if forma == "fecha"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <th
-                            onclick={() => ordenarTratamientos("animal")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Animal
-                                {#if forma == "animal"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <th
-                            onclick={() => ordenarTratamientos("categoria")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Categoria
-                                {#if forma == "categoria"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <th
-                            onclick={() => ordenarTratamientos("tipo")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Tipo
-                                {#if forma == "tipo"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <!--<th class="text-base mx-1 px-1">Acciones</th>-->
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each tratamientosrow as t}
-                        <tr
-                            onclick={() => irDetalle(t.id)}
-                            class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
-                        >
-                            <td class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                >{new Date(t.fecha).toLocaleDateString()}</td
-                            >
-                            <td class="text-base mx-1 px-1">
-                                {`${t.expand.animal.caravana}`}
-                            </td>
-                            <td class="text-base mx-1 px-1">
-                                {`${capitalize(t.categoria)}`}
-                            </td>
-                            <td class="text-base mx-1 px-1">
-                                {`${t.expand.tipo.nombre}`}
-                            </td>
-                        </tr>
-                    {/each}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="block w-full md:hidden justify-items-center mx-1">
-        {#each tratamientosrow as t}
             <div
-                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                class={`
+                overflow-hidden rounded-xl
+                border dark:border-gray-700
+
+            `}
             >
-                <button onclick={() => irDetalle(t.id)}>
-                    <div class="block p-4">
-                        <div class="grid grid-cols-2 gap-y-2">
-                            <div class="flex items-start">
-                                <span>Fecha:</span>
-                                <span class="mx-1 font-semibold">
-                                    {new Date(t.fecha).toLocaleDateString()}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Caravana:</span>
-                                <span class="mx-1 font-semibold">
-                                    {`${shorterWord(t.expand.animal.caravana)}`}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Tipo:</span>
-                                <span class="mx-1 font-semibold">
+                <TablaTratamientos
+                    bind:pageSize
+                    {selecthash}
+                    tratamientosrows={tratamientosrow}
+                    {ordenarTratamientos}
+                    openEditModal={irDetalle}
+                    openViewModal={irDetalle}
+                    openDelModal = {eliminar}
+                    {clickTodos}
+                    {clickFila}
+                    {todos}
+                />
+            </div>
+        </div>
+        <div
+            class={`
+            hidden w-full
+            mx-auto py-6 px-4 max-w-7xl
+        `}
+        >
+            <div
+                class={`
+                overflow-hidden rounded-xl
+            `}
+            >
+                <table class="table table-lg w-full">
+                    <thead
+                        class="bg-emerald-600 text-white dark:bg-emerald-700"
+                    >
+                        <tr>
+                            <th
+                                onclick={() => ordenarTratamientos("fecha")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Fecha
+                                    {#if forma == "fecha"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                onclick={() => ordenarTratamientos("animal")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Animal
+                                    {#if forma == "animal"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                onclick={() => ordenarTratamientos("categoria")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Categoria
+                                    {#if forma == "categoria"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                onclick={() => ordenarTratamientos("tipo")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Tipo
+                                    {#if forma == "tipo"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <!--<th class="text-base mx-1 px-1">Acciones</th>-->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {#each tratamientosrow as t}
+                            <tr
+                                onclick={() => irDetalle(t.id)}
+                                class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
+                            >
+                                <td
+                                    class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
+                                    >{new Date(
+                                        t.fecha,
+                                    ).toLocaleDateString()}</td
+                                >
+                                <td class="text-base mx-1 px-1">
+                                    {`${t.expand.animal.caravana}`}
+                                </td>
+                                <td class="text-base mx-1 px-1">
+                                    {`${capitalize(t.categoria)}`}
+                                </td>
+                                <td class="text-base mx-1 px-1">
                                     {`${t.expand.tipo.nombre}`}
-                                </span>
-                            </div>
-                            <div class="col-span-2 flex items-start">
-                                <span>{`${t.observacion}`}</span>
+                                </td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="block w-full md:hidden justify-items-center mx-1">
+            {#each tratamientosrow as t}
+                <div
+                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                >
+                    <button onclick={() => irDetalle(t.id)}>
+                        <div class="block p-4">
+                            <div class="grid grid-cols-2 gap-y-2">
+                                <div class="flex items-start">
+                                    <span>Fecha:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {new Date(t.fecha).toLocaleDateString()}
+                                    </span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span>Caravana:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {`${shorterWord(t.expand.animal.caravana)}`}
+                                    </span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span>Tipo:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {`${t.expand.tipo.nombre}`}
+                                    </span>
+                                </div>
+                                <div class="col-span-2 flex items-start">
+                                    <span>{`${t.observacion}`}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </button>
-            </div>
-        {/each}
-    </div>
+                    </button>
+                </div>
+            {/each}
+        </div>
+    {/if}
 </Navbar2>
 <dialog
     id="nuevoModal"

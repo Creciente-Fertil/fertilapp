@@ -122,7 +122,7 @@
         proxymovimiento.observacion = observaciongeneral;
         proxymovimiento.padreslist = padreslist;
         proxymovimiento.padresserv = padresserv;
-        proxymovimiento.pajuela  = pajuela
+        proxymovimiento.pajuela = pajuela;
         proxy.save(proxymovimiento);
     }
     function loadDetalle() {
@@ -134,7 +134,7 @@
         padresserv = proxymovimiento.padresserv;
         padreslist = proxymovimiento.padreslist;
         padre = proxymovimiento.padre;
-        pajuela= proxymovimiento.pajuela;
+        pajuela = proxymovimiento.pajuela;
         fechaparto = proxymovimiento.fechaparto;
         fechadesdeserv = proxymovimiento.fechadesdeserv;
         fechahastaserv = proxymovimiento.fechahastaserv;
@@ -448,7 +448,6 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <!--Este va a ser el componente confirmar-->
 <Navbar2>
-    
     <div class={classmove}>
         
         <DetalleMovimiento
@@ -474,7 +473,7 @@
             {padre}
             {pajuela}
         />
-        
+
         <DetalleAnimalesMovimiento
             {esNatural}
             bind:selectanimales={listaanimales}
@@ -510,7 +509,7 @@
             >
                 Volver
             </button>
-            <!-- Botón Editar -->
+            <!-- Botón Guardar -->
             <button
                 class="
                     mt-2 px-10 py-2 bg-[#115642] text-white
@@ -520,11 +519,10 @@
                     "
                 onclick={mover}
             >
-                Guardar
+                Crear {listaanimales.length > 1 ? "servicios" : "servicio"}
             </button>
         </div>
     </div>
-
 </Navbar2>
 
 <dialog id="veranimal" class="modal modal-middle rounded-xl">

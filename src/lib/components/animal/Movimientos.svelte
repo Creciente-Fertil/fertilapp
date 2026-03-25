@@ -12,21 +12,98 @@
     import BuscadorMovimiento from "./BuscadorMovimiento.svelte";
     import TablaMovimiento from "./TablaMovimiento.svelte";
 
+
     let { caravana = "", animal = {} } = $props();
 
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
     let id = $state("");
     let historial = $state([]);
+
     let filas = $state([]);
+    let filasfiltradas = $state([]);
     let fechadesde = $state("");
     let fechahasta = $state("");
+    let descendente = $state(true)
     let contodos = $state(true);
-    let concate = $state(false);
-    let conlote = $state(false);
-    let conrodeo = $state(false);
-    function filterUpdate() {}
-    function changeCampo() {}
+    let concate = $state(true);
+    let conlote = $state(true);
+    let conrodeo = $state(true);
+    function filterUpdate() {
+        changeCampo();
+        if (fechadesde != "") {
+            filasfiltradas = filasfiltradas.filter(
+                (e) => new Date(e.fecha) > new Date(fechadesde),
+            );
+        }
+        if (fechahasta != "") {
+            filasfiltradas = filasfiltradas.filter(
+                (e) => new Date(e.fecha) < new Date(fechahasta),
+            );
+        }
+    }
+    function onClickCustom(coleccion = "") {
+        if (coleccion == "todos") {
+            if (!contodos) {
+                conlote = true;
+                conrodeo = true;
+                concate = true;
+            }
+        }
+
+        if (contodos && concate) {
+            contodos = false;
+        }
+        if (contodos && conlote) {
+            contodos = false;
+        }
+        if (contodos && conrodeo) {
+            contodos = false;
+        }
+    }
+    function filterMovimiento(fila) {
+        if (!contodos && !concate && fila.coleccion == "categoria") {
+            return false;
+        }
+        if (!contodos && !conlote && fila.coleccion == "lote") {
+            return false;
+        }
+        if (!contodos && !conrodeo && fila.coleccion == "rodeo") {
+            return false;
+        }
+        return true;
+    }
+    function changeCampo() {
+        
+        filasfiltradas = filas.filter(filterMovimiento);
+    }
+    function crearInfo(desde="",hasta=""){
+        let html =`
+            <span>
+                <span 
+                    class="font-semibold text-gray-600 dark:text-gray-400"
+                >
+                    ${desde}
+                </span>
+                <span class="font-semibold text-[#115642] dark:text-[#24a579]" 
+                >
+                    ${hasta}
+                </span>
+            </span>`
+        return html
+    }
+    function ordenarFecha(){
+        filterUpdate()
+        descendente = !descendente
+     
+        filasfiltradas.sort((m1,m2)=>   {
+            let f1 = new Date(m1.fecha)
+            let f2 = new Date(m2.fecha)
+            return  descendente? f1>f2? -1:1 : f1>f2? 1:-1;
+        })
+        
+        
+    }
     function procesarHistorial() {
         filas = [];
         let fecha_inicio = animal.created;
@@ -39,69 +116,80 @@
             let id = h_f.id;
             if (h_o.rodeo != h_f.rodeo) {
                 let info = "";
+                let desde = ""
+                let hasta = ""
                 if (h_o.rodeo.length > 0) {
-                    info = "" + h_o.expand.rodeo.nombre;
+                    desde = "" + h_o.expand.rodeo.nombre;
                 } else {
-                    info = "Sin rodeo";
+                    desde = "Sin rodeo";
                 }
                 if (h_f.rodeo.length > 0) {
-                    info += " -> " + h_f.expand.rodeo.nombre;
+                    hasta += " ⇒ " + h_f.expand.rodeo.nombre;
                 } else {
-                    info += " Sin rodeo";
+                    hasta += " ⇒ " + " Sin rodeo";
                 }
+                info = crearInfo(desde,hasta)
                 let estado = {
-                    id,
+                    id: id + "rodeo" + fecha,
                     fecha,
                     caravana,
                     nombre: "Rodeo",
+                    coleccion: "rodeo",
                     info,
                 };
                 filas.push(estado);
             }
             if (h_o.lote != h_f.lote) {
                 let info = "";
+                let desde = ""
+                let hasta = ""
                 if (h_o.lote.length > 0) {
-                    info = " " + h_o.expand.lote.nombre;
+                    desde = " " + h_o.expand.lote.nombre;
                 } else {
-                    info = "Sin lote";
+                    desde = "Sin lote";
                 }
                 if (h_f.lote.length > 0) {
-                    info += " -> " + h_f.expand.lote.nombre;
+                    hasta += " &rarr; " + h_f.expand.lote.nombre;
                 } else {
-                    info += " Sin lote";
+                    hasta += " ⇒ " +" Sin lote";
                 }
+                info = crearInfo(desde,hasta)
                 let estado = {
-                    id,
+                    id: id + "lote" + fecha,
                     fecha,
                     caravana,
                     nombre: "Lote",
+                    coleccion: "lote",
                     info,
                 };
                 filas.push(estado);
             }
             if (h_o.categoria != h_f.categoria) {
                 let info = "";
+                let desde = ""
+                let hasta = ""
                 if (h_o.categoria.length > 0) {
-                    info = "" + h_o.categoria;
+                    desde = "" + capitalize(h_o.categoria);
                 } else {
-                    info = "Sin rodeo";
+                    desde = "Sin categoria";
                 }
                 if (h_f.categoria.length > 0) {
-                    info += " -> " + h_f.categoria;
+                    hasta += " ⇒ " + capitalize(h_f.categoria);
                 } else {
-                    info += " Sin categoria";
+                    hasta += " ⇒ " +" Sin categoria";
                 }
+                info = crearInfo(desde,hasta)
                 let estado = {
-                    id,
+                    id: id + "categoria" + fecha,
                     fecha,
                     caravana,
                     nombre: "Categoria",
+                    coleccion: "categoria",
                     info,
                 };
                 filas.push(estado);
             }
         }
-        
     }
     async function getHistorial() {
         historial = await pb.collection("historialanimales").getFullList({
@@ -115,11 +203,12 @@
         id = $page.params.slug;
         await getHistorial();
         procesarHistorial();
+        filterUpdate();
     });
 </script>
 
 <BuscadorMovimiento
-    data={filas}
+    data={filasfiltradas}
     {caravana}
     bind:fechadesde
     bind:fechahasta
@@ -129,6 +218,7 @@
     bind:conrodeo
     {filterUpdate}
     {changeCampo}
+    onclick={onClickCustom}
 />
 <div
     class={`
@@ -147,7 +237,7 @@
         {#if historial.length == 0}
             <p class="mt-5 text-lg">No recibio modificaciones</p>
         {:else}
-            <TablaMovimiento data={filas} />
+            <TablaMovimiento data={filasfiltradas} {ordenarFecha}/>
         {/if}
     </div>
 </div>

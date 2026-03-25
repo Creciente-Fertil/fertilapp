@@ -110,23 +110,23 @@
     {#if edit}
         <div
             class={`
-        relative
-        ${margintop}
-    `}
+                relative
+                ${margintop}
+            `}
         >
             <input
                 bind:this={inputRef}
                 type="text"
                 class={`
-            input 
-            input-bordered 
-            border border-gray-300 rounded-md
-            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-            w-full
-            pr-10
-            mb-0
-            ${estilos.bgdark2} 
-        `}
+                    input 
+                    input-bordered 
+                    border border-gray-300 rounded-md
+                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                    w-full
+                    pr-10
+                    mb-0
+                    ${estilos.bgdark2} 
+                `}
                 oninput={onChangeCadena}
                 onclick={() => {
                     isOpen = !isOpen;
@@ -143,11 +143,11 @@
                 stroke-width="1.5"
                 stroke="currentColor"
                 class={`
-            absolute right-3 top-1/2 -translate-y-1/2
-            w-5 h-5 text-gray-400 
-            transition-transform duration-150 
-            ${isOpen ? "rotate-180" : ""}
-        `}
+                    absolute right-3 top-1/2 -translate-y-1/2
+                    w-5 h-5 text-gray-400 
+                    transition-transform duration-150 
+                    ${isOpen ? "rotate-180" : ""}
+                `}
             >
                 <path
                     stroke-linecap="round"
@@ -166,13 +166,13 @@
                 {#if listarow.length == 0}
                     <div
                         class={`
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                        w-full
-                        mb-0
-                        bg-white
-                        ${estilos.bgdark2} 
-                    `}
+                            border border-gray-300 rounded-md
+                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                            w-full
+                            mb-0
+                            bg-white
+                            ${estilos.bgdark2} 
+                        `}
                     >
                         <button
                             class={`
@@ -196,31 +196,30 @@
                 {:else}
                     <div
                         class={`
-                    
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                        w-full
-                        mb-0
-                        bg-white
-                        ${estilos.bgdark2} 
-                    `}
+                            border border-gray-300 rounded-md
+                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                            w-full
+                            mb-0
+                            bg-white
+                            ${estilos.bgdark2} 
+                        `}
                     >
                         {#each listarow as v}
                             <button
                                 class={`
-                                text-start w-full 
-                                relative py-2 pl-3 
-                                select-none pr-9 bg-transparent
-                                hover:bg-green-100 hover:text-green-800 dark:hover:text-green-800 dark:text-white
-                            `}
+                                    text-start w-full 
+                                    relative py-2 pl-3 
+                                    select-none pr-9 bg-transparent
+                                    hover:bg-green-100 hover:text-green-800 dark:hover:text-green-800 dark:text-white
+                                `}
                                 onclick={() => clickOption(v.id)}
                             >
                                 <span
                                     class={`
-                                    block
-                                    truncate
-                                    font-normal
-                                `}
+                                        block
+                                        truncate
+                                        font-normal
+                                    `}
                                 >
                                     {v[campo]}
                                 </span>

@@ -1036,9 +1036,9 @@
         <a
             href={`${pre + "/servicios"}`}
             class="
-        inline-flex items-center text-sm
-        text-gray-700 hover:text-gray-900 dark:text-gray-400
-        dark:hover:text-gray-200 mb-4"
+                inline-flex items-center text-sm
+                text-gray-700 hover:text-gray-900 dark:text-gray-400
+                dark:hover:text-gray-200 mb-4"
         >
             <svg
                 class="w-4 h-4 mr-1"
@@ -1075,7 +1075,7 @@
                 </h1>
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 max-h-screen">
+        <div class="grid grid-cols-1 md:grid-cols-3 max-h-screen gap-2 md:gap-4 lg:gap-10">
             <!--Lado izquierd-->
             <div>
                 <div
@@ -1154,13 +1154,15 @@
 
                 <div
                     class={`
+                        
+                        pt-0 my-0
                         hidden w-full md:grid
-                        mx-auto  px-2 md:px-1 max-w-7xl
+                        mx-auto px-2 md:px-1 max-w-7xl
                     `}
                 >
                     <div
                         class={`
-                            overflow-hidden rounded-t-xl
+                            overflow-hidden 
                         `}
                     >
                         <TablaMovimiento

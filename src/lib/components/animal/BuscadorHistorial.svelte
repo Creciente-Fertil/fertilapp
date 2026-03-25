@@ -48,6 +48,7 @@
         conpari = $bindable(true),
         filterUpdate = () => {},
         changeCampo = () => {},
+        onclick = (e) => {},
     } = $props();
 </script>
 
@@ -55,10 +56,7 @@
 <div class=" py-1 px-4 w-full">
     <!--Header-->
     <div
-        class={`
-            
-            
-        `}
+        class={``}
     >
         <div
             class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 mb-2 border-b dark:border-gray-800"
@@ -82,7 +80,6 @@
                 <Arrowdown size="size-4" margenes="" />
                 Exportar Historial
             </Secondary>
-            
         </div>
         <div class="grid grid-cols-1 w-full p-1 md:p-4">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-1">
@@ -125,39 +122,46 @@
                     />
                 </div>
             </div>
-            
+
             <div class="flex flex-wrap gap-2 my-2">
                 <CustomCheck
+                    onclick = {()=>onclick("todos")}
                     bind:activo={contodos}
                     etiqueta="Todos"
                     onchange={changeCampo}
                 />
                 <CustomCheck
+                    {onclick}
                     bind:activo={coninse}
                     etiqueta="Inseminación"
                     onchange={changeCampo}
                 />
                 <CustomCheck
+                    {onclick}
                     bind:activo={conser}
                     etiqueta="Servicio"
                     onchange={changeCampo}
                 />
                 <CustomCheck
+                    {onclick}
                     bind:activo={conpari}
                     etiqueta="Parición"
                     onchange={changeCampo}
                 />
                 <CustomCheck
+                    {onclick}
                     bind:activo={conobser}
                     etiqueta="Observación"
                     onchange={changeCampo}
                 />
                 <CustomCheck
+                    {onclick}
                     bind:activo={contactos}
                     etiqueta="Tacto"
                     onchange={changeCampo}
                 />
                 <CustomCheck
+                    {onclick}
                     bind:activo={contrata}
                     etiqueta="Tratamiento"
                     onchange={changeCampo}

@@ -45,16 +45,14 @@
         conrodeo = $bindable(false),
         filterUpdate = () => {},
         changeCampo = () => {},
+        onclick = (e)=>{}
     } = $props();
 </script>
 <svelte:window bind:innerWidth bind:innerHeight />
 <div class=" py-1 px-4 w-full">
     <!--Header-->
     <div
-        class={`
-            
-            
-        `}
+        class={``}
     >
         <div
             class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 mb-2 border-b dark:border-gray-800"
@@ -124,21 +122,25 @@
             
             <div class="flex flex-wrap gap-2 my-2">
                 <CustomCheck
+                    onclick = {()=>onclick("todos")}
                     bind:activo={contodos}
                     etiqueta="Todos"
                     onchange={changeCampo}
                 />
                 <CustomCheck
+                {onclick}
                     bind:activo={concate}
                     etiqueta="Categorias"
                     onchange={changeCampo}
                 />
                 <CustomCheck
+                {onclick}
                     bind:activo={conlote}
                     etiqueta="Lotes"
                     onchange={changeCampo}
                 />
                 <CustomCheck
+                {onclick}
                     bind:activo={conrodeo}
                     etiqueta="Rodeos"
                     onchange={changeCampo}

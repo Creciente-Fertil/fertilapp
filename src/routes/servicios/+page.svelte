@@ -584,7 +584,7 @@
         //ordenarServicios("fecha")
     });
     //Paginacion
-    let pageSize = $state(10);
+    let pageSize = $state(15);
 
     //Para el collapse de los ordenar
     let isOpenOrdenar = $state(false);
@@ -804,8 +804,9 @@
         <!--Tabla-->
         <div
             class={`
+                pt-1 md:pt-2 lg:pt-5
                 hidden w-full xl:w-3/4 md:grid
-                mx-auto py-1 px-4 max-w-7xl  
+                mx-auto px-4 max-w-7xl  
             `}
         >
             <div
@@ -816,7 +817,7 @@
             `}
             >
                 <TablaServicios
-                    {pageSize}
+                    bind:pageSize
                     {serviciosrow}
                     {ordenarServicios}
                     {openEditModal}

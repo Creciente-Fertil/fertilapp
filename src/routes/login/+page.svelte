@@ -1,4 +1,5 @@
 <script>
+    import estilos from "$lib/stores/estilos";
     import { enabled } from "$lib/stores/enabled";
     import { usuario } from "$lib/stores/usuario";
     import { createCaber } from "$lib/stores/cab.svelte";
@@ -158,14 +159,14 @@
             out:fade
         >
             <h1
-                class="hidden text-3xl font-bold text-green-700 dark:text-green-400 mb-6 text-center"
+                class="hidden text-3xl font-bold text-[#115642] dark:text-[#126a50] mb-6 text-center"
             >
                 Bienvenido a Fertil
             </h1>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 32000 10000"
-                class="fill-green-800 dark:fill-green-500"
+                class="fill-[#115642] dark:fill-[#126a50]"
             >
                 <g id="Capa_x0020_1">
                     <metadata id="CorelCorpID_0Corel-Layer" />
@@ -298,7 +299,13 @@
                 </div>
                 <div>
                     <button
-                        class="w-full bg-green-600 text-white rounded-md py-2 px-4 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition"
+                        class={`
+                            w-full bg-[#115642] dark:bg-[#126a50] text-white rounded-md 
+                            py-2 px-4 hover:bg-green-700 hover:dark:bg-[#168561] focus:outline-none 
+                            focus:ring-2 focus:ring-green-500 focus:ring-offset-2 
+                            transition
+                            `
+                        }
                         onclick={ingresar}
                     >
                         Ingresar
@@ -308,18 +315,29 @@
             <div class="mt-6 text-center">
                 <a
                     href={pre + "/recover"}
-                    class="text-sm text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition"
+                    class={`
+                        text-md text-[#115642] dark:text-[#126a50] 
+                        hover:text-[#24a579] dark:hover:text-[#168561] 
+                        transition
+                        `
+                    }
                 >
                     ¿Olvidaste la contraseña?
                 </a>
             </div>
 
             <div class="mt-8 border-t border-gray-200 pt-6 text-center">
-                <p class="text-sm text-gray-600 dark:text-gray-400">
+                <p class="text-md text-gray-600 dark:text-gray-400">
                     ¿No tienes una cuenta?
                     <a
                         href={pre + "/user/new"}
-                        class="font-medium text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition"
+                        class={`
+                            font-medium 
+                            text-md text-[#115642] dark:text-[#126a50] 
+                            hover:text-[#24a579] dark:hover:text-[#168561]
+                            transition
+                            `
+                        }
                     >
                         Crear una
                     </a>

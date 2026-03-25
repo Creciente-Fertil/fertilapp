@@ -149,7 +149,7 @@
         <li
             transition:slide
             class={`
-                    border-b border-gray-700  items-start
+                    
                     ${cab.exist ? "" : "disabled"}
                 `}
         >

@@ -24,7 +24,7 @@ export default {
     btnbuscador: `bg-[#115642]  hover:bg-[#0f4537] disabled:bg-[#24a579] disabled:cursor-not-allowed font-medium py-1.5 px-5 rounded-full shadow-md flex items-center gap-2 transition-all duration-200 `,
     btnbuscadorunrounded: `bg-[#115642]  hover:bg-[#0f4537] disabled:bg-[#24a579] disabled:cursor-not-allowed font-medium py-1.5 px-5 shadow-md flex items-center gap-2 transition-all duration-200 `,
 
-    tableheader: "bg-[#115642BD] text-white",
+    tableheader: "bg-[#115642] text-white",
     tableth: "text-base p-3  text-center uppercase",
 
     bgdark1: "dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800",

@@ -104,7 +104,7 @@
     </div>
     
     <!--Fecha parto-->
-    <div class="">
+    <div class="pt-2    ">
         <label for="fechaparto" class="label py-0 my-0">
             <span class="label-text text-sm">Fecha parto</span>
         </label>
@@ -154,8 +154,11 @@
                 campo="caravana"
                 bind:valores={padreslist}
                 {edit}
+                etiquetaDefault={false}
+                py={"py-0"}
+            
             >
-            <label for="padres" class="label">
+            <label for="padres" class="label pb-0 mb-0">
                 <span class="label-text text-sm font-normal">Padres</span>
             </label>
             </SelectToros>
@@ -185,7 +188,7 @@
                 </textarea>
                 
             {:else}
-                <p class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}>{observacion}</p>
+                <p class={`text-lg ${estilos.labelcolor} py-2 my-0 px-1`}>{observacion}</p>
             {/if}
         </label>
     </div>

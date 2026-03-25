@@ -20,11 +20,33 @@
     } = $props();
     //Logica de las opciones
     let isOpen = $state(false);
+    let buttonWidth = $state("0px");
+    let buttonRef = $state(null);
+
 
     function getNombre(idopt) {
-        let op = opciones.filter((o) => o.id == idopt)[0];
-        return op.nombre;
+        let idx_op = opciones.findIndex((o) => o.id == idopt);
+        if(idx_op != -1){
+            let op = opciones[idx_op]
+            return op.nombre;
+        }
+        return ""
+        
     }
+    // Función para actualizar el ancho
+    function updateWidth() {
+        if (buttonRef) {
+            buttonWidth = `${buttonRef.offsetWidth}px`;
+        }
+    }
+
+    // En Svelte 5, usamos $effect para reaccionar cuando se abre
+    $effect(() => {
+        if (isOpen) {
+            // Pequeño timeout para asegurar que el DOM del botón está listo si acaba de renderizarse
+            setTimeout(() => updateWidth(), 0);
+        }
+    });
 </script>
 
 <div class="">
@@ -32,6 +54,7 @@
         <span class="label-text text-base">{etiqueta} </span>
     </label>
     <button
+        bind:this={buttonRef}
         class={`
             ${margintop} h-12 w-full p-2 text-left 
             flex items-center justify-between 
@@ -83,6 +106,7 @@
     </button>
     {#if isOpen}
         <div
+            style="width: {buttonWidth}"
             class={`
                 ${estilos.bgdark2}
                 absolute z-10 mt-0 bg-white rounded-md shadow-lg   
@@ -91,12 +115,7 @@
             <ul
                 class="
                     text-base max-h-40 focus:outline-none sm:text-sm overflow-y-auto
-                    w-80
-                    sm:w-80
-                    md:w-80
-                    lg:w-80
-                    xl:w-96
-                    2xl:w-96
+                    
                 "
             >
                 {#each opciones as v}

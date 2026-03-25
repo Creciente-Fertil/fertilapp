@@ -15,6 +15,7 @@
     import { verificarNivel } from "$lib/permisosutil/lib";
     import AgregarAnimal from "$lib/components/eventos/AgregarAnimal.svelte";
     import { goto } from "$app/navigation";
+    import { shorterWord } from "$lib/stringutil/lib";
     //Filtros
 
     import { createStorageProxy } from "$lib/filtros/filtros";
@@ -28,6 +29,7 @@
     import { getPermisosList } from "$lib/permisosutil/lib";
     import RadioButton from "$lib/components/RadioButton.svelte";
     import CustomDate from "$lib/components/CustomDate.svelte";
+    import TablaNacimientos from "$lib/components/nacimientos/TablaNacimientos.svelte";
 
     let caber = createCaber();
     let cab = caber.cab;
@@ -42,6 +44,7 @@
     //Datos filtrar
     let nacimientos = $state([]);
     let nacimientosrow = $state([]);
+    let selecthash = $state({})
     let buscar = $state("");
     let fechadesde = $state("");
     let fechahasta = $state("");
@@ -49,6 +52,10 @@
     let buscarmadre = $state("");
     let buscarpadre = $state("");
     let cargadoanimales = $state(false);
+    let cargadonacimientos = $state(false);
+    let todos = $state(false)
+    let algunos = $state(false)
+    let ninguno = $state(false)
 
     let defaultfiltro = {
         buscar: "",
@@ -61,6 +68,21 @@
         ...defaultfiltro,
     });
     let proxy = createStorageProxy("listanacimientos", defaultfiltro);
+    //Detalle para nacimiento
+    let defaultNacimiento = {
+        edit:false,
+        idanimal:"",
+        caravana:"",
+        id:"",
+        fecha:"",
+        madre:"",
+        nombremadre:"",
+        padre:"",
+        nombrepadre:"",
+        observacion:""
+    }
+    let detalleNacimiento = $state({ ...defaultNacimiento });
+    let proxyNacimiento = createStorageProxy("detalleNacimiento", defaultNacimiento);
     //Datos nacimiento
     let agregaranimal = $state(false);
     let nacimiento = $state(null);
@@ -140,6 +162,7 @@
         });
         nacimientos = recordsn;
         nacimientosrow = nacimientos;
+        cargadonacimientos = true;
     }
     async function guardar() {
         if (agregaranimal) {
@@ -289,8 +312,8 @@
         }
     }
     function limpiarFiltros() {
-        proxyfiltros = {...defaultfiltro}
-        setFilters()
+        proxyfiltros = { ...defaultfiltro };
+        setFilters();
         filterUpdate();
     }
     function setFilters() {
@@ -395,7 +418,62 @@
         observacion = nacimiento.observacion;
         caravana = nacimiento.caravana;
         idanimal = nacimiento.animalid;
-        nuevoModal.showModal();
+        detalleNacimiento={
+            fecha,
+            nombremadre,
+            madre,
+            nombrepadre,
+            padre,
+            caravana,
+            idanimal,
+            id,
+            edit:true
+        }
+        proxyNacimiento.save(detalleNacimiento)
+        goto(pre+"/nacimientos/"+id)
+        //nuevoModal.showModal();
+    }
+    function openViewModal(id) {
+        botonhabilitado = true;
+        malcaravana = false;
+        malfecha = false;
+        malmadre = false;
+        malpadre = false;
+        idnacimiento = id;
+
+        nacimiento = nacimientos.filter((n) => n.id == id)[0];
+        if (nacimiento.padre) {
+            padre = nacimiento.padre;
+            nombrepadre = nacimiento.nombrepadre;
+        } else {
+            padre = "";
+        }
+        if (nacimiento.madre) {
+            madre = nacimiento.madre;
+            nombremadre = nacimiento.nombremadre;
+        } else {
+            madre = "";
+        }
+        fecha = nacimiento.fecha.split(" ")[0];
+        nombremadre = nacimiento.nombremadre;
+        nombrepadre = nacimiento.nombrepadre;
+        observacion = nacimiento.observacion;
+        caravana = nacimiento.caravana;
+        idanimal = nacimiento.animalid;
+        detalleNacimiento={
+            fecha,
+            nombremadre,
+            madre,
+            nombrepadre,
+            padre,
+            caravana,
+            idanimal,
+            id,
+            edit:false
+        }
+        proxyNacimiento.save(detalleNacimiento)
+        goto(pre+"/nacimientos/"+id)
+        //nuevoModal.showModal();
     }
     function eliminar(id) {
         Swal.fire({
@@ -416,7 +494,7 @@
                     );
 
                     //const recorda = await pb.collection('animales').getFirstListItem(`nacimiento='${idnacimiento}'`, {});
-                    
+
                     //const recordupdate = await pb.collection('animales').update(recorda.id, {nacimiento:""});
                     filterUpdate();
                     Swal.fire(
@@ -447,6 +525,12 @@
         filterUpdate();
         await getAnimales();
     });
+    function clickTodos(){
+
+    }
+    function clickFila(id){
+
+    }
     function onwriteMadre() {}
     function onwritePadre() {
         onchange("PADRE");
@@ -588,191 +672,7 @@
         {nuevo}
         {clickFilter}
     />
-    <div
-        class="hidden grid grid-cols-2 lg:grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12"
-    >
-        <div>
-            <h1 class="text-2xl">Nacimientos</h1>
-        </div>
-        <div class="flex col-span-2 gap-1 justify-start">
-            <div>
-                <button
-                    class={`btn flex btn-primary rounded-lg ${estilos.btntext}`}
-                    data-theme="forest"
-                    onclick={() => openNewModal()}
-                >
-                    <span class="text-xl">Nuevo</span>
-                </button>
-            </div>
-            <div>
-                <Exportar
-                    titulo={"Nacimientos"}
-                    filtros={[]}
-                    confiltros={false}
-                    data={nacimientosrow}
-                    sheetname={"Nacimientos"}
-                    establecimiento={cab.nombre}
-                    {prepararData}
-                />
-            </div>
-            <div class="hidden">
-                <button
-                    class={`
-                        bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                        ${estilos.btnsecondary}
-                        rounded-full
-                        px-4 pt-2 pb-3
-                    `}
-                    onclick={() => goto(pre + "/nacimientos/reporte")}
-                >
-                    <span class="text-lg font-semibold">Estadísticas</span>
-                </button>
-            </div>
-        </div>
-    </div>
-    <div
-        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10 w-11/12"
-    >
-        <div class="w-11/12">
-            <label
-                class={`
-                    input 
-                    input-bordered 
-                    flex 
-                    items-center gap-2
-                    ${estilos.bgdark2}
-                `}
-            >
-                <input
-                    type="text"
-                    class="grow"
-                    placeholder="Buscar..."
-                    bind:value={buscar}
-                    oninput={filterUpdate}
-                />
-            </label>
-        </div>
-        <div class="w-11/12">
-            <Limpiar {limpiarFiltros} />
-        </div>
-    </div>
-    <!--Filtrar-->
-    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
-        <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
-            <div class="flex justify-between items-center px-1">
-                <h1 class="font-semibold text-lg py-2">Filtros</h1>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class={`h-5 w-5 transition-all duration-300 ${isOpenFilter ? "transform rotate-180" : ""}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
-                    />
-                </svg>
-            </div>
-        </button>
-        <div>
-            <span class="text-lg my-1"
-                >Total de nacimientos encontrados: {totalNacimientosEncontrados}</span
-            >
-        </div>
-        {#if isOpenFilter}
-            <div transition:slide>
-                <div class="grid grid-cols-1 lg:grid-cols-2 mb-2 lg:mb-3 gap-1">
-                    <div class="">
-                        <label
-                            class="block tracking-wide mb-2"
-                            for="grid-first-name"
-                        >
-                            Fecha desde
-                        </label>
-                        <input
-                            id="fechadesde"
-                            type="date"
-                            class={`
-                                w-full md:w-1/2
-                                input input-bordered
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={fechadesde}
-                            onchange={filterUpdate}
-                        />
-                    </div>
-                    <div class="">
-                        <label
-                            class="block tracking-wide mb-2"
-                            for="grid-first-name"
-                        >
-                            Fecha Hasta
-                        </label>
-                        <input
-                            id="fechadesde"
-                            type="date"
-                            class={`
-                                w-full md:w-1/2
-                                input input-bordered
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={fechahasta}
-                            onchange={filterUpdate}
-                        />
-                    </div>
-                    <div class="">
-                        <label for="nombremadre" class="label">
-                            <span class="label-text text-base">Madre</span>
-                        </label>
-                        <label class="input-group md:w-1/2 md:flex">
-                            <input
-                                id="nombremadre"
-                                type="text"
-                                class={`
-                                    input 
-                                    input-bordered 
-                                    border border-gray-300 rounded-md
-                                    focus:outline-none 
-                                    focus:ring-2 focus:ring-green-500 
-                                    focus:border-green-500
-                                    w-full 
-                                    ${estilos.bgdark2} 
-                                `}
-                                bind:value={buscarmadre}
-                                oninput={filterUpdate}
-                            />
-                        </label>
-                    </div>
-                    <div>
-                        <label for="nombrepadre" class="label">
-                            <span class="label-text text-base">Padre</span>
-                        </label>
-                        <label class="input-group md:w-1/2 md:flex">
-                            <input
-                                id="nombrepadre"
-                                type="text"
-                                class={`
-                                    input 
-                                    input-bordered 
-                                    border border-gray-300 rounded-md
-                                    focus:outline-none 
-                                    focus:ring-2 focus:ring-green-500 
-                                    focus:border-green-500
-                                    w-full 
-                                    ${estilos.bgdark2} 
-                                `}
-                                bind:value={buscarpadre}
-                                oninput={filterUpdate}
-                            />
-                        </label>
-                    </div>
-                </div>
-            </div>
-        {/if}
-    </div>
+
     <!--Ordenar-->
     <div
         class="block md:hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
@@ -838,212 +738,249 @@
             </div>
         {/if}
     </div>
-    <div
-        class={`
-            hidden w-full md:grid
-            mx-auto py-6 px-4 max-w-7xl
-        `}
-    >
+    {#if cargadonacimientos}
+    <!--Tabla-->
         <div
             class={`
-                overflow-hidden rounded-xl
+                hidden w-full xl:w-3/4 md:grid
+                mx-auto py-1 px-4 max-w-7xl  
             `}
         >
-            <table class="table table-lg w-full">
-                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
-                    <tr>
-                        <th
-                            onclick={() => ordenarNacimientos("fecha")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Fecha
-                                {#if forma == "fecha"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <th
-                            onclick={() => ordenarNacimientos("caravana")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Caravana
-                                {#if forma == "caravana"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <th
-                            onclick={() => ordenarNacimientos("madre")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Madre
-                                {#if forma == "madre"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <th
-                            onclick={() => ordenarNacimientos("padre")}
-                            class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                        >
-                            <div class="flex flex-row justify-between">
-                                Padre
-                                {#if forma == "padre"}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                {/if}
-                            </div>
-                        </th>
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Observacion
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each nacimientosrow as n}
-                        <tr
-                            onclick={() => openEditModal(n.id)}
-                            class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
-                        >
-                            <td class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                >{new Date(n.fecha).toLocaleDateString()}</td
-                            >
-                            <td class="text-base mx-1 px-1">
-                                {`${n.caravana}`}
-                            </td>
-                            <td class="text-base mx-1 px-1">
-                                {`${n.nombremadre}`}
-                            </td>
-                            <td class="text-base mx-1 px-1">
-                                {`${n.nombrepadre}`}
-                            </td>
-                            <td class="text-base mx-1 px-1">
-                                {`${n.observacion}`}
-                            </td>
-                        </tr>
-                    {/each}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="block w-full md:hidden justify-items-center mx-1">
-        {#each nacimientosrow as n}
             <div
-                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                class={`
+                overflow-hidden rounded-xl
+                border dark:border-gray-700
+
+            `}
             >
-                <button onclick={() => openEditModal(n.id)}>
-                    <div class="block p-4">
-                        <div class="grid grid-cols-2 gap-y-2">
-                            <div class="flex items-start">
-                                <span>Fecha:</span>
-                                <span class="mx-1 font-semibold">
-                                    {new Date(n.fecha).toLocaleDateString()}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Caravana:</span>
-                                <span class="mx-1 font-semibold">
+                <TablaNacimientos
+                    {selecthash}
+                    {nacimientosrow}
+                    {ordenarNacimientos}
+                    openViewModal={openViewModal}
+                    {openEditModal}
+                    openDelModal = {eliminar}
+                    {shorterWord}
+                    {clickTodos}
+                    {clickFila}
+                    bind:todos
+                    {ascendente}
+                    {forma}
+                />
+            </div>
+        </div>
+        <div
+            class={`
+            hidden w-full 
+            mx-auto py-6 px-4 max-w-7xl
+        `}
+        >
+            <div
+                class={`
+                overflow-hidden rounded-xl
+            `}
+            >
+                <table class="table table-lg w-full">
+                    <thead
+                        class="bg-emerald-600 text-white dark:bg-emerald-700"
+                    >
+                        <tr>
+                            <th
+                                onclick={() => ordenarNacimientos("fecha")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Fecha
+                                    {#if forma == "fecha"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                onclick={() => ordenarNacimientos("caravana")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Caravana
+                                    {#if forma == "caravana"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                onclick={() => ordenarNacimientos("madre")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Madre
+                                    {#if forma == "madre"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                onclick={() => ordenarNacimientos("padre")}
+                                class={`
+                                text-base p-3 
+                                border-b border-emerald-700
+                                hover:cursor-pointer
+                                hover:bg-emerald-800   
+                            `}
+                            >
+                                <div class="flex flex-row justify-between">
+                                    Padre
+                                    {#if forma == "padre"}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 9l-7 7-7-7"
+                                            />
+                                        </svg>
+                                    {/if}
+                                </div>
+                            </th>
+                            <th
+                                class="text-base mx-1 px-1 border-b border-emerald-700"
+                            >
+                                Observacion
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {#each nacimientosrow as n}
+                            <tr
+                                onclick={() => openEditModal(n.id)}
+                                class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
+                            >
+                                <td
+                                    class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
+                                    >{new Date(
+                                        n.fecha,
+                                    ).toLocaleDateString()}</td
+                                >
+                                <td class="text-base mx-1 px-1">
                                     {`${n.caravana}`}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Madre:</span>
-                                <span class="mx-1 font-semibold">
+                                </td>
+                                <td class="text-base mx-1 px-1">
                                     {`${n.nombremadre}`}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Padre:</span>
-                                <span class="mx-1 font-semibold">
+                                </td>
+                                <td class="text-base mx-1 px-1">
                                     {`${n.nombrepadre}`}
-                                </span>
-                            </div>
-                            <div class="col-span-2 flex items-start">
-                                <span>{`${n.observacion}`}</span>
+                                </td>
+                                <td class="text-base mx-1 px-1">
+                                    {`${n.observacion}`}
+                                </td>
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="block w-full md:hidden justify-items-center mx-1">
+            {#each nacimientosrow as n}
+                <div
+                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                >
+                    <button onclick={() => openEditModal(n.id)}>
+                        <div class="block p-4">
+                            <div class="grid grid-cols-2 gap-y-2">
+                                <div class="flex items-start">
+                                    <span>Fecha:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {new Date(n.fecha).toLocaleDateString()}
+                                    </span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span>Caravana:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {`${n.caravana}`}
+                                    </span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span>Madre:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {`${n.nombremadre}`}
+                                    </span>
+                                </div>
+                                <div class="flex items-start">
+                                    <span>Padre:</span>
+                                    <span class="mx-1 font-semibold">
+                                        {`${n.nombrepadre}`}
+                                    </span>
+                                </div>
+                                <div class="col-span-2 flex items-start">
+                                    <span>{`${n.observacion}`}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </button>
-            </div>
-        {/each}
-    </div>
+                    </button>
+                </div>
+            {/each}
+        </div>
+    {/if}
 </Navbar2>
 <dialog
     id="nuevoModal"
