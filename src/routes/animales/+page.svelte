@@ -43,11 +43,23 @@
     import { verificarNivel } from "$lib/permisosutil/lib";
     import Buscador from "$lib/components/animales/Buscador.svelte";
     import TablaAnimales from "$lib/components/animales/TablaAnimales.svelte";
+    import { getAll, saveAnimal } from "$lib/java/animales/animalesback";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
+
+    //ver java
+    let versionjava = $state(false);
+    
+
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getAnimales();
+    }
+
+    //ver animales
     let caber = createCaber();
     let userer = createUserer();
     let per = createPer();
@@ -55,7 +67,8 @@
     let userpermisos = $state([]);
 
     let usuarioid = $state("");
-    let filtros = false;
+    let filtros = $state(false);
+
     let defaultfiltro = {
         buscar: "",
         rodeobuscar: "",
@@ -193,13 +206,18 @@
     }
     async function getAnimales() {
         //Estaria joya que el animal venga con todos los chiches
+        if (!versionjava) {
+            const recordsa = await pb.collection("animales").getFullList({
+                filter: `delete=false && cab='${cab.id}'`,
+                expand: "nacimiento,lote,rodeo",
+            });
 
-        const recordsa = await pb.collection("animales").getFullList({
-            filter: `delete=false && cab='${cab.id}'`,
-            expand: "nacimiento,lote,rodeo",
-        });
-
-        animales = recordsa;
+            animales = recordsa;
+        } else {
+            let data_animales = await getAll();
+            
+            animales = data_animales;
+        }
         animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
 
         animalesrows = animales;
@@ -256,7 +274,8 @@
     }
     //Se puede guardar un animal con su nacimiento
     async function guardar() {
-        let verificar = await verificarNivel(cab.id);
+        if(!versionjava){
+let verificar = await verificarNivel(cab.id);
         if (!verificar) {
             //Swal.fire(
             //    "Error guardar",
@@ -358,6 +377,26 @@
                 "error",
             );
         }
+        }
+        else{
+            let data = {
+                caravana,
+                active: true,
+                delete: false,
+                prenada,
+                fechanacimiento: fechanacimiento + " 03:00:00",
+                sexo,
+                peso,
+                lote,
+                rodeo,
+                rp,
+                categoria: categoria ? "" : sexo == "M" ? "ternero" : "ternera",
+                cab: cab.id,
+            };
+            await saveAnimal(data)
+            await getAnimales()
+        }
+        
     }
     function setFilters() {
         buscar = proxyfiltros.buscar;
@@ -704,7 +743,7 @@
         } else if (ninguno) {
             ninguno = false;
             todos = true;
-            
+
             for (let i = 0; i < animalesrows.length; i++) {
                 let s = animalesrows[i];
                 selecthash[s.id] = { ...s };
@@ -775,6 +814,8 @@
         {estadisticas}
         {filterUpdate}
         {clickFilter}
+        verJava={toggleJava}
+        {versionjava}
     />
 
     <!--Ordenar-->
@@ -873,11 +914,9 @@
                 {capitalize}
                 {getEstadoNombre}
                 {calcularEdad}
-                
             />
         </div>
     </div>
-    
 
     <div class="block md:hidden justify-items-center mx-1">
         {#each animalesrows as a}

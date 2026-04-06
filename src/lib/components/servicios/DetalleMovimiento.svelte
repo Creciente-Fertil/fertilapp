@@ -37,7 +37,7 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <div
     class="
-        container  py-3 px-4 max-w-7xl
+        container py-3 px-4 max-w-7xl
         "
 >
     <!--Header-->
@@ -72,30 +72,29 @@
             <!--Tipo y padres-->
             <div class="grid grid-cols-1">
                 <div class="">
-                        <label for="fechadesde" class="label mb-0 pb-0">
-                            <span
-                                class="
-                                    label-text tracking-wide 
-                                    text-md uppercase 
-                                    font-semibold dark:text-gray-400 
-                                    text-gray-500 
-                                "
-                            >
-                                Tipo de servicio</span
-                            >
-                        </label>
-                        
+                    <label for="tipo" class="label mb-0 pb-0">
                         <span
-                            class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3 `}
-                            >
-                            {#if esNatural}
-                                Servicio natural
-                            {:else}
-                                Inseminación artificial
-                            {/if}</span
+                            class="
+                                    label-text tracking-wide
+                                    text-md uppercase
+                                    font-semibold dark:text-gray-400
+                                    text-gray-500
+                                "
                         >
-                        
-                    </div>
+                            Tipo de servicio</span
+                        >
+                    </label>
+
+                    <span
+                        class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3 `}
+                    >
+                        {#if esNatural}
+                            Servicio natural
+                        {:else}
+                            Inseminación artificial
+                        {/if}</span
+                    >
+                </div>
                 {#if cargadoanimales}
                     <div>
                         {#if esNatural}
@@ -147,7 +146,9 @@
                 {/if}
             </div>
             <!--Fechas-->
-            <div class="grid grid-cols-1 md:grid-cols-2 pb-1 mb-1 md:mb-6 md:pb-4">
+            <div
+                class="grid grid-cols-1 md:grid-cols-2 pb-1 mb-1 md:mb-6 md:pb-4"
+            >
                 {#if esNatural}
                     <div class="">
                         <label for="fechadesde" class="label mb-0 pb-0">

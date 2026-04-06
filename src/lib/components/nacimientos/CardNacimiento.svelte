@@ -8,7 +8,7 @@
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
-    let { edit,  cardsize = "", children } = $props();
+    let { edit=false,  cardsize = "", children } = $props();
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
@@ -56,10 +56,9 @@
         >
             <div
                 class={`
-                bg-transparent
-                
-                px-3 py-4 
-            `}
+                    bg-transparent
+                    px-3 py-4 
+                `}
             >
                 <button onclick={() => goto(pre + "/servicios")}>
                     <h1

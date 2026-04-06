@@ -8,6 +8,7 @@
     import { onMount } from "svelte";
     import { slide } from "svelte/transition";
     import estilos from "$lib/stores/estilos";
+    import Secondary from "$lib/components/botones/Secondary.svelte";
 
     import { createCaber } from "$lib/stores/cab.svelte";
     import categorias from "$lib/stores/categorias";
@@ -33,6 +34,7 @@
     import NuevoServicio from "$lib/components/servicios/NuevoServicio.svelte";
     import AnimalesSeleccionados from "$lib/components/servicios/AnimalesSeleccionados.svelte";
     import SelectToros from "$lib/components/SelectToros.svelte";
+    import { getAll } from "$lib/java/animales/animalesback";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -43,6 +45,15 @@
     const today = new Date();
     const DESDE = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const HASTA = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    //propuesta
+    let propuesta1 = $state(true);
+    //JAVA
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getAnimales();
+    }
 
     let caber = createCaber();
     let cab = caber.cab;
@@ -477,12 +488,17 @@
         //ordenarNombre(rodeos)
     }
     async function getAnimales() {
-        const recordsa = await pb.collection("Animalestacto").getFullList({
-            filter: `active=true && cab='${cab.id}'`,
-            expand: "rodeo,lote,cab",
-        });
+        if (!versionjava) {
+            const recordsa = await pb.collection("Animalestacto").getFullList({
+                filter: `active=true && cab='${cab.id}'`,
+                expand: "rodeo,lote,cab",
+            });
+            animales = recordsa;
+        } else {
+            let recordsa = await getAll();
+            animales = recordsa;
+        }
 
-        animales = recordsa;
         animales.sort((a1, a2) =>
             a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase()
                 ? 1
@@ -1024,6 +1040,9 @@
     function siguiente() {
         goto(pre + "/servicios/movimiento/detallemovimento");
     }
+    function togglePropuesta() {
+        propuesta1 = !propuesta1;
+    }
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
@@ -1056,7 +1075,7 @@
             Volver a servicios
         </a>
         <div
-            class="hidden md:block flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3"
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3"
         >
             <div
                 class={`
@@ -1073,31 +1092,18 @@
                 >
                     Nuevo servicios
                 </h1>
+                <Secondary texto="propuestas" onclick={togglePropuesta} />
+                <Secondary
+                    texto={versionjava ? "Cerrar java" : "Ver java"}
+                    onclick={toggleJava}
+                />
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 max-h-screen gap-2 md:gap-4 lg:gap-10">
+        <div
+            class={`grid grid-cols-1 ${propuesta1 ? "md:grid-cols-3" : ""}   max-h-screen gap-2 md:gap-4 lg:gap-10`}
+        >
             <!--Lado izquierd-->
             <div>
-                <div
-                    class="md:hidden flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3"
-                >
-                    <div
-                        class={`
-                            bg-transparent
-                            px-2 py-1
-                        `}
-                    >
-                        <h1
-                            class={`
-                            text-4xl font-semibold 
-                            dark:text-[#24a579] text-[#115642]
-                            
-                        `}
-                        >
-                            Crear nuevo servicio
-                        </h1>
-                    </div>
-                </div>
                 <NuevoServicio
                     bind:esNatural
                     bind:fechadesdeserv
@@ -1122,6 +1128,8 @@
                     {inputObsGeneral}
                     {onwrite}
                     {onelegir}
+                    {propuesta1}
+                    {togglePropuesta}
                 />
                 <AnimalesSeleccionados
                     {selecthashmap}

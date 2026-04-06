@@ -14,6 +14,7 @@
         padreslist = $bindable([]),
         observacion = $bindable(""),
         toros = [],
+        versionjava=false
     } = $props();
     let padresserv = $state("");
 </script>
@@ -136,7 +137,7 @@
             <span class="label-text text-sm font-normal">Padres</span>
         </label>
         <label class="input-group">
-            {#if cargado}
+            {#if cargado && !versionjava}
                 <MultipleToros
                     {toros}
                     {edit}
@@ -147,7 +148,7 @@
             {/if}
         </label>
     </div>
-    {#if cargado}
+    {#if cargado && !versionjava}
         <div>
             <SelectToros
                 opciones={toros}

@@ -24,7 +24,14 @@
     } from "$lib/components/estadosutils/lib";
     import { getSexoNombre, capitalize } from "$lib/stringutil/lib";
     import { goto } from "$app/navigation";
-
+    import Secondary from "$lib/components/botones/Secondary.svelte";
+    import AnimalesSeleccionados from "$lib/components/movimientos/AnimalesSeleccionados.svelte";
+    import DetalleMovimiento from "$lib/components/movimientos/DetalleMovimiento.svelte";
+    import TablaMovimiento from "$lib/components/TablaMovimiento.svelte";
+    import InfoAnimal from "$lib/components/InfoAnimal.svelte";
+    let innerWidth = $state(0);
+    let innerHeight = $state(0);
+    let esCelu = $derived(innerWidth <= 1100);
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
@@ -37,8 +44,13 @@
     //boton
     let textoboton = $state("Mover");
     //Datos animales
+    let animal = $state({})
     let animales = $state([]);
     let animalesrows = $state([]);
+    let cargado = $state(false);
+    //paginacon
+    let pageSize = $state(15);
+    let paginaActual = $state(1);
     //Filtros
     let buscar = $state("");
     let lote = $state("");
@@ -54,6 +66,7 @@
     let lotes = $state([]);
     let rodeos = $state([]);
     let tipos = $state([]);
+    let cargadosmovs = $state(false);
     let isOpenFilter = $state(false);
     //Seleccionados
     let selectanimales = $state([]);
@@ -63,8 +76,9 @@
     let algunos = $state(false);
     let ninguno = $state(true);
     //movimientos
-    
+
     //movimiento
+    let seccionAbierta = $state("")
     let nuevacategoria = $state("");
     let nuevolote = $state("");
     let nuevorodeo = $state("");
@@ -73,7 +87,7 @@
     let fechabaja = $state("");
     let motivo = $state("");
     let codigo = $state("");
-    
+
     let defaultmovimiento = {
         categoria: "",
         lote: "",
@@ -83,12 +97,20 @@
         fechabaja: "",
         codigo: "",
         listaanimales: [],
-        selecthashmap:{}
-    }
+        selecthashmap: {},
+        lotes:[],
+        rodeos:[],
+        categorias:[],
+        seccion:""
+
+    };
     let detallemovimiento = $state({
-        ...defaultmovimiento
-    })
-    let proxyDetalleMovimiento = createStorageProxy("detallemovimiento", defaultmovimiento);
+        ...defaultmovimiento,
+    });
+    let proxyDetalleMovimiento = createStorageProxy(
+        "detallemovimiento",
+        defaultmovimiento,
+    );
     //validar
     let malcategoria = $state("");
     let mallote = $state("");
@@ -204,7 +226,7 @@
                 ...a,
             };
         }
-        saveDetalleMovmiento()
+        saveDetalleMovmiento();
     }
     function clickTodos() {
         if (todos) {
@@ -227,7 +249,7 @@
             todos = false;
             ninguno = true;
         }
-        saveDetalleMovmiento()
+        saveDetalleMovmiento();
     }
     async function getLotes() {
         const records = await pb.collection("lotes").getFullList({
@@ -266,6 +288,7 @@
                 : -1,
         );
         animalesrows = animales;
+        cargado = true;
     }
     function openNewModal() {
         listaanimales = [];
@@ -300,10 +323,8 @@
     function irDetalle() {
         listaanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
-            if (value != null) {    
+            if (value != null) {
                 listaanimales.push(value);
-                
-            
             }
         }
         if (listaanimales.length == 0) {
@@ -333,26 +354,26 @@
             fechabaja: "",
             codigo: "",
             listaanimales: [],
-            selecthashmap:{}
+            selecthashmap: {},
         };
         let proxymovimiento = $state({
             ...defaultmovimiento,
         });
         let proxy = createStorageProxy("detallemovimiento", defaultmovimiento);
-        
+
         let movimiento = {
             ...defaultmovimiento,
-            categoria:nuevacategoria,
-            lote:nuevolote,
-            rodeo:nuevorodeo,
-            fecha:fecha,
-            motivo:motivo,
-            fechabaja:fechabaja,
-            codigo:codigo,
+            categoria: nuevacategoria,
+            lote: nuevolote,
+            rodeo: nuevorodeo,
+            fecha: fecha,
+            motivo: motivo,
+            fechabaja: fechabaja,
+            codigo: codigo,
             listaanimales,
-            selecthashmap
-        }
-        proxy.save(movimiento)
+            selecthashmap,
+        };
+        proxy.save(movimiento);
 
         goto(pre + "/movimientos/detalle");
     }
@@ -609,6 +630,8 @@
             selecttransfer = true;
             textoboton = "Transferir";
         }
+        seccionAbierta = seccion
+        saveDetalleMovmiento()
     }
     function validarBoton() {
         habilitarboton = true;
@@ -700,268 +723,366 @@
             }
         }
     }
-    function saveDetalleMovmiento(){
-        detallemovimiento.categoria=categoria
-        detallemovimiento.lote=lote
-        detallemovimiento.rodeo=rodeo
-        detallemovimiento.fecha=fecha
-        detallemovimiento.motivo=motivo
-        detallemovimiento.fechabaja=fechabaja
-        detallemovimiento.codigo=codigo
-        detallemovimiento.listaanimales=listaanimales
-        detallemovimiento.selecthashmap=selecthashmap
-        proxyDetalleMovimiento.save(detallemovimiento)
+    function saveDetalleMovmiento() {
+        detallemovimiento.categoria = categoria;
+        detallemovimiento.lote = lote;
+        detallemovimiento.rodeo = rodeo;
+        detallemovimiento.fecha = fecha;
+        detallemovimiento.motivo = motivo;
+        detallemovimiento.fechabaja = fechabaja;
+        detallemovimiento.codigo = codigo;
+        detallemovimiento.listaanimales = listaanimales;
+        detallemovimiento.selecthashmap = selecthashmap;
+        detallemovimiento.lotes = lotes
+        detallemovimiento.rodeos=rodeos
+        detallemovimiento.categorias=categorias
+        detallemovimiento.seccion = seccionAbierta
+        proxyDetalleMovimiento.save(detallemovimiento);
     }
-    function loadDetalleMovimiento(){
-        detallemovimiento = proxyDetalleMovimiento.load()
-        nuevacategoria = detallemovimiento.categoria
-        nuevolote = detallemovimiento.lote
-        nuevorodeo = detallemovimiento.rodeo
-        fecha = detallemovimiento.fecha
-        motivo = detallemovimiento.motivo
-        fechabaja = detallemovimiento.fechabaja
-        codigo = detallemovimiento.codigo
-        
-        selecthashmap = detallemovimiento.selecthashmap
+    function loadDetalleMovimiento() {
+        detallemovimiento = proxyDetalleMovimiento.load();
+        nuevacategoria = detallemovimiento.categoria;
+        nuevolote = detallemovimiento.lote;
+        nuevorodeo = detallemovimiento.rodeo;
+        fecha = detallemovimiento.fecha;
+        motivo = detallemovimiento.motivo;
+        fechabaja = detallemovimiento.fechabaja;
+        codigo = detallemovimiento.codigo;
+
+        selecthashmap = detallemovimiento.selecthashmap;
         listaanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
                 listaanimales.push(value);
             }
         }
-        if(listaanimales.length == animalesrows.length){
-            todos = true
-            algunos = false
-            ninguno = false
-        }
-        else if(listaanimales.length>0){
-            todos = false
-            algunos = true
-            ninguno = false
-        }
-        else{
-            todos = false
-            algunos = false
-            ninguno = true
+        if (listaanimales.length == animalesrows.length) {
+            todos = true;
+            algunos = false;
+            ninguno = false;
+        } else if (listaanimales.length > 0) {
+            todos = false;
+            algunos = true;
+            ninguno = false;
+        } else {
+            todos = false;
+            algunos = false;
+            ninguno = true;
         }
     }
     onMount(async () => {
-
         await getAnimales();
         await getRodeos();
         await getLotes();
         await getTipos();
-        loadDetalleMovimiento()
+        cargadosmovs = true;
+        loadDetalleMovimiento();
     });
     function nuevo() {
         openNewModal();
     }
+    function siguiente() {
+        goto(pre + "/movimientos/detalle");
+    }
+    function verAnimal(id) {
+        let a_idx = animales.findIndex((a) => a.id == id);
+
+        if (a_idx != -1) {
+            animal = animales[a_idx];
+            veranimal.showModal();
+        }
+    }
 </script>
 
+<svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
-    <Buscador
-        {animalesrows}
-        {selecthashmap}
-        bind:buscar
-        {rodeos}
-        bind:rodeoseleccion
-        bind:sexobuscar={sexo}
-        {sexos}
-        {lotes}
-        bind:categoriaseleccion
-        bind:raza
-        bind:color
-        bind:isOpenFilter
-        nuevo = {irDetalle}
-        {filterUpdate}
-        {clickFilter}
-    />
-    <div class="hidden grid grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12">
-        <div>
-            <h1 class="text-2xl">Movimientos</h1>
-        </div>
-        <div class="flex col-span-2 gap-1 justify-end">
-            <button
-                class={`btn btn-primary rounded-lg ${estilos.btntext}`}
-                data-theme="forest"
-                onclick={() => openNewModal()}
-            >
-                <span class="text-xl">Nuevo</span>
-            </button>
-        </div>
-    </div>
-
     <div
-        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
-    >
-        <div class="w-11/12">
-            <label
-                class={`input input-bordered flex items-center gap-2 ${estilos.bgdark2}`}
-            >
-                <input
-                    type="text"
-                    class="grow"
-                    placeholder="Buscar..."
-                    bind:value={buscar}
-                    oninput={filterUpdate}
-                />
-            </label>
-        </div>
-    </div>
-    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
-        <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
-            <div class="flex justify-between items-center px-1">
-                <h2 class="font-semibold text-xl py-2">Filtros</h2>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class={`h-5 w-5 transition-all duration-300 ${isOpenFilter ? "transform rotate-180" : ""}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
-                    />
-                </svg>
-            </div>
-        </button>
-        <div class="flex justify-between items-center px-1">
-            <h3 class=" text-md py-2">
-                Animales seleccionados: {Object.keys(selecthashmap).length}
-            </h3>
-        </div>
-
-        {#if isOpenFilter}
-            <div
-                transition:slide
-                class="grid grid-cols-1 lg:grid-cols-4 m-1 gap-2 w-11/12"
-            >
-                <div>
-                    <label for="sexo" class="label">
-                        <span class="label-text text-base">Sexo</span>
-                    </label>
-                    <label class="input-group">
-                        <select
-                            class={`
-                                select select-bordered w-full
-                                rounded-md
-                                focus:outline-none focus:ring-2 
-                                focus:ring-green-500 
-                                focus:border-green-500
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={sexo}
-                            onchange={filterUpdate}
-                        >
-                            <option value="">Todos</option>
-                            {#each sexos as s}
-                                <option value={s.id}>{s.nombre}</option>
-                            {/each}
-                        </select>
-                    </label>
-                </div>
-                <div class="mt-2">
-                    <MultiSelect
-                        opciones={[{ id: "-1", nombre: "Sin rodeo" }].concat(
-                            rodeos,
-                        )}
-                        bind:valores={rodeoseleccion}
-                        etiqueta="Rodeos"
-                        {filterUpdate}
-                    />
-                </div>
-
-                <div class="mt-2">
-                    <MultiSelect
-                        opciones={[{ id: "-1", nombre: "Sin lote" }].concat(
-                            lotes,
-                        )}
-                        bind:valores={loteseleccion}
-                        etiqueta="Lotes"
-                        {filterUpdate}
-                    />
-                </div>
-                <div class="mt-2">
-                    <MultiSelect
-                        opciones={[
-                            { id: "-1", nombre: "Sin categoria" },
-                        ].concat(categorias)}
-                        bind:valores={categoriaseleccion}
-                        etiqueta="Categorias"
-                        {filterUpdate}
-                    />
-                </div>
-                <div class="my-0 py-0">
-                    <label for="raza" class="label mb-0">
-                        <span class="label-text text-base">Raza</span>
-                    </label>
-                    <label class="input-group">
-                        <input
-                            type="text"
-                            class={`
-                                        input input-bordered w-full
-                                        rounded-md
-                                        focus:outline-none focus:ring-2 
-                                        focus:ring-green-500 
-                                        focus:border-green-500
-                                        
-                                        ${estilos.bgdark2}
-                                    `}
-                            bind:value={raza}
-                            oninput={filterUpdate}
-                        />
-                    </label>
-                </div>
-                <div class="my-0 py-0">
-                    <label for="color" class="label mb-0">
-                        <span class="label-text text-base">Color</span>
-                    </label>
-                    <label class="input-group">
-                        <input
-                            type="text"
-                            class={`
-                                        input input-bordered w-full
-                                        rounded-md
-                                        focus:outline-none focus:ring-2 
-                                        focus:ring-green-500 
-                                        focus:border-green-500
-                                        
-                                        ${estilos.bgdark2}
-                                    `}
-                            bind:value={color}
-                            oninput={filterUpdate}
-                        />
-                    </label>
-                </div>
-            </div>
-        {/if}
-    </div>
-    <div
-        class={`
-            hidden w-full md:grid
-            mx-auto py-6 px-4 max-w-7xl
-        `}
+        class="
+            container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4
+            "
     >
         <div
-            class={`
-                overflow-hidden rounded-xl
-            `}
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3"
         >
-            <table class="table table-lg w-full">
-                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
-                    <tr>
-                        <th class="px-1 p-0 m-0 border-b border-emerald-700">
-                            <button
-                                aria-label="Todos"
-                                onclick={clickTodos}
-                                class={`
+            <div
+                class={`
+                            bg-transparent
+                            px-2 py-1
+                        `}
+            >
+                <h1
+                    class={`
+                            text-4xl font-semibold 
+                            dark:text-[#24a579] text-[#115642]
+                            
+                        `}
+                >
+                    Nuevo movimientos
+                </h1>
+            </div>
+        </div>
+        <div
+            class="grid grid-cols-1 md:grid-cols-3 max-h-screen gap-2 md:gap-4 lg:gap-10"
+        >
+            <!--Lado izquierdo-->
+            <div>
+                <DetalleMovimiento
+                    {lotes}
+                    {rodeos}
+                    {categorias}
+                    {motivos}
+                    bind:categoria
+                    bind:lote
+                    bind:rodeo
+                    bind:fecha
+                    bind:motivo
+                    bind:codigo
+                    {oninput}
+                    {onChangeCollapse}
+                />
+                <AnimalesSeleccionados
+                    {selecthashmap}
+                    quitarAnimal={clickAnimal}
+                />
+            </div>
+            <!--Lado derecho-->
+            <div class="md:col-span-2">
+                <Buscador
+                    {animalesrows}
+                    {selecthashmap}
+                    bind:buscar
+                    {rodeos}
+                    bind:rodeoseleccion
+                    bind:sexobuscar={sexo}
+                    {sexos}
+                    {lotes}
+                    bind:categoriaseleccion
+                    bind:raza
+                    bind:color
+                    bind:isOpenFilter
+                    nuevo={irDetalle}
+                    {filterUpdate}
+                    {clickFilter}
+                />
+                {#if cargado}
+                    <TablaMovimiento
+                        bind:paginaActual
+                        bind:pageSize
+                        selecthash={selecthashmap}
+                        {animalesrows}
+                        clickFila={clickAnimal}
+                        {clickTodos}
+                        {todos}
+                        {ninguno}
+                        {algunos}
+                        verFila={verAnimal}
+                        {siguiente}
+                    />
+                    <div
+                        class={`
+                            hidden w-full 
+                            mx-auto py-6 px-4 max-w-7xl
+                        `}
+                    >
+                        <div
+                            class={`
+                                overflow-hidden rounded-xl
+                            `}
+                        >
+                            <table class="table table-lg w-full">
+                                <thead
+                                    class="bg-emerald-600 text-white dark:bg-emerald-700"
+                                >
+                                    <tr>
+                                        <th
+                                            class="px-1 p-0 m-0 border-b border-emerald-700"
+                                        >
+                                            <button
+                                                aria-label="Todos"
+                                                onclick={clickTodos}
+                                                class={`
                                     text-white bg-transparent rounded-lg
                                     px-3 py-3
                                     ${estilos.secundario}
                                 `}
+                                            >
+                                                {#if todos}
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke-width="1.5"
+                                                        stroke="currentColor"
+                                                        class="size-6"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                                        />
+                                                    </svg>
+                                                {/if}
+                                                {#if ninguno}
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke-width="1.5"
+                                                        stroke="currentColor"
+                                                        class="size-6"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                                        />
+                                                    </svg>
+                                                {/if}
+                                                {#if algunos}
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke-width="1.5"
+                                                        stroke="currentColor"
+                                                        class="size-6"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                                        />
+                                                    </svg>
+                                                {/if}
+                                            </button>
+                                        </th>
+                                        <th
+                                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                                            >Caravana</th
+                                        >
+                                        <th
+                                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                                            >Categoria</th
+                                        >
+                                        <th
+                                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                                            >Rodeo</th
+                                        >
+                                        <th
+                                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                                            >Lote</th
+                                        >
+                                        <th
+                                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                                            >Sexo</th
+                                        >
+                                        <th
+                                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                                        >
+                                            <div
+                                                class="flex flex-row justify-between"
+                                            >
+                                                Raza
+                                            </div>
+                                        </th>
+                                        <th
+                                            class="text-base mx-1 px-1 border-b border-emerald-700"
+                                        >
+                                            <div
+                                                class="flex flex-row justify-between"
+                                            >
+                                                Color
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {#each animalesrows as a}
+                                        <tr>
+                                            <td class="px-1 p-0 m-0">
+                                                <button
+                                                    aria-label="fila"
+                                                    onclick={() =>
+                                                        clickAnimal(a.id)}
+                                                    class={`
+                                    font-medium bg-transparent rounded-lg
+                                    px-3 py-3 text-base
+                                    ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
+                                `}
+                                                >
+                                                    {#if selecthashmap[a.id]}
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke-width="1.5"
+                                                            stroke="currentColor"
+                                                            class="size-6"
+                                                        >
+                                                            <path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                                            />
+                                                        </svg>
+                                                    {:else}
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                            stroke-width="1.5"
+                                                            stroke="currentColor"
+                                                            class="size-6"
+                                                        >
+                                                            <path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                                            />
+                                                        </svg>
+                                                    {/if}
+                                                </button>
+                                            </td>
+                                            <td class="text-base mx-1 px-0"
+                                                >{a.caravana}</td
+                                            >
+                                            <td class="text-base mx-1 px-0"
+                                                >{capitalize(a.categoria)}</td
+                                            >
+                                            <td class="text-base mx-1 px-0"
+                                                >{a.expand?.rodeo?.nombre ||
+                                                    ""}</td
+                                            >
+                                            <td class="text-base mx-1 px-0"
+                                                >{a.expand?.lote?.nombre ||
+                                                    ""}</td
+                                            >
+                                            <td class="text-base mx-1 px-0"
+                                                >{a.sexo}</td
+                                            >
+                                            <td>
+                                                {a.raza}
+                                            </td>
+                                            <td>
+                                                {a.color}
+                                            </td>
+                                        </tr>
+                                    {/each}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="block md:hidden justify-items-center mx-1">
+                        <div class="w-full flex justify-start">
+                            <button
+                                aria-label="Todos"
+                                onclick={clickTodos}
+                                class={`
+                    text-base bg-transparent rounded-lg
+                    p-1 text-base flex flex-row
+                    ${estilos.secundario}
+                `}
                             >
                                 {#if todos}
                                     <svg
@@ -1011,284 +1132,124 @@
                                         />
                                     </svg>
                                 {/if}
+
+                                <span class="mt-1"> Seleccionar todos </span>
                             </button>
-                        </th>
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >Caravana</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >Categoria</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >Rodeo</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >Lote</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >Sexo</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            <div class="flex flex-row justify-between">
-                                Raza
-                            </div>
-                        </th>
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            <div class="flex flex-row justify-between">
-                                Color
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each animalesrows as a}
-                        <tr>
-                            <td class="px-1 p-0 m-0">
-                                <button
-                                    aria-label="fila"
-                                    onclick={() => clickAnimal(a.id)}
-                                    class={`
-                                    font-medium bg-transparent rounded-lg
-                                    px-3 py-3 text-base
-                                    ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
-                                `}
-                                >
-                                    {#if selecthashmap[a.id]}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-6"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                            />
-                                        </svg>
-                                    {:else}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-6"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                            />
-                                        </svg>
-                                    {/if}
-                                </button>
-                            </td>
-                            <td class="text-base mx-1 px-0">{a.caravana}</td>
-                            <td class="text-base mx-1 px-0"
-                                >{capitalize(a.categoria)}</td
-                            >
-                            <td class="text-base mx-1 px-0"
-                                >{a.expand?.rodeo?.nombre || ""}</td
-                            >
-                            <td class="text-base mx-1 px-0"
-                                >{a.expand?.lote?.nombre || ""}</td
-                            >
-                            <td class="text-base mx-1 px-0">{a.sexo}</td>
-                            <td>
-                                {a.raza}
-                            </td>
-                            <td>
-                                {a.color}
-                            </td>
-                        </tr>
-                    {/each}
-                </tbody>
-            </table>
-        </div>
-    </div>
+                        </div>
 
-    <div class="block md:hidden justify-items-center mx-1">
-        <div class="w-full flex justify-start">
-            <button
-                aria-label="Todos"
-                onclick={clickTodos}
-                class={`
-                    text-base bg-transparent rounded-lg
-                    p-1 text-base flex flex-row
-                    ${estilos.secundario}
-                `}
-            >
-                {#if todos}
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-6"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                        />
-                    </svg>
-                {/if}
-                {#if ninguno}
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-6"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                        />
-                    </svg>
-                {/if}
-                {#if algunos}
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-6"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                        />
-                    </svg>
-                {/if}
-
-                <span class="mt-1"> Seleccionar todos </span>
-            </button>
-        </div>
-
-        {#each animalesrows as a}
-            <div
-                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-            >
-                <div class="block p-4">
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-medium">
-                            <button
-                                aria-label="fila"
-                                onclick={() => clickAnimal(a.id)}
-                                class={`
+                        {#each animalesrows as a}
+                            <div
+                                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                            >
+                                <div class="block p-4">
+                                    <div
+                                        class="flex justify-between items-start mb-2"
+                                    >
+                                        <h3 class="font-medium">
+                                            <button
+                                                aria-label="fila"
+                                                onclick={() =>
+                                                    clickAnimal(a.id)}
+                                                class={`
                                 font-medium bg-transparent rounded-lg
                                 px-3 py-3 text-base
                                 ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
                             `}
-                            >
-                                {#if selecthashmap[a.id]}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="size-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                        />
-                                    </svg>
-                                {:else}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="size-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                        />
-                                    </svg>
-                                {/if}
-                            </button>
-                            {a.caravana}
-                        </h3>
-                        {#if a.sexo == "H" && a.prenada != 1}
-                            <div
-                                class={`badge badge-outline badge-${getEstadoColor(a.prenada)}`}
-                            >
-                                {getEstadoNombre(a.prenada)}
+                                            >
+                                                {#if selecthashmap[a.id]}
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke-width="1.5"
+                                                        stroke="currentColor"
+                                                        class="size-6"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                                        />
+                                                    </svg>
+                                                {:else}
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke-width="1.5"
+                                                        stroke="currentColor"
+                                                        class="size-6"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                                        />
+                                                    </svg>
+                                                {/if}
+                                            </button>
+                                            {a.caravana}
+                                        </h3>
+                                        {#if a.sexo == "H" && a.prenada != 1}
+                                            <div
+                                                class={`badge badge-outline badge-${getEstadoColor(a.prenada)}`}
+                                            >
+                                                {getEstadoNombre(a.prenada)}
+                                            </div>
+                                        {/if}
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-y-2">
+                                        <div class="flex items-start">
+                                            <span class="font-semibold"
+                                                >{getSexoNombre(a.sexo)}</span
+                                            >
+                                        </div>
+                                        <div class="flex items-start">
+                                            <span>Categoría:</span>
+                                            <span class="font-semibold">
+                                                {capitalize(a.categoria)}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <span>Lote:</span>
+                                            <span class="font-semibold">
+                                                {a.expand
+                                                    ? a.expand.lote
+                                                        ? a.expand.lote.nombre
+                                                        : ""
+                                                    : ""}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <span>Rodeo:</span>
+                                            <span class="font-semibold">
+                                                {a.expand
+                                                    ? a.expand.rodeo
+                                                        ? a.expand.rodeo.nombre
+                                                        : ""
+                                                    : ""}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <span>Raza:</span>
+                                            <span class="font-semibold">
+                                                {a.raza}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <span>Color:</span>
+                                            <span class="font-semibold">
+                                                {a.color}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        {/if}
+                        {/each}
                     </div>
-                    <div class="grid grid-cols-2 gap-y-2">
-                        <div class="flex items-start">
-                            <span class="font-semibold"
-                                >{getSexoNombre(a.sexo)}</span
-                            >
-                        </div>
-                        <div class="flex items-start">
-                            <span>Categoría:</span>
-                            <span class="font-semibold">
-                                {capitalize(a.categoria)}
-                            </span>
-                        </div>
-                        <div class="flex items-start">
-                            <span>Lote:</span>
-                            <span class="font-semibold">
-                                {a.expand
-                                    ? a.expand.lote
-                                        ? a.expand.lote.nombre
-                                        : ""
-                                    : ""}
-                            </span>
-                        </div>
-                        <div class="flex items-start">
-                            <span>Rodeo:</span>
-                            <span class="font-semibold">
-                                {a.expand
-                                    ? a.expand.rodeo
-                                        ? a.expand.rodeo.nombre
-                                        : ""
-                                    : ""}
-                            </span>
-                        </div>
-                        <div class="flex items-start">
-                            <span>Raza:</span>
-                            <span class="font-semibold">
-                                {a.raza}
-                            </span>
-                        </div>
-                        <div class="flex items-start">
-                            <span>Color:</span>
-                            <span class="font-semibold">
-                                {a.color}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                {/if}
             </div>
-        {/each}
+        </div>
     </div>
 </Navbar2>
 <dialog
@@ -1593,5 +1554,23 @@
                 <button class="btn btn-error text-white">Cancelar</button>
             </form>
         </div>
+    </div>
+</dialog>
+<dialog id="veranimal" class="modal modal-middle rounded-xl">
+    <div
+        class="
+            modal-box w-11/12 max-w-6xl
+            bg-gradient-to-br from-white to-gray-100
+            dark:from-gray-900 dark:to-gray-800
+            "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-xl font-bold">Ver animal</h3>
+        <InfoAnimal {animal} forcedOpen={true} />
     </div>
 </dialog>

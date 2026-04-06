@@ -14,7 +14,10 @@
     import { goto } from "$app/navigation";
     import { isEmpty, addDays } from "$lib/stringutil/lib";
     import estilos from "$lib/stores/estilos";
-    
+    import InfoAnimal from "$lib/components/InfoAnimal.svelte";
+    import DetalleMovimiento from "$lib/components/tratamientos/DetalleMovimiento.svelte";
+    import DetallesAnimalesMovimiento from "$lib/components/tratamientos/DetallesAnimalesMovimiento.svelte";
+
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -36,6 +39,9 @@
     let defaultmovimiento = {
         selecthashmap: {},
         tipos: [],
+        fecha: "",
+        tipotratamientoselect: "",
+        observaciongeneral: "",
     };
     let detallemovimento = $state({ ...defaultmovimiento });
     let proxymovimiento = createStorageProxy(
@@ -44,6 +50,7 @@
     );
 
     //Valores
+    let animal = $state({});
     //movimiento
     let fecha = $state("");
     let tipotratamientoselect = $state("");
@@ -57,7 +64,10 @@
     function loadDetalle() {
         detallemovimento = proxymovimiento.load();
         tipotratamientos = detallemovimento.tipos;
-        selecthashmap = detallemovimento.selecthashmap
+        selecthashmap = detallemovimento.selecthashmap;
+        fecha = detallemovimento.fecha;
+        tipotratamientoselect = detallemovimento.tipotratamientoselect;
+        observaciongeneral = detallemovimento.observaciongeneral;
         selectanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
@@ -107,11 +117,76 @@
         userpermisos = getPermisosList(per.per.permisos);
         loadDetalle();
     });
+    function verAnimal(id) {
+        let a_idx = listaanimales.findIndex((a) => a.id == id);
+
+        if (a_idx != -1) {
+            animal = listaanimales[a_idx];
+            veranimal.showModal();
+        }
+    }
+    let classbuscador = "container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4";
+    let classmove = "container mx-auto py-3 px-4 max-w-6xl w-full";
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
-    <div class="container mx-auto py-1 px-4 max-w-7xl">
+    <div class={classmove}>
+        <DetalleMovimiento
+            {fecha}
+            tipo={tipotratamientoselect}
+            {observaciongeneral}
+            tipos={tipotratamientos}
+        />
+        <DetallesAnimalesMovimiento
+            bind:selectanimales={selectanimales}
+            tipos={tipotratamientos}
+            {quitarAnimal}
+            {verAnimal}
+            cambiar={setDetalle}
+            abierta={false}
+        />
+
+        <div
+            class="mt-6 flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
+        >
+            <!-- Botón Cancelar -->
+            <button
+                class="
+                        hidden md:block
+                        mt-2 px-10 py-2
+                        dark:bg-transparent
+                        bg-white
+                        text-gray-800
+                        dark:text-white
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors
+                        text-base"
+                onclick={volver}
+            >
+                Volver
+            </button>
+            <!-- Botón Guardar -->
+            <button
+                class="
+                    mt-2 px-10 py-2 bg-[#115642] text-white
+                    font-medium rounded-full
+                    shadow-sm hover:bg-green-700
+                    transition-colors text-base
+                    "
+                onclick={mover}
+            >
+                Crear {selectanimales.length > 1
+                    ? "tratamientos"
+                    : "tratamiento"}
+            </button>
+        </div>
+    </div>
+    <div class="hidden container mx-auto py-1 px-4 max-w-7xl">
         <!--Header-->
         <div
             class={`
@@ -169,7 +244,7 @@
             </div>
         </div>
     </div>
-    <div class="container mx-auto py-1 px-4 max-w-7xl">
+    <div class="hidden container mx-auto py-1 px-4 max-w-7xl">
         <div
             class={`
                 rounded-md p-4 shadow-xl mb-4
@@ -279,11 +354,11 @@
                         oninput={inputObsGeneral}
                     />
                 </div>
-            </div>  
+            </div>
         </div>
     </div>
-    
-    <div class="container mx-auto py-1 px-4 max-w-7xl">
+
+    <div class="hidden container mx-auto py-1 px-4 max-w-7xl">
         <div
             class={`
                 rounded-md p-4 shadow-xl mb-4
@@ -294,3 +369,21 @@
         </div>
     </div>
 </Navbar2>
+<dialog id="veranimal" class="modal modal-middle rounded-xl">
+    <div
+        class="
+            modal-box w-11/12 max-w-6xl
+            bg-gradient-to-br from-white to-gray-100
+            dark:from-gray-900 dark:to-gray-800
+            "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-xl font-bold">Ver animal</h3>
+        <InfoAnimal {animal} forcedOpen={true} />
+    </div>
+</dialog>

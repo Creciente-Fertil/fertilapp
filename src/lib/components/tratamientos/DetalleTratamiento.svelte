@@ -1,0 +1,184 @@
+<script>
+    import estilos from "$lib/stores/estilos";
+    import { getCategoriaNombre } from "../categoriasutil/lib";
+    import categorias from "$lib/stores/categorias";
+    let {
+        edit = false,
+        cargado = false,
+        tipos = [],
+        categoria = $bindable(""),
+        fecha = $bindable(""),
+        tipo = $bindable(""),
+        observacion = $bindable(""),
+        malfecha = false,
+        maltipo = false,
+        caravana = "",
+        oninput = () => {},
+    } = $props();
+    function getNombreTipo(id) {
+        let t_idx = tipos.findIndex((t) => t.id == id);
+        if (t_idx != -1) {
+            let t = tipos[t_idx];
+            return t.nombre;
+        }
+        return "";
+    }
+</script>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-1 p-2 pt-0">
+    <div class="col-span-1 md:col-span-2">
+        <label for="general" class="label pt-1">
+            <span class={`label-text font-medium text-lg ${estilos.subtitle}`}
+                >Datos generales</span
+            >
+        </label>
+    </div>
+    <div class="col-span-1">
+        <label for="caravana" class="label py-0 my-0">
+            <span class="label-text text-sm font-normal">Caravana</span>
+        </label>
+        <label for="caravana" class="label py-0 my-0">
+            <span class={`text-lg ${estilos.labelcolor} py-0 my-0`}
+                >{caravana}</span
+            >
+        </label>
+    </div>
+    <div>
+        <label for="fecha" class="label">
+            <span class="label-text text-base">Fecha</span>
+        </label>
+        {#if edit}
+            <label class="input-group">
+                <input
+                    id="fechanacimiento"
+                    type="date"
+                    class={`
+                        input input-bordered 
+                        w-full
+                        border border-gray-300 rounded-md
+                        focus:outline-none focus:ring-2 
+                        focus:ring-green-500 
+                        focus:border-green-500
+                        ${estilos.bgdark2} 
+                    `}
+                    bind:value={fecha}
+                    onchange={() => onchange("FECHA")}
+                />
+                {#if malfecha}
+                    <div class="label">
+                        <span class="label-text-alt text-red-500"
+                            >Debe seleccionar la fecha del nacimiento</span
+                        >
+                    </div>
+                {/if}
+            </label>
+        {:else}
+            <span class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
+                >{new Date(fecha).toLocaleDateString()}</span
+            >
+        {/if}
+    </div>
+    <div>
+        <label for="tipo" class="label pb-0 mb-0">
+            <span class="label-text text-base">Categoria</span>
+        </label>
+        {#if edit}
+            <label class="input-group">
+                <select
+                    class={`
+                        select select-bordered 
+                        w-full
+                        border border-gray-300 rounded-md
+                        focus:outline-none focus:ring-2 
+                        focus:ring-green-500 
+                        focus:border-green-500
+                        ${estilos.bgdark2}
+                    `}
+                    bind:value={categoria}
+                >
+                    {#each categorias.filter((c) => c.sexo == "H") as t}
+                        <option value={t.id}>{t.nombre}</option>
+                    {/each}
+                </select>
+            </label>
+        {:else}
+            <label
+                for="categoria"
+                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+            >
+                {getCategoriaNombre(categoria)}
+            </label>
+        {/if}
+    </div>
+    <div>
+        <label for="tipo" class="label pb-0 mb-0">
+            <span class="label-text text-base">Tipo tratamiento</span>
+        </label>
+        {#if edit}
+            <label class="input-group">
+                <select
+                    class={`
+                        select select-bordered w-full
+                        border border-gray-300 rounded-md
+                        focus:outline-none focus:ring-2 
+                        focus:ring-green-500 
+                        focus:border-green-500
+                        ${estilos.bgdark2} 
+                    `}
+                    bind:value={tipo}
+                    onchange={() => oninput("TIPO")}
+                >
+                    {#each tipos as t}
+                        <option value={t.id}>{t.nombre}</option>
+                    {/each}
+                </select>
+                <div class={`label ${maltipo ? "" : "hidden"}`}>
+                    <span class="label-text-alt text-red-400"
+                        >Debe seleccionar un tipo</span
+                    >
+                </div>
+            </label>
+        {:else}
+            <label
+                for="categoria"
+                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+            >
+                {getNombreTipo(tipo)}
+            </label>
+        {/if}
+    </div>
+    <div class="col-span-1 md:col-span-2 border-t dark:border-gray-800">
+        <label class="form-control">
+            <div class="label">
+                <span
+                    class={`label-text font-medium text-lg ${estilos.subtitle}`}
+                    >Observacion</span
+                >
+            </div>
+            <div class="pl-2">
+                {#if edit}
+                    <textarea
+                        name="observacion"
+                        id="observacion"
+                        class={`
+                        p-2 m-1
+                        min-h-32
+                        leading-tight
+                        textarea textarea-bordered textarea-lg
+                        
+                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                        w-full
+                        ${estilos.bgdark2}
+                    `}
+                        bind:value={observacion}
+                    >
+                    </textarea>
+                {:else}
+                    <p class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}>
+                        {observacion}
+                    </p>
+                {/if}
+            </div>
+        </label>
+    </div>
+</div>

@@ -21,6 +21,9 @@
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
+    import TablaMovimiento from "$lib/components/TablaMovimiento.svelte";
+    import NuevoTratamiento from "$lib/components/tratamientos/NuevoTratamiento.svelte";
+    import AnimalesSeleccionados from "$lib/components/tratamientos/AnimalesSeleccionados.svelte";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -30,11 +33,17 @@
     const HASTA = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     let caber = createCaber();
     let cab = caber.cab;
+    let cargado = $state(false);
+    //paginacon
+    let pageSize = $state(15);
+    let paginaActual = $state(1);
     //boton
     let textoboton = $state("Tratamientos");
     //Datos animales
+    let animal = $state({});
     let animales = $state([]);
     let animalesrows = $state([]);
+
     //Filtros
     let buscar = $state("");
     let lote = $state("");
@@ -64,7 +73,10 @@
     //movimientot
     let defaultmovimiento = {
         selecthashmap: {},
-        tipos :[]
+        tipos: [],
+        fecha:"",
+        tipotratamientoselect:"",
+        observaciongeneral:""
     };
     let detallemovimento = $state({ ...defaultmovimiento });
     let proxymovimiento = createStorageProxy(
@@ -140,12 +152,18 @@
     }
     function setDetalle() {
         detallemovimento.selecthashmap = selecthashmap;
-        detallemovimento.tipos = tipotratamientos
+        detallemovimento.tipos = tipotratamientos;
+        detallemovimento.tipotratamientoselect = tipotratamientoselect
+        detallemovimento.fecha = fecha
+        detallemovimento.observaciongeneral = observaciongeneral
         proxymovimiento.save(detallemovimento);
     }
     function loadDetalleMovimiento() {
         detallemovimento = proxymovimiento.load();
         selecthashmap = detallemovimento.selecthashmap;
+        tipotratamientoselect = detallemovimento.tipotratamientoselect
+        fecha = detallemovimento.fecha
+        observaciongeneral = detallemovimento.observaciongeneral
         selectanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
@@ -345,6 +363,7 @@
                 : -1,
         );
         animalesrows = animales;
+        cargado = true;
     }
     function irDetalle() {
         if (ninguno) {
@@ -355,7 +374,7 @@
             );
             return;
         }
-        setDetalle()
+        setDetalle();
         goto(pre + "/tratamientos/movimiento/detallemovimiento");
     }
     function openNewModal() {
@@ -462,6 +481,21 @@
         }
         selectanimales = [];
     }
+    function verAnimal(id) {
+        let a_idx = animales.findIndex((a) => a.id == id);
+
+        if (a_idx != -1) {
+            animal = animales[a_idx];
+            veranimal.showModal();
+        }
+    }
+    function cancelar() {
+        goto(pre + "/tratamientos");
+    }
+    function siguiente() {
+        goto(pre + "/tratamientos/movimiento/detallemovimiento");
+    }
+    function input(campo) {}
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
@@ -474,243 +508,133 @@
 </script>
 
 <Navbar2>
-    <BuscadorTratamientos
-        {animalesrows}
-        {selecthashmap}
-        bind:buscar
-        {rodeos}
-        bind:rodeoseleccion
-        {lotes}
-        bind:loteseleccion
-        {categorias}
-        bind:categoriaseleccion
-        bind:raza
-        bind:color
-        bind:isOpenFilter
-        {clickFilter}
-        {filterUpdate}
-        nuevoTratamiento={() => irDetalle()}
-        {limpiarFiltros}
-    />
-    <div class="hidden grid grid-cols-2 mx-1 lg:mx-10 mt-1 w-11/12">
-        <div>
-            <button
-                class="bg-transparent border-none flex"
-                aria-label="volver"
-                onclick={() => goto(pre + "/tratamientos")}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="size-6 mt-1"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M15.75 19.5 8.25 12l7.5-7.5"
-                    />
-                </svg>
-                <h1 class="text-2xl">Tratamientos</h1>
-            </button>
-        </div>
-        <div class="flex gap-1 justify-end">
-            <button
-                class={`btn btn-primary rounded-lg ${estilos.btntext}`}
-                data-theme="forest"
-                onclick={() => openNewModal()}
-            >
-                <span class="text-xl">{capitalize("nuevo")}</span>
-            </button>
-            <button
-                onclick={() => goto(pre + "/tratamientos")}
-                class={`
-                    hidden
-                    bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                    ${estilos.btnsecondary}
-                    rounded-full
-                    px-4 pt-2 pb-3
-                `}
-                aria-label="Exportar"
-            >
-                <span class="text-xl font-semibold">Volver</span>
-            </button>
-        </div>
-    </div>
     <div
-        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10"
+        class="
+            container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4
+            "
     >
-        <div class="w-11/12">
-            <label
-                class={`input input-bordered flex items-center gap-2 ${estilos.bgdark2}`}
-            >
-                <input
-                    type="text"
-                    class="grow"
-                    placeholder="Buscar..."
-                    bind:value={buscar}
-                    oninput={filterUpdate}
-                />
-            </label>
-        </div>
-        <div class="w-11/12">
-            <Limpiar {limpiarFiltros} />
-        </div>
-    </div>
-    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
-        <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
-            <div class="flex justify-between items-center px-1">
-                <h2 class="font-semibold text-xl py-2">Filtros</h2>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class={`h-5 w-5 transition-all duration-300 ${isOpenFilter ? "transform rotate-180" : ""}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
-                    />
-                </svg>
-            </div>
-        </button>
-        <div class="flex justify-between items-center px-1">
-            <h3 class=" text-md py-2">
-                Animales seleccionados: {Object.keys(selecthashmap).length}
-            </h3>
-        </div>
-        {#if isOpenFilter}
-            <div
-                transition:slide
-                class="grid grid-cols-1 lg:grid-cols-4 m-1 gap-2 w-11/12"
-            >
-                <div>
-                    <label for="sexo" class="label">
-                        <span class="label-text text-base">Sexo</span>
-                    </label>
-                    <label class="input-group">
-                        <select
-                            class={`
-                            select select-bordered w-full
-                            rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2}
-                        `}
-                            bind:value={sexo}
-                            onchange={filterUpdate}
-                        >
-                            <option value="">Todos</option>
-                            {#each sexos as s}
-                                <option value={s.id}>{s.nombre}</option>
-                            {/each}
-                        </select>
-                    </label>
-                </div>
-                <div class="mt-0">
-                    <MultiSelect
-                        opciones={[{ id: "-1", nombre: "Sin rodeo" }].concat(
-                            rodeos,
-                        )}
-                        bind:valores={rodeoseleccion}
-                        etiqueta="Rodeos"
-                        {filterUpdate}
-                    />
-                </div>
-                <div class="mt-0">
-                    <MultiSelect
-                        opciones={[{ id: "-1", nombre: "Sin lote" }].concat(
-                            lotes,
-                        )}
-                        bind:valores={loteseleccion}
-                        etiqueta="Lotes"
-                        {filterUpdate}
-                    />
-                </div>
-                <div class="">
-                    <MultiSelect
-                        opciones={[
-                            { id: "-1", nombre: "Sin categoria" },
-                        ].concat(categorias)}
-                        bind:valores={categoriaseleccion}
-                        etiqueta="Categorias"
-                        {filterUpdate}
-                    />
-                </div>
-                <div class="my-0 py-0">
-                    <label for="raza" class="label mb-0">
-                        <span class="label-text text-base">Raza</span>
-                    </label>
-                    <label class="input-group">
-                        <input
-                            type="text"
-                            class={`
-                                        input input-bordered w-full
-                                        rounded-md
-                                        focus:outline-none focus:ring-2 
-                                        focus:ring-green-500 
-                                        focus:border-green-500
-                                        
-                                        ${estilos.bgdark2}
-                                    `}
-                            bind:value={raza}
-                            oninput={filterUpdate}
-                        />
-                    </label>
-                </div>
-                <div class="my-0 py-0">
-                    <label for="color" class="label mb-0">
-                        <span class="label-text text-base">Color</span>
-                    </label>
-                    <label class="input-group">
-                        <input
-                            type="text"
-                            class={`
-                                        input input-bordered w-full
-                                        rounded-md
-                                        focus:outline-none focus:ring-2 
-                                        focus:ring-green-500 
-                                        focus:border-green-500
-                                        
-                                        ${estilos.bgdark2}
-                                    `}
-                            bind:value={color}
-                            oninput={filterUpdate}
-                        />
-                    </label>
-                </div>
-            </div>
-        {/if}
-    </div>
-    <div
-        class={`
-            hidden w-full md:grid
-            mx-auto py-6 px-4 max-w-7xl
-        `}
-    >
-        <div
-            class={`
-                    overflow-hidden rounded-xl
-                `}
+        <a
+            href={`${pre + "/tratamientos"}`}
+            class="
+                inline-flex items-center text-sm
+                text-gray-700 hover:text-gray-900 dark:text-gray-400
+                dark:hover:text-gray-200 mb-4"
         >
-            <table class="table table-lg w-full">
-                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
-                    <tr>
-                        <th class="px-1 py-0 m-0">
+            <svg
+                class="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+            </svg>
+            Volver a tratamientos
+        </a>
+        <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3"
+        >
+            <div
+                class={`
+                            bg-transparent
+                            px-2 py-1
+                        `}
+            >
+                <h1
+                    class={`
+                            text-4xl font-semibold 
+                            dark:text-[#24a579] text-[#115642]
+                            
+                        `}
+                >
+                    Nuevo tratamientos
+                </h1>
+            </div>
+        </div>
+
+        <div
+            class="grid grid-cols-1 md:grid-cols-3 max-h-screen gap-2 md:gap-4 lg:gap-10"
+        >
+            <!--Lado izquierd-->
+            <div>
+                <NuevoTratamiento
+                    bind:fecha
+                    bind:tipotratamientoselect
+                    bind:observaciongeneral
+                    tipos={tipotratamientos}
+                    {inputObsGeneral}
+                    {input}
+                />
+                <AnimalesSeleccionados
+                    {selecthashmap}
+                    quitarAnimal={clickAnimal}
+                />
+            </div>
+            <!--Lado derecho-->
+            <div class="md:col-span-2">
+                <BuscadorTratamientos
+                    {animalesrows}
+                    {selecthashmap}
+                    bind:buscar
+                    {rodeos}
+                    bind:rodeoseleccion
+                    {lotes}
+                    bind:loteseleccion
+                    {categorias}
+                    bind:categoriaseleccion
+                    bind:raza
+                    bind:color
+                    bind:isOpenFilter
+                    {clickFilter}
+                    {filterUpdate}
+                    nuevoTratamiento={() => irDetalle()}
+                    {limpiarFiltros}
+                />
+                {#if cargado}
+                    <div
+                        class={`
+                        
+                        pt-0 my-0
+                        hidden w-full md:grid
+                        mx-auto px-2 md:px-1 max-w-7xl
+                    `}
+                    >
+                        <div
+                            class={`
+                            overflow-hidden 
+                        `}
+                        >
+                            <TablaMovimiento
+                                bind:paginaActual
+                                bind:pageSize
+                                selecthash={selecthashmap}
+                                {animalesrows}
+                                clickFila={clickAnimal}
+                                {clickTodos}
+                                {todos}
+                                {ninguno}
+                                {algunos}
+                                verFila={verAnimal}
+                                conEstado={true}
+                                {cancelar}
+                                {siguiente}
+                            />
+                        </div>
+                    </div>
+                    <div class="block md:hidden justify-items-center mx-1">
+                        <div class="w-full flex justify-start">
                             <button
                                 aria-label="Todos"
                                 onclick={clickTodos}
                                 class={`
-                                    text-white bg-transparent rounded-lg
-                                    px-3 py-3
-                                    ${estilos.secundario}
-                                `}
+                    text-base bg-transparent rounded-lg
+                    p-1 text-base flex flex-row
+                    ${estilos.secundario}
+                `}
                             >
                                 {#if todos}
                                     <svg
@@ -760,276 +684,117 @@
                                         />
                                     </svg>
                                 {/if}
+
+                                <span class="mt-1"> Seleccionar todos </span>
                             </button>
-                        </th>
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Caravana</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Categoria</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Peso</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Rodeo</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Lote</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Raza</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Color</th
-                        >
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each animalesrows as a}
-                        <tr>
-                            <td class="px-1 py-0 m-0">
-                                <button
-                                    aria-label="fila"
-                                    onclick={() => clickAnimal(a.id)}
-                                    class={`
-                                    font-medium bg-transparent rounded-lg
-                                    px-3 py-3 text-base
-                                    ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
-                                `}
-                                >
-                                    {#if selecthashmap[a.id]}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-6"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                            />
-                                        </svg>
-                                    {:else}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-6"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                            />
-                                        </svg>
-                                    {/if}
-                                </button>
-                            </td>
-                            <td class="text-base mx-1 px-0"
-                                >{shorterWord(a.caravana)}</td
-                            >
-                            <td class="text-base mx-1 px-0"
-                                >{capitalize(a.categoria)}</td
-                            >
-                            <td class="text-base mx-1 px-0">{a.peso}</td>
-                            <td class="text-base mx-1 px-0"
-                                >{a.expand?.rodeo?.nombre || ""}</td
-                            >
-                            <td class="text-base mx-1 px-0"
-                                >{a.expand?.lote?.nombre || ""}</td
-                            >
-                            <td class="text-base mx-1 px-0">{a.raza}</td>
-                            <td class="text-base mx-1 px-0">{a.color}</td>
-                        </tr>
-                    {/each}
-                </tbody>
-            </table>
-        </div>
-    </div>
+                        </div>
 
-    <div class="block md:hidden justify-items-center mx-1">
-        <div class="w-full flex justify-start">
-            <button
-                aria-label="Todos"
-                onclick={clickTodos}
-                class={`
-                    text-base bg-transparent rounded-lg
-                    p-1 text-base flex flex-row
-                    ${estilos.secundario}
-                `}
-            >
-                {#if todos}
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-6"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                        />
-                    </svg>
-                {/if}
-                {#if ninguno}
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-6"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                        />
-                    </svg>
-                {/if}
-                {#if algunos}
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="1.5"
-                        stroke="currentColor"
-                        class="size-6"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                        />
-                    </svg>
-                {/if}
-
-                <span class="mt-1"> Seleccionar todos </span>
-            </button>
-        </div>
-
-        {#each animalesrows as a}
-            <div
-                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-            >
-                <div class="block p-4">
-                    <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-medium">
-                            <button
-                                aria-label="fila"
-                                onclick={() => clickAnimal(a.id)}
-                                class={`
+                        {#each animalesrows as a}
+                            <div
+                                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                            >
+                                <div class="block p-4">
+                                    <div
+                                        class="flex justify-between items-start mb-2"
+                                    >
+                                        <h3 class="font-medium">
+                                            <button
+                                                aria-label="fila"
+                                                onclick={() =>
+                                                    clickAnimal(a.id)}
+                                                class={`
                                 font-medium bg-transparent rounded-lg
                                 px-3 py-3 text-base
                                 ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
                             `}
-                            >
-                                {#if selecthashmap[a.id]}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="size-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                        />
-                                    </svg>
-                                {:else}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="size-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                        />
-                                    </svg>
-                                {/if}
-                            </button>
-                            {shorterWord(a.caravana)}
-                        </h3>
+                                            >
+                                                {#if selecthashmap[a.id]}
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke-width="1.5"
+                                                        stroke="currentColor"
+                                                        class="size-6"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                                        />
+                                                    </svg>
+                                                {:else}
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke-width="1.5"
+                                                        stroke="currentColor"
+                                                        class="size-6"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                                                        />
+                                                    </svg>
+                                                {/if}
+                                            </button>
+                                            {shorterWord(a.caravana)}
+                                        </h3>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-y-2">
+                                        <div class="flex items-start">
+                                            <span class="font-semibold"
+                                                >{getSexoNombre(a.sexo)}</span
+                                            >
+                                        </div>
+                                        <div class="flex items-start">
+                                            <span>Categoría:</span>
+                                            <span class="font-semibold">
+                                                {a.categoria}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <span>Lote:</span>
+                                            <span class="font-semibold">
+                                                {a.expand
+                                                    ? a.expand.lote
+                                                        ? a.expand.lote.nombre
+                                                        : ""
+                                                    : ""}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <span>Rodeo:</span>
+                                            <span class="font-semibold">
+                                                {a.expand
+                                                    ? a.expand.rodeo
+                                                        ? a.expand.rodeo.nombre
+                                                        : ""
+                                                    : ""}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <span>Raza:</span>
+                                            <span class="font-semibold">
+                                                {a.raza}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-start">
+                                            <span>Color:</span>
+                                            <span class="font-semibold">
+                                                {a.color}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {/each}
                     </div>
-                    <div class="grid grid-cols-2 gap-y-2">
-                        <div class="flex items-start">
-                            <span class="font-semibold"
-                                >{getSexoNombre(a.sexo)}</span
-                            >
-                        </div>
-                        <div class="flex items-start">
-                            <span>Categoría:</span>
-                            <span class="font-semibold">
-                                {a.categoria}
-                            </span>
-                        </div>
-                        <div class="flex items-start">
-                            <span>Lote:</span>
-                            <span class="font-semibold">
-                                {a.expand
-                                    ? a.expand.lote
-                                        ? a.expand.lote.nombre
-                                        : ""
-                                    : ""}
-                            </span>
-                        </div>
-                        <div class="flex items-start">
-                            <span>Rodeo:</span>
-                            <span class="font-semibold">
-                                {a.expand
-                                    ? a.expand.rodeo
-                                        ? a.expand.rodeo.nombre
-                                        : ""
-                                    : ""}
-                            </span>
-                        </div>
-                        <div class="flex items-start">
-                            <span>Raza:</span>
-                            <span class="font-semibold">
-                                {a.raza}
-                            </span>
-                        </div>
-                        <div class="flex items-start">
-                            <span>Color:</span>
-                            <span class="font-semibold">
-                                {a.color}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                {/if}
             </div>
-        {/each}
+        </div>
     </div>
 </Navbar2>
 <dialog id="tratamientoMasivo" class="modal modal-middle rounded-xl">
@@ -1195,5 +960,23 @@
                 <button class="btn btn-error text-white">Cancelar</button>
             </form>
         </div>
+    </div>
+</dialog>
+<dialog id="veranimal" class="modal modal-middle rounded-xl">
+    <div
+        class="
+            modal-box w-11/12 max-w-6xl
+            bg-gradient-to-br from-white to-gray-100
+            dark:from-gray-900 dark:to-gray-800
+            "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-xl font-bold">Ver animal</h3>
+        <InfoAnimal {animal} forcedOpen={true} />
     </div>
 </dialog>

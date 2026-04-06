@@ -324,7 +324,7 @@
                 `}
         >
             {#if cab.exist}
-                <a class={`py-0 px-3 ${classtext}`} href={pre + "/pesajes"}>
+                <a class={`py-0 px-3 ${classtext}`} href={pre + "/pesajes/historial"}>
                     <Pesaje size={"size-8"} margenes=""></Pesaje>
 
                     <span class="">Pesajes</span>

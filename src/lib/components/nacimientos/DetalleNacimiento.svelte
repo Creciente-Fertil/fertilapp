@@ -42,8 +42,8 @@
         </label>
     </div>
     <div>
-        <label for="fechanacimiento" class="label">
-            <span class="label-text text-sm py-0 my-0">Fecha nacimiento</span>
+        <label for="fechanacimiento" class="label pb-0 mb-0">
+            <span class="label-text text-base">Fecha nacimiento</span>
         </label>
         {#if edit}
             <label class="input-group">
@@ -88,7 +88,7 @@
                 etiquetaDefault={false}
                 {edit}
             >
-                <label for="nombremadre" class="label">
+                <label for="nombremadre" class="label pb-0 mb-0">
                     <span class="label-text text-sm py-0 my-0">Madre</span>
                 </label>
             </PredictSelect>
@@ -104,7 +104,7 @@
                 etiquetaDefault={false}
                 {edit}
             >
-                <label for="nombrepadre" class="label">
+                <label for="nombrepadre" class="label pb-0 mb-0">
                     <span class="label-text text-sm py-0 my-0">Padre</span>
                 </label>
             </PredictSelect>

@@ -50,6 +50,7 @@
     import { goto } from "$app/navigation";
     import { dolar } from "$lib/stores/dolarprecio.svelte";
     import { getDolarPrice } from "$lib/stores/dolar";
+
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     let esdev = import.meta.env.VITE_DEV == "si";
@@ -87,7 +88,7 @@
     let tipotratamientos = $state([]);
     let cargadoanimales = $state(false);
     //Datos cabaña
-    let classbutton =`
+    let classbutton = `
         w-full flex items-center justify-center space-x-4 
         text-white font-bold py-6 px-4 rounded-lg shadow-lg 
         transition duration-300 ease-in-out transform 
@@ -97,7 +98,7 @@
         dark:bg-[#0f4537] dark:hover:bg-[#168561]
         bg-[#115642] hover:bg-[#126a50]
     `;
-        //"w-full flex items-center justify-center space-x-4 bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 dark:bg-green-700 dark:hover:bg-green-600";
+    //"w-full flex items-center justify-center space-x-4 bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 dark:bg-green-700 dark:hover:bg-green-600";
     //Tacto
     let tacto = $state({
         fechatacto: "",
@@ -283,7 +284,11 @@
             sort: "-created",
         });
         tipotratamientos = records;
-        tipotratamientos.sort((tp1, tp2) => (tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase() ? 1 : -1));
+        tipotratamientos.sort((tp1, tp2) =>
+            tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase()
+                ? 1
+                : -1,
+        );
     }
     function verficarPermisosColab(animal) {
         let listapermisos = getPermisosList(permisos.permisos);
@@ -347,7 +352,7 @@
         initObservacion();
         nuevoModalObservacion.showModal();
     }
-    async function guardarAnimalParicion(madre,idnacimiento,fecha) {
+    async function guardarAnimalParicion(madre, idnacimiento, fecha) {
         //let verificar = await verificarNivel(cab.id)
         let verificar = true;
         if (!verificar) {
@@ -358,19 +363,19 @@
             );
             return { id: -1 };
         }
-        let categoriaseleccion = sexo=="M"?"ternero":"ternera"
-        
-        let lote = ""
-        let rodeo = ""
-        let idx_madre = animales.findIndex(a=>a.id == madre)
-        if(idx_madre != -1){
-            lote = animales[idx_madre].lote
-            rodeo = animales[idx_madre].rodeo
+        let categoriaseleccion = sexo == "M" ? "ternero" : "ternera";
+
+        let lote = "";
+        let rodeo = "";
+        let idx_madre = animales.findIndex((a) => a.id == madre);
+        if (idx_madre != -1) {
+            lote = animales[idx_madre].lote;
+            rodeo = animales[idx_madre].rodeo;
         }
         let data = {
             caravana,
             active: true,
-            categoria:categoriaseleccion,
+            categoria: categoriaseleccion,
             delete: false,
             fechanacimiento: fecha + " 03:00:00",
             sexo: sexo,
@@ -378,7 +383,7 @@
             cab: cab.id,
             lote,
             rodeo,
-            nacimiento: idnacimiento
+            nacimiento: idnacimiento,
         };
         let listapermisos = getPermisosList(permisos.permisos);
         if (!listapermisos[5]) {
@@ -401,11 +406,11 @@
             );
             return { id: -1 };
         }
-        let categoriaseleccion = sexo=="M"?"ternero":"ternera"
+        let categoriaseleccion = sexo == "M" ? "ternero" : "ternera";
         let data = {
             caravana,
             active: true,
-            categoria:categoriaseleccion,
+            categoria: categoriaseleccion,
             delete: false,
             fechanacimiento: fechanacimiento + " 03:00:00",
             sexo: sexo,
@@ -455,7 +460,7 @@
                     fecha: tacto.fechatacto + " 03:00:00",
                     observacion: tacto.observaciontacto,
                     animal: a.id,
-                    categoria:sexo=="M"?"ternero":"ternera",
+                    categoria: sexo == "M" ? "ternero" : "ternera",
                     prenada: prenadatacto,
                     tipo: tacto.tipotacto,
                     nombreveterinario: "",
@@ -484,8 +489,6 @@
             }
         } else {
             try {
-                
-                
                 let data = {
                     fecha: tacto.fechatacto + " 03:00:00",
                     observacion: tacto.observaciontacto,
@@ -568,7 +571,11 @@
                     return false;
                 }
                 //Laburar esta parte
-                let a = await guardarAnimalParicion(nacimiento.madrenac,recordparicion.id,nacimiento.fechanac);
+                let a = await guardarAnimalParicion(
+                    nacimiento.madrenac,
+                    recordparicion.id,
+                    nacimiento.fechanac,
+                );
 
                 await getAnimales();
                 //await pb
@@ -1022,6 +1029,40 @@
         totaleventos.lotes = recordslotes.totalItems;
         totaleventos.rodeos = recordsrodeos.totalItems;
     }
+    async function tetstnewback() {
+        let res_back = await fetch(
+            "https://test.crecientefertil.com.ar/api/services/all",
+        );
+        let data_back = await res_back.json();
+        console.log(data_back);
+    }
+    async function posttnewback() {
+        tetstnewback()
+        
+        let data = {
+            tagNumber: "TzAG-001"+Math.random(),
+            birthDate: "2022-01-10",
+            sex: "F",
+            isPregnant: true,
+            breed: "Angus",
+            color: "Negro",
+            rpCode: "RP-123",
+            establishmentId: 1,
+        };
+
+        let res_back = await fetch(
+            "https://test.crecientefertil.com.ar/api/animals",
+            {
+                method: "POST",
+                body: JSON.stringify(data), // data can be `string` or {object}!
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            },
+        );
+        let data_back = await res_back.json();
+        console.log(data_back);
+    }
     onMount(async () => {
         try {
             dolar.updateDolar();
@@ -1049,8 +1090,10 @@
             await getTotales();
             cargados = true;
         }
+        
     });
 </script>
+
 <Navbar2>
     <div class="flex items-center justify-center">
         <h2 class="text-xl font-bold">
@@ -1060,7 +1103,7 @@
     {#if esdev}
         premisos {JSON.stringify(permisos, null, 2)}
         <br />
-        
+        <button class="btn px-10" onclick={posttnewback}> porobar post </button>
     {/if}
     {#if cab.exist}
         <CardBase titulo="Información general" cardsize="max-w-5xl">
@@ -1132,7 +1175,7 @@
                 <h2
                     class="
                         text-xl font-bold mb-6 text-start
-                        text-[#115642] dark:text-[#24a579] 
+                        text-[#115642] dark:text-[#24a579]
                     "
                 >
                     Acciones rapidas

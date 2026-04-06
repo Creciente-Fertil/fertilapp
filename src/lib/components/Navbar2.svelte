@@ -197,7 +197,8 @@
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <!--Escritorio-->
-<div class={`
+<div
+    class={`
         hidden 2xl:block min-h-screen
         dark:bg-gradient-to-br 
         dark:from-gray-900 
@@ -221,7 +222,9 @@
         {verManual}
         {salir}
     />
-    <div class="scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pt-16 fixed min-h-screen overflow-y-auto ">
+    <div
+        class="scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pt-16 fixed min-h-screen overflow-y-auto"
+    >
         <Sidebar
             {nombreestablecimiento}
             {esCelu}
@@ -235,10 +238,9 @@
             {toggleDatos}
         />
     </div>
-    <div class="w-full ">
+    <div class="w-full">
         <main class={`pt-16 ${estilos.bgmain} ml-10 pl-10`}>
             {@render children()}
-            
         </main>
     </div>
 </div>
@@ -275,12 +277,9 @@
         <main class={`pt-16 ${estilos.bgmain}`}>
             {@render children()}
             {#if esCelu}
-                <div
-                    class="pt-16"
-                >
-<NavegacionBottom />
+                <div class="pt-16">
+                    <NavegacionBottom />
                 </div>
-                
             {/if}
         </main>
     </div>

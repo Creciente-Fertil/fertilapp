@@ -15,6 +15,9 @@
     import { isEmpty, addDays } from "$lib/stringutil/lib";
     import estilos from "$lib/stores/estilos";
     import tipostacto from "$lib/stores/tipostacto";
+    import DetalleMovimiento from "$lib/components/tactos/DetalleMovimiento.svelte";
+    import InfoAnimal from "$lib/components/InfoAnimal.svelte";
+    import DetallesAnimalesMovimiento from "$lib/components/tactos/DetallesAnimalesMovimiento.svelte";
 
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -32,19 +35,26 @@
     let usuarioid = $state("");
     let listaanimales = $state([]);
     let selecthashmap = $state({});
+    
 
     //valores
     //movimiento
+    let animal = $state({})
     let tipotactoselect = $state("");
     let fecha = $state("");
     let observaciongeneral = $state("");
+    let prenada = $state(0)
     //validacion
     let malfecha = $state(false);
     let botonhabilitado = $state(false);
     let defaultmovimiento = {
         selecthashmap: {},
+        fecha:"",
+        observaciongeneral:"",
+        tipotactoselect:"",
+        prenada:0
     };
-    let proxymovimiento = $state({
+    let detallemovimiento = $state({
         ...defaultmovimiento,
     });
     let proxy = createStorageProxy("detallemovimientotacto", defaultmovimiento);
@@ -66,13 +76,17 @@
         }
     }
     function setDetalle() {
-        proxymovimiento.selecthashmap = selecthashmap;
-        proxy.save(proxymovimiento);
+        detallemovimiento.selecthashmap = selecthashmap;
+        proxy.save(detallemovimiento);
     }
     function loadDetalle() {
-        proxymovimiento = proxy.load();
+        detallemovimiento = proxy.load();
 
-        selecthashmap = proxymovimiento.selecthashmap;
+        selecthashmap = detallemovimiento.selecthashmap;
+        fecha = detallemovimiento.fecha
+        tipotactoselect = detallemovimiento.tipotactoselect
+        prenada = detallemovimiento.prenada
+        observaciongeneral = detallemovimiento.observaciongeneral
         
         listaanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
@@ -206,170 +220,91 @@
         per.setPer(respermisos.permisos, usuarioid);
         userpermisos = getPermisosList(per.per.permisos);
         loadDetalle();
+        console.log(listaanimales)
     });
+    function verAnimal(id) {
+        let a_idx = listaanimales.findIndex((a) => a.id == id);
+
+        if (a_idx != -1) {
+            animal = listaanimales[a_idx];
+            veranimal.showModal();
+        }
+    }
+    let classbuscador = "container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4";
+    let classmove = "container mx-auto py-3 px-4 max-w-6xl w-full";
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
-        <!--Header-->
+    <div class={classmove}>
+        <DetalleMovimiento
+            {fecha}
+            tipo={tipotactoselect}
+            {prenada}
+            {observaciongeneral}
+        />
+        <DetallesAnimalesMovimiento
+            bind:selectanimales={listaanimales}
+            {quitarAnimal}
+            {verAnimal}
+            cambiar={setDetalle}
+            abierta={false}
+        />
         <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
+            class="mt-6 flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
         >
-            <div
-                class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
+            <!-- Botón Cancelar -->
+            <button
+                class="
+                        hidden md:block
+                        mt-2 px-10 py-2
+                        dark:bg-transparent
+                        bg-white
+                        text-gray-800
+                        dark:text-white
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors
+                        text-base"
+                onclick={volver}
             >
-                <div
-                    class={`
-                        bg-transparent        
-                        px-4 py-4 
-                    `}
-                >
-                    <button onclick={volver}>
-                        <h1
-                            class={`
-                                flex text-left
-                                text-2xl font-bold 
-                                dark:text-white text-gray-900
-                            `}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="size-5 mt-1"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M15.75 19.5 8.25 12l7.5-7.5"
-                                />
-                            </svg>
-                            Tactos
-                        </h1>
-                    </button>
-                </div>
-                <button
-                    class={`btn btn-primary rounded-lg ${estilos.btntext2}`}
-                    data-theme="forest"
-                    disabled={!botonhabilitado}
-                    onclick={mover}
-                >
-                    {#if esCelu}
-                        <span class="text-lg">Movimientos</span>
-                    {:else}
-                        <span class="text-lg">+ Crear movimientos</span>
-                    {/if}
-                </button>
-            </div>
+                Volver
+            </button>
+            <!-- Botón Guardar -->
+            <button
+                class="
+                    mt-2 px-10 py-2 bg-[#115642] text-white
+                    font-medium rounded-full
+                    shadow-sm hover:bg-green-700
+                    transition-colors text-base
+                    "
+                onclick={mover}
+            >
+                Crear {listaanimales.length > 1 ? "tactos" : "tacto"}
+            </button>
         </div>
     </div>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
-        <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
-        >
-        
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-1">
-                
-                <div>
-                    <label for="fechatacto" class="label">
-                        <span class="label-text text-base">Fecha </span>
-                    </label>
-                    <label class="input-group">
-                        <input
-                            id="fechatacto"
-                            type="date"
-                            max={HOY}
-                            class={`
-                            input input-bordered w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2} 
-                        `}
-                            bind:value={fecha}
-                            onchange={() => {
-                                if (fecha == "") {
-                                    malfecha = true;
-                                    botonhabilitado = false;
-                                } else {
-                                    malfecha = false;
-                                    botonhabilitado = true;
-                                }
-                            }}
-                        />
-                        {#if malfecha}
-                            <div class="label">
-                                <span class="label-text-alt text-red-500"
-                                    >Debe seleccionar la fecha del tacto</span
-                                >
-                            </div>
-                        {/if}
-                    </label>
-                </div>
-                <div>
-                    <label for="tipotacto" class="tracking-wide label">
-                        <span class="label-text text-base">Tipo</span>
-                    </label>
-                    <label class="input-group">
-                        <select
-                            class={`
-                            select select-bordered w-full
-                            rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2}
-                        `}
-                            bind:value={tipotactoselect}
-                            onchange={onchangeTipoTacto}
-                        >
-                            {#each tipostacto as s}
-                                <option value={s.id}>{s.nombre}</option>
-                            {/each}
-                        </select>
-                    </label>
-                </div>
-                <div>
-                    <label for="obs" class="label">
-                        <span class="label-text text-base">Observación </span>
-                    </label>
-                    <input
-                        id="observacion"
-                        type="text"
-                        class={`
-                            input 
-                            input-bordered 
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                            w-full
-                            ${estilos.bgdark2}
-                        `}
-                        bind:value={observaciongeneral}
-                        oninput={inputObsGeneral}
-                    />
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
-        <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
-        >
-            <ListaAnimales bind:selectanimales={listaanimales} />
-        </div>
-    </div>
+    
 </Navbar2>
+
+<dialog id="veranimal" class="modal modal-middle rounded-xl">
+    <div
+        class="
+            modal-box w-11/12 max-w-6xl
+            bg-gradient-to-br from-white to-gray-100
+            dark:from-gray-900 dark:to-gray-800
+            "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-xl font-bold">Ver animal</h3>
+        <InfoAnimal {animal} forcedOpen={true} />
+    </div>
+</dialog>

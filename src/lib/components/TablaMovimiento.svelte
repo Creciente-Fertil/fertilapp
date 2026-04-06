@@ -44,7 +44,7 @@
 </script>
 
 <div
-    class="relative w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
+    class="relative w-full overflow-hidden rounded-b-xl border border-slate-200 dark:border-slate-700"
 >
     <div class="max-h-[500px] overflow-y-auto custom-scrollbar">
         <table class="table table-lg w-full bg-white dark:bg-slate-900">

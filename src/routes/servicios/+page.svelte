@@ -30,6 +30,8 @@
     //tabla
     import TablaServicios from "$lib/components/servicios/TablaServicios.svelte";
     import ListaServicios from "$lib/components/servicios/ListaServicios.svelte";
+    //java
+    import { getAllServices } from "$lib/java/servicios/serviciosback";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -51,6 +53,19 @@
         { id: 1, nombre: "Solo servicios" },
         { id: 2, nombre: "Solo inseminaciones" },
     ];
+
+    //ver java
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        if (!versionjava) {
+            await getServicios();
+            await getInseminaciones();
+        } else {
+            await getServicios();
+        }
+    }
+
     let buscar = $state("");
     let isOpenFilter = $state(false);
     // Datos para mostrar
@@ -168,21 +183,30 @@
         esservicio = true;
         idserv = id;
         let ser = servicios.filter((s) => s.id == id)[0];
+        
         if (ser) {
             caravanamadre = "";
             if (ser.expand && ser.expand.madre) {
                 caravanamadre = ser.expand.madre.caravana;
             }
             madre = ser.madre;
-            fechadesdeserv = ser.fechadesde.split(" ")[0];
-            fechahastaserv = ser.fechahasta.split(" ")[0];
-            fechaparto = ser.fechaparto.split(" ")[0];
+            if (versionjava) {
+                fechadesdeserv = ser.fechadesde;
+                fechahastaserv = ser.fechahasta?ser.fechahasta:"";
+                fechaparto = ser.fechaparto;
+            } else {
+                fechadesdeserv = ser.fechadesde.split(" ")[0];
+                fechahastaserv = ser.fechahasta.split(" ")[0];
+                fechaparto = ser.fechaparto.split(" ")[0];
+            }
+
             observacion = ser.observacion;
             padreslist = ser.padres.split(",");
             detalleServicio = {
                 edit,
                 id,
                 natural: true,
+                versionjava,
                 //servicio
                 caravanamadre,
                 madre,
@@ -378,17 +402,21 @@
             filter: `cab = '${cab.id}' && active = true`,
             expand: "animal",
         });
-        inseminaciones = records;
+        inseminaciones = records.map((x) => ({ ...x, tipo: "INSEMINATION" }));
 
         //inseminacionesrow = inseminaciones
     }
     async function getServicios() {
-        const records = await pb.collection("servicios").getFullList({
-            sort: "fechadesde ",
-            filter: `cab = '${cab.id}' && active = true`,
-            expand: "madre",
-        });
-        servicios = records;
+        if (!versionjava) {
+            const records = await pb.collection("servicios").getFullList({
+                sort: "fechadesde ",
+                filter: `cab = '${cab.id}' && active = true`,
+                expand: "madre",
+            });
+            servicios = records.map((x) => ({ ...x, tipo: "NATURAL_SERVICE" }));
+        } else {
+            servicios = await getAllServices();
+        }
 
         serviciosrow = servicios;
     }
@@ -733,6 +761,8 @@
         {nuevoInseminacion}
         {filterUpdate}
         {clickFilter}
+        {versionjava}
+        {toggleJava}
     />
 
     <!--Ordenar-->

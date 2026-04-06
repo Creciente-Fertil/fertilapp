@@ -40,6 +40,15 @@
     import HorizontalTabs from "$lib/components/animal/HorizontalTabs.svelte";
     import AccionesTab from "$lib/components/animal/AccionesTab.svelte";
     import Transferir from "$lib/components/animal/Transferir.svelte";
+    import { getAnimalId } from "$lib/java/animales/animalesback";
+
+    //ver java
+    let versionjava = $state(false);
+
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await perfilAnimal(slug);
+    }
 
     //Size
     let innerWidth = $state(0);
@@ -307,12 +316,51 @@
     async function perfilAnimal(_id) {
         //slug = $page.params.slug;
         slug = _id;
+        if (!versionjava) {
+            if (slug != "") {
+                try {
+                    const recorda = await pb
+                        .collection("animales")
+                        .getOne(slug, {
+                            expand: "nacimiento",
+                        });
+                    animal = recorda;
+                    caravana = recorda.caravana;
+                    color = recorda.raza;
+                    raza = recorda.color;
+                    active = recorda.active;
+                    fechanacimiento = recorda.fechanacimiento.split(" ")[0];
 
-        if (slug != "") {
-            try {
-                const recorda = await pb.collection("animales").getOne(slug, {
-                    expand: "nacimiento",
-                });
+                    nacimiento = "";
+                    nacimientoobj = {};
+                    if (recorda.nacimiento != "") {
+                        connacimiento = true;
+                        nacimiento = recorda.nacimiento;
+                        nacimientoobj = recorda.expand.nacimiento;
+                        await getMadre(recorda.expand.nacimiento.madre);
+                        await getPadre(recorda.expand.nacimiento.padre);
+                    }
+                    peso = recorda.peso;
+                    sexo = recorda.sexo;
+                    rodeo = recorda.rodeo;
+                    lote = recorda.lote;
+                    categoria = recorda.categoria;
+                    prenada = recorda.prenada == 1 ? 0 : recorda.prenada;
+                    rp = recorda.rp;
+                    if (recorda.fechafallecimiento != "") {
+                        fechafall = recorda.fechafallecimiento.split(" ")[0];
+                        motivobaja = recorda.motivobaja;
+                    }
+                    cargado = true;
+                    tab = "datos";
+                    calcularTabs();
+                } catch (err) {
+                    Swal.fire("Error animal", "No existe el animal", "error");
+                }
+            }
+        } else {
+            if (slug != "") {
+                let recorda = await getAnimalId(slug);
                 animal = recorda;
                 caravana = recorda.caravana;
                 color = recorda.raza;
@@ -322,7 +370,7 @@
 
                 nacimiento = "";
                 nacimientoobj = {};
-                if (recorda.nacimiento != "") {
+                if (recorda.nacimiento != "" && recorda.nacimiento != null) {
                     connacimiento = true;
                     nacimiento = recorda.nacimiento;
                     nacimientoobj = recorda.expand.nacimiento;
@@ -336,15 +384,13 @@
                 categoria = recorda.categoria;
                 prenada = recorda.prenada == 1 ? 0 : recorda.prenada;
                 rp = recorda.rp;
-                if (recorda.fechafallecimiento != "") {
+                if (recorda.fechafallecimiento != "" && recorda.fechafallecimiento != null) {
                     fechafall = recorda.fechafallecimiento.split(" ")[0];
                     motivobaja = recorda.motivobaja;
                 }
                 cargado = true;
                 tab = "datos";
                 calcularTabs();
-            } catch (err) {
-                Swal.fire("Error animal", "No existe el animal", "error");
             }
         }
     }
@@ -400,6 +446,19 @@
         {#if esdev}
             premisos {JSON.stringify(userpermisos, null, 2)}
         {/if}
+        <button
+            class={`
+                    ${estilos.btnbuscador}
+                    ${estilos.btntextbuscador}
+                `}
+            onclick={toggleJava}
+        >
+            {#if versionjava}
+                <span class="text-lg">Cerrar java</span>
+            {:else}
+                <span class="text-lg">Ver java</span>
+            {/if}
+        </button>
         <div class="flex justify-center mt-1">
             <div class="w-full max-w-7xl px-4">
                 <!-- Combo alineado al borde izquierdo de la card -->
@@ -509,9 +568,7 @@
             {:else if tab == "clinica"}
                 <!--Pesajes, tactos, servicios, tratamientos, observaciones,pariciones-->
                 <CardAnimal cardsize="max-w-7xl" titulo="">
-                    <HistoriaClinica 
-                        {caravana}
-                    />
+                    <HistoriaClinica {caravana} />
                 </CardAnimal>
             {:else if tab == "historial"}
                 <!--Historial del animal-->
@@ -531,10 +588,7 @@
                 </CardAnimal>
             {:else if tab == "movimientos"}
                 <CardAnimal cardsize="max-w-7xl">
-                    <Movimientos 
-                        {caravana}
-                        {animal}
-                    />
+                    <Movimientos {caravana} {animal} />
                 </CardAnimal>
             {:else if tab == "transfer"}
                 <CardAnimal cardsize="max-w-7xl" titulo="Transferencia">
@@ -549,16 +603,13 @@
                 </CardAnimal>
             {:else if tab == "acciones"}
                 <CardAnimal cardsize="max-w-7xl" titulo="Acciones">
-                    
                     <AccionesTab
                         {caravana}
-
                         bind:fechafallecimiento={fechafall}
                         bind:motivo={motivobaja}
                         bajar={async (fechafallecimiento, motivo) =>
                             await darBaja(fechafallecimiento, motivo)}
                         {eliminar}
-
                         openModal={openModalTransfer}
                         {transfer}
                         bind:codigo

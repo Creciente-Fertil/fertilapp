@@ -50,7 +50,7 @@
     let count = $derived(serviciosrow.length);
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
-    let pyfila = "py-1"
+    let pyfila = "py-0"
 </script>
 
 <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
@@ -267,14 +267,13 @@
                         {s.fechadesde ? getNombrePadres(s.padres) : s.pajuela}
                     </td>
                     <td class={`text-base mx-1 px-1 ${pyfila}`}>
-                        {#if s.fechadesde}
+                        {#if s.tipo=="NATURAL_SERVICE"}
                             <Badge color="blue" text="Natural" />
                         {:else}
                             <Badge color="purple" text="Artificial" />
                         {/if}
                     </td>
-                    <td 
-                        class={`flex items-center justify-center gap-2 px-1 ${pyfila}`}
+                    <td class={`flex items-center justify-center gap-2 px-1 ${pyfila}`}
                     >
 
                         <button

@@ -21,6 +21,8 @@
     import { createStorageProxy } from "$lib/filtros/filtros";
     import tipostacto from "$lib/stores/tipostacto";
     import categorias from "$lib/stores/categorias";
+    import DetalleTacto from "$lib/components/tactos/DetalleTacto.svelte";
+    import estados from "$lib/stores/estados";
 
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
@@ -37,6 +39,7 @@
 
     let usuarioid = $state("");
     let defaultacto = {
+        edit: false,
         idtacto: "",
         animal: "",
         caravana: "",
@@ -49,6 +52,7 @@
     let detalletacto = $state({ ...defaultacto });
     let proxytacto = createStorageProxy("detalletacto", defaultacto);
     //Valores
+    let edit = $state(false);
     let idtacto = $state("");
     let animal = $state("");
     let caravana = $state("");
@@ -70,6 +74,7 @@
         prenada = detalletacto.prenada;
         tipo = detalletacto.tipo;
         categoria = detalletacto.categoria;
+        edit = detalletacto.edit;
     }
     function saveTacto() {
         detalletacto.idtacto = idtacto;
@@ -100,6 +105,10 @@
         }
     }
     async function editar() {
+        if (!edit) {
+            edit = true;
+            return;
+        }
         try {
             let data = {
                 fecha: fecha + " 03:00:00",
@@ -120,10 +129,13 @@
             console.error(err);
             Swal.fire("Error guardar", "No se pudo guardar el tacto", "error");
         }
-        volver()
+        volver();
     }
     function volver() {
-        
+        if (edit) {
+            edit = false;
+            return;
+        }
         goto(pre + "/tactos/cab/");
     }
     function eliminar() {
@@ -150,17 +162,15 @@
                         "success",
                     );
                     proxytacto.save(defaultacto);
-                    volver()
+                    volver();
                 } catch (e) {
                     Swal.fire(
                         "Acción cancelada",
                         "No se pudo eliminar el tacto",
                         "error",
                     );
-                    volver()
+                    volver();
                 }
-                
-
             }
         });
     }
@@ -177,8 +187,73 @@
 
 <Navbar2>
     <CardTacto cardsize="max-w-7xl">
+        <DetalleTacto
+            {edit}
+            {idtacto}
+            {caravana}
+            bind:fecha
+            bind:observacion
+            bind:tipo
+            {categoria}
+            {malfecha}
+            {oninput}
+            {prenada}
+        />
+        <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
+
+        {#if edit}
+            <div class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
+                
+
+                <!-- Botón Cancelar -->
+                <button
+                    class="
+                        hidden md:block
+                        mt-2 px-10 py-2 
+                        dark:bg-transparent
+                        bg-white 
+                        text-gray-800 
+                        dark:text-white
+                        font-medium 
+                        rounded-full shadow-sm border 
+                        border-gray-300 
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors 
+                        text-base"  
+                    onclick={volver}
+                >
+                    Cancelar
+                </button>
+
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={editar}
+                >
+                    Guardar cambios
+                </button>
+            </div>
+        {:else}
+            <div class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
+                <button
+                    class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+                    onclick={eliminar}
+                >
+                    Eliminar
+                </button>
+
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={editar}
+                >
+                    Editar
+                </button>
+            </div>
+        {/if}
         <!--Formulario-->
-        <div class="form-control">
+        <div class="form-control hidden">
             <label for="animal" class="label">
                 <span class="label-text text-base">Animal: {caravana}</span>
             </label>
@@ -284,7 +359,7 @@
             </label>
         </div>
         <!--fin Formulario-->
-        <div class="mt-6 flex space-x-3">
+        <div class="mt-6 flex space-x-3 hidden">
             <!-- Botón Eliminar -->
             <button
                 class="px-4 py-1.5 bg-red-700 text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-sm"

@@ -37,6 +37,9 @@ export function getSexoNombre(s){
     
 }
 export function shorterWord(cadena){
+    if(cadena == null || cadena == undefined){
+        return ""
+    }
     let maxLongitud = 15
     let sufijo = "..."
     return cadena.length > maxLongitud 
