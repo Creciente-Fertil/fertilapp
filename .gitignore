@@ -33,7 +33,7 @@ web_modules/
 build/
 
 #pnpm
-pnpm-lock.yaml
+#pnpm-lock.yaml
 
 # dotenv environment variable files
 .env
