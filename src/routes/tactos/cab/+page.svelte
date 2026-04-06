@@ -78,6 +78,7 @@
     let proxy = createStorageProxy("listatactos", defaultfiltro);
     //detalle
     let tactovacio = {
+        edit:false,
         idtacto: "",
         animal: "",
         caravana: "",
@@ -196,31 +197,51 @@
         detalletacto.categoria = categoria;
         detalletacto.prenada = prenada;
         detalletacto.tipo = tipo;
+        detalletacto.edit = false
         proxytacto.save(detalletacto);
         goto(pre + "/tactos/cab/" + idtacto);
     }
     function openModalEdit(id) {
-        if (permisos[4]) {
-            botonhabilitado = true;
-            malanimal = false;
-            malfecha = false;
-            idtacto = id;
-            tacto = tactos.filter((t) => t.id == idtacto)[0];
-            fecha = tacto.fecha.split(" ")[0];
-            observacion = tacto.observacion;
-            animal = tacto.animal;
-            categoria = tacto.categoria;
-            prenada = tacto.prenada;
-            tipo = tacto.tipo;
-            nombreveterinario = tacto.nombreveterinario;
-            nuevoModal.showModal();
-        } else {
-            Swal.fire(
-                "Sin permisos",
-                "No tienes permisos para crear eventos",
-                "error",
-            );
-        }
+        idtacto = id;
+        tacto = tactos.filter((t) => t.id == idtacto)[0];
+        fecha = tacto.fecha.split(" ")[0];
+        observacion = tacto.observacion;
+        animal = tacto.animal;
+        categoria = tacto.categoria;
+        prenada = tacto.prenada;
+        tipo = tacto.tipo;
+        detalletacto.idtacto = idtacto;
+        detalletacto.fecha = fecha;
+        detalletacto.observacion = observacion;
+        detalletacto.animal = animal;
+        detalletacto.caravana = tacto.expand.animal.caravana || "";
+        detalletacto.categoria = categoria;
+        detalletacto.prenada = prenada;
+        detalletacto.tipo = tipo;
+        detalletacto.edit = true
+        proxytacto.save(detalletacto);
+        goto(pre + "/tactos/cab/" + idtacto);
+        //if (permisos[4]) {
+        //    botonhabilitado = true;
+        //    malanimal = false;
+        //    malfecha = false;
+        //    idtacto = id;
+        //    tacto = tactos.filter((t) => t.id == idtacto)[0];
+        //    fecha = tacto.fecha.split(" ")[0];
+        //    observacion = tacto.observacion;
+        //    animal = tacto.animal;
+        //    categoria = tacto.categoria;
+        //    prenada = tacto.prenada;
+        //    tipo = tacto.tipo;
+        //    nombreveterinario = tacto.nombreveterinario;
+        //    nuevoModal.showModal();
+        //} else {
+        //    Swal.fire(
+        //        "Sin permisos",
+        //        "No tienes permisos para crear eventos",
+        //        "error",
+        //    );
+        //}
     }
     function eliminar(id) {
         Swal.fire({

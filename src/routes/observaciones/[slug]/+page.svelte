@@ -1,0 +1,216 @@
+<script>
+    import Navbar2 from "$lib/components/Navbar2.svelte";
+    import CardObservacion from "$lib/components/observaciones/CardObservacion.svelte";
+    import PocketBase from "pocketbase";
+    import { onMount } from "svelte";
+    import { page } from "$app/stores";
+    import { goto } from "$app/navigation";
+    import estilos from "$lib/stores/estilos";
+    import Swal from "sweetalert2";
+    import { isEmpty, capitalize } from "$lib/stringutil/lib";
+    //permisos
+    import { createPer } from "$lib/stores/permisos.svelte";
+    import { getPermisosMessage, getPermisosList } from "$lib/permisosutil/lib";
+    import {
+        getPermisosCabUser,
+        getPermisosEstXColab,
+    } from "$lib/permisosutil/lib";
+    import { createCaber } from "$lib/stores/cab.svelte";
+    import { createStorageProxy } from "$lib/filtros/filtros";
+    import categorias from "$lib/stores/categorias";
+    import DetalleObservaciones from "$lib/components/observaciones/DetalleObservaciones.svelte";
+    let esdev = import.meta.env.VITE_DEV == "si";
+    let ruta = import.meta.env.VITE_RUTA;
+    let pre = import.meta.env.VITE_PRE;
+    const pb = new PocketBase(ruta);
+    const HOY = new Date().toISOString().split("T")[0];
+    const today = new Date();
+    let caber = createCaber();
+    let cab = caber.cab;
+    let cargado = $state(false);
+    let per = createPer();
+    let userpermisos = $state([]);
+    let slug = $state("");
+    let usuarioid = $state("")
+    //datos
+    let idobservacion = $state("");
+    let caravana = $state("");
+    let categoria = $state("");
+    let fecha = $state("");
+    let observacion = $state("");
+    
+    let edit = $state(false);
+    let malfecha = $state(false)
+    //detalle observacion
+    let defaulobservacion = {
+        id: "",
+        animal: "",
+        caravana: "",
+        categoria: "",
+        fecha: "",
+        observacion: "",
+        edit: false,
+    };
+    let detalleobservacion = $state({ ...defaulobservacion });
+    let proxydetalleobservacion = createStorageProxy(
+        "detalleobservacion",
+        defaulobservacion,
+    );
+    async function editar() {
+        if (!edit) {
+            edit = true;
+            return;
+        }
+        try {
+            let data = {
+                fecha: fecha + " 03:00:00",
+                categoria,
+                observacion,
+            };
+            const record = await pb
+                .collection("observaciones")
+                .update(idobservacion, data);
+
+            Swal.fire(
+                "Éxito editar",
+                "Se pudo editar la observación",
+                "success",
+            );
+        } catch (err) {
+            console.error(err);
+            Swal.fire(
+                "Error editar",
+                "No se pudo editar la observación",
+                "error",
+            );
+        }
+    }
+    async function eliminar() {
+        Swal.fire({
+            title: "Eliminar observación",
+            text: "¿Seguro que deseas eliminar la observacion?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Si",
+            cancelButtonText: "No",
+        }).then(async (result) => {
+            if (result.value) {
+                let data = {
+                    active: false,
+                };
+                try {
+                    const recordedit = await pb
+                        .collection("observaciones")
+                        .update(idobservacion, data);
+
+                    Swal.fire(
+                        "Observación eliminada!",
+                        "Se eliminó la observación correctamente.",
+                        "success",
+                    );
+                } catch (err) {
+                    Swal.fire(
+                        "Acción cancelada",
+                        "No se pudo eliminar la observacion",
+                        "error",
+                    );
+                    console.error(err);
+                }
+                goto(pre + "/observaciones");
+            }
+        });
+    }
+    function volver() {
+        if (edit) {
+            edit = false;
+            return;
+        }
+        goto(pre + "/observaciones");
+    }
+    function loadObservacion() {
+        detalleobservacion = proxydetalleobservacion.load();
+        idobservacion = detalleobservacion.id;
+        caravana = detalleobservacion.caravana;
+        categoria = detalleobservacion.categoria;
+        fecha = detalleobservacion.fecha;
+        observacion = detalleobservacion.observacion;
+        edit = detalleobservacion.edit;
+        cargado = true;
+    }
+    onMount(async () => {
+        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+        usuarioid = pb_json.record.id;
+        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+
+        per.setPer(respermisos.permisos, usuarioid);
+        userpermisos = getPermisosList(per.per.permisos);
+        loadObservacion();
+    });
+</script>
+
+<Navbar2>
+    <CardObservacion cardsize="max-w-7xl" {edit}>
+        <DetalleObservaciones
+            {edit}
+            {caravana}
+            bind:fecha
+            bind:categoria
+            bind:observacion
+            {malfecha}
+        />
+        <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
+        {#if edit}
+            <div
+                class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
+                <!-- Botón Cancelar -->
+                <button
+                    class="
+                        hidden md:block
+                        mt-2 px-10 py-2
+                        dark:bg-transparent
+                        bg-white
+                        text-gray-800
+                        dark:text-white
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors
+                        text-base"
+                    onclick={volver}
+                >
+                    Cancelar
+                </button>
+
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={editar}
+                >
+                    Guardar cambios
+                </button>
+            </div>
+        {:else}
+            <div
+                class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
+                <button
+                    class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+                    onclick={eliminar}
+                >
+                    Eliminar
+                </button>
+
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={editar}
+                >
+                    Editar
+                </button>
+            </div>
+        {/if}
+    </CardObservacion>
+</Navbar2>

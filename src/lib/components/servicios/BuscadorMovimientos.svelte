@@ -1,6 +1,6 @@
 <script>
     import estilos from "$lib/stores/estilos";
-    import paginacion from "$lib/stores/paginacion";
+    
     import { slide } from "svelte/transition";
     import MultiSelect from "../MultiSelect.svelte";
     import { goto } from "$app/navigation";
@@ -53,7 +53,7 @@
     <!--Header-->
     <div
         class={`
-            rounded-xl p-1 shadow-2xl mb-0
+            rounded-t-xl p-1 shadow-2xl mb-0
             dark:bg-slate-900 bg-white
             px-2
             mt-2 md:mt-0
@@ -64,9 +64,9 @@
         >
             <div
                 class={`
-                bg-transparent
-                px-2 py-0   
-            `}
+                    bg-transparent
+                    px-2 py-0   
+                `}
             >
                 <button onclick={volver}>
                     <h1
@@ -148,7 +148,7 @@
             </div>
         </div>
 
-        <!--Animales seleccionados-->
+       
         {#if isOpenFilter}
             <div transition:slide>
                 <div

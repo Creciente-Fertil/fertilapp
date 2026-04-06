@@ -40,6 +40,7 @@ const config = {
 				"/user/config",
 				"/inseminaciones",
 				"/observaciones",
+				"/observaciones/1",
 				"/tareas",
 				"/tratamientos",
 				"/tratamientos/1",

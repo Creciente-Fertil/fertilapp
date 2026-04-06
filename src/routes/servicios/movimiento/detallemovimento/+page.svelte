@@ -24,6 +24,14 @@
     import Eye from "$lib/svgs/eye.svelte";
     import estilos from "$lib/stores/estilos";
     import ListaAnimales from "$lib/components/servicios/ListaAnimales.svelte";
+    import Secondary from "$lib/components/botones/Secondary.svelte";
+    import { saveServicio } from "$lib/java/servicios/serviciosback";
+
+    //java
+    let versionjava = $state(false);
+    function toggleJava() {
+        versionjava = !versionjava;
+    }
 
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -274,130 +282,157 @@
             Swal.fire("Sin madres", "No hay madres seleccionados", "error");
             return;
         }
-        if (esservicio) {
-            if (listapadres.length == 0) {
-                Swal.fire("Sin padres", "No hay padres seleccionados", "error");
-                return;
+        if (!versionjava) {
+            if (esservicio) {
+                if (listapadres.length == 0) {
+                    Swal.fire(
+                        "Sin padres",
+                        "No hay padres seleccionados",
+                        "error",
+                    );
+                    return;
+                }
+                let errores = false;
+                let serverrores = [];
+                for (let i = 0; i < listaanimales.length; i++) {
+                    let servicio = listaanimales[i];
+                    try {
+                        let s_padres = servicio.padres.join();
+                        if (s_padres.length == 0) {
+                            throw 101;
+                        }
+                        let dataser = {
+                            fechadesde: fechadesdeserv + " 03:00:00",
+                            fechaparto: fechaparto + " 03:00:00",
+                            observacion: servicio.observacion,
+                            madre: servicio.id,
+                            padres: s_padres,
+                            active: true,
+                            cab: cab.id,
+                        };
+
+                        if (fechahastaserv != "") {
+                            dataser.fechahasta = fechahastaserv + " 03:00:00";
+                        }
+                        await pb.collection("servicios").create(dataser);
+                        //Revisar las fechas
+                        await guardarHistorial(pb, servicio.id);
+                        await pb
+                            .collection("animales")
+                            .update(servicio.id, { prenada: 3 });
+                    } catch (err) {
+                        serverrores.push(servicio.id);
+                        console.error(err);
+                        errores = true;
+                    }
+                }
+                if (errores) {
+                    Swal.fire(
+                        "Error servicios",
+                        "Hubo algun error en algun servico",
+                        "error",
+                    );
+                } else {
+                    Swal.fire(
+                        "Éxito servicios",
+                        "Se lograron registrar todos los servicios",
+                        "success",
+                    );
+                }
+                for (let i = 0; i < listaanimales.length; i++) {
+                    let servicio = listaanimales[i];
+                    let i_error = serverrores.findIndex(
+                        (pid) => pid == servicio.id,
+                    );
+                    if (i_error == -1) {
+                        delete selecthashmap[servicio.id];
+                    }
+                }
+            } else {
+                if (fechainseminacion == "") {
+                    Swal.fire(
+                        "Error inseminaciones",
+                        "Debe seleccionar una fecha",
+                        "error",
+                    );
+                    esinseminacion = false;
+                    return;
+                }
+                let errores = false;
+                let erroresins = [];
+                for (let i = 0; i < listaanimales.length; i++) {
+                    let inseminacion = listaanimales[i];
+
+                    let data = {
+                        cab: cab.id,
+                        animal: inseminacion.id,
+                        fechaparto: fechaparto + " 03:00:00",
+                        fechainseminacion: fechainseminacion + " 03:00:00",
+                        active: true,
+                        padre: inseminacion.padre,
+                        pajuela: inseminacion.pajuela,
+                        categoria: inseminacion.categoria,
+                        observacion: inseminacion.observacion,
+                    };
+                    try {
+                        const record = await pb
+                            .collection("inseminacion")
+                            .create(data);
+                        await guardarHistorial(pb, inseminacion.id);
+                        await pb
+                            .collection("animales")
+                            .update(inseminacion.id, { prenada: 3 });
+                    } catch (err) {
+                        erroresins.push(inseminacion.id);
+                        console.error(err);
+                    }
+                }
+                if (errores) {
+                    Swal.fire(
+                        "Error inseminaciones",
+                        "Hubo algun error en alguna inseminación",
+                        "error",
+                    );
+                } else {
+                    Swal.fire(
+                        "Éxito inseminaciones",
+                        "Se lograron registrar todas las inseminaciones",
+                        "success",
+                    );
+                }
+
+                for (let i = 0; i < listaanimales.length; i++) {
+                    let inseminacion = listaanimales[i];
+                    let i_error = erroresins.findIndex(
+                        (pid) => pid == inseminacion.id,
+                    );
+                    if (i_error == -1) {
+                        delete selecthashmap[inseminacion.id];
+                    }
+                }
             }
+        } else {
             let errores = false;
             let serverrores = [];
             for (let i = 0; i < listaanimales.length; i++) {
                 let servicio = listaanimales[i];
-                try {
-                    let s_padres = servicio.padres.join();
-                    if (s_padres.length == 0) {
-                        throw 101;
-                    }
-                    let dataser = {
-                        fechadesde: fechadesdeserv + " 03:00:00",
-                        fechaparto: fechaparto + " 03:00:00",
-                        observacion: servicio.observacion,
-                        madre: servicio.id,
-                        padres: s_padres,
-                        active: true,
-                        cab: cab.id,
-                    };
-
-                    if (fechahastaserv != "") {
-                        dataser.fechahasta = fechahastaserv + " 03:00:00";
-                    }
-                    await pb.collection("servicios").create(dataser);
-                    //Revisar las fechas
-                    await guardarHistorial(pb, servicio.id);
-                    await pb
-                        .collection("animales")
-                        .update(servicio.id, { prenada: 3 });
-                } catch (err) {
-                    serverrores.push(servicio.id);
-                    console.error(err);
-                    errores = true;
-                }
-            }
-            if (errores) {
-                Swal.fire(
-                    "Error servicios",
-                    "Hubo algun error en algun servico",
-                    "error",
-                );
-            } else {
-                Swal.fire(
-                    "Éxito servicios",
-                    "Se lograron registrar todos los servicios",
-                    "success",
-                );
-            }
-            for (let i = 0; i < listaanimales.length; i++) {
-                let servicio = listaanimales[i];
-                let i_error = serverrores.findIndex(
-                    (pid) => pid == servicio.id,
-                );
-                if (i_error == -1) {
-                    delete selecthashmap[servicio.id];
-                }
-            }
-        } else {
-            if (fechainseminacion == "") {
-                Swal.fire(
-                    "Error inseminaciones",
-                    "Debe seleccionar una fecha",
-                    "error",
-                );
-                esinseminacion = false;
-                return;
-            }
-            let errores = false;
-            let erroresins = [];
-            for (let i = 0; i < listaanimales.length; i++) {
-                let inseminacion = listaanimales[i];
-
-                let data = {
-                    cab: cab.id,
-                    animal: inseminacion.id,
-                    fechaparto: fechaparto + " 03:00:00",
-                    fechainseminacion: fechainseminacion + " 03:00:00",
-                    active: true,
-                    padre: inseminacion.padre,
-                    pajuela: inseminacion.pajuela,
-                    categoria: inseminacion.categoria,
-                    observacion: inseminacion.observacion,
+                let data_java = {
+                    animalId: servicio.id,
+                    establishmentId: 1,
+                    serviceType: esNatural ? "NATURAL_SERVICE" : "INSEMINATION",
+                    startDate: esNatural ? fechadesdeserv : fechainseminacion,
+                    expectedBirthDate:fechaparto,
+                    notes:servicio.observacion,
+                    isActive:true
                 };
-                try {
-                    const record = await pb
-                        .collection("inseminacion")
-                        .create(data);
-                    await guardarHistorial(pb, inseminacion.id);
-                    await pb
-                        .collection("animales")
-                        .update(inseminacion.id, { prenada: 3 });
-                } catch (err) {
-                    erroresins.push(inseminacion.id);
-                    console.error(err);
+                if (esNatural && fechahastaserv != "") {
+                    data_java.endDate = fechahastaserv;
                 }
-            }
-            if (errores) {
-                Swal.fire(
-                    "Error inseminaciones",
-                    "Hubo algun error en alguna inseminación",
-                    "error",
-                );
-            } else {
-                Swal.fire(
-                    "Éxito inseminaciones",
-                    "Se lograron registrar todas las inseminaciones",
-                    "success",
-                );
-            }
-
-            for (let i = 0; i < listaanimales.length; i++) {
-                let inseminacion = listaanimales[i];
-                let i_error = erroresins.findIndex(
-                    (pid) => pid == inseminacion.id,
-                );
-                if (i_error == -1) {
-                    delete selecthashmap[inseminacion.id];
-                }
+                await saveServicio(data_java)
+               
             }
         }
+
         setDetalleDefault();
         goto(pre + "/servicios");
     }
@@ -448,8 +483,12 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <!--Este va a ser el componente confirmar-->
 <Navbar2>
+    
     <div class={classmove}>
-        
+        <Secondary
+            texto={versionjava?"Cerrar java":"Ver java"}
+            onclick={toggleJava}
+        />
         <DetalleMovimiento
             {esNatural}
             {observaciongeneral}

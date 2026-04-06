@@ -36,6 +36,10 @@
     let defaultmovimiento = {
         selecthashmap: {},
         tipos: [],
+        fecha:"",
+        tipotratamientoselect:"",
+        observaciongeneral:""
+
     };
     let detallemovimento = $state({ ...defaultmovimiento });
     let proxymovimiento = createStorageProxy(
@@ -58,6 +62,9 @@
         detallemovimento = proxymovimiento.load();
         tipotratamientos = detallemovimento.tipos;
         selecthashmap = detallemovimento.selecthashmap
+        fecha = detallemovimento.fecha
+        tipotratamientoselect = detallemovimento.tipotratamientoselect
+        observaciongeneral = detallemovimento.observaciongeneral
         selectanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {

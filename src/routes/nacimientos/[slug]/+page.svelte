@@ -1,4 +1,5 @@
 <script>
+    import Navbar2 from "$lib/components/Navbar2.svelte";
     import PocketBase from "pocketbase";
     import { getAbortSignal, onMount } from "svelte";
     import { page } from "$app/stores";
@@ -209,8 +210,6 @@
                     "Se pudo editar el nacimiento con exito",
                     "success",
                 );
-
-                
             } catch (err) {
                 console.error(err);
                 Swal.fire(
@@ -262,34 +261,35 @@
     function onwritePadre() {}
 </script>
 
-<CardNacimiento cardsize="max-w-7xl" {edit}>
-    <DetalleNacimiento
-        {edit}
-        {cargado}
-        caravananimal={caravana}
-        bind:fecha
-        bind:padre
-        bind:madre
-        bind:nombremadre
-        bind:nombrepadre
-        bind:observacion
-        {malfecha}
-        {listamadres}
-        {listapadres}
-        {onchange}
-        {onelegirMadre}
-        {onelegirPadre}
-        {onwritePadre}
-        {onwriteMadre}
-    />
-    <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
-    {#if edit}
-        <div
-            class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
-        >
-            <!-- Botón Cancelar -->
-            <button
-                class="
+<Navbar2>
+    <CardNacimiento cardsize="max-w-7xl" {edit}>
+        <DetalleNacimiento
+            {edit}
+            {cargado}
+            caravananimal={caravana}
+            bind:fecha
+            bind:padre
+            bind:madre
+            bind:nombremadre
+            bind:nombrepadre
+            bind:observacion
+            {malfecha}
+            {listamadres}
+            {listapadres}
+            {onchange}
+            {onelegirMadre}
+            {onelegirPadre}
+            {onwritePadre}
+            {onwriteMadre}
+        />
+        <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
+        {#if edit}
+            <div
+                class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
+                <!-- Botón Cancelar -->
+                <button
+                    class="
                         hidden md:block
                         mt-2 px-10 py-2
                         dark:bg-transparent
@@ -303,37 +303,38 @@
                         dark:hover:bg-gray-800
                         transition-colors
                         text-base"
-                onclick={volver}
-            >
-                Cancelar
-            </button>
+                    onclick={volver}
+                >
+                    Cancelar
+                </button>
 
-            <!-- Botón Editar -->
-            <button
-                class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
-                onclick={editar}
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={editar}
+                >
+                    Guardar cambios
+                </button>
+            </div>
+        {:else}
+            <div
+                class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
             >
-                Guardar cambios
-            </button>
-        </div>
-    {:else}
-        <div
-            class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
-        >
-            <button
-                class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
-                onclick={confirmDelete}
-            >
-                Eliminar
-            </button>
+                <button
+                    class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+                    onclick={confirmDelete}
+                >
+                    Eliminar
+                </button>
 
-            <!-- Botón Editar -->
-            <button
-                class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
-                onclick={editar}
-            >
-                Editar
-            </button>
-        </div>
-    {/if}
-</CardNacimiento>
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={editar}
+                >
+                    Editar
+                </button>
+            </div>
+        {/if}
+    </CardNacimiento>
+</Navbar2>

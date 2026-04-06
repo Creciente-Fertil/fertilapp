@@ -9,6 +9,7 @@
     import Filter from "$lib/svgs/filter.svelte";
     import Limpiar from "$lib/svgs/limpiar.svelte";
     import Sticky from "./Sticky.svelte";
+    import Secondary from "../botones/Secondary.svelte";
 
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -43,6 +44,8 @@
         nuevoInseminacion = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
+        versionjava=false,
+        toggleJava=()=>{}
     } = $props();
 
     //buscador
@@ -87,6 +90,19 @@
                     Servicio
                 {:else}
                     + Nuevo servicio
+                {/if}
+            </button>
+            <button
+                class={`
+                    ${estilos.btnbuscador}
+                    ${estilos.btntextbuscador}
+                `}
+                onclick={toggleJava}
+            >
+                {#if versionjava}
+                    Cerrar java
+                {:else}
+                    Ver java
                 {/if}
             </button>
             <button

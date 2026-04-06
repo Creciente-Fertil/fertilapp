@@ -21,11 +21,16 @@
     import ServicioDetalle from "$lib/components/servicios/ServicioDetalle.svelte";
     import InseminacionDetalle from "$lib/components/servicios/InseminacionDetalle.svelte";
     import tiposanimal from "$lib/stores/tiposanimal";
+    import {
+        editServicio,
+        eliminarServicio,
+    } from "$lib/java/servicios/serviciosback";
 
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
+    let versionjava = $state(false);
     let caber = createCaber();
     let cab = caber.cab;
     let cargado = $state(false);
@@ -40,6 +45,7 @@
     let defaultServicio = {
         edit: false,
         id: "",
+        versionjava: false,
         natural: true,
         fechaparto: "",
         observacion: "",
@@ -94,6 +100,7 @@
         padre = detalleServicio.padre;
         pajuela = detalleServicio.pajuela;
         categoria = detalleServicio.categoria;
+        versionjava = detalleServicio.versionjava;
     }
     async function getToros() {
         let recordsa = await pb.collection("animales").getFullList({
@@ -127,9 +134,9 @@
         cargado = true;
     });
     async function editar() {
-        if(!edit){
-            edit = true
-            return
+        if (!edit) {
+            edit = true;
+            return;
         }
         if (natural) {
             try {
@@ -143,7 +150,21 @@
                 if (fechahasta != "") {
                     dataser.fechahasta = fechahasta + " 03:00:00";
                 }
-                await pb.collection("servicios").update(id, dataser);
+                if (versionjava) {
+                    let data_java = {
+                        startDate: fechadesde,
+                        
+                        expectedBirthDate: fechaparto,
+                        notes:  observacion,
+                    };
+                    if (fechahasta != "") {
+                        data_java.endDate = fechahasta;
+                    }
+                    await editServicio(id, data_java);
+                } else {
+                    await pb.collection("servicios").update(id, dataser);
+                }
+
                 Swal.fire(
                     "Éxito editar",
                     "Se pudo editar el servicio con exito",
@@ -201,7 +222,13 @@
     async function eliminar() {
         if (natural) {
             try {
-                await pb.collection("servicios").update(id, { active: false });
+                if (!versionjava) {
+                    await pb
+                        .collection("servicios")
+                        .update(id, { active: false });
+                } else {
+                    await eliminarServicio(id);
+                }
 
                 Swal.fire(
                     "Éxito eliminar",
@@ -231,9 +258,9 @@
         }
     }
     function volver() {
-        if(edit){
-            edit = false
-            return
+        if (edit) {
+            edit = false;
+            return;
         }
         goto(pre + "/servicios");
     }
@@ -241,6 +268,9 @@
 
 <Navbar2>
     <CardServicio cardsize="max-w-7xl" {titulo} {edit}>
+        {#if esdev}
+            <h2>Version java: {versionjava}</h2>
+        {/if}
         {#if natural}
             <ServicioDetalle
                 {edit}
@@ -252,6 +282,7 @@
                 bind:observacion
                 bind:fechaparto
                 {toros}
+                {versionjava}
             />
         {:else}
             <InseminacionDetalle
@@ -265,29 +296,30 @@
                 bind:pajuela
                 {listapadres}
                 {tiposanimal}
+                {versionjava}
             />
         {/if}
         <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
         {#if edit}
-            <div class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
-                
-
+            <div
+                class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
                 <!-- Botón Cancelar -->
                 <button
                     class="
                         hidden md:block
-                        mt-2 px-10 py-2 
+                        mt-2 px-10 py-2
                         dark:bg-transparent
-                        bg-white 
-                        text-gray-800 
+                        bg-white
+                        text-gray-800
                         dark:text-white
-                        font-medium 
-                        rounded-full shadow-sm border 
-                        border-gray-300 
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
                         hover:bg-gray-200
                         dark:hover:bg-gray-800
-                        transition-colors 
-                        text-base"  
+                        transition-colors
+                        text-base"
                     onclick={volver}
                 >
                     Cancelar
@@ -298,11 +330,13 @@
                     class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                     onclick={editar}
                 >
-                    Editar
+                    Guardar cambios
                 </button>
             </div>
         {:else}
-            <div class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
+            <div
+                class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
                 <button
                     class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
                     onclick={confirmDelete}
@@ -315,10 +349,9 @@
                     class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                     onclick={editar}
                 >
-                    Guardar cambios
+                    Editar
                 </button>
             </div>
         {/if}
     </CardServicio>
-    
 </Navbar2>

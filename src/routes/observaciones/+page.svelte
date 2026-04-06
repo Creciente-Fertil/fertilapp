@@ -22,6 +22,8 @@
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
     import PredictSelect from "$lib/components/PredictSelect.svelte";
     import { capitalize } from "$lib/stringutil/lib";
+    import { goto } from "$app/navigation";
+    let pre = import.meta.env.VITE_PRE;
     let caber = createCaber();
     let cab = caber.cab;
     let ruta = import.meta.env.VITE_RUTA;
@@ -86,6 +88,21 @@
         ...defaultfiltro,
     });
     let proxy = createStorageProxy("listaobservaciones", defaultfiltro);
+    //detalle observacion
+    let defaulobservacion={
+        id:"",
+        animal:"",
+        caravana:"",
+        categoria:"",
+        fecha:"",
+        observacion:"",
+        edit:false
+    }
+    let detalleobservacion = $state({ ...defaulobservacion });
+    let proxydetalleobservacion = createStorageProxy(
+        "detalleobservacion",
+        defaulobservacion,
+    );
     //Datos animal
     let caravananuevo = $state("");
     let categorianuevo = $state("");
@@ -155,7 +172,27 @@
             );
         }
     }
+    function irDetalle(id){
 
+        idobservacion = id;
+        let obs = observaciones.filter((o) => o.id == idobservacion)[0];
+        observacion = obs.observacion;
+        categoria = obs.categoria;
+        fecha = obs.fecha.split(" ")[0];
+        animal = obs.animal;
+        nombreanimal = obs.expand.animal.caravana;
+        detalleobservacion ={
+            id,
+            observacion,
+            categoria,
+            caravana:nombreanimal,
+            fecha,
+            edit:false
+        }
+        proxydetalleobservacion.save(detalleobservacion)
+        goto(pre + "/observaciones/" + idobservacion);
+        
+    }
     function openModalEditar(id) {
         botonhabilitado = true;
         malanimal = false;
@@ -167,7 +204,18 @@
         fecha = obs.fecha.split(" ")[0];
         animal = obs.animal;
         nombreanimal = obs.expand.animal.caravana;
-        nuevoModal.showModal();
+        detalleobservacion ={
+            id,
+            observacion,
+            categoria,
+            caravana:nombreanimal,
+            fecha,
+            edit:true
+        }
+        proxydetalleobservacion.save(detalleobservacion)
+        goto(pre + "/observaciones/" + idobservacion);
+        
+        //nuevoModal.showModal();
     }
     function eliminar(id) {
         Swal.fire({
@@ -778,7 +826,7 @@
                     observacionesrows={observacionesrow}
                     {ordenarObservaciones}
                     openEditModal={openModalEditar}
-                    openViewModal={openModalEditar}
+                    openViewModal={irDetalle}
                     openDelModal={eliminar}
                     {clickFila}
                     {clickTodos}

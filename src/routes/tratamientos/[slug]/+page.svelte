@@ -19,6 +19,7 @@
     import { createCaber } from "$lib/stores/cab.svelte";
     import { createStorageProxy } from "$lib/filtros/filtros";
     import categorias from "$lib/stores/categorias";
+    import DetalleTratamiento from "$lib/components/tratamientos/DetalleTratamiento.svelte";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -33,8 +34,9 @@
     let slug = $state("");
 
     let usuarioid = $state("");
-    let tipotratamientos = $state([]);
+    let tipos = $state([]);
     //Datos tratamiento
+    let edit = $state(false)
     let idtratamiento = $state("");
     let animal = $state("");
     let caravana = $state("");
@@ -47,6 +49,7 @@
     let maltipo = $state(false);
     let botonhabilitado = $state(false);
     let vaciotratamiento = {
+        edit:false,
         idtratamiento: "",
         animal: "",
         caravana: "",
@@ -97,13 +100,27 @@
         fecha = detalletratamiento.fecha;
         tipo = detalletratamiento.tipo;
         observacion = detalletratamiento.observacion;
-        tipotratamientos = detalletratamiento.tipos;
+        
+        edit = detalletratamiento.edit
+        tipos = detalletratamiento.tipos
+        cargado = true
     }
     function setDetalle() {}
     function volver() {
+        if(edit)
+        {
+            edit = false
+            return    
+        }
         goto(pre + "/tratamientos");
     }
+    
     async function editar() {
+        if(!edit)
+        {
+            edit = true
+            return    
+        }
         try {
             let data = {
                 //animal,
@@ -178,8 +195,73 @@
 </script>
 
 <Navbar2>
-    <CardTratamiento cardsize="max-w-7xl">
-        <div class="form-control">
+    <CardTratamiento cardsize="max-w-7xl" {edit}>
+        <DetalleTratamiento
+            {edit}
+            {cargado}
+            {caravana}
+            {tipos}
+            bind:categoria
+            bind:fecha
+            bind:tipo
+            bind:observacion
+            {malfecha}
+            {maltipo}
+            {oninput}
+        />
+        <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
+        {#if edit}
+            <div class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
+                
+
+                <!-- Botón Cancelar -->
+                <button
+                    class="
+                        hidden md:block
+                        mt-2 px-10 py-2 
+                        dark:bg-transparent
+                        bg-white 
+                        text-gray-800 
+                        dark:text-white
+                        font-medium 
+                        rounded-full shadow-sm border 
+                        border-gray-300 
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors 
+                        text-base"  
+                    onclick={volver}
+                >
+                    Cancelar
+                </button>
+
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={editar}
+                >
+                    Guardar cambios
+                </button>
+            </div>
+        {:else}
+            <div class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
+                <button
+                    class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+                    onclick={eliminar}
+                >
+                    Eliminar
+                </button>
+
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={editar}
+                >
+                    Editar
+                </button>
+            </div>
+        {/if}
+        <div class="form-control hidden">
             <label for="madre" class="label">
                 <span class="label-text text-base">Animal: {caravana}</span>
             </label>
@@ -246,7 +328,7 @@
                     bind:value={tipo}
                     onchange={() => oninput("TIPO")}
                 >
-                    {#each tipotratamientos as t}
+                    {#each tipos as t}
                         <option value={t.id}>{t.nombre}</option>
                     {/each}
                 </select>
@@ -276,7 +358,7 @@
             </label>
         </div>
         <!-- Botones alineados a la izquierda, más bajos, en la parte inferior -->
-        <div class="mt-6 flex space-x-3">
+        <div class="mt-6 flex space-x-3 hidden">
             <!-- Botón Eliminar -->
             <button
                 class="px-4 py-1.5 bg-red-700 text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-sm"

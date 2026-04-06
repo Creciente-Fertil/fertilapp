@@ -14,6 +14,7 @@
         pajuela = $bindable(""),
         listapadres = [],
         tiposanimal = [],
+        versionjava = false
     } = $props();
     let padresserv = $state("");
     function onelegir(id) {}
@@ -96,7 +97,7 @@
         </label>
     </div>
     <div>
-        {#if cargado}
+        {#if cargado && !versionjava}
             <PredictSelect
                 {edit}
                 {onwrite}

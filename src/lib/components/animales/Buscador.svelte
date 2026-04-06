@@ -44,6 +44,8 @@
         estadisticas = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
+        verJava=()=>{},
+        versionjava = false
     } = $props();
 </script>
 
@@ -90,7 +92,7 @@
             </button>
             <button
                 class={`
-                        hidden
+                        hidden   
                         bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
                         ${estilos.btnsecondary}
                         rounded-full
@@ -99,6 +101,19 @@
                 onclick={estadisticas}
             >
                 <span class="text-lg font-semibold">Estadísticas</span>
+            </button>
+            <button
+                class={`
+                    ${estilos.btnbuscador}
+                    ${estilos.btntextbuscador}
+                `}
+                onclick={verJava}
+            >
+                {#if versionjava}
+                    <span class="text-lg">Cerrar java</span>
+                {:else}
+                    <span class="text-lg">Ver java</span>
+                {/if}
             </button>
         </div>
         <!--Filtros-->

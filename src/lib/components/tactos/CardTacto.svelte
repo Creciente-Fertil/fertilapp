@@ -1,6 +1,7 @@
 <script>
     import { fade, fly } from "svelte/transition";
-    import { quintOut } from "svelte/easing";
+    import estilos from "$lib/stores/estilos";
+    
     import Tacto from "$lib/svgs/tacto.svelte";
     import { goto } from "$app/navigation";
     import Tactos from "../animal/Tactos.svelte";
@@ -8,56 +9,72 @@
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
-    let { cardsize = "", children } = $props();
+    let { edit = false, cardsize = "", children } = $props();
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
-<div class="container mx-auto py-6 px-4 max-w-7xl">
+<div
+    class={`
+            container mx-auto py-6 px-4 max-w-7xl
+            w-full xl:w-3/4
+            pb-16
+        `}
+>
+    <a
+        href={`${pre + "/tactos/cab"}`}
+        class="
+        inline-flex items-center text-sm
+        text-gray-700 hover:text-gray-900 dark:text-gray-400
+        dark:hover:text-gray-200 mb-4"
+    >
+        <svg
+            class="w-4 h-4 mr-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+        </svg>
+        Volver a tactos
+    </a>
     <!--Header-->
     <div
         class={`
-            rounded-md p-4 shadow-xl mb-4
+            rounded-2xl p-2  mb-2
             dark:bg-slate-900 bg-white
+            shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
+            dark:shadow-none
         `}
     >
         <div
-            class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2 border-b dark:border-gray-800"
         >
             <div
                 class={`
-                bg-transparent
-                
-                px-4 py-4 
-            `}
+                    bg-transparent
+                    px-3 py-4 
+                `}
             >
                 <button onclick={() => goto(pre + "/tactos/cab")}>
                     <h1
                         class={`
                             flex text-left
-                            text-2xl font-bold 
-                            dark:text-white text-gray-900
+                            text-3xl font-medium 
+                            ${estilos.subtitle}
                         `}
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            class="size-5 mt-1"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M15.75 19.5 8.25 12l7.5-7.5"
-                            />
-                        </svg>
-                        Ver tacto
+                        {edit ? "Editar" : "Ver"}
+                        Tacto
                     </h1>
                 </button>
             </div>
 
-            <div class="hidden md:block text-emerald-600 dark:text-emerald-500">
+            <div class="hidden md:block text-[#115642]">
                 <Tacto size="size-12" />
             </div>
         </div>

@@ -1,8 +1,10 @@
 <script>
     import estilos from "$lib/stores/estilos";
+    import Secondary from "../botones/Secondary.svelte";
     import MultipleToros from "../MultipleToros.svelte";
     import PredictSelect from "../PredictSelect.svelte";
     import SelectToros from "../SelectToros.svelte";
+    import { tipoServicios } from "$lib/java/servicios/serviciosback";
     let {
         //natural
         esNatural = $bindable(true),
@@ -32,6 +34,9 @@
         inputObsGeneral = () => {},
         onwrite = () => {},
         onelegir = () => {},
+        propuesta1=true,
+        togglePropuesta=()=>{},
+        versionjava=false
     } = $props();
     const HOY = new Date().toISOString().split("T")[0];
 </script>
@@ -60,10 +65,11 @@
             >
                 Detalles servicio
             </h1>
+            
         </div>
     </div>
     {#if esNatural}
-        <div class="grid grid-cols-1">
+        <div class={`${propuesta1?"grid grid-cols-1":"grid grid-cols-3"}`}>
             <div class="pr-3">
                 <label for="tiposervicio" class="label">
                     <span
@@ -86,8 +92,10 @@
                         bind:value={esNatural}
                         onchange={() => input("TIPO")}
                     >
+                        
                         <option value={true}>Servicio natural</option>
                         <option value={false}>Inseminación artificial</option>
+                        
                     </select>
                 </label>
             </div>
@@ -151,34 +159,34 @@
                 </label>
             </div>
             {#if cargadoanimales}
-                <SelectToros
-                    opciones={listapadres}
-                    etiqueta="Padres"
-                    bind:valores={padreslist}
-                    etiquetaDefault={false}
-                    py="py-1"
-                    px="pl-3"
-                    margintop=""
-                    
-                    agregarElemento={agregarPadre}
-                    quitarElemento={quitarPadre}
-                    
-                >
-                    <label for="Padres" class="label">
-                        <span
-                            class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
-                        >
-                            Padres</span
-                        >
-                    </label>
-                </SelectToros>
-                {#if malpadre}
-                    <div class="label">
-                        <span class="label-text-alt text-red-500"
-                            >Debe seleccionar al menos un padre</span
-                        >
-                    </div>
-                {/if}
+                <div>
+                    <SelectToros
+                        opciones={listapadres}
+                        etiqueta="Padres"
+                        bind:valores={padreslist}
+                        etiquetaDefault={false}
+                        py="py-1"
+                        px="pl-3"
+                        margintop=""
+                        agregarElemento={agregarPadre}
+                        quitarElemento={quitarPadre}
+                    >
+                        <label for="Padres" class="label">
+                            <span
+                                class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                            >
+                                Padres</span
+                            >
+                        </label>
+                    </SelectToros>
+                    {#if malpadre}
+                        <div class="label">
+                            <span class="label-text-alt text-red-500"
+                                >Debe seleccionar al menos un padre</span
+                            >
+                        </div>
+                    {/if}
+                </div>
             {/if}
             <div class="pr-3">
                 <label for="fechaparto" class="label">
@@ -304,7 +312,7 @@
                     <PredictSelect
                         {onwrite}
                         {onelegir}
-                        cambiar = {()=>input("PAJUELA")}
+                        cambiar={() => input("PAJUELA")}
                         bind:valor={padre}
                         etiqueta={"Padre"}
                         bind:cadena={pajuela}
