@@ -8,8 +8,8 @@
     let {
         fecha = $bindable(""),
         observaciongeneral = $bindable(""),
-        tipo = $bindable(""),
-        prenada = $bindable(1),
+        pesajegeneral = $bindable(""),
+        
     } = $props();
 </script>
 
@@ -50,7 +50,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <div class="grid grid-cols-1">
                 <div class="">
-                    <label for="tipo" class="label mb-0 pb-0">
+                    <label for="pesaje" class="label mb-0 pb-0">
                         <span
                             class="
                                     label-text tracking-wide
@@ -59,49 +59,15 @@
                                     text-gray-500
                                 "
                         >
-                            Tipo de tacto</span
+                            Pesaje general</span
                         >
                     </label>
 
                     <span
                         class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3 `}
                     >
-                        {#if tipo == "eco"}
-                            Ecografía
-                        {:else}
-                            Tacto
-                        {/if}</span
+                        {pesajegeneral}</span
                     >
-                </div>
-                <div>
-                    <label for="prenada" class="label mb-0 pb-0">
-                        <span
-                            class="
-                                label-text tracking-wide
-                                text-md uppercase
-                                font-semibold dark:text-gray-400
-                                text-gray-500
-                            "
-                        >
-                            Estado</span
-                        >
-                    </label>
-                    <label class="input-group">
-                        <select
-                            class={`
-                                select select-bordered
-                                border border-gray-300 rounded-md
-                                focus:outline-none focus:ring-2 
-                                focus:ring-green-500 focus:border-green-500
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={prenada}
-                        >
-                            {#each estados as s}
-                                <option value={s.id}>{s.nombre}</option>
-                            {/each}
-                        </select>
-                    </label>
                 </div>
             </div>
             <div class="grid grid-cols-1">

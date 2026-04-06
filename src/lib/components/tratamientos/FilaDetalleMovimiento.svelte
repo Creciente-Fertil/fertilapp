@@ -2,17 +2,16 @@
     import estilos from "$lib/stores/estilos";
     import { shorterWord } from "$lib/stringutil/lib";
     import estados from "$lib/stores/estados";
-    import tipostacto from "$lib/stores/tipostacto";
+
     let {
         selectanimales = $bindable([]),
-        
+        tipos = [],
+
         animal = null,
         id = "",
         quitarAnimal = (id) => {},
         verAnimal = (id) => {},
         cambiar = () => {},
-        
-        
         i,
     } = $props();
     // Toggle estado de expansión
@@ -31,7 +30,7 @@
     </div>
     <div class="md:col-span-3">
         <select
-                    class={`
+            class={`
                         w-full
                         select select-bordered
                         border border-gray-300 rounded-md
@@ -40,13 +39,12 @@
                         ${estilos.bgdark2}
                         pr-3
                     `}
-                    bind:value={selectanimales[i].prenada}
-                    
-                >
-                    {#each estados as t}
-                        <option value={t.id}>{t.nombre}</option>
-                    {/each}
-                </select>
+            bind:value={selectanimales[i].tipotratamiento}
+        >
+            {#each tipos as t}
+                <option value={t.id}>{t.nombre}</option>
+            {/each}
+        </select>
     </div>
     <!-- Observaciones -->
     <div class="md:col-span-4">
@@ -135,13 +133,12 @@
             </div>
             <div>
                 <label for="Estado" class="label">
-                            <span
-                                class="label-text text-base uppercase font-semibold dark:text-gray-400 text-gray-500"
-                            >
-                                Estado
-                                </span
-                            >
-                        </label>
+                    <span
+                        class="label-text text-base uppercase font-semibold dark:text-gray-400 text-gray-500"
+                    >
+                        Tipo
+                    </span>
+                </label>
                 <select
                     class={`
                         w-full
@@ -152,10 +149,9 @@
                         ${estilos.bgdark2}
                         pr-3
                     `}
-                    bind:value={selectanimales[i].prenada}
-                    
+                    bind:value={selectanimales[i].tipotratamiento}
                 >
-                    {#each estados as t}
+                    {#each tipos as t}
                         <option value={t.id}>{t.nombre}</option>
                     {/each}
                 </select>

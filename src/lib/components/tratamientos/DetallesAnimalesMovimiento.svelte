@@ -2,7 +2,7 @@
     import InfoAnimal from "../InfoAnimal.svelte";
     import { slide } from "svelte/transition";
     import { shorterWord } from "$lib/stringutil/lib";
-
+    
 
     import Arrowdownsimple from "$lib/svgs/arrowdownsimple.svelte";
     import estilos from "$lib/stores/estilos";
@@ -14,12 +14,13 @@
     let esCelu = $derived(innerWidth <= 1100);
     let {
         selectanimales = $bindable([]),
+        tipos = [],
         abierta = false,
         
         cambiar = () => {},
         quitarAnimal = (id) => {},
         verAnimal = (id) => {},
-        cargadoanimales = false,
+        
         
     } = $props();
     let minimo = 3
@@ -80,7 +81,7 @@
                             dark:text-[#24a579] text-[#115642]
                         `}
                         >
-                            Madres seleccionadas
+                            Animales seleccionados
                         </h1>
                         <!-- Badge -->
                         <span
@@ -136,7 +137,7 @@
                 class="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
             >
                 <div class="col-span-3">Caravana</div>
-                <div class="col-span-3 ">Estado</div>
+                <div class="col-span-3 ">Tipo</div>
                 <div class="col-span-4 ">Observaciones</div>
                 <div class="col-span-2 text-right">Acciones</div>
             </div>
@@ -146,6 +147,7 @@
                     {#each rows as a, i}
                         <FilaDetalleMovimiento
                             bind:selectanimales
+                            {tipos}
                             animal={a}
                             id={a.id}
                             {quitarAnimal}

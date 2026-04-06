@@ -90,13 +90,13 @@ export async function eliminarServicio(id) {
     let res_post = await fetch(ruta,
         {
             method: "POST",
-            body: JSON.stringify({}), // data can be `string` or {object}!
+//            body: JSON.stringify({}), // data can be `string` or {object}!
             headers: {
                 "Content-Type": "application/json",
             },
         }
     )
 
-    let data_post = await res_post.json()
-    return data_post
+    //let data_post = await res_post.json()
+    return {}
 }

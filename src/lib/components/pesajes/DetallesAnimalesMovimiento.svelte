@@ -19,7 +19,7 @@
         cambiar = () => {},
         quitarAnimal = (id) => {},
         verAnimal = (id) => {},
-        cargadoanimales = false,
+        
         
     } = $props();
     let minimo = 3
@@ -80,7 +80,7 @@
                             dark:text-[#24a579] text-[#115642]
                         `}
                         >
-                            Madres seleccionadas
+                            Animales seleccionadas
                         </h1>
                         <!-- Badge -->
                         <span
@@ -136,7 +136,7 @@
                 class="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
             >
                 <div class="col-span-3">Caravana</div>
-                <div class="col-span-3 ">Estado</div>
+                <div class="col-span-3 ">Pesaje</div>
                 <div class="col-span-4 ">Observaciones</div>
                 <div class="col-span-2 text-right">Acciones</div>
             </div>

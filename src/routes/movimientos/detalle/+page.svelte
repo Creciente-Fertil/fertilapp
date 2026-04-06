@@ -17,7 +17,10 @@
     import { createUserer } from "$lib/stores/user.svelte";
     import { goto } from "$app/navigation";
     import estilos from "$lib/stores/estilos";
-
+    import InfoAnimal from "$lib/components/InfoAnimal.svelte";
+    import DetalleMovimientoHeader from "$lib/components/movimientos/DetalleMovimientoHeader.svelte";
+    import DetallesAnimalesMovimiento from "$lib/components/movimientos/DetallesAnimalesMovimiento.svelte";
+    import motivos from "$lib/stores/motivos";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -46,12 +49,17 @@
         codigo: "",
         listaanimales: [],
         selecthashmap: {},
+        lotes:[],
+        rodeos:[],
+        categorias:[],
+        seccionAbierta:""
     };
     let proxymovimiento = $state({
         ...defaultmovimiento,
     });
     let proxy = createStorageProxy("detallemovimiento", defaultmovimiento);
     //boton
+    let seccionAbierta = $state("CATEGORIA")
     let textoboton = $state("Mover categoria");
     let categoria = $state("");
     let lote = $state("");
@@ -74,6 +82,7 @@
     let malcodigo = $state("");
     let habilitarboton = $state(false);
     //Seleecionar
+    let animal = $state({})
     let selectcategoria = $state(true);
     let selectlote = $state(false);
     let selectrodeo = $state(false);
@@ -88,6 +97,8 @@
         motivo = proxymovimiento.motivo;
         fechabaja = proxymovimiento.fechabaja;
         codigo = proxymovimiento.codigo;
+        seccionAbierta = proxymovimiento.seccion
+        
         listaanimales = [];
         selecthashmap = proxymovimiento.selecthashmap;
 
@@ -362,6 +373,7 @@
     }
     function oninput(campo) {
         validarBoton();
+        
         if (selectcategoria && campo == "CATEGORIA") {
             if (categoria == "") {
                 malcategoria = true;
@@ -419,6 +431,7 @@
         motivo = "";
         codigo = "";
         habilitarboton = false;
+        seccionAbierta = seccion
         if (seccion == "CATEGORIA") {
             selectcategoria = true;
             selectlote = false;
@@ -473,6 +486,7 @@
             selecttransfer = true;
             textoboton = "Transferir";
         }
+        guardarLista()
     }
     function quitarAnimal(id) {
         if (selecthashmap[id]) {
@@ -498,6 +512,11 @@
             codigo,
             listaanimales: [],
             selecthashmap,
+            lotes,
+            categorias,
+            rodeos,
+            seccionAbierta
+            
         };
         proxy.save(movimiento);
     }
@@ -513,11 +532,82 @@
         await getRodeos();
         await getLotes();
     });
+    function verAnimal(id) {
+        let a_idx = listaanimales.findIndex((a) => a.id == id);
+
+        if (a_idx != -1) {
+            animal = listaanimales[a_idx];
+            veranimal.showModal();
+        }
+    }
+    let classbuscador = "container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4";
+    let classmove = "container mx-auto py-3 px-4 max-w-6xl w-full";
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
+    <div class={classmove}>
+        <DetalleMovimientoHeader
+            {lotes}
+            {rodeos}
+            {categorias}
+            {motivos}
+            {seccionAbierta}
+            
+            nuevacategoria={categoria}
+            nuevolote={lote}
+            nuevorodeo={rodeo}
+            
+            {fecha}
+            {fechabaja}
+            {motivo}
+            {codigo}
+        />
+        <DetallesAnimalesMovimiento
+            bind:selectanimales = {listaanimales}
+            {quitarAnimal}
+            {verAnimal}
+            
+            abierta={false}
+        />
+        <div
+            class="mt-6 flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
+        >
+            <!-- Botón Cancelar -->
+            <button
+                class="
+                        hidden md:block
+                        mt-2 px-10 py-2
+                        dark:bg-transparent
+                        bg-white
+                        text-gray-800
+                        dark:text-white
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors
+                        text-base"
+                onclick={volver}
+            >
+                Volver
+            </button>
+            <!-- Botón Guardar -->
+            <button
+                class="
+                    mt-2 px-10 py-2 bg-[#115642] text-white
+                    font-medium rounded-full
+                    shadow-sm hover:bg-green-700
+                    transition-colors text-base
+                    "
+                onclick={moverDetalle}
+            >
+                Crear {listaanimales.length > 1 ? "movimientos" : "movimiento"}
+            </button>
+        </div>
+    </div>
+    <div class="hidden container mx-auto py-6 px-4 max-w-7xl">
         <!--Header-->
         <div
             class={`
@@ -575,7 +665,7 @@
             </div>
         </div>
     </div>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
+    <div class="hidden  container mx-auto py-6 px-4 max-w-7xl">
         <div
             class={`
                 rounded-md p-4 shadow-xl mb-4
@@ -601,7 +691,7 @@
             />
         </div>
     </div>
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
+    <div class="hidden  container mx-auto py-6 px-4 max-w-7xl">
         <div
             class={`
                 rounded-md p-4 shadow-xl mb-4
@@ -619,3 +709,22 @@
         </div>
     </div>
 </Navbar2>
+
+<dialog id="veranimal" class="modal modal-middle rounded-xl">
+    <div
+        class="
+            modal-box w-11/12 max-w-6xl
+            bg-gradient-to-br from-white to-gray-100
+            dark:from-gray-900 dark:to-gray-800
+            "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-xl font-bold">Ver animal</h3>
+        <InfoAnimal {animal} forcedOpen={true} />
+    </div>
+</dialog>

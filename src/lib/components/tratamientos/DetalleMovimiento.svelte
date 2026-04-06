@@ -1,6 +1,6 @@
 <script>
     import estilos from "$lib/stores/estilos";
-    import estados from "$lib/stores/estados";
+
     let pre = import.meta.env.VITE_PRE;
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -9,7 +9,7 @@
         fecha = $bindable(""),
         observaciongeneral = $bindable(""),
         tipo = $bindable(""),
-        prenada = $bindable(1),
+        tipos = [],
     } = $props();
 </script>
 
@@ -50,31 +50,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             <div class="grid grid-cols-1">
                 <div class="">
-                    <label for="tipo" class="label mb-0 pb-0">
-                        <span
-                            class="
-                                    label-text tracking-wide
-                                    text-md uppercase
-                                    font-semibold dark:text-gray-400
-                                    text-gray-500
-                                "
-                        >
-                            Tipo de tacto</span
-                        >
-                    </label>
-
-                    <span
-                        class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3 `}
-                    >
-                        {#if tipo == "eco"}
-                            Ecografía
-                        {:else}
-                            Tacto
-                        {/if}</span
-                    >
-                </div>
-                <div>
-                    <label for="prenada" class="label mb-0 pb-0">
+                    <label for="Tipotra" class="label mb-0 pb-0">
                         <span
                             class="
                                 label-text tracking-wide
@@ -83,7 +59,7 @@
                                 text-gray-500
                             "
                         >
-                            Estado</span
+                            Tipo tratamiento</span
                         >
                     </label>
                     <label class="input-group">
@@ -95,9 +71,9 @@
                                 focus:ring-green-500 focus:border-green-500
                                 ${estilos.bgdark2}
                             `}
-                            bind:value={prenada}
+                            bind:value={tipo}
                         >
-                            {#each estados as s}
+                            {#each tipos as s}
                                 <option value={s.id}>{s.nombre}</option>
                             {/each}
                         </select>

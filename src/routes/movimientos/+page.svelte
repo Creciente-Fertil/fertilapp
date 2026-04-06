@@ -78,6 +78,7 @@
     //movimientos
 
     //movimiento
+    let seccionAbierta = $state("")
     let nuevacategoria = $state("");
     let nuevolote = $state("");
     let nuevorodeo = $state("");
@@ -97,6 +98,11 @@
         codigo: "",
         listaanimales: [],
         selecthashmap: {},
+        lotes:[],
+        rodeos:[],
+        categorias:[],
+        seccion:""
+
     };
     let detallemovimiento = $state({
         ...defaultmovimiento,
@@ -624,6 +630,8 @@
             selecttransfer = true;
             textoboton = "Transferir";
         }
+        seccionAbierta = seccion
+        saveDetalleMovmiento()
     }
     function validarBoton() {
         habilitarboton = true;
@@ -725,6 +733,10 @@
         detallemovimiento.codigo = codigo;
         detallemovimiento.listaanimales = listaanimales;
         detallemovimiento.selecthashmap = selecthashmap;
+        detallemovimiento.lotes = lotes
+        detallemovimiento.rodeos=rodeos
+        detallemovimiento.categorias=categorias
+        detallemovimiento.seccion = seccionAbierta
         proxyDetalleMovimiento.save(detallemovimiento);
     }
     function loadDetalleMovimiento() {

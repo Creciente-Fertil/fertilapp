@@ -276,7 +276,7 @@ import { slide } from "svelte/transition";
                                 <input
                                     id="fecha"
                                     type="date"
-                                    max={HOY}
+                                    
                                     class={`
                                         input input-bordered w-full
                                         border border-gray-300 rounded-md

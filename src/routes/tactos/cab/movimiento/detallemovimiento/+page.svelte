@@ -244,15 +244,11 @@
             {observaciongeneral}
         />
         <DetallesAnimalesMovimiento
-        bind:selectanimales={listaanimales}
-        {quitarAnimal}
-
+            bind:selectanimales={listaanimales}
+            {quitarAnimal}
             {verAnimal}
             cambiar={setDetalle}
             abierta={false}
-
-
-        
         />
         <div
             class="mt-6 flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
