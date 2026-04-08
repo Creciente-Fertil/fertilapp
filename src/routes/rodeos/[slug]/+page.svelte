@@ -14,7 +14,7 @@
         getPermisosCabUser,
         getPermisosEstXColab,
     } from "$lib/permisosutil/lib";
-    
+
     import Rodeo from "$lib/svgs/rodeo.svelte";
     import Danger from "$lib/components/botones/Danger.svelte";
     import Secondary from "$lib/components/botones/Secondary.svelte";
@@ -34,6 +34,7 @@
     let slug = $state("");
     let nombre = $state("");
     let edit = $state(false);
+    let add = $state(false);
     let animales = $state([]);
     let defaultRodeo = {
         id: "",
@@ -47,7 +48,7 @@
     function getRodeo() {
         detalleRodeo = proxyLote.load();
         nombre = detalleRodeo.nombre;
-        edit = detalleRodeo.edit
+        edit = detalleRodeo.edit;
     }
     onMount(async () => {
         slug = $page.params.slug;
@@ -58,13 +59,64 @@
         per.setPer(respermisos.permisos, usuarioid);
 
         userpermisos = getPermisosList(per.per.permisos);
-        getRodeo();
+        if (slug == "0") {
+            add = true;
+        } else {
+            getRodeo();
+        }
     });
     async function editar() {
         edit = true;
     }
-    async function eliminar() {}
-    async function guardarCambio() {}
+    async function eliminar() {
+        try {
+            let data = {
+                active: false,
+            };
+            const record = await pb.collection("rodeos").update(slug, data);
+            goto(pre + "/rodeos");
+            //ver como hago para actualizar la lista
+            Swal.fire(
+                "Rodeo eliminado!",
+                "Se eliminó el rodeo correctamente.",
+                "success",
+            );
+        } catch (e) {
+            Swal.fire(
+                "Acción cancelada",
+                "No se pudo eliminar el rodeo",
+                "error",
+            );
+        }
+    }
+    async function guardarCambio() {
+        try {
+            let data = {
+                nombre,
+            };
+            const record = await pb.collection("rodeos").update(slug, data);
+            volver();
+            Swal.fire("Éxito editar", "Se pudo editar el rodeo", "success");
+        } catch (err) {
+            console.error(err);
+            Swal.fire("Error editar", "No se pudo editar el rodeo", "error");
+        }
+    }
+    async function guardarNuevo() {
+        try {
+            let data = {
+                nombre,
+                active: true,
+                cab: cab.id,
+            };
+            let record = await pb.collection("rodeos").create(data);
+            volver();
+            Swal.fire("Éxito guardar", "Se pudo guardar el rodeo", "success");
+        } catch (err) {
+            console.error(err);
+            Swal.fire("Error guardar", "No se pudo guardar el rodeo", "error");
+        }
+    }
     async function getAnimales() {}
 
     async function confirmDelete() {
@@ -149,7 +201,7 @@
                             ${estilos.subtitle}
                         `}
                         >
-                            {edit ? "Editar" : "Ver"}
+                            {add ? "Nuevo" : edit ? "Editar" : "Ver"}
                             Rodeo
                         </h1>
                     </button>
@@ -175,19 +227,39 @@
                             >Nombre</span
                         >
                     </label>
-                    <label for="nombre" class="label py-0 my-0">
-                        <span class={`text-lg ${estilos.labelcolor} py-0 my-0`}
-                            >{nombre}</span
-                        >
-                    </label>
+                    {#if add || edit}
+                        <input
+                            id="nombre"
+                            type="text"
+                            class={`
+                                input input-bordered 
+                                w-full
+                                border border-gray-300 rounded-md
+                                focus:outline-none focus:ring-2 
+                                focus:ring-green-500 
+                                focus:border-green-500
+                                ${estilos.bgdark2} 
+                            `}
+                            bind:value={nombre}
+                        />
+                    {:else}
+                        <label for="nombre" class="label py-0 my-0">
+                            <span
+                                class={`text-lg ${estilos.labelcolor} py-0 my-0`}
+                                >{nombre}</span
+                            >
+                        </label>
+                    {/if}
                 </div>
             </div>
             <!--FIN Detalle-->
             <div
                 class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
             >
-                {#if edit}
-
+                {#if add}
+                    <Secondary onclick={volver} texto="Volver" />
+                    <Success onclick={guardarNuevo} texto="Guardar nuevo" />
+                {:else if edit}
                     <Secondary onclick={volver} texto="Cancelar" />
                     <Success onclick={guardarCambio} texto="Guardar edición" />
                 {:else}

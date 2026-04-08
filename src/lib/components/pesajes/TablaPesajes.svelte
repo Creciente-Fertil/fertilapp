@@ -148,7 +148,9 @@
                     <td class={`text-base ml-3 pl-3 mr-1 pr-1 ${pyfila}`}>
                         {`${p.expand.animal.caravana}`}
                     </td>
-                    <td class={`text-base ml-3 pl-3 mr-1 pr-1 ${pyfila}`}>
+                    <td 
+                        class={`text-base ml-3 pl-3 mr-1 pr-1 ${pyfila}`}
+                    >
                         {p.pesonuevo}
                     </td>
                     <td

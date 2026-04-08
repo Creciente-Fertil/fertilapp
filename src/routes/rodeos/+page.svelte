@@ -262,7 +262,8 @@
         }
     }
     function nuevo() {
-        openNewModal();
+        goto(pre+"/rodeos/0")
+        //openNewModal();
     }
     function clickTodos() {}
     function clickFila(id) {}

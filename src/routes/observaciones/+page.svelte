@@ -153,7 +153,8 @@
         nombreanimal = "";
         animal = "";
         cadenaanimal = "";
-        nuevoModal.showModal();
+        goto(pre+"/observaciones/0")
+        //nuevoModal.showModal();
     }
 
     function openNewAnimal() {
@@ -187,7 +188,8 @@
             categoria,
             caravana:nombreanimal,
             fecha,
-            edit:false
+            edit:false,
+            animal
         }
         proxydetalleobservacion.save(detalleobservacion)
         goto(pre + "/observaciones/" + idobservacion);
@@ -210,7 +212,8 @@
             categoria,
             caravana:nombreanimal,
             fecha,
-            edit:true
+            edit:true,
+            animal
         }
         proxydetalleobservacion.save(detalleobservacion)
         goto(pre + "/observaciones/" + idobservacion);

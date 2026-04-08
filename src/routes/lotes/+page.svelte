@@ -115,6 +115,7 @@
         if (userpermisos[1]) {
             idlote = "";
             nombre = "";
+            goto(pre+"/lotes/0")
             nuevoModal.showModal();
         } else {
             Swal.fire(

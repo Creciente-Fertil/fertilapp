@@ -16,6 +16,7 @@
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import { goto } from "$app/navigation";
+    import HistorialPesajes from "$lib/components/pesajes/HistorialPesajes.svelte";
     let caber = createCaber();
     let cab = caber.cab;
     let ruta = import.meta.env.VITE_RUTA;
@@ -27,6 +28,7 @@
     const HASTA = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     let isOpenFilter = $state(false);
     //Datos filtrar
+    let cargados = $state(false);
     let buscarcaravana = $state("");
     let fechadesde = $state("");
     let fechahasta = $state("");
@@ -62,6 +64,7 @@
             filter: `animal.cab = '${cab.id}'`,
         });
         pesajes = records;
+        cargados = true;
     }
     function setFilters() {
         buscarcaravana = proxyfiltros.buscarcaravana;
@@ -297,300 +300,181 @@
         {filterUpdate}
         {clickFilter}
     />
-    <div
-        class="hidden grid grid-cols-1 lg:grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12"
-    >
-        <div class="hidden md:block">
-            <h1 class="text-2xl col-span-2 lg:col-span-1">
-                Historia pesajes - Últimos 5
-            </h1>
-        </div>
-        <div class="md:hidden">
-            <h1 class="text-2xl col-span-2 lg:col-span-1">
-                Historia pesajes - Últimos 3
-            </h1>
-        </div>
-        <div class="flex col-span-2 gap-1 justify-end">
-            <div class="flex flex-row gap-2">
-                <div>
-                    <a
-                        class={`
-                        btn 
-                        bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                        ${estilos.btnsecondary}`}
-                        href={pre + "/pesajes/historial"}
-                    >
-                        <span class="text-xl font-semibold">Historial</span>
-                    </a>
-                </div>
-                <button
-                    onclick={exportarPesaje}
-                    class={`
-                        bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                        ${estilos.btnsecondary}
-                        rounded-full
-                        p-2
-                    `}
-                    aria-label="Exportar"
-                >
-                    <span class="text-xl font-semibold">Exportar</span>
-                </button>
-            </div>
-            <div>
-                <a
-                    class={`
-                    btn 
-                    bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                    ${estilos.btnsecondary}`}
-                    href={pre + "/pesajes"}
-                >
-                    <span class="text-xl font-semibold">Volver</span>
-                </a>
-            </div>
-        </div>
-    </div>
-    <div
-        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10 w-11/12"
-    >
-        <div class="w-11/12">
-            <label
+
+    {#if cargados}
+        <!--Tabla grande-->
+        <div
+            class={`
+            hidden w-full xl:w-3/4 md:grid
+                mx-auto py-1 px-4 max-w-7xl  
+        `}
+        >
+            <div
                 class={`
-                    input 
-                    input-bordered 
-                    flex 
-                    items-center gap-2
-                    ${estilos.bgdark2}
+                    overflow-hidden rounded-xl
+            border dark:border-gray-700
                 `}
             >
-                <input
-                    type="text"
-                    class="grow"
-                    placeholder="Buscar..."
-                    bind:value={buscarcaravana}
-                    oninput={filterUpdate}
-                />
-            </label>
-        </div>
-        <div class="w-11/12">
-            <Limpiar {limpiarFiltros} />
-        </div>
-    </div>
-    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
-        <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
-            <div class="flex justify-between items-center px-1">
-                <h1 class="font-semibold text-lg py-2">Filtros</h1>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class={`h-5 w-5 transition-all duration-300 ${isOpenFilter ? "transform rotate-180" : ""}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
-                    />
-                </svg>
-            </div>
-        </button>
-        {#if isOpenFilter}
-            <div transition:slide>
-                <div class="grid grid-cols-1 lg:grid-cols-3 mb-2 lg:mb-3 gap-1">
-                    <div class="">
-                        <label
-                            class="block tracking-wide mb-2"
-                            for="grid-first-name"
+                <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
+                    <table
+                        class="table table-lg w-full bg-white dark:bg-slate-900"
+                    >
+                        <thead
+                            class={`${estilos.tableheader}  sticky top-0 z-5 shadow-sm`}
                         >
-                            Fecha desde
-                        </label>
-                        <input
-                            id="fechadesde"
-                            type="date"
-                            class={`
-                                input input-bordered
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={fechadesde}
-                            onchange={filterUpdate}
-                        />
-                    </div>
-                    <div class="">
-                        <label
-                            class="block tracking-wide mb-2"
-                            for="grid-first-name"
-                        >
-                            Fecha Hasta
-                        </label>
-                        <input
-                            id="fechadesde"
-                            type="date"
-                            class={`
-                                input input-bordered
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={fechahasta}
-                            onchange={filterUpdate}
-                        />
-                    </div>
+                            <tr>
+                                <th
+                                    class={`${estilos.tableth}`}
+                                >
+                                    Animal</th
+                                >
+                                <th
+                                    class={`${estilos.tableth}`}
+                                >
+                                    5</th
+                                >
+                                <th
+                                    class={`${estilos.tableth}`}
+                                >
+                                    4</th
+                                >
+                                <th
+                                    class={`${estilos.tableth}`}
+                                >
+                                    3</th
+                                >
+                                <th
+                                    class={`${estilos.tableth}`}
+                                >
+                                    2</th
+                                >
+                                <th
+                                    class={`${estilos.tableth}`}
+                                >
+                                    1</th
+                                >
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {#each pesajesprocesados as f}
+                                <tr>
+                                    <td class="text-base ml-3 pl-3 mr-1 pr-1 text-center">
+                                        {shorterWord(f.animal)}
+                                    </td>
+                                    {#each Array(5) as _, idx}
+                                        {#if f.pesajes.length < ultimos - idx}
+                                            <td
+                                                class={`text-base ml-3 pl-3 mr-1 pr-1 `}
+                                            >
+                                                {"-"}
+                                            </td>
+                                        {:else}
+                                            <td
+                                                onclick={() =>
+                                                    openDetalle(
+                                                        f.pesajes[
+                                                            ultimos - idx - 1
+                                                        ].id,
+                                                    )}
+                                                class="cursor-pointer ml-3 pl-3 mr-1 pr-1 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                            >
+                                                {new Date(
+                                                    f.pesajes[
+                                                        ultimos - idx - 1
+                                                    ].fecha,
+                                                ).toLocaleDateString()} , {f
+                                                    .pesajes[ultimos - idx - 1]
+                                                    .peso}
+                                            </td>
+                                        {/if}
+                                    {/each}
+                                </tr>
+                            {/each}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        {/if}
-    </div>
-    <!--Tabla grande-->
-    <div
-        class={`
-            hidden w-full md:grid
-            mx-auto py-6 px-4 max-w-7xl
-        `}
-    >
-        <div
-            class={`
-                    overflow-hidden rounded-xl
-                `}
-        >
-            <table class="table table-lg w-full">
-                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
-                    <tr>
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Animal</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            5</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            4</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            3</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            2</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            1</th
-                        >
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each pesajesprocesados as f}
-                        <tr>
-                            <td class="text-base mx-1 px-1">
-                                {shorterWord(f.animal)}
-                            </td>
-                            {#each Array(5) as _, idx}
-                                {#if f.pesajes.length < ultimos - idx}
-                                    <td>
-                                        {"-"}
-                                    </td>
-                                {:else}
-                                    <td
-                                        onclick={() =>
-                                            openDetalle(
-                                                f.pesajes[ultimos - idx - 1].id,
-                                            )}
-                                        class="cursor-pointer text-base mx-1 px-1 hover:bg-gray-200 dark:hover:bg-gray-900"
-                                    >
-                                        {new Date(
-                                            f.pesajes[ultimos - idx - 1].fecha,
-                                        ).toLocaleDateString()} , {f.pesajes[
-                                            ultimos - idx - 1
-                                        ].peso}
-                                    </td>
-                                {/if}
-                            {/each}
-                        </tr>
-                    {/each}
-                </tbody>
-            </table>
         </div>
-    </div>
 
-    <!--Tabla chica-->
-    <div
-        class={`
-            w-full md:hidden
-            mx-auto py-6 px-4 max-w-7xl
-        `}
-    >
+        <!--Tabla chica-->
         <div
             class={`
-                    overflow-hidden rounded-xl
-                `}
+            w-full md:hidden
+            mx-auto py-1 px-4 max-w-7xl  
+        `}
         >
-            <table class="table table-lg w-full">
-                <thead class="bg-emerald-600 text-white dark:bg-emerald-700">
-                    <tr>
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                        >
-                            Animal</th
-                        >
-
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >3</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >2</th
-                        >
-                        <th
-                            class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >1</th
-                        >
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each pesajesprocesados as f}
+            <div
+                class={`
+                    overflow-hidden rounded-xl
+                    border dark:border-gray-700
+                `}
+            >
+            <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
+                <table class="table table-lg w-full bg-white dark:bg-slate-900">
+                    <thead
+                        class={`${estilos.tableheader}  sticky top-0 z-5 shadow-sm`}
+                    >
                         <tr>
-                            <td class="text-base mx-1 px-1">
-                                {shorterWord(f.animal)}
-                            </td>
-                            {#each Array(3) as _, idx}
-                                {#if f.pesajes.length < ultimos - (idx + 2)}
-                                    <td>
-                                        {"-"}
-                                    </td>
-                                {:else}
-                                    <td
-                                        onclick={() =>
-                                            openDetalle(
+                            <th
+                                class={`${estilos.tableth}`}
+                            >
+                                Animal</th
+                            >
+
+                            <th
+                                class={`${estilos.tableth}`}
+                                >3</th
+                            >
+                            <th
+                                class={`${estilos.tableth}`}
+                                >2</th
+                            >
+                            <th
+                                class={`${estilos.tableth}`}
+                                >1</th
+                            >
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {#each pesajesprocesados as f}
+                            <tr>
+                                <td class="text-base mx-2 px-1 text-center">
+                                    {shorterWord(f.animal)}
+                                </td>
+                                {#each Array(3) as _, idx}
+                                    {#if f.pesajes.length < ultimos - (idx + 2)}
+                                        <td>
+                                            {"-"}
+                                        </td>
+                                    {:else}
+                                        <td
+                                            onclick={() =>
+                                                openDetalle(
+                                                    f.pesajes[
+                                                        ultimos - (idx + 2) - 1
+                                                    ].id,
+                                                )}
+                                            class="cursor-pointer text-base mx-1 px-1 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                        >
+                                            {new Date(
                                                 f.pesajes[
                                                     ultimos - (idx + 2) - 1
-                                                ].id,
-                                            )}
-                                        class="cursor-pointer text-base mx-1 px-1 hover:bg-gray-200 dark:hover:bg-gray-900"
-                                    >
-                                        {new Date(
-                                            f.pesajes[
+                                                ].fecha,
+                                            ).toLocaleDateString()} , {f
+                                                .pesajes[
                                                 ultimos - (idx + 2) - 1
-                                            ].fecha,
-                                        ).toLocaleDateString()} , {f.pesajes[
-                                            ultimos - (idx + 2) - 1
-                                        ].peso}
-                                    </td>
-                                {/if}
-                            {/each}
-                        </tr>
-                    {/each}
-                </tbody>
-            </table>
+                                            ].peso}
+                                        </td>
+                                    {/if}
+                                {/each}
+                            </tr>
+                        {/each}
+                    </tbody>
+                </table>
+                </div>
+            </div>
         </div>
-    </div>
+    {/if}
 </Navbar2>
 <dialog
     id="detallePesaje"

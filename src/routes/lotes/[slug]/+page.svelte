@@ -33,6 +33,7 @@
     let slug = $state("");
     let nombre = $state("");
     let edit = $state(false);
+    let add = $state(false);
     let animales = $state([]);
     let defaultLote = {
         id: "",
@@ -46,7 +47,7 @@
     function getLote() {
         detalleLote = proxyLote.load();
         nombre = detalleLote.nombre;
-        edit = detalleLote.edit
+        edit = detalleLote.edit;
     }
     onMount(async () => {
         slug = $page.params.slug;
@@ -57,13 +58,68 @@
         per.setPer(respermisos.permisos, usuarioid);
 
         userpermisos = getPermisosList(per.per.permisos);
-        getLote();
+        if (slug == "0") {
+            add = true;
+            nombre = "";
+            edit = false;
+        } else {
+            getLote();
+        }
     });
     async function editar() {
         edit = true;
     }
-    async function eliminar() {}
-    async function guardarCambio() {}
+    async function eliminar() {
+        try {
+            let data = {
+                active: false,
+            };
+            const record = await pb.collection("lotes").update(slug, data);
+            goto(`${pre + "/lotes"}`)
+            //ver como hago para actualizar la lista
+            Swal.fire(
+                "Lote eliminada!",
+                "Se eliminó el lote correctamente.",
+                "success",
+            );
+        } catch (e) {
+            Swal.fire(
+                "Acción cancelada",
+                "No se pudo eliminar el lote",
+                "error",
+            );
+        }
+    }
+    async function guardarCambio() {
+        try {
+            let data = {
+                nombre,
+            };
+            const record = await pb.collection("lotes").update(slug, data);
+
+            Swal.fire("Éxito editar", "Se pudo editar el lote", "success");
+            volver();
+        } catch (err) {
+            console.error(err);
+            Swal.fire("Error editar", "No se pudo editar el lote", "error");
+        }
+    }
+    async function guardarNuevo() {
+        try {
+            let data = {
+                nombre,
+                active: true,
+                cab: cab.id,
+            };
+            let record = await pb.collection("lotes").create(data);
+
+            Swal.fire("Éxito guardar", "Se pudo guardar el lote", "success");
+            volver();
+        } catch (err) {
+            console.error(err);
+            Swal.fire("Error guardar", "No se pudo guardar el lote", "error");
+        }
+    }
     async function getAnimales() {}
 
     async function confirmDelete() {
@@ -148,7 +204,7 @@
                             ${estilos.subtitle}
                         `}
                         >
-                            {edit ? "Editar" : "Ver"}
+                            {add ? "Nuevo" : edit ? "Editar" : "Ver"}
                             Lote
                         </h1>
                     </button>
@@ -174,19 +230,39 @@
                             >Nombre</span
                         >
                     </label>
-                    <label for="nombre" class="label py-0 my-0">
-                        <span class={`text-lg ${estilos.labelcolor} py-0 my-0`}
-                            >{nombre}</span
-                        >
-                    </label>
+                    {#if add || edit}
+                        <input
+                            id="nombre"
+                            type="text"
+                            class={`
+                            input input-bordered 
+                            w-full
+                            border border-gray-300 rounded-md
+                            focus:outline-none focus:ring-2 
+                            focus:ring-green-500 
+                            focus:border-green-500
+                            ${estilos.bgdark2} 
+                        `}
+                            bind:value={nombre}
+                        />
+                    {:else}
+                        <label for="nombre" class="label py-0 my-0">
+                            <span
+                                class={`text-lg ${estilos.labelcolor} py-0 my-0`}
+                                >{nombre}</span
+                            >
+                        </label>
+                    {/if}
                 </div>
             </div>
             <!--FIN Detalle-->
             <div
                 class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
             >
-                {#if edit}
-
+                {#if add}
+                    <Secondary onclick={volver} texto="Volver" />
+                    <Success onclick={guardarNuevo} texto="Guardar nuevo" />
+                {:else if edit}
                     <Secondary onclick={volver} texto="Cancelar" />
                     <Success onclick={guardarCambio} texto="Guardar edición" />
                 {:else}

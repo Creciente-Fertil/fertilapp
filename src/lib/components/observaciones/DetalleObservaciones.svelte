@@ -2,17 +2,23 @@
     import estilos from "$lib/stores/estilos";
     import { getCategoriaNombre } from "../categoriasutil/lib";
     import categorias from "$lib/stores/categorias";
+    import PredictSelect from "../PredictSelect.svelte";
     let {
-        edit= false,
+        add = false,
+        edit = false,
+        cargadoanimales = false,
+        animal = $bindable(""),
+        animales = [],
         caravana = "",
-        fecha=$bindable(""),
-        categoria =$bindable(""),
-        observacion=$bindable(""),
-        malfecha = false
+        fecha = $bindable(""),
+        categoria = $bindable(""),
+        observacion = $bindable(""),
+        malfecha = false,
+    } = $props();
 
-    } = $props()
-
+    let cadenaanimal = $state("");
 </script>
+
 <div class="grid grid-cols-1 md:grid-cols-2 gap-1 p-2 pt-0">
     <div class="col-span-1 md:col-span-2">
         <label for="general" class="label pt-1">
@@ -21,21 +27,41 @@
             >
         </label>
     </div>
+
     <div class="col-span-1">
-        <label for="caravana" class="label py-0 my-0">
-            <span class="label-text text-sm font-normal">Caravana</span>
-        </label>
-        <label for="caravana" class="label py-0 my-0">
-            <span class={`text-lg ${estilos.labelcolor} py-0 my-0 px-3`}
-                >{caravana}</span
-            >
-        </label>
+        {#if add}
+            {#if cargadoanimales}
+                <PredictSelect
+                    lista={animales}
+                    etiqueta={"Animal"}
+                    bind:valor={animal}
+                    bind:cadena={cadenaanimal}
+                    etiquetaDefault={false}
+                    campo={"caravana"}
+                >
+                    <label for="caravana" class="label py-0 my-0">
+                        <span class="label-text text-sm font-normal"
+                            >Caravana</span
+                        >
+                    </label>
+                </PredictSelect>
+            {/if}
+        {:else}
+            <label for="caravana" class="label py-0 my-0">
+                <span class="label-text text-sm font-normal">Caravana</span>
+            </label>
+            <label for="caravana" class="label py-0 my-0">
+                <span class={`text-lg ${estilos.labelcolor} py-0 my-0 px-3`}
+                    >{caravana}</span
+                >
+            </label>
+        {/if}
     </div>
     <div>
         <label for="fecha" class="label pb-0 mb-0">
             <span class="label-text text-base">Fecha</span>
         </label>
-        {#if edit}
+        {#if edit || add}
             <label class="input-group">
                 <input
                     id="fechanacimiento"
@@ -50,7 +76,7 @@
                         ${estilos.bgdark2} 
                     `}
                     bind:value={fecha}
-                    onchange={() => onchange("FECHA")}
+                    
                 />
                 {#if malfecha}
                     <div class="label">
@@ -70,7 +96,7 @@
         <label for="tipo" class="label pb-0 mb-0">
             <span class="label-text text-base">Categoria</span>
         </label>
-        {#if edit}
+        {#if edit || add}
             <label class="input-group">
                 <select
                     class={`
@@ -84,8 +110,8 @@
                     `}
                     bind:value={categoria}
                 >
-                    {#each categorias.filter((c) => c.sexo == "H") as t}
-                        <option value={t.id}>{t.nombre}</option>
+                    {#each categorias as c}
+                        <option value={c.id}>{c.nombre}</option>
                     {/each}
                 </select>
             </label>
@@ -107,7 +133,7 @@
                 >
             </div>
             <div class="pl-2">
-                {#if edit}
+                {#if edit || add}
                     <textarea
                         name="observacion"
                         id="observacion"
