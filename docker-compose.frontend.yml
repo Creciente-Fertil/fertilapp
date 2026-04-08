@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  cffront:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: cffront:latest
+    container_name: cffront
+    ports:
+      - "3000:80"  # nginx escucha en el puerto 80 internamente
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - cfnetwork
+
+networks:
+  cfnetwork:
+    external: true
