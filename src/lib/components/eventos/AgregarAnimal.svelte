@@ -34,7 +34,7 @@
         >Cancelar</button>
     </dir>
     
-    <div class="grid grid-cols-1 gap-1">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-1">
         <div class="mb-1 lg:mb-0">
             <label for = "caravana" class="label">
                 <span class="label-text text-base">Caravana</span>

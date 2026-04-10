@@ -18,6 +18,7 @@
     import { createCaber } from "$lib/stores/cab.svelte";
     import { createStorageProxy } from "$lib/filtros/filtros";
     import DetalleNacimiento from "$lib/components/nacimientos/DetalleNacimiento.svelte";
+    import PredictSelect from "$lib/components/PredictSelect.svelte";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -28,6 +29,9 @@
     let per = createPer();
     let userpermisos = $state([]);
     let slug = $state("");
+    let add = $state(false);
+    let cargadoanimales = $state(false);
+    let agregaranimal = $state(false);
 
     let usuarioid = $state("");
     //Detalle para nacimiento
@@ -149,7 +153,10 @@
         detalleNacimiento = proxyNacimiento.load();
         edit = detalleNacimiento.edit;
         id = detalleNacimiento.id;
+        idanimal = detalleNacimiento.idanimal;
         madre = detalleNacimiento.madre;
+        caravana = detalleNacimiento.caravana;
+
         nombremadre = detalleNacimiento.nombremadre;
         padre = detalleNacimiento.padre;
         nombrepadre = detalleNacimiento.nombrepadre;
@@ -166,10 +173,82 @@
         per.setPer(respermisos.permisos, usuarioid);
 
         userpermisos = getPermisosList(per.per.permisos);
-        loadNacimiento();
+        if (slug == "0") {
+            add = true;
+            edit = true;
+            idanimal = "";
+            madre = "";
+            caravana = "";
+            nombremadre = "";
+            padre = "";
+            nombrepadre = "";
+            observacion = "";
+            fecha = "";
+        } else {
+            loadNacimiento();
+        }
+
         await getAnimales();
         cargado = true;
     });
+    async function guardar() {
+        try {
+            let ms = madres.filter((ma) => ma.id == madre);
+            let m = {
+                id: "",
+                nombremadre: "",
+                rodeo: "",
+                lote: "",
+            };
+            if (ms.length > 0) {
+                m.id = ms[0].id;
+                m.nombremadre = ms[0].caravana;
+                m.lote = ms[0].lote;
+                m.rodeo = ms[0].rodeo;
+            }
+            let tipomadre = m.categoria;
+            let dataparicion = {
+                madre: m.id,
+                padre,
+                fecha: fecha + " 03:00:00",
+                nombremadre: m.nombremadre,
+                nombrepadre,
+                observacion,
+                cab: cab.id,
+            }; 
+            const recordparicion = await pb
+                .collection("nacimientos")
+                .create(dataparicion);
+            if (agregaranimal) {
+                let data = {
+                    caravana,
+                    active: true,
+                    delete: false,
+                    fechanacimiento: fecha + " 03:00:00",
+                    sexo,
+                    cab: cab.id,
+                    peso,
+                    lote: m.lote,
+                    rodeo: m.rodeo,
+                    nacimiento: recordparicion.id,
+                };
+                let recorda = await pb.collection("animales").create(data);
+            }
+            Swal.fire(
+                "Éxito guardar",
+                "Se pudo guardar el nacimiento con exito",
+                "success",
+            );
+            goto(pre+"/nacimientos")
+        } catch (err) {
+            console.error(err);
+            Swal.fire(
+                "Error guardar",
+                "Hubo un error para guardar el nacimiento",
+                "error",
+            );
+        }
+    }
     async function editar() {
         if (!edit) {
             setViejo();
@@ -262,9 +341,10 @@
 </script>
 
 <Navbar2>
-    <CardNacimiento cardsize="max-w-7xl" {edit}>
+    <CardNacimiento cardsize="max-w-7xl" {edit} {add}>
         <DetalleNacimiento
             {edit}
+            {add}
             {cargado}
             caravananimal={caravana}
             bind:fecha
@@ -273,6 +353,12 @@
             bind:nombremadre
             bind:nombrepadre
             bind:observacion
+            bind:agregaranimal
+            bind:idanimal
+            bind:caravana
+            bind:sexo
+            bind:categoria
+            bind:peso
             {malfecha}
             {listamadres}
             {listapadres}
@@ -283,7 +369,20 @@
             {onwriteMadre}
         />
         <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
-        {#if edit}
+
+        {#if add}
+            <div
+                class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
+                <!-- Botón Editar -->
+                <button
+                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    onclick={guardar}
+                >
+                    Guardar nuevo
+                </button>
+            </div>
+        {:else if edit}
             <div
                 class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
             >

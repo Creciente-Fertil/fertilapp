@@ -8,7 +8,7 @@
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
-    let { edit=false,  cardsize = "", children } = $props();
+    let { edit=false,add=false,  cardsize = "", children } = $props();
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
@@ -68,7 +68,7 @@
                             ${estilos.subtitle}
                         `}
                     >
-                        {edit ? "Editar" : "Ver"}
+                        {add?"Nuevo":edit ? "Editar" : "Ver"}
                         Nacimiento
                     </h1>
                 </button>

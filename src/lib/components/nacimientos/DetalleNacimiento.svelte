@@ -1,10 +1,21 @@
 <script>
     import estilos from "$lib/stores/estilos";
+    import AgregarAnimal from "../eventos/AgregarAnimal.svelte";
     import PredictSelect from "../PredictSelect.svelte";
     let {
         edit = false,
+        add = false,
         cargado = false,
+
+        idanimal = $bindable(""),
+        agregaranimal = $bindable(false),
+        caravana = $bindable(""),
+        categoria = $bindable(""),
+        sexo = $bindable(""),
+        peso = $bindable(0),
+
         caravananimal = "",
+
         fecha = $bindable(""),
         madre = $bindable(""),
         padre = $bindable(""),
@@ -20,6 +31,7 @@
         onelegirPadre = () => {},
         onwritePadre = () => {},
     } = $props();
+    let cadena = $state("");
 </script>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-1 p-2 pt-0">
@@ -30,23 +42,39 @@
             >
         </label>
     </div>
-
-    <div class="col-span-1">
-        <label for="caravana" class="label py-0 my-0">
-            <span class="label-text text-sm font-normal">Caravana</span>
-        </label>
-        <label for="caravana" class="label py-0 my-0">
-            <span class={`text-lg ${estilos.labelcolor} py-0 my-0`}
-                >{caravananimal.length > 0 ? caravananimal : "Sin animal"}</span
-            >
-        </label>
-    </div>
+    {#if add}
+        <div class="col-span-1 md:col-span-2">
+            <AgregarAnimal
+                bind:agregaranimal
+                bind:caravana
+                bind:categoria
+                bind:sexo
+                bind:peso
+                bind:fechanacimiento={fecha}
+                confechanac={true}
+            />
+        </div>
+    {:else}
+        <div class="col-span-1">
+            <label for="caravana" class="label py-0 my-0">
+                <span class="label-text text-sm font-normal">Caravana</span>
+            </label>
+            <label for="caravana" class="label py-0 my-0">
+                <span class={`text-lg ${estilos.labelcolor} py-0 my-0`}
+                    >{caravananimal.length > 0
+                        ? caravananimal
+                        : "Sin animal"}</span
+                >
+            </label>
+        </div>
+    {/if}
     <div>
         <label for="fechanacimiento" class="label pb-0 mb-0">
-            <span class="label-text text-base">Fecha nacimiento</span>
+            <span class="label-text text-sm py-0 mb-3">Fecha nacimiento</span>
         </label>
         {#if edit}
-            <label class="input-group">
+            <label class="input-group px-2 ">
+            
                 <input
                     id="fechanacimiento"
                     type="date"
@@ -57,6 +85,7 @@
                         focus:outline-none focus:ring-2 
                         focus:ring-green-500 
                         focus:border-green-500
+                        
                         ${estilos.bgdark2} 
                     `}
                     bind:value={fecha}
@@ -114,7 +143,7 @@
         <label class="form-control">
             <div class="label">
                 <span
-                    class={`label-text font-medium text-lg ${estilos.subtitle}`}
+                    class={`label-text font-medium text-sm ${estilos.subtitle}`}
                     >Observacion</span
                 >
             </div>

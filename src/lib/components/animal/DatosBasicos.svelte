@@ -1102,9 +1102,9 @@
                         <span
                             class="label-text tracking-wide text-md uppercase font-semibold dark:text-gray-400 text-gray-500"
                         >
-                            Padre:
+                            Padre
                         </span>
-                        {nombrepadre}
+                        : {nombrepadre}
                     </span>
                 </label>
 

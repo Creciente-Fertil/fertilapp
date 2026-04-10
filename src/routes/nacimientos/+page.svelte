@@ -385,8 +385,8 @@
         malfecha = false;
         malmadre = false;
         malpadre = false;
-
-        nuevoModal.showModal();
+        goto(pre+"/nacimientos/0")
+        //nuevoModal.showModal();
     }
     function cerrar() {
         nuevoModal.close();
@@ -427,8 +427,11 @@
             caravana,
             idanimal,
             id,
-            edit:true
+            edit:true,
+            observacion
         }
+        //console.log("detalleNacimiento")
+        //console.log(detalleNacimiento)
         proxyNacimiento.save(detalleNacimiento)
         goto(pre+"/nacimientos/"+id)
         //nuevoModal.showModal();
@@ -469,7 +472,8 @@
             caravana,
             idanimal,
             id,
-            edit:false
+            edit:false,
+            observacion
         }
         proxyNacimiento.save(detalleNacimiento)
         goto(pre+"/nacimientos/"+id)
