@@ -116,7 +116,7 @@
             idlote = "";
             nombre = "";
             goto(pre+"/lotes/0")
-            nuevoModal.showModal();
+            //nuevoModal.showModal();
         } else {
             Swal.fire(
                 "Error lotes",

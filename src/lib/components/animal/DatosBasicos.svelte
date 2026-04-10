@@ -20,7 +20,6 @@
     import { shorterWord, capitalize } from "$lib/stringutil/lib";
     import InfoAnimal from "../InfoAnimal.svelte";
     import NacimientoPerfil from "./NacimientoPerfil.svelte";
-    import { elasticIn } from "svelte/easing";
 
     let {
         caravana = $bindable(""),
@@ -45,6 +44,7 @@
         esCelu,
         //Eliminar
         openEliminarModal = () => {},
+        add = false,
     } = $props();
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -493,6 +493,101 @@
             Swal.fire("Error editar", "No se pudo editar el animal", "error");
         }
     }
+    async function guardarAnimal() {
+        let data = {
+            peso,
+            sexo,
+            caravana,
+            rodeo,
+            lote,
+            prenada,
+            categoria,
+            raza,
+            color,
+            rp,
+            active:true,
+            cab:cab.id
+
+        };
+        data.fechanacimiento = fecha.length > 0 ? fecha + " 03:00:00" : "";
+        try {
+            //nueva fecha
+            let connuevafecha = fechaviejo != fecha && fecha.length > 0;
+            //nueva madre
+            let connuevamadre = madreviejo != madre;
+            //nuevo padre
+            let connuevopadre = padreviejo != padre;
+
+            let nuevonacimiento = connacimiento;
+            if (connuevamadre || connuevopadre) {
+                let dataparicion = {
+                    madre,
+                    padre,
+                    fecha: fecha.length > 0 ? fecha + " 03:00:00" : "",
+                    nombremadre,
+                    nombrepadre,
+                    observacion,
+                    cab: cab.id,
+                };
+                const recordparicion = await pb
+                    .collection("nacimientos")
+                    .create(dataparicion);
+
+                idnacimiento = recordparicion.id;
+                nuevonacimiento = true;
+                if (padre != "") {
+                    padreobj = { id: padre, caravana: nombrepadre };
+                } else {
+                    padreobj = { id: -1 };
+                }
+                if (madre != "") {
+                    madreobj = { id: madre, caravana: nombremadre };
+                } else {
+                    madreobj = { id: -1 };
+                }
+            }
+            if (nuevonacimiento) {
+                data.nacimiento = idnacimiento;
+                connacimiento = true;
+            }
+            const record = await pb.collection("animales").create(data);
+            sexo = data.sexo;
+            peso = data.peso;
+            caravana = data.caravana;
+            rodeo = data.rodeo;
+            lote = data.lote;
+            categoria = data.categoria;
+            prenada = data.prenada;
+            if (rodeo != "") {
+                nombrerodeo = rodeos.filter((t) => t.id == rodeo)[0].nombre;
+            } else {
+                nombrerodeo = "";
+            }
+            if (lote != "") {
+                nombrelote = lotes.filter((l) => l.id == lote)[0].nombre;
+            } else {
+                nombrelote = "";
+            }
+            if (fecha.length > 0) {
+                let datapesaje = {
+                    animal: record.id,
+                    fecha: fecha + " 03:00:00",
+                    pesoanterior: 0,
+                    pesonuevo: peso,
+                };
+                let recordope = await pb.collection("pesaje").create(datapesaje);
+
+            }
+            Swal.fire("Éxito guardar", "Se pudo guardar el animal", "success");
+            modoedicion = false;
+
+            
+            goto(pre + "/animales");
+        } catch (err    ) {
+            console.error(err);
+            Swal.fire("Error guardar", "No se pudo guardar el animal", "error");
+        }
+    }
     function cerrarModal() {
         fecha = "";
         nombremadre = "";
@@ -530,6 +625,9 @@
             observacion = nacimiento.observacion;
         } else {
             fecha = fechanacimiento;
+        }
+        if (add) {
+            modoedicion = true;
         }
     });
     //cancelar class="btn btn-error text-white font-medium text-lg "
@@ -1082,8 +1180,17 @@
 {#if modoedicion}
     <div class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
         <!-- Botón Cancelar -->
-        <button
-            class="
+        {#if add}
+            <!-- Botón Editar -->
+            <button
+                class="mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                onclick={guardarAnimal}
+            >
+                Guardar
+            </button>
+        {:else}
+            <button
+                class="
                         
                 mt-2 px-5 py-1 md:py-2 md:px-10
                 dark:bg-transparent
@@ -1097,18 +1204,18 @@
                 dark:hover:bg-gray-800
                 transition-colors
                 text-base"
-            onclick={cancelarEditar}
-        >
-            Cancelar
-        </button>
-
-        <!-- Botón Editar -->
-        <button
-            class="mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
-            onclick={editarAnimal}
-        >
-            Guardar
-        </button>
+                onclick={cancelarEditar}
+            >
+                Cancelar
+            </button>
+            <!-- Botón Editar -->
+            <button
+                class="mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                onclick={editarAnimal}
+            >
+                Guardar cambios
+            </button>
+        {/if}
     </div>
 {/if}
 <div

@@ -52,7 +52,6 @@
 
     //ver java
     let versionjava = $state(false);
-    
 
     async function toggleJava() {
         versionjava = !versionjava;
@@ -215,7 +214,7 @@
             animales = recordsa;
         } else {
             let data_animales = await getAll();
-            
+
             animales = data_animales;
         }
         animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
@@ -274,53 +273,114 @@
     }
     //Se puede guardar un animal con su nacimiento
     async function guardar() {
-        if(!versionjava){
-let verificar = await verificarNivel(cab.id);
-        if (!verificar) {
-            //Swal.fire(
-            //    "Error guardar",
-            //    `No tienes el nivel de la cuenta para tener más animales`,
-            //    "error",
-            //);
-            Swal.fire({
-                title: "Error al guardar",
-                text: "No tienes el nivel de la cuenta para tener más animales.",
-                icon: "error",
-                showCancelButton: true,
-                confirmButtonText: "Actualizar plan",
-                cancelButtonText: "Ok",
-                reverseButtons: true, // Pone "Ok" a la izquierda, estilo más natural
-                background: "#1f2937", // Fondo oscuro (modo dark opcional)
-                color: "#f3f4f6", // Texto claro
-                confirmButtonColor: "#16a34a", // Verde
-                cancelButtonColor: "#6b7280", // Gris
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Acción al presionar "Actualizar plan"
-                    goto("/user/nivel"); // Ejemplo si usás SvelteKit
-                    // o window.location.href = "/user/nivel";
-                }
-                // Si presiona "Ok" simplemente se cierra
-            });
-            return;
-        }
-        try {
-            let recordparicion = null;
-            if (conparicion) {
-                let dataparicion = {
-                    madre,
-                    padre,
-                    fecha: fechanacimiento + " 03:00:00",
-                    nombremadre,
-                    nombrepadre,
-                    observacion,
+        if (!versionjava) {
+            let verificar = await verificarNivel(cab.id);
+            if (!verificar) {
+                //Swal.fire(
+                //    "Error guardar",
+                //    `No tienes el nivel de la cuenta para tener más animales`,
+                //    "error",
+                //);
+                Swal.fire({
+                    title: "Error al guardar",
+                    text: "No tienes el nivel de la cuenta para tener más animales.",
+                    icon: "error",
+                    showCancelButton: true,
+                    confirmButtonText: "Actualizar plan",
+                    cancelButtonText: "Ok",
+                    reverseButtons: true, // Pone "Ok" a la izquierda, estilo más natural
+                    background: "#1f2937", // Fondo oscuro (modo dark opcional)
+                    color: "#f3f4f6", // Texto claro
+                    confirmButtonColor: "#16a34a", // Verde
+                    cancelButtonColor: "#6b7280", // Gris
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Acción al presionar "Actualizar plan"
+                        goto("/user/nivel"); // Ejemplo si usás SvelteKit
+                        // o window.location.href = "/user/nivel";
+                    }
+                    // Si presiona "Ok" simplemente se cierra
+                });
+                return;
+            }
+            try {
+                let recordparicion = null;
+                if (conparicion) {
+                    let dataparicion = {
+                        madre,
+                        padre,
+                        fecha: fechanacimiento + " 03:00:00",
+                        nombremadre,
+                        nombrepadre,
+                        observacion,
 
+                        cab: cab.id,
+                    };
+                    recordparicion = await pb
+                        .collection("nacimientos")
+                        .create(dataparicion);
+                }
+                let data = {
+                    caravana,
+                    active: true,
+                    delete: false,
+                    prenada,
+                    fechanacimiento: fechanacimiento + " 03:00:00",
+                    sexo,
+                    peso,
+                    lote,
+                    rodeo,
+                    rp,
+                    categoria: categoria
+                        ? ""
+                        : sexo == "M"
+                          ? "ternero"
+                          : "ternera",
                     cab: cab.id,
                 };
-                recordparicion = await pb
-                    .collection("nacimientos")
-                    .create(dataparicion);
+                if (conparicion) {
+                    data.nacimiento = recordparicion.id;
+                }
+                let recorda = await pb.collection("animales").create(data);
+                if (conparicion) {
+                    recorda.expand = {
+                        nacimiento: recordparicion,
+                    };
+                }
+                if (fechanacimiento) {
+                    let datapesaje = {
+                        animal: recorda.id,
+                        fecha: fechanacimiento + " 03:00:00",
+                        pesoanterior: 0,
+                        pesonuevo: peso,
+                    };
+                    await pb.collection("pesaje").create(datapesaje);
+                }
+
+                animales.push(recorda);
+                animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
+
+                madres = animales.filter((a) => a.sexo == "H");
+                padres = animales.filter((a) => a.sexo == "M");
+                filterUpdate();
+                Swal.fire(
+                    "Éxito guardar",
+                    "Se pudo guardar el animal con exito",
+                    "success",
+                );
+                caravana = "";
+                nacimiento = "";
+                fechanacimiento = "";
+                sexo = "H";
+            } catch (e) {
+                console.error(e);
+                Swal.fire(
+                    "Error guardar",
+                    "Hubo un error para guardar el animal",
+                    "error",
+                );
             }
+        } else {
             let data = {
                 caravana,
                 active: true,
@@ -335,68 +395,9 @@ let verificar = await verificarNivel(cab.id);
                 categoria: categoria ? "" : sexo == "M" ? "ternero" : "ternera",
                 cab: cab.id,
             };
-            if (conparicion) {
-                data.nacimiento = recordparicion.id;
-            }
-            let recorda = await pb.collection("animales").create(data);
-            if (conparicion) {
-                recorda.expand = {
-                    nacimiento: recordparicion,
-                };
-            }
-            if (fechanacimiento) {
-                let datapesaje = {
-                    animal: recorda.id,
-                    fecha: fechanacimiento + " 03:00:00",
-                    pesoanterior: 0,
-                    pesonuevo: peso,
-                };
-                await pb.collection("pesaje").create(datapesaje);
-            }
-
-            animales.push(recorda);
-            animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
-
-            madres = animales.filter((a) => a.sexo == "H");
-            padres = animales.filter((a) => a.sexo == "M");
-            filterUpdate();
-            Swal.fire(
-                "Éxito guardar",
-                "Se pudo guardar el animal con exito",
-                "success",
-            );
-            caravana = "";
-            nacimiento = "";
-            fechanacimiento = "";
-            sexo = "H";
-        } catch (e) {
-            console.error(e);
-            Swal.fire(
-                "Error guardar",
-                "Hubo un error para guardar el animal",
-                "error",
-            );
+            await saveAnimal(data);
+            await getAnimales();
         }
-        }
-        else{
-            let data = {
-                caravana,
-                active: true,
-                delete: false,
-                prenada,
-                fechanacimiento: fechanacimiento + " 03:00:00",
-                sexo,
-                peso,
-                lote,
-                rodeo,
-                rp,
-                categoria: categoria ? "" : sexo == "M" ? "ternero" : "ternera",
-                cab: cab.id,
-            };
-            await saveAnimal(data)
-            await getAnimales()
-        }
-        
     }
     function setFilters() {
         buscar = proxyfiltros.buscar;
@@ -725,7 +726,8 @@ let verificar = await verificarNivel(cab.id);
         }
     }
     function nuevo() {
-        openNewModal();
+        goto(pre+"/animales/0")
+        //openNewModal();
     }
     function estadisticas() {
         goto(pre + "/animales/estadisticas");

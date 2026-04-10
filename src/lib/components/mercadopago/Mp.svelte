@@ -29,6 +29,8 @@
         
         let pb_json = JSON.parse(localStorage.getItem('pocketbase_auth'))
         pb_json.record.nivel = p_nivel
+        
+            
         localStorage.setItem('pocketbase_auth',JSON.stringify(pb_json))
         try{
             let data = {

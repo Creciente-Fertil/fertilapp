@@ -47,7 +47,7 @@
     const HASTA = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
     //propuesta
-    let propuesta1 = $state(true);
+    let propuesta1 = $state(false);
     //JAVA
     let versionjava = $state(false);
     async function toggleJava() {
@@ -59,7 +59,7 @@
     let cab = caber.cab;
     let cargado = $state(false);
     //paginacon
-    let pageSize = $state(15);
+    let pageSize = $state(5);
     let paginaActual = $state(1);
     //Datos animales
     let animales = $state([]);
@@ -394,7 +394,7 @@
             }
         }
         paginaActual = 1;
-        pageSize = 15;
+        pageSize = 5;
     }
     function ordenarNombre(lista) {
         lista.sort((r1, r2) =>
@@ -1092,11 +1092,14 @@
                 >
                     Nuevo servicios
                 </h1>
+                
+                <div class="hidden">
                 <Secondary texto="propuestas" onclick={togglePropuesta} />
                 <Secondary
                     texto={versionjava ? "Cerrar java" : "Ver java"}
                     onclick={toggleJava}
                 />
+                </div>
             </div>
         </div>
         <div
@@ -1131,10 +1134,11 @@
                     {propuesta1}
                     {togglePropuesta}
                 />
+                <div class="hidden">
                 <AnimalesSeleccionados
                     {selecthashmap}
                     quitarAnimal={clickAnimal}
-                />
+                /></div>
             </div>
             <!--Lado derecho-->
             <div class="md:col-span-2">

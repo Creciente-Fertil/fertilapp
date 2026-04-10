@@ -8,7 +8,7 @@
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
 
-    let { caravana, children } = $props();
+    let { caravana, children,add=false } = $props();
     function volver() {
         goto(pre + "/animales");
     }
@@ -63,7 +63,7 @@
                             `}
                     >
                         
-                        {caravana}
+                        {add?"Nuevo animal":caravana}
                     </h1>
             </div>
             <div class="hidden md:block text-emerald-600 dark:text-emerald-500">

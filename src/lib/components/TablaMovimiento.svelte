@@ -11,7 +11,7 @@
     } from "./estadosutils/lib";
     import AccionesMovimiento from "./AccionesMovimiento.svelte";
     let {
-        pageSize = $bindable(10),
+        pageSize = $bindable(5),
         paginaActual = $bindable(1),
         conEstado = false,
         selecthash,

@@ -44,8 +44,9 @@
         estadisticas = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
-        verJava=()=>{},
-        versionjava = false
+        verJava = () => {},
+        versionjava = false,
+        isDev = false,
     } = $props();
 </script>
 
@@ -102,19 +103,21 @@
             >
                 <span class="text-lg font-semibold">Estadísticas</span>
             </button>
-            <button
-                class={`
+            {#if isDev}
+                <button
+                    class={`
                     ${estilos.btnbuscador}
                     ${estilos.btntextbuscador}
                 `}
-                onclick={verJava}
-            >
-                {#if versionjava}
-                    <span class="text-lg">Cerrar java</span>
-                {:else}
-                    <span class="text-lg">Ver java</span>
-                {/if}
-            </button>
+                    onclick={verJava}
+                >
+                    {#if versionjava}
+                        <span class="text-lg">Cerrar java</span>
+                    {:else}
+                        <span class="text-lg">Ver java</span>
+                    {/if}
+                </button>
+            {/if}
         </div>
         <!--Filtros-->
         <div
@@ -204,8 +207,6 @@
                 <div
                     class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-10 w-full my-1"
                 >
-                    
-
                     <div class="mt-1">
                         <MultiSelect
                             opciones={[

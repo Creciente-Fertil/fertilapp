@@ -68,6 +68,7 @@
     let userpermisos = $state([]);
 
     // Datos
+    let add = $state(false);
     let animal = $state({});
     let slug = $state("");
     let caravana = $state("");
@@ -313,6 +314,31 @@
             );
         }
     }
+    function perfilNuevoAnimal() {
+        animal = {};
+        caravana = "";
+        color = "";
+        raza = "";
+        active = "";
+        fechanacimiento = "";
+        nacimiento = "";
+        nacimientoobj = {};
+
+        peso = "";
+        sexo = "h";
+        rodeo = "";
+        lote = "";
+        categoria = "";
+        prenada = 0;
+        rp = "";
+        fechafall = "";
+        motivobaja = "";
+
+        cargado = true;
+        
+        tab = "datos";
+        calcularNuevasTabs();
+    }
     async function perfilAnimal(_id) {
         //slug = $page.params.slug;
         slug = _id;
@@ -384,7 +410,10 @@
                 categoria = recorda.categoria;
                 prenada = recorda.prenada == 1 ? 0 : recorda.prenada;
                 rp = recorda.rp;
-                if (recorda.fechafallecimiento != "" && recorda.fechafallecimiento != null) {
+                if (
+                    recorda.fechafallecimiento != "" &&
+                    recorda.fechafallecimiento != null
+                ) {
                     fechafall = recorda.fechafallecimiento.split(" ")[0];
                     motivobaja = recorda.motivobaja;
                 }
@@ -394,7 +423,14 @@
             }
         }
     }
+    function calcularNuevasTabs() {
+        pestañas = [];
+    }
     function calcularTabs() {
+        if(add){
+            calcularNuevasTabs()
+            return
+        }
         if (sexo.toLowerCase() == "h") {
             pestañas = [
                 { id: "datos", nombre: "Datos básicos" },
@@ -431,7 +467,12 @@
         let _id = $page.params.slug;
         let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
-        await perfilAnimal(_id);
+        if (_id == "0") {
+            add = true;
+            perfilNuevoAnimal();
+        } else {
+            await perfilAnimal(_id);
+        }
 
         let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
         per.setPer(respermisos.permisos, usuarioid);
@@ -442,23 +483,24 @@
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
-    <DetalleAnimal {caravana}>
+    <DetalleAnimal {caravana} {add}>
         {#if esdev}
             premisos {JSON.stringify(userpermisos, null, 2)}
-        {/if}
-        <button
-            class={`
+
+            <button
+                class={`
                     ${estilos.btnbuscador}
                     ${estilos.btntextbuscador}
                 `}
-            onclick={toggleJava}
-        >
-            {#if versionjava}
-                <span class="text-lg">Cerrar java</span>
-            {:else}
-                <span class="text-lg">Ver java</span>
-            {/if}
-        </button>
+                onclick={toggleJava}
+            >
+                {#if versionjava}
+                    <span class="text-lg">Cerrar java</span>
+                {:else}
+                    <span class="text-lg">Ver java</span>
+                {/if}
+            </button>
+        {/if}
         <div class="flex justify-center mt-1">
             <div class="w-full max-w-7xl px-4">
                 <!-- Combo alineado al borde izquierdo de la card -->
@@ -496,6 +538,7 @@
                         {calcularTabs}
                         {esCelu}
                         {openEliminarModal}
+                        {add}
                     />
                 </CardAnimal>
                 <div class="hidden">
