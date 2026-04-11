@@ -44,6 +44,7 @@ const config = {
 				"/tareas",
 				"/tratamientos",
 				"/tratamientos/1",
+				"/tratamientos/tipos",
 				"/importar",
 				"/lotes",
 				"/lotes/1",
