@@ -5,14 +5,13 @@
     import tipostacto from "$lib/stores/tipostacto";
     let {
         selectanimales = $bindable([]),
-        
+
         animal = null,
         id = "",
         quitarAnimal = (id) => {},
         verAnimal = (id) => {},
         cambiar = () => {},
-        
-        
+
         i,
     } = $props();
     // Toggle estado de expansión
@@ -31,22 +30,21 @@
     </div>
     <div class="md:col-span-3">
         <select
-                    class={`
-                        w-full
-                        select select-bordered
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 focus:border-green-500
-                        ${estilos.bgdark2}
-                        pr-3
-                    `}
-                    bind:value={selectanimales[i].prenada}
-                    
-                >
-                    {#each estados as t}
-                        <option value={t.id}>{t.nombre}</option>
-                    {/each}
-                </select>
+            class={`
+                w-full
+                select select-bordered
+                border border-gray-300 rounded-md
+                focus:outline-none focus:ring-2 
+                focus:ring-green-500 focus:border-green-500
+                ${estilos.bgdark2}
+                pr-3
+            `}
+            bind:value={selectanimales[i].prenada}
+        >
+            {#each estados.filter(e => e.id > -1) as t}
+                <option value={t.id}>{t.nombre}</option>
+            {/each}
+        </select>
     </div>
     <!-- Observaciones -->
     <div class="md:col-span-4">
@@ -135,13 +133,12 @@
             </div>
             <div>
                 <label for="Estado" class="label">
-                            <span
-                                class="label-text text-base uppercase font-semibold dark:text-gray-400 text-gray-500"
-                            >
-                                Estado
-                                </span
-                            >
-                        </label>
+                    <span
+                        class="label-text text-base uppercase font-semibold dark:text-gray-400 text-gray-500"
+                    >
+                        Estado
+                    </span>
+                </label>
                 <select
                     class={`
                         w-full
@@ -153,7 +150,6 @@
                         pr-3
                     `}
                     bind:value={selectanimales[i].prenada}
-                    
                 >
                     {#each estados as t}
                         <option value={t.id}>{t.nombre}</option>

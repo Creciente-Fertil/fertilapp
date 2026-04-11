@@ -44,7 +44,7 @@
 
     //ver java
     let versionjava = $state(false);
-
+    
     async function toggleJava() {
         versionjava = !versionjava;
         await perfilAnimal(slug);
@@ -501,6 +501,7 @@
                 {/if}
             </button>
         {/if}
+        {#if !add}
         <div class="flex justify-center mt-1">
             <div class="w-full max-w-7xl px-4">
                 <!-- Combo alineado al borde izquierdo de la card -->
@@ -511,6 +512,7 @@
                 {/if}
             </div>
         </div>
+        {/if}
 
         {#if cargado}
             {#if tab == "datos"}
@@ -539,6 +541,7 @@
                         {esCelu}
                         {openEliminarModal}
                         {add}
+                        {versionjava}
                     />
                 </CardAnimal>
                 <div class="hidden">

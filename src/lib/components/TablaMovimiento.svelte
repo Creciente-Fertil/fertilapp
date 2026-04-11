@@ -48,7 +48,7 @@
 >
     <div class="max-h-[500px] overflow-y-auto custom-scrollbar">
         <table class="table table-lg w-full bg-white dark:bg-slate-900">
-            <thead class={`${estilos.tableheader} sticky top-0 z-10 shadow-sm`}>
+            <thead class={`${estilos.tableheader} sticky top-0 z-5 shadow-sm`}>
                 <tr>
                     
                     <th class="text-base mx-2 px-2 w-16 flex items-center justify-center">

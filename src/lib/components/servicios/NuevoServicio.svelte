@@ -69,7 +69,7 @@
         </div>
     </div>
     {#if esNatural}
-        <div class={`${propuesta1?"grid grid-cols-1":"grid grid-cols-3"}`}>
+        <div class={ `grid grid-cols-1 ${propuesta1?"grid-cols-1":"md:grid-cols-3 "}`}>
             <div class="pr-3">
                 <label for="tiposervicio" class="label">
                     <span
@@ -247,30 +247,33 @@
             </div>
         </div>
     {:else}
-        <div class="grid grid-cols-1">
-            <div class="pl-3">
+        <div class={ `grid grid-cols-1 ${propuesta1?"grid-cols-1":"md:grid-cols-3 "}`}>
+            <div class="pr-3">
                 <label for="tiposervicio" class="label">
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
                     >
-                        Tipo servicio</span
-                    >
+                        Tipo servicio
+                    </span>
                 </label>
-                <label class="input-group pr-3">
+                <label class="input-group pl-3">
                     <select
                         class={`
-                                w-full  
-                                select select-bordered
-                                border border-gray-300 rounded-md
-                                focus:outline-none focus:ring-2 
-                                focus:ring-green-500 focus:border-green-500
-                                ${estilos.bgdark2}
-                            `}
+                        w-full
+                        select select-bordered
+                        border border-gray-300 rounded-md
+                        focus:outline-none focus:ring-2 
+                        focus:ring-green-500 focus:border-green-500
+                        ${estilos.bgdark2}
+                        pr-3
+                    `}
                         bind:value={esNatural}
                         onchange={() => input("TIPO")}
                     >
+                        
                         <option value={true}>Servicio natural</option>
                         <option value={false}>Inseminación artificial</option>
+                        
                     </select>
                 </label>
             </div>
@@ -320,8 +323,9 @@
                         size="w-full lg:w-1/3"
                         etiquetaDefault={false}
                         px="pl-3"
+                        py="py-1"
                     >
-                        <label for="Padres" class="label">
+                        <label for="Padres" class="label pb-0">
                             <span
                                 class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
                             >

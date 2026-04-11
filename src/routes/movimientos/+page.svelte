@@ -822,7 +822,7 @@
             </div>
         </div>
         <div
-            class="grid grid-cols-1 md:grid-cols-3 max-h-screen gap-2 md:gap-4 lg:gap-10"
+            class="grid grid-cols-1  max-h-screen gap-1 md:gap-2"
         >
             <!--Lado izquierdo-->
             <div>
@@ -840,10 +840,13 @@
                     {oninput}
                     {onChangeCollapse}
                 />
-                <AnimalesSeleccionados
+                <div class="hidden">
+<AnimalesSeleccionados
                     {selecthashmap}
                     quitarAnimal={clickAnimal}
                 />
+                </div>
+                
             </div>
             <!--Lado derecho-->
             <div class="md:col-span-2">

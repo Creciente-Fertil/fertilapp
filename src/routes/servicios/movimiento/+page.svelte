@@ -37,6 +37,8 @@
     import { getAll } from "$lib/java/animales/animalesback";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
+    let esdev = import.meta.env.VITE_DEV == "si";
+    let isDev = $derived(esdev);
     let esCelu = $derived(innerWidth <= 1100);
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -1080,7 +1082,7 @@
             <div
                 class={`
                             bg-transparent
-                            px-2 py-1
+                            px-2 py-0
                         `}
             >
                 <h1
@@ -1092,18 +1094,18 @@
                 >
                     Nuevo servicios
                 </h1>
-                
-                <div class="hidden">
-                <Secondary texto="propuestas" onclick={togglePropuesta} />
-                <Secondary
-                    texto={versionjava ? "Cerrar java" : "Ver java"}
-                    onclick={toggleJava}
-                />
-                </div>
+                {#if isDev}
+                    <div class="">
+                        <Secondary
+                            texto={versionjava ? "Cerrar java" : "Ver java"}
+                            onclick={toggleJava}
+                        />
+                    </div>
+                {/if}
             </div>
         </div>
         <div
-            class={`grid grid-cols-1 ${propuesta1 ? "md:grid-cols-3" : ""}   max-h-screen gap-2 md:gap-4 lg:gap-10`}
+            class={`grid grid-cols-1 ${propuesta1 ? "md:grid-cols-3" : ""}   max-h-screen gap-1 md:gap-2 `}
         >
             <!--Lado izquierd-->
             <div>
@@ -1135,10 +1137,11 @@
                     {togglePropuesta}
                 />
                 <div class="hidden">
-                <AnimalesSeleccionados
-                    {selecthashmap}
-                    quitarAnimal={clickAnimal}
-                /></div>
+                    <AnimalesSeleccionados
+                        {selecthashmap}
+                        quitarAnimal={clickAnimal}
+                    />
+                </div>
             </div>
             <!--Lado derecho-->
             <div class="md:col-span-2">

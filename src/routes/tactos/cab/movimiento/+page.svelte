@@ -41,10 +41,10 @@
     let caber = createCaber();
     let cab = caber.cab;
     //paginacon
-    let pageSize = $state(15);
+    let pageSize = $state(5);
     let paginaActual = $state(1);
     //Datos animales
-    let animal = $state({})
+    let animal = $state({});
     let animales = $state([]);
     let animalesrows = $state([]);
     let madres = $state([]);
@@ -83,10 +83,10 @@
     //movimiento
     let defaultmovimiento = {
         selecthashmap: {},
-        fecha:"",
-        observaciongeneral:"",
-        tipotactoselect:"",
-        prenada:0
+        fecha: "",
+        observaciongeneral: "",
+        tipotactoselect: "",
+        prenada: 0,
     };
     let detallemovimento = $state({
         ...defaultmovimiento,
@@ -108,7 +108,7 @@
     let ninguno = $state(true);
 
     //movimiento
-    
+
     let tipotactoselect = $state("");
     let fecha = $state("");
     let prenada = $state(1);
@@ -124,15 +124,15 @@
         for (let i = 0; i < selectanimales.length; i++) {
             selectanimales[i].tipotacto = tipotactoselect;
         }
+        setDetalle()
     }
     function setDetalle() {
         detallemovimento.selecthashmap = selecthashmap;
-        detallemovimento.fecha = fecha
-        detallemovimento.observaciongeneral = observaciongeneral
-        detallemovimento.tipotactoselect = tipotactoselect
-        detallemovimento.prenada = prenada
+        detallemovimento.fecha = fecha;
+        detallemovimento.observaciongeneral = observaciongeneral;
+        detallemovimento.tipotactoselect = tipotactoselect;
+        detallemovimento.prenada = prenada;
         proxymovimiento.save(detallemovimento);
-
     }
     function limpiar() {
         selectanimales = [];
@@ -244,7 +244,7 @@
             }
         }
         paginaActual = 1;
-        pageSize = 15;
+        pageSize = 5;
     }
     function ordenarNombre(lista) {
         lista.sort((r1, r2) =>
@@ -269,6 +269,9 @@
             let a = animales.filter((an) => an.id == id)[0];
             selecthashmap[id] = {
                 ...a,
+                prenada: 0,
+                observacion: "",
+                abierto: false,
             };
         }
         setDetalle();
@@ -286,6 +289,9 @@
                 let a = animalesrows[i];
                 selecthashmap[animalesrows[i].id] = {
                     ...a,
+                    prenada: 0,
+                    observacion: "",
+                    abierto: false,
                 };
             }
         } else if (algunos) {
@@ -531,12 +537,16 @@
         for (let i = 0; i < selectanimales.length; i++) {
             selectanimales[i].observacion = observaciongeneral;
         }
+        setDetalle();
     }
     function loadDetalle() {
         detallemovimento = proxymovimiento.load();
 
         selecthashmap = detallemovimento.selecthashmap;
-
+        fecha = detallemovimento.fecha
+        tipotactoselect = detallemovimento.tipotactoselect
+        prenada = detallemovimento.prenada
+        observaciongeneral = detallemovimento.observaciongeneral
         selectanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
@@ -562,9 +572,14 @@
             ninguno = true;
         }
     }
-    function input(campo) {}
+    function input(campo) {
+        //for (let i = 0; i < selecthashmap.length; i++) {
+        //    selectanimales[i].prenada = prenada;
+        //}
+        setDetalle();
+    }
     function cancelar() {
-        goto(pre + "/servicios");
+        goto(pre + "/tactos/cab");
     }
     function siguiente() {
         goto(pre + "/tactos/cab/movimiento/detallemovimiento");
@@ -585,7 +600,7 @@
         await getLotes();
         let detallemovimento = $state({
             ...defaultmovimiento,
-        })
+        });
         loadDetalle();
     });
 </script>
@@ -597,7 +612,7 @@
             "
     >
         <a
-            href={`${pre + "/tactos"}`}
+            href={`${pre + "/tactos/cab"}`}
             class="
                 inline-flex items-center text-sm
                 text-gray-700 hover:text-gray-900 dark:text-gray-400
@@ -638,9 +653,7 @@
                 </h1>
             </div>
         </div>
-        <div
-            class="grid grid-cols-1 md:grid-cols-3 max-h-screen gap-2 md:gap-4 lg:gap-10"
-        >
+        <div class="grid grid-cols-1 max-h-screen gap-1 md:gap-2">
             <!--Lado izquierd-->
             <div>
                 <NuevoTacto
@@ -651,10 +664,12 @@
                     {inputObsGeneral}
                     {input}
                 />
-                <AnimalesSeleccionados
-                    {selecthashmap}
-                    quitarAnimal={clickAnimal}
-                />
+                <div class="hidden">
+                    <AnimalesSeleccionados
+                        {selecthashmap}
+                        quitarAnimal={clickAnimal}
+                    />
+                </div>
             </div>
             <!--Lado derecho-->
             <div class="md:col-span-2">
@@ -689,7 +704,7 @@
                             overflow-hidden 
                         `}
                     >
-                    <TablaMovimiento
+                        <TablaMovimiento
                             bind:paginaActual
                             bind:pageSize
                             selecthash={selecthashmap}
@@ -706,9 +721,6 @@
                         />
                     </div>
                 </div>
-
-                
-
             </div>
         </div>
     </div>

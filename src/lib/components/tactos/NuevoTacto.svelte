@@ -38,7 +38,7 @@
             </h1>
         </div>
     </div>
-    <div class="grid grid-cols-1">
+    <div class="grid grid-cols-1 md:grid-cols-3">
         <div class="pr-3">
             <label for="tiposervicio" class="label">
                 <span
@@ -115,7 +115,7 @@
                     bind:value={prenada}
                     onchange={() => input("PRENADA")}
                 >
-                    {#each estados as t}
+                    {#each estados.filter(ta=>ta.id>-1) as t}
                         <option value={t.id}>{t.nombre}</option>
                     {/each}
                 </select>

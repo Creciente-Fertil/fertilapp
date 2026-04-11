@@ -430,8 +430,7 @@
             edit:true,
             observacion
         }
-        //console.log("detalleNacimiento")
-        //console.log(detalleNacimiento)
+        
         proxyNacimiento.save(detalleNacimiento)
         goto(pre+"/nacimientos/"+id)
         //nuevoModal.showModal();

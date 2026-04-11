@@ -1034,7 +1034,7 @@
             "https://test.crecientefertil.com.ar/api/services/all",
         );
         let data_back = await res_back.json();
-        console.log(data_back);
+        console.info(data_back);
     }
     async function posttnewback() {
         tetstnewback()
@@ -1061,7 +1061,8 @@
             },
         );
         let data_back = await res_back.json();
-        console.log(data_back);
+        console.info(data_back);
+        
     }
     onMount(async () => {
         try {

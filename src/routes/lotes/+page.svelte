@@ -15,7 +15,8 @@
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import TablaLotes from "$lib/components/lotes/TablaLotes.svelte";
     import { shorterWord } from "$lib/stringutil/lib";
-    
+    import { getAll } from "$lib/java/lotes/lotesback";
+    let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -25,6 +26,14 @@
     let per = createPer();
     let userpermisos = getPermisosList(per.per.permisos);
 
+    //ver java
+    let versionjava = $state(false);
+
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getLotes();
+    }
+
     //Datos para mostrar
     let lotes = $state([]);
     let lotesrows = $state([]);
@@ -32,9 +41,9 @@
     let buscar = $state("");
     let mostrarVacios = $state(true);
     let cargadolotes = $state(false);
-    let todos = $state(false)
-    let ninguno = $state(false)
-    let algunos = $state(false)
+    let todos = $state(false);
+    let ninguno = $state(false);
+    let algunos = $state(false);
     //Paginacion
     let pageSize = $state(15);
     //filtros
@@ -68,11 +77,11 @@
 
     //lote
     let defaultLote = {
-        id:"",
-        nombre:"",
-        edit:false
-    }
-    let detalleLote = $state({...defaultLote})
+        id: "",
+        nombre: "",
+        edit: false,
+    };
+    let detalleLote = $state({ ...defaultLote });
     let proxyLote = createStorageProxy("detalleLote", defaultLote);
     //Guardar
     let idlote = $state("");
@@ -97,25 +106,37 @@
         );
     }
     async function getLotes() {
-        const records = await pb.collection("lotes").getFullList({
-            filter: `active=True && cab='${cab.id}'`,
-            sort: "nombre",
-        });
-        lotes = records;
-        ordenar(lotes);
-        lotesrows = lotes;
-        for (let i = 0; i < lotes.length; i++) {
-            let total = await getAnimalesTotal(lotes[i].id);
-            lotes[i].total = total;
+        if (!versionjava) {
+            const records = await pb.collection("lotes").getFullList({
+                filter: `active=True && cab='${cab.id}'`,
+                sort: "nombre",
+            });
+            lotes = records;
+            ordenar(lotes);
+            lotesrows = lotes;
+            for (let i = 0; i < lotes.length; i++) {
+                let total = await getAnimalesTotal(lotes[i].id);
+                lotes[i].total = total;
+            }
+            filterUpdate();
+            cargadolotes = true;
         }
-        filterUpdate();
-        cargadolotes = true;
+        else{
+            let data_lotes = await getAll()
+            lotes = data_lotes
+            lotesrows = lotes;
+            for (let i = 0; i < lotes.length; i++) {
+                lotes[i].total = 0;
+            }
+            filterUpdate();
+            cargadolotes = true;
+        }
     }
     function openNewModal() {
         if (userpermisos[1]) {
             idlote = "";
             nombre = "";
-            goto(pre+"/lotes/0")
+            goto(pre + "/lotes/0");
             //nuevoModal.showModal();
         } else {
             Swal.fire(
@@ -160,24 +181,18 @@
         idlote = id;
         let lote = lotes.filter((r) => r.id == idlote)[0];
         nombre = lote.nombre;
-        proxyLote.save({id,nombre,edit:true})
-        goto(pre+"/lotes/"+idlote)
+        proxyLote.save({ id, nombre, edit: true });
+        goto(pre + "/lotes/" + idlote);
 
-        
-        
-        
         //nuevoModal.showModal();
     }
     function openViewModal(id) {
         idlote = id;
         let lote = lotes.filter((r) => r.id == idlote)[0];
         nombre = lote.nombre;
-        proxyLote.save({id,nombre,edit:false})
-        goto(pre+"/lotes/"+idlote)
+        proxyLote.save({ id, nombre, edit: false });
+        goto(pre + "/lotes/" + idlote);
 
-        
-        
-        
         //nuevoModal.showModal();
     }
     async function editar(id) {
@@ -288,12 +303,8 @@
     function nuevo() {
         openNewModal();
     }
-    function clickTodos(){
-
-    }
-    function clickFila(id){
-
-    }
+    function clickTodos() {}
+    function clickFila(id) {}
 </script>
 
 <Navbar2>
@@ -305,6 +316,9 @@
         {limpiarFiltros}
         {filterUpdate}
         {nuevo}
+        {versionjava}
+        {toggleJava}
+        {esdev}
     />
 
     {#if cargadolotes}
@@ -326,9 +340,9 @@
                     bind:pageSize
                     {selecthash}
                     {lotesrows}
-                    openView = {openViewModal}
-                    openEdit = {openEditModal}
-                    openEliminar = {eliminar}
+                    openView={openViewModal}
+                    openEdit={openEditModal}
+                    openEliminar={eliminar}
                     {clickFila}
                     {clickTodos}
                     {todos}

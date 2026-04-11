@@ -45,6 +45,7 @@
     import TablaAnimales from "$lib/components/animales/TablaAnimales.svelte";
     import { getAll, saveAnimal } from "$lib/java/animales/animalesback";
     let esdev = import.meta.env.VITE_DEV == "si";
+    let isDev = $derived(esdev)
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -52,7 +53,7 @@
 
     //ver java
     let versionjava = $state(false);
-
+    
     async function toggleJava() {
         versionjava = !versionjava;
         await getAnimales();
@@ -818,6 +819,7 @@
         {clickFilter}
         verJava={toggleJava}
         {versionjava}
+        {isDev}
     />
 
     <!--Ordenar-->

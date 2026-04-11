@@ -10,6 +10,7 @@
     import Filter from "$lib/svgs/filter.svelte";
     import Limpiar from "$lib/svgs/limpiar.svelte";
     import Sticky from "../animales/Sticky.svelte";
+    
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -26,6 +27,9 @@
         filterUpdate = () => {},
         clickFilter = () => {},
         prepararData = () => {},
+        esdev=false,
+        versionjava=false,
+        toggleJava=()=>{}
     } = $props();
 </script>
 
@@ -70,6 +74,21 @@
                     + Nuevo lote
                 {/if}
             </button>
+            {#if esdev}
+                <button
+                    class={`
+                    ${estilos.btnbuscador}
+                    ${estilos.btntextbuscador}
+                `}
+                    onclick={toggleJava}
+                >
+                    {#if versionjava}
+                        <span class="text-lg">Cerrar java</span>
+                    {:else}
+                        <span class="text-lg">Ver java</span>
+                    {/if}
+                </button>
+            {/if}
         </div>
         <!--Filtros-->
         <div

@@ -394,6 +394,7 @@
                         "error",
                     );
                 } else {
+                    setDetalleDefault()
                     Swal.fire(
                         "Éxito inseminaciones",
                         "Se lograron registrar todas las inseminaciones",

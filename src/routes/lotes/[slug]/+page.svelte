@@ -18,6 +18,7 @@
     import Danger from "$lib/components/botones/Danger.svelte";
     import Secondary from "$lib/components/botones/Secondary.svelte";
     import Success from "$lib/components/botones/Success.svelte";
+    import { saveLot } from "$lib/java/lotes/lotesback";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -35,6 +36,13 @@
     let edit = $state(false);
     let add = $state(false);
     let animales = $state([]);
+
+    //ver java
+    let versionjava = $state(false);
+
+    async function toggleJava() {
+        versionjava = !versionjava;
+    }
     let defaultLote = {
         id: "",
         nombre: "",
@@ -75,7 +83,7 @@
                 active: false,
             };
             const record = await pb.collection("lotes").update(slug, data);
-            goto(`${pre + "/lotes"}`)
+            goto(`${pre + "/lotes"}`);
             //ver como hago para actualizar la lista
             Swal.fire(
                 "Lote eliminada!",
@@ -105,19 +113,38 @@
         }
     }
     async function guardarNuevo() {
-        try {
+        if (versionjava) {
             let data = {
                 nombre,
                 active: true,
                 cab: cab.id,
             };
-            let record = await pb.collection("lotes").create(data);
-
+            let res = await saveLot(data);
             Swal.fire("Éxito guardar", "Se pudo guardar el lote", "success");
             volver();
-        } catch (err) {
-            console.error(err);
-            Swal.fire("Error guardar", "No se pudo guardar el lote", "error");
+        } else {
+            try {
+                let data = {
+                    nombre,
+                    active: true,
+                    cab: cab.id,
+                };
+                let record = await pb.collection("lotes").create(data);
+
+                Swal.fire(
+                    "Éxito guardar",
+                    "Se pudo guardar el lote",
+                    "success",
+                );
+                volver();
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error guardar",
+                    "No se pudo guardar el lote",
+                    "error",
+                );
+            }
         }
     }
     async function getAnimales() {}
@@ -137,10 +164,14 @@
         });
     }
     function volver() {
+        if (add) {
+            goto(pre + "/lotes");
+        }
         if (edit) {
             edit = false;
             return;
         }
+
         goto(pre + "/lotes");
     }
 </script>
@@ -191,10 +222,9 @@
             >
                 <div
                     class={`
-                bg-transparent
-                
-                px-3 py-4 
-            `}
+                        bg-transparent
+                        px-3 py-4 
+                    `}
                 >
                     <button onclick={() => goto(pre + "/lotes")}>
                         <h1
@@ -208,6 +238,21 @@
                             Lote
                         </h1>
                     </button>
+                    {#if esdev}
+                        <button
+                            class={`
+                    ${estilos.btnbuscador}
+                    ${estilos.btntextbuscador}
+                `}
+                            onclick={toggleJava}
+                        >
+                            {#if versionjava}
+                                <span class="text-lg">Cerrar java</span>
+                            {:else}
+                                <span class="text-lg">Ver java</span>
+                            {/if}
+                        </button>
+                    {/if}
                 </div>
 
                 <div class="hidden md:block text-[#115642]">

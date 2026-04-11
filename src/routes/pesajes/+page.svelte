@@ -500,14 +500,17 @@
             </div>
         </div>
         <div
-            class={`grid grid-cols-1 md:grid-cols-3  max-h-screen gap-2 md:gap-4 lg:gap-10`}
+            class={`grid grid-cols-1   max-h-screen gap-1 md:gap-2`}
         >
             <div>
                 <NuevoPesajes bind:fecha bind:pesogeneral {cambioPesoGeneral} />
-                <AnimalesSeleccionados
+                <div class="hidden">
+<AnimalesSeleccionados
                     {selecthashmap}
                     quitarAnimal={clickAnimal}
                 />
+                </div>
+                
             </div>
             <div class="md:col-span-2">
                 <Buscador

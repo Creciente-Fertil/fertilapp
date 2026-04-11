@@ -20,7 +20,7 @@
     import { shorterWord, capitalize } from "$lib/stringutil/lib";
     import InfoAnimal from "../InfoAnimal.svelte";
     import NacimientoPerfil from "./NacimientoPerfil.svelte";
-
+    import { getAll, saveAnimal } from "$lib/java/animales/animalesback";
     let {
         caravana = $bindable(""),
         rodeo = $bindable(""),
@@ -45,6 +45,7 @@
         //Eliminar
         openEliminarModal = () => {},
         add = false,
+        versionjava = false,
     } = $props();
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -494,98 +495,134 @@
         }
     }
     async function guardarAnimal() {
-        let data = {
-            peso,
-            sexo,
-            caravana,
-            rodeo,
-            lote,
-            prenada,
-            categoria,
-            raza,
-            color,
-            rp,
-            active:true,
-            cab:cab.id
+        
+        if (!versionjava) {
+            let data = {
+                peso,
+                sexo,
+                caravana,
+                rodeo,
+                lote,
+                prenada,
+                categoria,
+                raza,
+                color,
+                rp,
+                active: true,
+                cab: cab.id,
+            };
+            data.fechanacimiento = fecha.length > 0 ? fecha + " 03:00:00" : "";
+            try {
+                //nueva fecha
+                let connuevafecha = fechaviejo != fecha && fecha.length > 0;
+                //nueva madre
+                let connuevamadre = madreviejo != madre;
+                //nuevo padre
+                let connuevopadre = padreviejo != padre;
 
-        };
-        data.fechanacimiento = fecha.length > 0 ? fecha + " 03:00:00" : "";
-        try {
-            //nueva fecha
-            let connuevafecha = fechaviejo != fecha && fecha.length > 0;
-            //nueva madre
-            let connuevamadre = madreviejo != madre;
-            //nuevo padre
-            let connuevopadre = padreviejo != padre;
+                let nuevonacimiento = connacimiento;
+                if (connuevamadre || connuevopadre) {
+                    let dataparicion = {
+                        madre,
+                        padre,
+                        fecha: fecha.length > 0 ? fecha + " 03:00:00" : "",
+                        nombremadre,
+                        nombrepadre,
+                        observacion,
+                        cab: cab.id,
+                    };
+                    const recordparicion = await pb
+                        .collection("nacimientos")
+                        .create(dataparicion);
 
-            let nuevonacimiento = connacimiento;
-            if (connuevamadre || connuevopadre) {
-                let dataparicion = {
-                    madre,
-                    padre,
-                    fecha: fecha.length > 0 ? fecha + " 03:00:00" : "",
-                    nombremadre,
-                    nombrepadre,
-                    observacion,
-                    cab: cab.id,
-                };
-                const recordparicion = await pb
-                    .collection("nacimientos")
-                    .create(dataparicion);
-
-                idnacimiento = recordparicion.id;
-                nuevonacimiento = true;
-                if (padre != "") {
-                    padreobj = { id: padre, caravana: nombrepadre };
-                } else {
-                    padreobj = { id: -1 };
+                    idnacimiento = recordparicion.id;
+                    nuevonacimiento = true;
+                    if (padre != "") {
+                        padreobj = { id: padre, caravana: nombrepadre };
+                    } else {
+                        padreobj = { id: -1 };
+                    }
+                    if (madre != "") {
+                        madreobj = { id: madre, caravana: nombremadre };
+                    } else {
+                        madreobj = { id: -1 };
+                    }
                 }
-                if (madre != "") {
-                    madreobj = { id: madre, caravana: nombremadre };
-                } else {
-                    madreobj = { id: -1 };
+                if (nuevonacimiento) {
+                    data.nacimiento = idnacimiento;
+                    connacimiento = true;
                 }
-            }
-            if (nuevonacimiento) {
-                data.nacimiento = idnacimiento;
-                connacimiento = true;
-            }
-            const record = await pb.collection("animales").create(data);
-            sexo = data.sexo;
-            peso = data.peso;
-            caravana = data.caravana;
-            rodeo = data.rodeo;
-            lote = data.lote;
-            categoria = data.categoria;
-            prenada = data.prenada;
-            if (rodeo != "") {
-                nombrerodeo = rodeos.filter((t) => t.id == rodeo)[0].nombre;
-            } else {
-                nombrerodeo = "";
-            }
-            if (lote != "") {
-                nombrelote = lotes.filter((l) => l.id == lote)[0].nombre;
-            } else {
-                nombrelote = "";
-            }
-            if (fecha.length > 0) {
-                let datapesaje = {
-                    animal: record.id,
-                    fecha: fecha + " 03:00:00",
-                    pesoanterior: 0,
-                    pesonuevo: peso,
-                };
-                let recordope = await pb.collection("pesaje").create(datapesaje);
+                const record = await pb.collection("animales").create(data);
+                sexo = data.sexo;
+                peso = data.peso;
+                caravana = data.caravana;
+                rodeo = data.rodeo;
+                lote = data.lote;
+                categoria = data.categoria;
+                prenada = data.prenada;
+                if (rodeo != "") {
+                    nombrerodeo = rodeos.filter((t) => t.id == rodeo)[0].nombre;
+                } else {
+                    nombrerodeo = "";
+                }
+                if (lote != "") {
+                    nombrelote = lotes.filter((l) => l.id == lote)[0].nombre;
+                } else {
+                    nombrelote = "";
+                }
+                if (fecha.length > 0) {
+                    let datapesaje = {
+                        animal: record.id,
+                        fecha: fecha + " 03:00:00",
+                        pesoanterior: 0,
+                        pesonuevo: peso,
+                    };
+                    let recordope = await pb
+                        .collection("pesaje")
+                        .create(datapesaje);
+                }
+                Swal.fire(
+                    "Éxito guardar",
+                    "Se pudo guardar el animal",
+                    "success",
+                );
+                modoedicion = false;
 
+                goto(pre + "/animales");
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error guardar",
+                    "No se pudo guardar el animal",
+                    "error",
+                );
             }
-            Swal.fire("Éxito guardar", "Se pudo guardar el animal", "success");
-            modoedicion = false;
+        }
+        else{
+            let data = {
+                caravana,
+                active: true,
+                delete: false,
+                prenada,
+                fechanacimiento: fechanacimiento + " 03:00:00",
+                sexo,
+                peso,
+                lote,
+                rodeo,
+                rp,
+                categoria: categoria ? "" : sexo == "M" ? "ternero" : "ternera",
+                cab: cab.id,
+            };
+            let res =  await saveAnimal(data);
+            Swal.fire(
+                    "Éxito guardar",
+                    "Se pudo guardar el animal",
+                    "success",
+                );
+                modoedicion = false;
 
-            
-            goto(pre + "/animales");
-        } catch (err    ) {
-            console.error(err);
-            Swal.fire("Error guardar", "No se pudo guardar el animal", "error");
+                goto(pre + "/animales");
+
         }
     }
     function cerrarModal() {
@@ -657,32 +694,6 @@
             Caravana: {shorterWord(caravana)}
         </h2>
     </button>
-    <div class="hidden flex w-11/12 justify-start">
-        <button
-            onclick={openEditar}
-            class={`
-                ${estilos.basico} ${estilos.chico}
-                ${estilos.btnsecondary}
-                ${modoedicion ? "hidden" : ""}
-                `}
-            aria-label="Editar"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-6"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
-                />
-            </svg>
-        </button>
-    </div>
 </div>
 
 <div class="grid grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">

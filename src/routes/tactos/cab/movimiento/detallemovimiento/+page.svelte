@@ -77,6 +77,11 @@
     }
     function setDetalle() {
         detallemovimiento.selecthashmap = selecthashmap;
+        detallemovimiento.fecha = fecha;
+        detallemovimiento.observaciongeneral = observaciongeneral;
+        detallemovimiento.tipotactoselect = tipotactoselect;
+        detallemovimiento.prenada = prenada;
+        
         proxy.save(detallemovimiento);
     }
     function loadDetalle() {
@@ -91,12 +96,13 @@
         listaanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
-                listaanimales.push({
-                    ...value,
-                    estadonuevo: 0,
-                    tipotacto: "tacto",
-                    observacion: "",
-                });
+                let fila = value;
+                
+                if (fila.observacion.length == 0) {
+                    fila.observacion = observaciongeneral;
+                }
+                fila.prenada = prenada
+                listaanimales.push(fila);
             }
         }
     }
@@ -112,6 +118,7 @@
         for (let i = 0; i < listaanimales.length; i++) {
             listaanimales[i].observacion = observaciongeneral;
         }
+        
     }
     async function mover() {
         if (fecha == "") {
@@ -143,7 +150,7 @@
 
             if (maximafecha == null || fecha > maximafecha) {
                 let dataupdate = {
-                    prenada: tactoanimal.estadonuevo,
+                    prenada: tactoanimal.prenada,
                     id: tactoanimal.id,
                 };
                 bulkcambios.push(dataupdate);
@@ -169,7 +176,7 @@
                 observacion: tactoanimal.observacion,
                 animal: tactoanimal.id,
                 categoria: tactoanimal.categoria,
-                prenada: tactoanimal.estadonuevo,
+                prenada: tactoanimal.prenada,
                 tipo: tactoanimal.tipotacto,
                 nombreveterinario: "",
                 cab: cab.id,
@@ -200,6 +207,12 @@
                 "Se pudieron guardar los tactos",
                 "success",
             );
+            selecthashmap={}
+            fecha=""
+            observaciongeneral=""
+            tipotactoselect =""
+            prenada = 0
+            setDetalle()
         } catch (err) {
             console.error(err);
             Swal.fire(
@@ -220,7 +233,7 @@
         per.setPer(respermisos.permisos, usuarioid);
         userpermisos = getPermisosList(per.per.permisos);
         loadDetalle();
-        console.log(listaanimales)
+        
     });
     function verAnimal(id) {
         let a_idx = listaanimales.findIndex((a) => a.id == id);
