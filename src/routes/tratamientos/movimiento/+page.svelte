@@ -35,7 +35,7 @@
     let cab = caber.cab;
     let cargado = $state(false);
     //paginacon
-    let pageSize = $state(15);
+    let pageSize = $state(5);
     let paginaActual = $state(1);
     //boton
     let textoboton = $state("Tratamientos");
@@ -619,7 +619,7 @@
                                 {ninguno}
                                 {algunos}
                                 verFila={verAnimal}
-                                conEstado={true}
+                                conEstado={false}
                                 {cancelar}
                                 {siguiente}
                             />

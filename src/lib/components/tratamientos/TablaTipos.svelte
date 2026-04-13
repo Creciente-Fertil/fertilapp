@@ -4,6 +4,7 @@
     import Eye from "$lib/svgs/eye.svelte";
     import Trash from "$lib/svgs/trash.svelte";
     import Pencil from "$lib/svgs/pencil.svelte";
+    import Plus from "$lib/svgs/plus.svelte";
     import { shorterWord } from "$lib/stringutil/lib";
     let pre = import.meta.env.VITE_PRE;
     let {
@@ -14,11 +15,15 @@
         openViewModal = (_p) => {},
         openEditModal = (_p) => {},
         openDelModal = (_p) => {},
+        guardarTipo =()=>{},
         clickTodos = () => {},
         clickFila = (id) => {},
         todos = $bindable(false),
         ascendente = false,
         forma = "",
+        isOpenForm =false,
+        idtipo = "",
+        nombretipo=$bindable("")
     } = $props();
     let firstRun = true;
     function onChangePageSize() {
@@ -60,6 +65,35 @@
             </tr>
         </thead>
         <tbody>
+        {#if isOpenForm}
+                <tr>
+                    <td class={`text-base mx-2 px-2 w-16 ${pyfila} w-3/5`} >
+                    <input
+                                id="nombre"
+                                type="text"
+                                class={`
+                                    input 
+                                    w-full
+                                    py-0 my-1
+                                    focus:outline-none focus:ring-2 
+                                    focus:ring-green-500 
+                                    focus:border-green-500
+                                    ${estilos.bgdark2} 
+                                    
+                                `}
+                                bind:value={nombretipo}
+                                
+                            />
+                    </td>
+                    <td
+                        class={`flex items-center justify-center  ${pyfila}`}
+                    >
+                        <button onclick={guardarTipo}>
+                            <Plus size="size-5" />
+                        </button>
+                    </td>
+                </tr>
+            {/if}
             {#each rows as t}
                 <tr>
                     <td class={`text-base mx-1 px-4 ${pyfila}`}>

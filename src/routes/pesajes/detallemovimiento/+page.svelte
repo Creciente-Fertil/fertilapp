@@ -33,9 +33,11 @@
     let usuarioid = $state("");
     let selectanimales = $state([]);
     let selecthashmap = $state({});
-    
+
     //movimento
     let defaultmovimiento = {
+        fecha: "",
+        pesogeneral: "",
         selecthashmap: {},
     };
     let detallemovimiento = $state({
@@ -46,7 +48,7 @@
         defaultmovimiento,
     );
     //movimiento
-    let animal = $state({})
+    let animal = $state({});
     let fecha = $state("");
     let nuevospesos = $state({});
     let pesogeneral = $state("");
@@ -56,13 +58,22 @@
         detallemovimiento.selecthashmap = selecthashmap;
         proxymovimiento.save(detallemovimiento);
     }
+    function setDefault() {
+        proxymovimiento.save(defaultmovimiento);
+    }
     function loadDetalle() {
         detallemovimiento = proxymovimiento.load();
         selecthashmap = detallemovimiento.selecthashmap;
+        fecha = detallemovimiento.fecha;
+        pesogeneral = detallemovimiento.pesogeneral;
         selectanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
-                selectanimales.push({ ...value, pesonuevo: value.peso });
+                if (pesogeneral != "" && pesogeneral > 0) {
+                    selectanimales.push({ ...value, pesonuevo: pesogeneral });
+                } else {
+                    selectanimales.push({ ...value, pesonuevo: value.peso });
+                }
             }
         }
     }
@@ -96,6 +107,7 @@
                     .collection("animales")
                     .update(selectanimales[i].id, dataupdate);
                 await pb.collection("pesaje").create(data);
+                setDefault();
             } catch (err) {
                 pesajeserror.push(ps.id);
                 console.error(err);
@@ -123,10 +135,14 @@
                 delete selecthashmap[ps.id];
             }
         }
-        setDetalle();
+        if (errores) {
+            setDetalle();
+        } else {
+            setDefault();
+        }
         volver();
     }
-    
+
     onMount(async () => {
         loadDetalle();
         let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
@@ -136,9 +152,7 @@
         per.setPer(respermisos.permisos, usuarioid);
         userpermisos = getPermisosList(per.per.permisos);
     });
-    function quitarAnimal(id){
-
-    }
+    function quitarAnimal(id) {}
     function verAnimal(id) {
         let a_idx = selectanimales.findIndex((a) => a.id == id);
 
@@ -153,16 +167,11 @@
 
 <Navbar2>
     <div class={classmove}>
-    
-        <DetalleMovimiento
-            {fecha}
-            pesajegeneral={pesogeneral}
-        />
+        <DetalleMovimiento {fecha} pesajegeneral={pesogeneral} />
         <DetallesAnimalesMovimiento
             bind:selectanimales
             {quitarAnimal}
             {verAnimal}
-            
             abierta={false}
         />
         <div

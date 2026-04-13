@@ -53,6 +53,7 @@
     let fecha = $state("");
     let pesoanterior = $state("");
     let pesonuevo = $state("");
+    let edit = $state(false);
     let ultimos = $state(5);
     function clickFilter() {
         isOpenFilter = !isOpenFilter;
@@ -107,6 +108,9 @@
         //procesarPesajes()
         procesarUltimosPesajes();
     }
+    function toggleEdit() {
+        edit = !edit;
+    }
     async function editarPesaje() {
         try {
             let data = {
@@ -154,6 +158,7 @@
         }
     }
     function openDetalle(id) {
+        edit = false;
         idpesaje = id;
         let pesaje = pesajes.filter((p) => p.id == idpesaje)[0];
         caravana = pesaje.expand.animal.caravana;
@@ -287,6 +292,34 @@
 </script>
 
 <Navbar2>
+    <div
+        class="
+            container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4
+            "
+    >
+        <a
+            href={`${pre + "/pesajes/historial"}`}
+            class="
+                inline-flex items-center text-sm
+                text-gray-700 hover:text-gray-900 dark:text-gray-400
+                dark:hover:text-gray-200 mb-4"
+        >
+            <svg
+                class="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+            </svg>
+            Volver a pesajes
+        </a>
+    </div>
     <UltimosPesajes
         cabnombre={cab.nombre}
         pesajesrows={pesajesprocesados}
@@ -323,42 +356,20 @@
                             class={`${estilos.tableheader}  sticky top-0 z-5 shadow-sm`}
                         >
                             <tr>
-                                <th
-                                    class={`${estilos.tableth}`}
-                                >
-                                    Animal</th
-                                >
-                                <th
-                                    class={`${estilos.tableth}`}
-                                >
-                                    5</th
-                                >
-                                <th
-                                    class={`${estilos.tableth}`}
-                                >
-                                    4</th
-                                >
-                                <th
-                                    class={`${estilos.tableth}`}
-                                >
-                                    3</th
-                                >
-                                <th
-                                    class={`${estilos.tableth}`}
-                                >
-                                    2</th
-                                >
-                                <th
-                                    class={`${estilos.tableth}`}
-                                >
-                                    1</th
-                                >
+                                <th class={`${estilos.tableth}`}> Animal</th>
+                                <th class={`${estilos.tableth}`}> 5</th>
+                                <th class={`${estilos.tableth}`}> 4</th>
+                                <th class={`${estilos.tableth}`}> 3</th>
+                                <th class={`${estilos.tableth}`}> 2</th>
+                                <th class={`${estilos.tableth}`}> 1</th>
                             </tr>
                         </thead>
                         <tbody>
                             {#each pesajesprocesados as f}
                                 <tr>
-                                    <td class="text-base ml-3 pl-3 mr-1 pr-1 text-center">
+                                    <td
+                                        class="text-base ml-3 pl-3 mr-1 pr-1 text-center"
+                                    >
                                         {shorterWord(f.animal)}
                                     </td>
                                     {#each Array(5) as _, idx}
@@ -409,68 +420,59 @@
                     border dark:border-gray-700
                 `}
             >
-            <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
-                <table class="table table-lg w-full bg-white dark:bg-slate-900">
-                    <thead
-                        class={`${estilos.tableheader}  sticky top-0 z-5 shadow-sm`}
+                <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
+                    <table
+                        class="table table-lg w-full bg-white dark:bg-slate-900"
                     >
-                        <tr>
-                            <th
-                                class={`${estilos.tableth}`}
-                            >
-                                Animal</th
-                            >
-
-                            <th
-                                class={`${estilos.tableth}`}
-                                >3</th
-                            >
-                            <th
-                                class={`${estilos.tableth}`}
-                                >2</th
-                            >
-                            <th
-                                class={`${estilos.tableth}`}
-                                >1</th
-                            >
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each pesajesprocesados as f}
+                        <thead
+                            class={`${estilos.tableheader}  sticky top-0 z-5 shadow-sm`}
+                        >
                             <tr>
-                                <td class="text-base mx-2 px-1 text-center">
-                                    {shorterWord(f.animal)}
-                                </td>
-                                {#each Array(3) as _, idx}
-                                    {#if f.pesajes.length < ultimos - (idx + 2)}
-                                        <td>
-                                            {"-"}
-                                        </td>
-                                    {:else}
-                                        <td
-                                            onclick={() =>
-                                                openDetalle(
+                                <th class={`${estilos.tableth}`}> Animal</th>
+
+                                <th class={`${estilos.tableth}`}>3</th>
+                                <th class={`${estilos.tableth}`}>2</th>
+                                <th class={`${estilos.tableth}`}>1</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {#each pesajesprocesados as f}
+                                <tr>
+                                    <td class="text-base mx-2 px-1 text-center">
+                                        {shorterWord(f.animal)}
+                                    </td>
+                                    {#each Array(3) as _, idx}
+                                        {#if f.pesajes.length < ultimos - (idx + 2)}
+                                            <td>
+                                                {"-"}
+                                            </td>
+                                        {:else}
+                                            <td
+                                                onclick={() =>
+                                                    openDetalle(
+                                                        f.pesajes[
+                                                            ultimos -
+                                                                (idx + 2) -
+                                                                1
+                                                        ].id,
+                                                    )}
+                                                class="cursor-pointer text-base mx-1 px-1 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                            >
+                                                {new Date(
                                                     f.pesajes[
                                                         ultimos - (idx + 2) - 1
-                                                    ].id,
-                                                )}
-                                            class="cursor-pointer text-base mx-1 px-1 hover:bg-gray-200 dark:hover:bg-gray-900"
-                                        >
-                                            {new Date(
-                                                f.pesajes[
+                                                    ].fecha,
+                                                ).toLocaleDateString()} , {f
+                                                    .pesajes[
                                                     ultimos - (idx + 2) - 1
-                                                ].fecha,
-                                            ).toLocaleDateString()} , {f
-                                                .pesajes[
-                                                ultimos - (idx + 2) - 1
-                                            ].peso}
-                                        </td>
-                                    {/if}
-                                {/each}
-                            </tr>
-                        {/each}
-                    </tbody>
-                </table>
+                                                ].peso}
+                                            </td>
+                                        {/if}
+                                    {/each}
+                                </tr>
+                            {/each}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -493,7 +495,7 @@
                 >✕</button
             >
         </form>
-        <h3 class="text-lg font-bold">Ver pesaje</h3>
+        <h3 class="text-lg font-bold">{edit ? "Editar " : "Ver "} pesaje</h3>
         <div class="form-control">
             <div class="grid grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
                 <div class="mb-1 lg:mb-0">
@@ -512,10 +514,12 @@
                         <span class="label-text text-base">Fecha</span>
                     </label>
                     <label class="input-group">
-                        <input
-                            id="fecha"
-                            type="date"
-                            class={`
+                        <label class="input-group">
+                            {#if edit}
+                                <input
+                                    id="fecha"
+                                    type="date"
+                                    class={`
                                 input input-bordered 
                                 w-full
                                 border border-gray-300 rounded-md
@@ -524,8 +528,17 @@
                                 focus:border-green-500
                                 ${estilos.bgdark2}
                             `}
-                            bind:value={fecha}
-                        />
+                                    bind:value={fecha}
+                                />
+                            {:else}
+                                <span
+                                    class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
+                                    >{fecha.length > 0
+                                        ? new Date(fecha).toLocaleDateString()
+                                        : "Sin fecha"}</span
+                                >
+                            {/if}
+                        </label>
                     </label>
                 </div>
                 <div class="mb-1 lg:mb-0">
@@ -545,10 +558,11 @@
                     <label for="pesonuevo" class="label">
                         <span class="label-text text-base">Peso nuevo(KG)</span>
                     </label>
-                    <input
-                        id="pesonuevo"
-                        type="number"
-                        class={`
+                    {#if edit}
+                        <input
+                            id="pesonuevo"
+                            type="number"
+                            class={`
                             input 
                             input-bordered 
                             border border-gray-300 rounded-md
@@ -556,26 +570,86 @@
                             w-full
                             ${estilos.bgdark2}
                         `}
-                        bind:value={pesonuevo}
-                        oninput={() => (pesonuevo = Math.max(pesonuevo, 0))}
-                    />
+                            bind:value={pesonuevo}
+                            oninput={() => (pesonuevo = Math.max(pesonuevo, 0))}
+                        />
+                    {:else}
+                        <span
+                            class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
+                            >{pesonuevo}</span
+                        >
+                    {/if}
                 </div>
             </div>
         </div>
-        <div class="modal-action justify-start">
-            <button class="btn btn-success text-white" onclick={editarPesaje}
-                >Editar</button
+        <div class="modal-action justify-end">
+            <div
+                class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
             >
-            <button class="btn btn-error text-white" onclick={eliminar}
-                >Eliminar</button
-            >
-            <button
-                class={`
-                    btn 
-                    bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                    ${estilos.btnsecondary}`}
-                onclick={() => detallePesaje.close()}>Cerrar</button
-            >
+                <button
+                    class="
+                        hidden md:block
+                        mt-2 px-10 py-2
+                        dark:bg-transparent
+                        bg-white
+                        text-gray-800
+                        dark:text-white
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors
+                        text-base"
+                    onclick={() => detallePesaje.close()}
+                >
+                    Cerrar
+                </button>
+                {#if edit}
+                    <!-- Botón Cancelar -->
+                    <button
+                        class="
+                        hidden md:block
+                        mt-2 px-10 py-2
+                        dark:bg-transparent
+                        bg-white
+                        text-gray-800
+                        dark:text-white
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors
+                        text-base"
+                        onclick={toggleEdit}
+                    >
+                        Cancelar
+                    </button>
+                    <!-- Botón Editar -->
+                    <button
+                        class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                        onclick={editarPesaje}
+                    >
+                        Guardar
+                    </button>
+                {:else}
+                    <button
+                        class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+                        onclick={eliminar}
+                    >
+                        Eliminar
+                    </button>
+                    <!-- Botón Editar -->
+                    <button
+                        class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                        onclick={toggleEdit}
+                    >
+                        Editar
+                    </button>
+                {/if}
+                
+            </div>
         </div>
     </div>
 </dialog>

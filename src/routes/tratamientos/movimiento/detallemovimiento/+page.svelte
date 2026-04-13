@@ -73,8 +73,8 @@
             if (value != null) {
                 selectanimales.push({
                     ...value,
-                    tipotratamiento: "",
-                    observacionnuevo: "",
+                    tipotratamiento: tipotratamientoselect,
+                    observacionnuevo: observaciongeneral,
                 });
             }
         }
@@ -139,7 +139,7 @@
             tipos={tipotratamientos}
         />
         <DetallesAnimalesMovimiento
-            bind:selectanimales={selectanimales}
+            bind:selectanimales
             tipos={tipotratamientos}
             {quitarAnimal}
             {verAnimal}

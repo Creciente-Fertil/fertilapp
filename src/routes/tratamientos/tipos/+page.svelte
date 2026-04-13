@@ -237,7 +237,46 @@
                     border dark:border-gray-700
                 `}
         >
-            <TablaTipos tiposrows={tipotratamientos} />
+            <TablaTipos 
+            
+            {idtipo}
+            bind:nombretipo
+            {isOpenForm}
+            tiposrows={tipotratamientos} 
+
+            />
         </div>
     </div>
 </Navbar2>
+<dialog
+    id="tiposmodal"
+    class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"
+>
+    <div
+        class="
+            modal-box max-w-xl w-11/12
+            bg-gradient-to-br from-white to-gray-100
+            dark:from-gray-900 dark:to-gray-800
+        "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-xl font-bold">
+            {idtipo.length > 0 ? "Editar " : "Nuevo "}tipo tratamientos
+        </h3>
+        <div class="modal-action justify-start">
+            <button class="btn btn-success text-white">Editar</button>
+            <button class="btn btn-error text-white">Eliminar</button>
+            <button
+                class={`
+                    btn 
+                    bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
+                    ${estilos.btnsecondary}`}>Cerrar</button
+            >
+        </div>
+    </div>
+</dialog>

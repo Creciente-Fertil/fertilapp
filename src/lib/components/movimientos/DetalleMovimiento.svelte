@@ -126,6 +126,7 @@ import { slide } from "svelte/transition";
                 <span>Cambiar Lote</span>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
+                    
                     class={`h-5 w-5 transition-transform duration-300 ${seccionAbierta === "LOTE" ? "rotate-180" : ""}`}
                     fill="none"
                     viewBox="0 0 24 24"
@@ -178,7 +179,7 @@ import { slide } from "svelte/transition";
                 <span>Cambiar rodeo</span>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class={`h-5 w-5 transition-transform duration-300 ${seccionAbierta === "CATEGORIA" ? "rotate-180" : ""}`}
+                    class={`h-5 w-5 transition-transform duration-300 ${seccionAbierta === "RODEO" ? "rotate-180" : ""}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -228,7 +229,7 @@ import { slide } from "svelte/transition";
                 <span>Dar de baja</span>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class={`h-5 w-5 transition-transform duration-300 ${seccionAbierta === "CATEGORIA" ? "rotate-180" : ""}`}
+                    class={`h-5 w-5 transition-transform duration-300 ${seccionAbierta === "BAJA" ? "rotate-180" : ""}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -304,7 +305,7 @@ import { slide } from "svelte/transition";
                 <span>Transferir</span>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class={`h-5 w-5 transition-transform duration-300 ${seccionAbierta === "CATEGORIA" ? "rotate-180" : ""}`}
+                    class={`h-5 w-5 transition-transform duration-300 ${seccionAbierta === "TRANSFERIR" ? "rotate-180" : ""}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

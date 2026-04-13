@@ -32,6 +32,7 @@
     let pesoanterior = $state(0);
     let fecha = $state("");
     let idpesaje = $state("");
+    let edit = $state(false);
     //Datos filtrar
     let selecthash = $state({});
     let pageSize = $state(15);
@@ -102,6 +103,9 @@
             pesajesrows = pesajesrows.filter((p) => p.fecha <= fechahasta);
         }
     }
+    function toggleEdit() {
+        edit = !edit;
+    }
     async function editarPesaje() {
         try {
             let data = {
@@ -112,6 +116,7 @@
             await pb.collection("pesaje").update(idpesaje, data);
             await getPesajes();
             filterUpdate();
+            edit = false;
             Swal.fire(
                 "Éxito editar pesaje",
                 "Se pudo editar el pesaje",
@@ -153,6 +158,18 @@
         }
     }
     function openDetalle(id) {
+        edit = false;
+        idpesaje = id;
+        let pesaje = pesajes.filter((p) => p.id == idpesaje)[0];
+        caravana = pesaje.expand.animal.caravana;
+        fecha = pesaje.fecha.split(" ")[0];
+        pesoanterior = pesaje.pesoanterior;
+        pesonuevo = pesaje.pesonuevo;
+
+        detallePesaje.showModal();
+    }
+    function openEditDetalle(id) {
+        edit = true;
         idpesaje = id;
         let pesaje = pesajes.filter((p) => p.id == idpesaje)[0];
         caravana = pesaje.expand.animal.caravana;
@@ -179,6 +196,7 @@
 </script>
 
 <Navbar2>
+    
     <HistorialPesajes
         {pesajesrows}
         bind:isOpenFilter
@@ -212,7 +230,7 @@
                     {selecthash}
                     {pesajesrows}
                     openViewModal={openDetalle}
-                    openEditModal={openDetalle}
+                    openEditModal={openEditDetalle}
                     openDelModal={confirmDelete}
                     {clickTodos}
                     {clickFila}
@@ -279,7 +297,7 @@
                 >✕</button
             >
         </form>
-        <h3 class="text-lg font-bold">Ver pesaje</h3>
+        <h3 class="text-lg font-bold">{edit ? "Editar " : "Ver "} pesaje</h3>
         <div class="form-control">
             <div class="grid grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
                 <div class="mb-1 lg:mb-0">
@@ -298,10 +316,11 @@
                         <span class="label-text text-base">Fecha</span>
                     </label>
                     <label class="input-group">
-                        <input
-                            id="fecha"
-                            type="date"
-                            class={`
+                        {#if edit}
+                            <input
+                                id="fecha"
+                                type="date"
+                                class={`
                                 input input-bordered 
                                 w-full
                                 border border-gray-300 rounded-md
@@ -310,8 +329,16 @@
                                 focus:border-green-500
                                 ${estilos.bgdark2}
                             `}
-                            bind:value={fecha}
-                        />
+                                bind:value={fecha}
+                            />
+                        {:else}
+                            <span
+                                class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
+                                >{fecha.length > 0
+                                    ? new Date(fecha).toLocaleDateString()
+                                    : "Sin fecha"}</span
+                            >
+                        {/if}
                     </label>
                 </div>
                 <div class="mb-1 lg:mb-0">
@@ -331,10 +358,11 @@
                     <label for="pesonuevo" class="label">
                         <span class="label-text text-base">Peso nuevo(KG)</span>
                     </label>
-                    <input
-                        id="pesonuevo"
-                        type="number"
-                        class={`
+                    {#if edit}
+                        <input
+                            id="pesonuevo"
+                            type="number"
+                            class={`
                             input 
                             input-bordered 
                             border border-gray-300 rounded-md
@@ -342,26 +370,85 @@
                             w-full
                             ${estilos.bgdark2}
                         `}
-                        bind:value={pesonuevo}
-                        oninput={() => (pesonuevo = Math.max(pesonuevo, 0))}
-                    />
+                            bind:value={pesonuevo}
+                            oninput={() => (pesonuevo = Math.max(pesonuevo, 0))}
+                        />
+                    {:else}
+                        <span
+                            class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
+                            >{pesonuevo}</span
+                        >
+                    {/if}
                 </div>
             </div>
         </div>
-        <div class="modal-action justify-start">
-            <button class="btn btn-success text-white" onclick={editarPesaje}
-                >Editar</button
+        <div class="modal-action justify-end">
+            <div
+                class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
             >
-            <button class="btn btn-error text-white" onclick={eliminar}
-                >Eliminar</button
-            >
-            <button
-                class={`
-                    btn 
-                    bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                    ${estilos.btnsecondary}`}
-                onclick={() => detallePesaje.close()}>Cerrar</button
-            >
+                <button
+                    class="
+                        hidden md:block
+                        mt-2 px-10 py-2
+                        dark:bg-transparent
+                        bg-white
+                        text-gray-800
+                        dark:text-white
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors
+                        text-base"
+                    onclick={() => detallePesaje.close()}
+                >
+                    Cerrar
+                </button>
+                {#if edit}
+                    <!-- Botón Cancelar -->
+                    <button
+                        class="
+                        hidden md:block
+                        mt-2 px-10 py-2
+                        dark:bg-transparent
+                        bg-white
+                        text-gray-800
+                        dark:text-white
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
+                        hover:bg-gray-200
+                        dark:hover:bg-gray-800
+                        transition-colors
+                        text-base"
+                        onclick={toggleEdit}
+                    >
+                        Cancelar
+                    </button>
+                    <!-- Botón Editar -->
+                    <button
+                        class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                        onclick={editarPesaje}
+                    >
+                    Guardar
+                    </button>
+                {:else}
+                    <button
+                        class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+                        onclick={eliminar}
+                    >
+                        Eliminar
+                    </button>
+                    <!-- Botón Editar -->
+                    <button
+                        class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                        onclick={toggleEdit}
+                    >
+                        Editar
+                    </button>
+                    {/if}
+            </div>
         </div>
     </div>
 </dialog>

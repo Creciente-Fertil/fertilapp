@@ -41,7 +41,7 @@
     //boton
     let textoboton = $state("Mover");
     //paginacon
-    let pageSize = $state(15);
+    let pageSize = $state(5);
     let paginaActual = $state(1);
     //Datos animales
     let animal = $state({});
@@ -80,6 +80,8 @@
     let proxy = createStorageProxy("pesajesanimales", defaultfiltro);
     //movimento
     let defaultmovimiento = {
+        fecha:"",
+        pesogeneral:"",
         selecthashmap: {},
     };
     let detallemovimiento = $state({
@@ -154,6 +156,8 @@
 
     function setDetalle() {
         detallemovimiento.selecthashmap = selecthashmap;
+        detallemovimiento.fecha=fecha
+        detallemovimiento.pesogeneral=pesogeneral
         proxymovimiento.save(detallemovimiento);
     }
     function loadDetalle() {
@@ -366,6 +370,7 @@
         for (let i = 0; i < selectanimales.length; i++) {
             selectanimales[i].pesonuevo = pesogeneral;
         }
+        setDetalle()
     }
     async function crearPesaje() {
         let errores = false;
@@ -432,6 +437,7 @@
         goto(pre + "/pesajes");
     }
     function siguiente() {
+        setDetalle()
         goto(pre + "/pesajes/detallemovimiento");
     }
     onMount(async () => {

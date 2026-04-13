@@ -93,7 +93,7 @@
                 </div>
             </div>
             <!--Observacion general-->
-            <div>
+            <div class="hidden">
                 <label for="observacion" class="label mb-0 pb-0">
                     <span
                         class="label-text text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"

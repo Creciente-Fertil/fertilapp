@@ -137,7 +137,9 @@
     function volver() {
         goto(pre + "/movimientos");
     }
-
+    function saveDefault(){
+        proxy.save(defaultmovimiento)
+    }
     async function moverDetalle() {
         if (selectcategoria) {
             if (categoria == "") {
@@ -326,17 +328,7 @@
         }
         //Limpiar variables
 
-        let defaultmovimiento = {
-            categoria: "",
-            lote: "",
-            rodeo: "",
-            fecha: "",
-            motivo: "",
-            fechabaja: "",
-            codigo: "",
-            listaanimales: [],
-            selecthashmap: {},
-        };
+        
 
         proxy.save(defaultmovimiento);
         volver();
@@ -553,7 +545,6 @@
             {categorias}
             {motivos}
             {seccionAbierta}
-            
             nuevacategoria={categoria}
             nuevolote={lote}
             nuevorodeo={rodeo}

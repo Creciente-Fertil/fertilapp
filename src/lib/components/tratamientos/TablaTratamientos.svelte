@@ -106,6 +106,7 @@
             </tr>
         </thead>
         <tbody>
+            
             {#each rows as t}
                 <tr>
                     <td class={`text-base mx-2 px-2 w-16 ${pyfila}`}>

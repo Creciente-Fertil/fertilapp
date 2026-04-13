@@ -43,7 +43,7 @@
         />
     </div>
     <!-- Observaciones -->
-    <div class="md:col-span-4">
+    <div class="hidden md:col-span-4">
         <div class="text-sm text-slate-600 dark:text-slate-300 line-clamp-2">
             {selectanimales[i].observacion || "Sin observaciones"}
         </div>
@@ -99,10 +99,10 @@
 </div>
 {#if animal.estado}
     <div
-        class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 animate-fadeIn"
+        class="my-0 py-1 border-t border-slate-200 dark:border-slate-700 animate-fadeIn"
     >
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="">
+            <div class="hidden">
                 <label for="observacion" class="label">
                     <span
                         class="label-text text-sm uppercase font-semibold dark:text-gray-400 text-gray-500"
@@ -127,8 +127,8 @@
                 >
                 </textarea>
             </div>
-            <div>
-                <label for="Estado" class="label">
+            <div class="mx-4 px-4 ">
+                <label for="pesonuevo" class="label">
                     <span
                         class="label-text text-base uppercase font-semibold dark:text-gray-400 text-gray-500"
                     >

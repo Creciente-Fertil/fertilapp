@@ -49,7 +49,7 @@
     <!-- Observaciones -->
     <div class="md:col-span-4">
         <div class="text-sm text-slate-600 dark:text-slate-300 line-clamp-2">
-            {selectanimales[i].observacion || "Sin observaciones"}
+            {selectanimales[i].observacionnuevo || "Sin observaciones"}
         </div>
     </div>
     <div class="md:col-span-2 flex justify-end items-center gap-2">
@@ -115,7 +115,7 @@
                     >
                 </label>
                 <textarea
-                    bind:value={selectanimales[i].observacion}
+                    bind:value={selectanimales[i].observacionnuevo}
                     placeholder="Observación"
                     class={`
                         p-2 m-1

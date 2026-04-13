@@ -137,7 +137,7 @@
             >
                 <div class="col-span-3">Caravana</div>
                 <div class="col-span-3 ">Pesaje</div>
-                <div class="col-span-4 ">Observaciones</div>
+                <div class="col-span-4 hidden">Observaciones</div>
                 <div class="col-span-2 text-right">Acciones</div>
             </div>
 

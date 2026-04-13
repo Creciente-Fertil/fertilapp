@@ -44,12 +44,12 @@
     //boton
     let textoboton = $state("Mover");
     //Datos animales
-    let animal = $state({})
+    let animal = $state({});
     let animales = $state([]);
     let animalesrows = $state([]);
     let cargado = $state(false);
     //paginacon
-    let pageSize = $state(15);
+    let pageSize = $state(5);
     let paginaActual = $state(1);
     //Filtros
     let buscar = $state("");
@@ -78,7 +78,7 @@
     //movimientos
 
     //movimiento
-    let seccionAbierta = $state("")
+    let seccionAbierta = $state("");
     let nuevacategoria = $state("");
     let nuevolote = $state("");
     let nuevorodeo = $state("");
@@ -98,11 +98,10 @@
         codigo: "",
         listaanimales: [],
         selecthashmap: {},
-        lotes:[],
-        rodeos:[],
-        categorias:[],
-        seccion:""
-
+        lotes: [],
+        rodeos: [],
+        categorias: [],
+        seccion: "",
     };
     let detallemovimiento = $state({
         ...defaultmovimiento,
@@ -630,8 +629,8 @@
             selecttransfer = true;
             textoboton = "Transferir";
         }
-        seccionAbierta = seccion
-        saveDetalleMovmiento()
+        seccionAbierta = seccion;
+        saveDetalleMovmiento();
     }
     function validarBoton() {
         habilitarboton = true;
@@ -733,10 +732,10 @@
         detallemovimiento.codigo = codigo;
         detallemovimiento.listaanimales = listaanimales;
         detallemovimiento.selecthashmap = selecthashmap;
-        detallemovimiento.lotes = lotes
-        detallemovimiento.rodeos=rodeos
-        detallemovimiento.categorias=categorias
-        detallemovimiento.seccion = seccionAbierta
+        detallemovimiento.lotes = lotes;
+        detallemovimiento.rodeos = rodeos;
+        detallemovimiento.categorias = categorias;
+        detallemovimiento.seccion = seccionAbierta;
         proxyDetalleMovimiento.save(detallemovimiento);
     }
     function loadDetalleMovimiento() {
@@ -782,6 +781,7 @@
         openNewModal();
     }
     function siguiente() {
+        saveDetalleMovmiento()
         goto(pre + "/movimientos/detalle");
     }
     function verAnimal(id) {
@@ -821,9 +821,7 @@
                 </h1>
             </div>
         </div>
-        <div
-            class="grid grid-cols-1  max-h-screen gap-1 md:gap-2"
-        >
+        <div class="grid grid-cols-1 max-h-screen gap-1 md:gap-2">
             <!--Lado izquierdo-->
             <div>
                 <DetalleMovimiento
@@ -841,12 +839,11 @@
                     {onChangeCollapse}
                 />
                 <div class="hidden">
-<AnimalesSeleccionados
-                    {selecthashmap}
-                    quitarAnimal={clickAnimal}
-                />
+                    <AnimalesSeleccionados
+                        {selecthashmap}
+                        quitarAnimal={clickAnimal}
+                    />
                 </div>
-                
             </div>
             <!--Lado derecho-->
             <div class="md:col-span-2">
@@ -904,10 +901,10 @@
                                                 aria-label="Todos"
                                                 onclick={clickTodos}
                                                 class={`
-                                    text-white bg-transparent rounded-lg
-                                    px-3 py-3
-                                    ${estilos.secundario}
-                                `}
+                                                    text-white bg-transparent rounded-lg
+                                                    px-3 py-3
+                                                    ${estilos.secundario}
+                                                `}
                                             >
                                                 {#if todos}
                                                     <svg
@@ -1082,10 +1079,10 @@
                                 aria-label="Todos"
                                 onclick={clickTodos}
                                 class={`
-                    text-base bg-transparent rounded-lg
-                    p-1 text-base flex flex-row
-                    ${estilos.secundario}
-                `}
+                                    text-base bg-transparent rounded-lg
+                                    p-1 text-base flex flex-row
+                                    ${estilos.secundario}
+                                `}
                             >
                                 {#if todos}
                                     <svg
