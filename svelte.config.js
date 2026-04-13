@@ -41,6 +41,7 @@ const config = {
 				"/inseminaciones",
 				"/observaciones",
 				"/observaciones/1",
+				"/oauth2/callback",
 				"/tareas",
 				"/tratamientos",
 				"/tratamientos/1",

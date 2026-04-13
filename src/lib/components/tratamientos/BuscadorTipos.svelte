@@ -2,6 +2,7 @@
     import estilos from "$lib/stores/estilos";
     import { slide } from "svelte/transition";
     import Filter from "$lib/svgs/filter.svelte";
+    import Plus from "$lib/svgs/plus.svelte";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -9,7 +10,7 @@
         buscador = $bindable(""),
         idtipo = "",
         nombretipo = $bindable(),
-        isOpenFilter = false,
+        isOpenForm = false,
         nuevo = () => {},
         editar = (id) => {},
         filterUpdate = () => {},
@@ -64,7 +65,7 @@
             >
                 <input
                     type="text"
-                    placeholder="Buscar por madre ..."
+                    placeholder="Buscar por nombre ..."
                     class={`
                     shadow-2xl
                     dark:placeholder-gray-500 
@@ -93,7 +94,7 @@
                     />
                 </svg>
             </div>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2 items-bottom">
                 <button
                     onclick={nuevo}
                     class={`
@@ -101,18 +102,18 @@
                         items-center gap-1
                         
                         ${
-                            isOpenFilter
+                            isOpenForm
                                 ? "bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white"
                                 : "bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white"
                         }
                     `}
                 >
-                    <Filter size="size-4" />
+                    <Plus size="size-4" />
                     Nuevo tipo
                 </button>
             </div>
         </div>
-        {#if isOpenFilter}
+        {#if isOpenForm}
             <div transition:slide>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-1">
                     <div class="col-span-1 md:col-span-2">
@@ -139,7 +140,7 @@
                         </label>
                     </div>
                     {#if idtipo == ""}
-                        <div>
+                        <div class="flex items-center justify-end">
                             <button
                                 onclick={nuevo}
                                 class={`
@@ -152,7 +153,7 @@
                             </button>
                         </div>
                     {:else}
-                        <div>
+                        <div class="flex items-end ">
                             <button
                                 onclick={() => editar(idtipo)}
                                 class={`

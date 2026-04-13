@@ -10,12 +10,11 @@
     import PocketBase from "pocketbase";
     import { fade, fly } from "svelte/transition";
     import { quintOut } from "svelte/easing";
-    import { createEventDispatcher } from "svelte";
-    import { json } from "@sveltejs/kit";
-    const dispatch = createEventDispatcher();
+
 
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
+    let go_server = import.meta.env.VITE_RUTA_GO_SERVER;
     let usuarioname = $state("");
     let contra = $state("");
     let showpass = $state(false);
@@ -320,7 +319,7 @@
 
                 <div>
                     <a
-                        href="/oauth2/authorization/google"
+                        href={`${go_server}oauth2/authorization/google`}
                         class="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-4 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition text-gray-700 dark:text-gray-200 text-sm font-medium"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-5 h-5">

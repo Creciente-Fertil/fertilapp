@@ -4,6 +4,15 @@
     import Swal from "sweetalert2";
     import PocketBase from "pocketbase";
     import { onMount } from "svelte";
+    import { createCaber } from "$lib/stores/cab.svelte";
+    import { createUserer } from "$lib/stores/user.svelte";
+    import { createPer } from "$lib/stores/permisos.svelte";
+    import BuscadorTipos from "$lib/components/tratamientos/BuscadorTipos.svelte";
+
+    import { createStorageProxy } from "$lib/filtros/filtros";
+    import TablaTipos from "$lib/components/tratamientos/TablaTipos.svelte";
+    import { getPermisosCabUser } from "$lib/permisosutil/lib";
+    import { getPermisosList } from "$lib/permisosutil/lib";
 
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -26,20 +35,21 @@
         ...defaulttipos,
     });
     let proxy = createStorageProxy("detallestipos", defaulttipos);
+    let buscador = $state("");
     //datos
     let tipotratamientos = $state([]);
-    
+    let isOpenForm = $state(false);
+
     let idtipo = $state("");
     let nombretipo = $state("");
 
     //validaciones
-    let addtipo = $state(false);
     let botontipo = $state(false);
 
     //Paginacion
-    let rows = $state([])
-    let pageSize = $state(15)
-    let paginaActual = $state(1)
+    let rows = $state([]);
+    let pageSize = $state(15);
+    let paginaActual = $state(1);
 
     function isEmpty(str) {
         return !str || str.length === 0;
@@ -56,14 +66,18 @@
         if (idx_tipo != -1) {
             let tipotratamiento = tipotratamientos[idx_tipo];
             nombretipo = tipotratamiento.nombre;
-            addtipo = true;
+
+            isOpenForm = true;
         }
     }
     function nuevoTipo() {
-        idtipo = "";
-
-        nombretipo = "";
-        addtipo = true;
+        if (isOpenForm) {
+            isOpenForm = false;
+        } else {
+            idtipo = "";
+            nombretipo = "";
+            isOpenForm = true;
+        }
     }
     async function guardarTipo() {
         if (idtipo == "") {
@@ -83,6 +97,7 @@
                         ? 1
                         : -1,
                 );
+                saveTipos();
                 Swal.fire(
                     "Exito guardar",
                     "Se logró guardar el tipo",
@@ -118,7 +133,7 @@
                     ? 1
                     : -11,
             );
-
+            saveTipos();
             Swal.fire("Exito editar", "Se logró editar el tipo", "success");
         } catch (err) {
             console.error(err);
@@ -142,6 +157,7 @@
                     ? 1
                     : -11,
             );
+            saveTipos();
             Swal.fire("Exito eliminar", "Se logró eliminar el tipo", "success");
         } catch (err) {
             console.error(err);
@@ -156,6 +172,10 @@
         detallestipos = proxy.load();
         tipotratamientos = detallestipos.tipos;
     }
+    function saveTipos() {
+        detallestipos.tipos = tipotratamientos;
+        proxy.save(detallestipos);
+    }
     onMount(async () => {
         let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
@@ -166,3 +186,58 @@
         loadTipos();
     });
 </script>
+
+<Navbar2>
+    <div
+        class="
+            container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4
+            "
+    >
+        <a
+            href={`${pre + "/tratamientos"}`}
+            class="
+                inline-flex items-center text-sm
+                text-gray-700 hover:text-gray-900 dark:text-gray-400
+                dark:hover:text-gray-200 mb-4"
+        >
+            <svg
+                class="w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+            </svg>
+            Volver a tratamientos
+        </a>
+    </div>
+    <BuscadorTipos
+        nuevo={nuevoTipo}
+        editar={editarTipo}
+        bind:buscador
+        bind:idtipo
+        bind:nombretipo
+        {isOpenForm}
+    />
+    <!--Tabla-->
+    <div
+        class={`
+                w-full xl:w-3/4 md:grid
+                mx-auto py-1 px-4 max-w-7xl  
+            `}
+    >
+        <div
+            class={`
+                    overflow-hidden rounded-xl
+                    border dark:border-gray-700
+                `}
+        >
+            <TablaTipos tiposrows={tipotratamientos} />
+        </div>
+    </div>
+</Navbar2>

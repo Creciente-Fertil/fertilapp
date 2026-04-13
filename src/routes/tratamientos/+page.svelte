@@ -81,6 +81,15 @@
         "detalletratamiento",
         vaciotratamiento,
     );
+    //tipos
+    let defaulttipos = {
+        tipos: [],
+    };
+
+    let detallestipos = $state({
+        ...defaulttipos,
+    });
+    let proxytipos = createStorageProxy("detallestipos", defaulttipos);
     //Datos tipo tratamiento
     let nombretipotratamiento = $state("");
     let idtipotratamiento = $state("");
@@ -342,7 +351,10 @@
         });
     }
     function openTiposModal() {
-        tiposmodal.showModal();
+        detallestipos.tipos = tipotratamientos
+        proxytipos.save(detallestipos)
+        goto(pre + "/tratamientos/tipos")
+        //tiposmodal.showModal();
     }
 
     function openEditTipoModal(id) {
@@ -739,10 +751,9 @@
         >
             <div
                 class={`
-                overflow-hidden rounded-xl
-                border dark:border-gray-700
-
-            `}
+                    overflow-hidden rounded-xl
+                    border dark:border-gray-700
+                `}
             >
                 <TablaTratamientos
                     bind:pageSize
