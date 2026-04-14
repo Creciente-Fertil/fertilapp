@@ -14,6 +14,7 @@
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import { shorterWord } from "$lib/stringutil/lib";
     import TablaRodeos from "$lib/components/rodeos/TablaRodeos.svelte";
+    import ListaRodeos from "$lib/components/rodeos/ListaRodeos.svelte";
     let ruta = import.meta.env.VITE_RUTA;
 
     const pb = new PocketBase(ruta);
@@ -29,7 +30,7 @@
     let mostrarVacios = $state(true);
     let cargadorodeos = $state(false);
     let todos = $state(false);
-    let ninguno = $state(false);
+    let ninguno = $state(true);
     let algunos = $state(false);
     //Paginacion
     let pageSize = $state(15);
@@ -265,8 +266,53 @@
         goto(pre+"/rodeos/0")
         //openNewModal();
     }
-    function clickTodos() {}
-    function clickFila(id) {}
+    function clickTodos() {
+        if (todos) {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        } else if (ninguno) {
+            ninguno = false;
+            todos = true;
+
+            for (let i = 0; i < rodeosrows.length; i++) {
+                let s = rodeosrows[i];
+                selecthash[s.id] = { ...s };
+            }
+        } else {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        }
+    }
+    function clickFila(id) {
+        if (selecthash[id]) {
+            if (todos) {
+                todos = false;
+                algunos = true;
+            }
+            delete selecthash[id];
+            if (Object.keys(selecthash).length == 0) {
+                todos = false;
+                algunos = false;
+                ninguno = true;
+            }
+        } else {
+            if (ninguno) {
+                algunos = true;
+                ninguno = false;
+            }
+            let s_idx = rodeosrows.findIndex((s) => s.id == id);
+            if (s_idx != -1) {
+                let s = rodeosrows[s_idx];
+                selecthash[s.id] = {
+                    ...s,
+                };
+            }
+        }
+    }
 </script>
 
 <Navbar2>
@@ -283,6 +329,7 @@
         <!--Tabla-->
         <div
             class={`
+                hidden
                 w-full xl:w-3/4 md:grid
                 mx-auto py-1 px-4 max-w-7xl  
             `}
@@ -307,6 +354,27 @@
                     {shorterWord}
                 />
             </div>
+        </div>
+        <!--Lista-->
+        <div
+            class={`
+             md:hidden
+            w-full grid grid-cols-1
+            mx-auto py-6 px-4 max-w-7xl
+        `}
+        >
+            <ListaRodeos
+            bind:pageSize
+                    {selecthash}
+                    {rodeosrows}
+                    openView={openViewModal}
+                    openEdit={openEditModal}
+                    openEliminar={eliminar}
+                    {clickFila}
+                    {clickTodos}
+                    {todos}
+                    {shorterWord}
+            />
         </div>
     {/if}
 </Navbar2>

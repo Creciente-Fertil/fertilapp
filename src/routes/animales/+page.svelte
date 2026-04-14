@@ -44,8 +44,12 @@
     import Buscador from "$lib/components/animales/Buscador.svelte";
     import TablaAnimales from "$lib/components/animales/TablaAnimales.svelte";
     import { getAll, saveAnimal } from "$lib/java/animales/animalesback";
+    import ListaAnimales from "$lib/components/animales/ListaAnimales.svelte";
+    let innerWidth = $state(0);
+    let innerHeight = $state(0);
+    let esCelu = $derived(innerWidth <= 1100);
     let esdev = import.meta.env.VITE_DEV == "si";
-    let isDev = $derived(esdev)
+    let isDev = $derived(esdev);
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -53,7 +57,7 @@
 
     //ver java
     let versionjava = $state(false);
-    
+
     async function toggleJava() {
         versionjava = !versionjava;
         await getAnimales();
@@ -540,6 +544,9 @@
         await getRodeos();
         await getLotes();
         filterUpdate();
+        if(esCelu){
+            pageSize = 5
+        }
     });
     function cerrarModal() {
         idanimal = "";
@@ -727,7 +734,7 @@
         }
     }
     function nuevo() {
-        goto(pre+"/animales/0")
+        goto(pre + "/animales/0");
         //openNewModal();
     }
     function estadisticas() {
@@ -785,7 +792,7 @@
         }
     }
 </script>
-
+<svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     {#if esdev}
         premisos {JSON.stringify(userpermisos, null, 2)}
@@ -824,7 +831,7 @@
 
     <!--Ordenar-->
     <div
-        class="block md:hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
+        class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
     >
         <button aria-label="Ordenar" class="w-full" onclick={clickOrdenar}>
             <div class="flex justify-between items-center px-1">
@@ -921,84 +928,28 @@
             />
         </div>
     </div>
-
-    <div class="block md:hidden justify-items-center mx-1">
-        {#each animalesrows as a}
-            <div
-                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-            >
-                <button onclick={() => goto(`${pre}/animales/${a.id}`)}>
-                    <div class="block p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-medium">
-                                {shorterWord(a.caravana)}
-                            </h3>
-                            {#if a.sexo == "H" && a.prenada != 1}
-                                <div
-                                    class={`badge badge-outline badge-${getEstadoColor(a.prenada)}`}
-                                >
-                                    {getEstadoNombre(a.prenada)}
-                                </div>
-                            {/if}
-                        </div>
-                        <div class="flex items-start">
-                            <span>Edad:</span>
-                            <span class="font-semibold">
-                                {a.fechanacimiento != ""
-                                    ? calcularEdad(a.fechanacimiento)
-                                    : ""}
-                            </span>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-y-2">
-                            <div class="flex items-start">
-                                <span class="font-semibold"
-                                    >{getSexoNombre(a.sexo)}</span
-                                >
-                            </div>
-                            <div class="flex items-start">
-                                <span>Categoría:</span>
-                                <span class="font-semibold">
-                                    {capitalize(a.categoria)}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Lote:</span>
-                                <span class="font-semibold">
-                                    {a.expand
-                                        ? a.expand.lote
-                                            ? a.expand.lote.nombre
-                                            : ""
-                                        : ""}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Rodeo:</span>
-                                <span class="font-semibold">
-                                    {a.expand
-                                        ? a.expand.rodeo
-                                            ? a.expand.rodeo.nombre
-                                            : ""
-                                        : ""}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Raza:</span>
-                                <span class="font-semibold">
-                                    {a.raza}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Color:</span>
-                                <span class="font-semibold">
-                                    {a.color}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </button>
-            </div>
-        {/each}
+    <div
+        class={`
+            md:hidden
+            w-full grid grid-cols-1
+            mx-auto py-6 px-4 max-w-7xl
+        `}
+    >
+        <ListaAnimales
+            {pageSize}
+            {selecthash}
+            {animalesrows}
+            {ordenarAnimales}
+            {clickTodos}
+            {clickFila}
+            {todos}
+            {ascendente}
+            {forma}
+            {shorterWord}
+            {capitalize}
+            {getEstadoNombre}
+            {calcularEdad}
+        />
     </div>
 </Navbar2>
 <dialog

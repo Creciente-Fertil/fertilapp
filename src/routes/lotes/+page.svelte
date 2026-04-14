@@ -16,6 +16,10 @@
     import TablaLotes from "$lib/components/lotes/TablaLotes.svelte";
     import { shorterWord } from "$lib/stringutil/lib";
     import { getAll } from "$lib/java/lotes/lotesback";
+    import ListaLotes from "$lib/components/lotes/ListaLotes.svelte";
+    let innerWidth = $state(0);
+    let innerHeight = $state(0);
+    let esCelu = $derived(innerWidth <= 1100);
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -42,7 +46,7 @@
     let mostrarVacios = $state(true);
     let cargadolotes = $state(false);
     let todos = $state(false);
-    let ninguno = $state(false);
+    let ninguno = $state(true);
     let algunos = $state(false);
     //Paginacion
     let pageSize = $state(15);
@@ -120,10 +124,9 @@
             }
             filterUpdate();
             cargadolotes = true;
-        }
-        else{
-            let data_lotes = await getAll()
-            lotes = data_lotes
+        } else {
+            let data_lotes = await getAll();
+            lotes = data_lotes;
             lotesrows = lotes;
             for (let i = 0; i < lotes.length; i++) {
                 lotes[i].total = 0;
@@ -303,10 +306,56 @@
     function nuevo() {
         openNewModal();
     }
-    function clickTodos() {}
-    function clickFila(id) {}
+    function clickTodos() {
+        if (todos) {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        } else if (ninguno) {
+            ninguno = false;
+            todos = true;
+
+            for (let i = 0; i < lotesrows.length; i++) {
+                let s = lotesrows[i];
+                selecthash[s.id] = { ...s };
+            }
+        } else {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        }
+    }
+    function clickFila(id) {
+        if (selecthash[id]) {
+            if (todos) {
+                todos = false;
+                algunos = true;
+            }
+            delete selecthash[id];
+            if (Object.keys(selecthash).length == 0) {
+                todos = false;
+                algunos = false;
+                ninguno = true;
+            }
+        } else {
+            if (ninguno) {
+                algunos = true;
+                ninguno = false;
+            }
+            let s_idx = lotesrows.findIndex((s) => s.id == id);
+            if (s_idx != -1) {
+                let s = lotesrows[s_idx];
+                selecthash[s.id] = {
+                    ...s,
+                };
+            }
+        }
+    }
 </script>
 
+<svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador
         cabnombre={cab.nombre}
@@ -325,7 +374,7 @@
         <!--Tabla-->
         <div
             class={`
-                w-full xl:w-3/4 md:grid
+                hidden w-full xl:w-3/4 md:grid
                 mx-auto py-1 px-4 max-w-7xl  
             `}
         >
@@ -347,52 +396,30 @@
                     {clickTodos}
                     {todos}
                     {shorterWord}
+                    {esCelu}
                 />
             </div>
         </div>
         <div
             class={`
-            hidden
+             md:hidden
             w-full grid grid-cols-1
             mx-auto py-6 px-4 max-w-7xl
         `}
         >
-            <div class="overflow-hidden rounded-xl">
-                <table class="table table-lg w-full">
-                    <thead
-                        class="bg-emerald-600 text-white dark:bg-emerald-700"
-                    >
-                        <tr>
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                                >Nombre</th
-                            >
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                                >Total</th
-                            >
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each lotesrows as r}
-                            {#if r.total != 0 || mostrarVacios}
-                                <tr
-                                    onclick={() => openEditModal(r.id)}
-                                    class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
-                                >
-                                    <td
-                                        class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                        >{r.nombre}</td
-                                    >
-                                    <td class="text-base mx-1 px-1"
-                                        >{r.total}</td
-                                    >
-                                </tr>
-                            {/if}
-                        {/each}
-                    </tbody>
-                </table>
-            </div>
+            <ListaLotes
+                bind:pageSize
+                {selecthash}
+                {lotesrows}
+                openView={openViewModal}
+                openEdit={openEditModal}
+                openEliminar={eliminar}
+                {clickFila}
+                {clickTodos}
+                {todos}
+                {shorterWord}
+                {esCelu}
+            />
         </div>
     {/if}
 </Navbar2>

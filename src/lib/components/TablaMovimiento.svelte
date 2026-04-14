@@ -24,6 +24,7 @@
         ninguno = true,
         cancelar = () => {},
         siguiente = () => {},
+        esCelu = false,
     } = $props();
 
     function onChangePageSize() {
@@ -40,7 +41,6 @@
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
     let pyfila = "py-2";
-    
 </script>
 
 <div
@@ -50,8 +50,9 @@
         <table class="table table-lg w-full bg-white dark:bg-slate-900">
             <thead class={`${estilos.tableheader} sticky top-0 z-5 shadow-sm`}>
                 <tr>
-                    
-                    <th class="text-base mx-2 px-2 w-16 flex items-center justify-center">
+                    <th
+                        class="text-base mx-2 px-2 w-16 flex items-center justify-center"
+                    >
                         <button
                             type="button"
                             onclick={clickTodos}
@@ -62,17 +63,17 @@
                                 border-2
                                 transition-all duration-200 ease-in-out
                                 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900
-                                ${todos
-                                    ? 'bg-emerald-700 border-emerald-700'
-                                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-500 hover:border-emerald-500 dark:hover:border-emerald-400'}
+                                ${
+                                    todos
+                                        ? "bg-emerald-700 border-emerald-700"
+                                        : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-500 hover:border-emerald-500 dark:hover:border-emerald-400"
+                                }
                             `}
                             aria-label={todos
                                 ? "Deseleccionar todos"
                                 : "Seleccionar todos"}
                         >
                             <!-- El icono de check (solo visible cuando todos es true) -->
-                            
-                            
                         </button>
                     </th>
                     <th
@@ -113,7 +114,6 @@
             <tbody>
                 {#each rows as a}
                     <tr>
-                        
                         <td class={`text-base mx-2 px-2 w-16 ${pyfila}`}>
                             <label
                                 class="flex items-center justify-center cursor-pointer"
@@ -188,6 +188,7 @@
         </table>
     </div>
 </div>
+
 <Paginacion
     rows={animalesrows}
     bind:paginaActual
@@ -195,6 +196,7 @@
     {totalPaginas}
     {onChangePageSize}
     rounded={""}
+    
 />
 <AccionesMovimiento {cancelar} {siguiente} />
 

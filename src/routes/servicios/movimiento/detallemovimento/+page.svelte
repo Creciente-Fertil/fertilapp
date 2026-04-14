@@ -466,6 +466,7 @@
         });
         cargadoanimales = true;
     }
+    
 
     onMount(async () => {
         let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
@@ -486,10 +487,12 @@
 <Navbar2>
     
     <div class={classmove}>
+        {#if esdev}
         <Secondary
             texto={versionjava?"Cerrar java":"Ver java"}
             onclick={toggleJava}
         />
+        { /if}
         <DetalleMovimiento
             {esNatural}
             {observaciongeneral}

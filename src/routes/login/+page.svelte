@@ -10,16 +10,19 @@
     import PocketBase from "pocketbase";
     import { fade, fly } from "svelte/transition";
     import { quintOut } from "svelte/easing";
-
-
+    const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
+    const LOGIN="auth/login"
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     let go_server = import.meta.env.VITE_RUTA_GO_SERVER;
+    let versionjava = $state(false);
     let usuarioname = $state("");
     let contra = $state("");
     let showpass = $state(false);
     let logooscuro = $state(true);
-
+    function toggleJava() {
+        versionjava = !versionjava;
+    }
     function isEmpty(str) {
         return !str || str.length === 0;
     }
@@ -37,6 +40,25 @@
             return false;
         }
     }
+    async function ingresarJava() {
+        let data = {
+            email: "nahuel.n.piguillem+1@gmail.com",
+            password: "secreto",
+        };
+        let ruta = `${RUTA_JAVA}${LOGIN}`
+        let res_login = await fetch(
+            ruta,
+            {
+                method: "POST",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+            },
+            }
+        )
+        let data_login = await res_login.json()
+        console.log(login)
+    }
     async function ingresar() {
         if (isEmpty(usuarioname)) {
             Swal.fire("Error login", "Nombre usuario vacio", "error");
@@ -46,7 +68,7 @@
             Swal.fire("Error login", "Contraseña vacia", "error");
             return;
         }
-        
+
         const pb = new PocketBase(ruta);
         let emailExiste = await existeEmailUsuario(pb, usuarioname);
         if (!emailExiste) {
@@ -268,7 +290,6 @@
                         bind:value={usuarioname}
                         required
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                        
                     />
                 </div>
                 <div>
@@ -303,11 +324,21 @@
                             py-2 px-4 hover:bg-green-700 hover:dark:bg-[#168561] focus:outline-none 
                             focus:ring-2 focus:ring-green-500 focus:ring-offset-2 
                             transition
-                            `
-                        }
+                            `}
                         onclick={ingresar}
                     >
                         Ingresar
+                    </button>
+                    <button
+                        class={`
+                            w-full bg-[#115642] dark:bg-[#126a50] text-white rounded-md 
+                            py-2 px-4 hover:bg-green-700 hover:dark:bg-[#168561] focus:outline-none 
+                            focus:ring-2 focus:ring-green-500 focus:ring-offset-2 
+                            transition
+                            `}
+                        onclick={ingresarJava}
+                    >
+                        Ingresar java
                     </button>
                 </div>
 
@@ -322,12 +353,28 @@
                         href={`${go_server}oauth2/authorization/google`}
                         class="w-full flex items-center justify-center gap-3 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-4 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition text-gray-700 dark:text-gray-200 text-sm font-medium"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-5 h-5">
-                            <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85l6.09-6.09C34.46 3.09 29.5 1 24 1 14.82 1 7.07 6.56 3.87 14.41l7.08 5.5C12.67 13.69 17.87 9.5 24 9.5z"/>
-                            <path fill="#4285F4" d="M46.1 24.55c0-1.64-.15-3.22-.42-4.75H24v9h12.42c-.54 2.93-2.18 5.41-4.64 7.08l7.2 5.6C43.18 37.26 46.1 31.36 46.1 24.55z"/>
-                            <path fill="#FBBC05" d="M10.95 28.09A14.56 14.56 0 0 1 9.5 24c0-1.42.24-2.8.65-4.09l-7.08-5.5A23.93 23.93 0 0 0 0 24c0 3.86.92 7.51 2.55 10.74l8.4-6.65z"/>
-                            <path fill="#34A853" d="M24 47c5.5 0 10.12-1.82 13.5-4.94l-7.2-5.6c-1.81 1.22-4.13 1.94-6.3 1.94-6.13 0-11.33-4.19-13.05-9.81l-8.4 6.65C7.07 41.44 14.82 47 24 47z"/>
-                            <path fill="none" d="M0 0h48v48H0z"/>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 48 48"
+                            class="w-5 h-5"
+                        >
+                            <path
+                                fill="#EA4335"
+                                d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85l6.09-6.09C34.46 3.09 29.5 1 24 1 14.82 1 7.07 6.56 3.87 14.41l7.08 5.5C12.67 13.69 17.87 9.5 24 9.5z"
+                            />
+                            <path
+                                fill="#4285F4"
+                                d="M46.1 24.55c0-1.64-.15-3.22-.42-4.75H24v9h12.42c-.54 2.93-2.18 5.41-4.64 7.08l7.2 5.6C43.18 37.26 46.1 31.36 46.1 24.55z"
+                            />
+                            <path
+                                fill="#FBBC05"
+                                d="M10.95 28.09A14.56 14.56 0 0 1 9.5 24c0-1.42.24-2.8.65-4.09l-7.08-5.5A23.93 23.93 0 0 0 0 24c0 3.86.92 7.51 2.55 10.74l8.4-6.65z"
+                            />
+                            <path
+                                fill="#34A853"
+                                d="M24 47c5.5 0 10.12-1.82 13.5-4.94l-7.2-5.6c-1.81 1.22-4.13 1.94-6.3 1.94-6.13 0-11.33-4.19-13.05-9.81l-8.4 6.65C7.07 41.44 14.82 47 24 47z"
+                            />
+                            <path fill="none" d="M0 0h48v48H0z" />
                         </svg>
                         Ingresar con Google
                     </a>
@@ -340,8 +387,7 @@
                         text-md text-[#115642] dark:text-[#126a50] 
                         hover:text-[#24a579] dark:hover:text-[#168561] 
                         transition
-                        `
-                    }
+                        `}
                 >
                     ¿Olvidaste la contraseña?
                 </a>
@@ -357,8 +403,7 @@
                             text-md text-[#115642] dark:text-[#126a50] 
                             hover:text-[#24a579] dark:hover:text-[#168561]
                             transition
-                            `
-                        }
+                            `}
                     >
                         Crear una
                     </a>

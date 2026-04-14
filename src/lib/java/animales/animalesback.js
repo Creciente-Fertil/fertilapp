@@ -37,9 +37,17 @@ function processAnimales(data) {
     return data_animales
 }
 export async function getAll() {
-    let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/all`
+    
+    let token =localStorage.getItem("token")||"";
 
-    let res_all = await fetch(ruta)
+    let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/all`
+    let options = {
+        headers:{
+            "Content-Type": "application/json",
+            "Authorization":`Bearer ${token}`
+        }
+    }
+    let res_all = await fetch(ruta,options)
 
     let data_all = await res_all.json()
 

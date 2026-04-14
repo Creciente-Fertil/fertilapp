@@ -32,6 +32,9 @@
     import ListaServicios from "$lib/components/servicios/ListaServicios.svelte";
     //java
     import { getAllServices } from "$lib/java/servicios/serviciosback";
+    let innerWidth = $state(0);
+    let innerHeight = $state(0);
+    let esCelu = $derived(innerWidth <= 1100);
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -72,6 +75,8 @@
     let servicios = $state([]);
     let serviciosrow = $state([]);
     //seleccionados
+    //Paginacion
+    let pageSize = $state(15);
     let todos = $state(false);
     let algunos = $state(false);
     let ninguno = $state(true);
@@ -183,7 +188,7 @@
         esservicio = true;
         idserv = id;
         let ser = servicios.filter((s) => s.id == id)[0];
-        
+
         if (ser) {
             caravanamadre = "";
             if (ser.expand && ser.expand.madre) {
@@ -192,7 +197,7 @@
             madre = ser.madre;
             if (versionjava) {
                 fechadesdeserv = ser.fechadesde;
-                fechahastaserv = ser.fechahasta?ser.fechahasta:"";
+                fechahastaserv = ser.fechahasta ? ser.fechahasta : "";
                 fechaparto = ser.fechaparto;
             } else {
                 fechadesdeserv = ser.fechadesde.split(" ")[0];
@@ -610,9 +615,12 @@
 
         filterUpdate();
         //ordenarServicios("fecha")
+        if(esCelu){
+            pageSize = 5
+        }
+
     });
-    //Paginacion
-    let pageSize = $state(15);
+    
 
     //Para el collapse de los ordenar
     let isOpenOrdenar = $state(false);
@@ -740,7 +748,7 @@
         }
     }
 </script>
-
+<svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador
         {selecthash}
@@ -767,7 +775,7 @@
 
     <!--Ordenar-->
     <div
-        class="block md:hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
+        class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
     >
         <button aria-label="Ordenar" class="w-full" onclick={clickOrdenar}>
             <div class="flex justify-between items-center px-1">
@@ -867,7 +875,13 @@
                 />
             </div>
         </div>
-        <div class="block w-full md:hidden justify-items-center mx-1">
+        <div
+            class={`
+                md:hidden
+                w-full grid grid-cols-1
+                mx-auto py-6 px-4 max-w-7xl
+            `}
+        >
             <ListaServicios
                 {pageSize}
                 {serviciosrow}
@@ -887,98 +901,6 @@
                 {clickTodos}
                 bind:todos
             />
-            <div class="hidden">
-                {#each serviciosrow as s}
-                    <div
-                        class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                    >
-                        <button
-                            onclick={() =>
-                                s.fechadesde
-                                    ? openEditModal(s.id)
-                                    : openEditModalIns(s.id)}
-                        >
-                            <div class="block p-4">
-                                <div class="grid grid-cols-2 gap-y-2">
-                                    <div class="flex items-start">
-                                        <span>Tipo:</span>
-                                        <span class="mx-1 font-semibold">
-                                            {s.fechadesde
-                                                ? "Natural"
-                                                : "Artificial"}
-                                        </span>
-                                    </div>
-                                    <div class="flex items-start">
-                                        <span>Fecha parto:</span>
-                                        <span class="mx-1 font-semibold">
-                                            {s.fechaparto
-                                                ? new Date(
-                                                      s.fechaparto,
-                                                  ).toLocaleDateString()
-                                                : ""}
-                                        </span>
-                                    </div>
-                                    <div
-                                        class={`flex items-start ${s.fechadesde ? "" : "col-span-2"}`}
-                                    >
-                                        <span>
-                                            Fecha {s.fechadesde
-                                                ? "desde"
-                                                : "de inseminación"}:
-                                        </span>
-                                        <span class="mx-1 font-semibold">
-                                            {s.fechadesde
-                                                ? new Date(
-                                                      s.fechadesde,
-                                                  ).toLocaleDateString()
-                                                : s.fechainseminacion
-                                                  ? new Date(
-                                                        s.fechainseminacion,
-                                                    ).toLocaleDateString()
-                                                  : ""}
-                                        </span>
-                                    </div>
-                                    {#if s.fechadesde}
-                                        <div class="flex items-start">
-                                            <span>Fecha hasta:</span>
-                                            <span class="mx-1 font-semibold">
-                                                {s.fechadesde
-                                                    ? new Date(
-                                                          s.fechadesde,
-                                                      ).toLocaleDateString()
-                                                    : s.fechainseminacion
-                                                      ? new Date(
-                                                            s.fechainseminacion,
-                                                        ).toLocaleDateString()
-                                                      : ""}
-                                            </span>
-                                        </div>
-                                    {/if}
-                                    <div class="flex items-start">
-                                        <span>Madre:</span>
-                                        <span class="mx-1 font-semibold">
-                                            {"caravana"}
-                                        </span>
-                                    </div>
-                                    <div class="flex items-start">
-                                        <span>
-                                            {s.fechadesde ? "Padres" : "Padre"}
-                                        </span>
-                                        <span class="mx-1 font-semibold">
-                                            {s.fechadesde
-                                                ? getNombrePadres(s.padres)
-                                                : s.pajuela}
-                                        </span>
-                                    </div>
-                                    <div class="col-span-2 flex items-start">
-                                        <span>{`${s.observacion}`}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
-                {/each}
-            </div>
         </div>
     {/if}
 </Navbar2>

@@ -22,6 +22,10 @@
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import TablaTratamientos from "$lib/components/tratamientos/TablaTratamientos.svelte";
     import Success from "$lib/components/botones/Success.svelte";
+    import ListaTratamientos from "$lib/components/tratamientos/ListaTratamientos.svelte";
+    let innerWidth = $state(0);
+    let innerHeight = $state(0);
+    let esCelu = $derived(innerWidth <= 1100);
     let caber = createCaber();
     let cab = caber.cab;
     let ruta = import.meta.env.VITE_RUTA;
@@ -354,8 +358,8 @@
     function openTiposModal() {
         detallestipos.tipos = tipotratamientos;
         proxytipos.save(detallestipos);
-        //goto(pre + "/tratamientos/tipos")
-        tiposmodal.showModal();
+        goto(pre + "/tratamientos/tipos");
+        //tiposmodal.showModal();
     }
 
     function openEditTipoModal(id) {
@@ -584,6 +588,9 @@
         await getTiposTratamientos();
         await getAnimales();
         filterUpdate();
+        if(esCelu){
+            pageSize = 5
+        }
     });
     function prepararData(item) {
         return {
@@ -648,10 +655,55 @@
     function nuevotipo() {
         openTiposModal();
     }
-    function clickTodos() {}
-    function clickFila(id) {}
-</script>
+    function clickTodos() {
+        if (todos) {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        } else if (ninguno) {
+            ninguno = false;
+            todos = true;
 
+            for (let i = 0; i < tratamientosrow.length; i++) {
+                let s = tratamientosrow[i];
+                selecthash[s.id] = { ...s };
+            }
+        } else {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        }
+    }
+    function clickFila(id) {
+        if (selecthash[id]) {
+            if (todos) {
+                todos = false;
+                algunos = true;
+            }
+            delete selecthash[id];
+            if (Object.keys(selecthash).length == 0) {
+                todos = false;
+                algunos = false;
+                ninguno = true;
+            }
+        } else {
+            if (ninguno) {
+                algunos = true;
+                ninguno = false;
+            }
+            let s_idx = tratamientosrow.findIndex((s) => s.id == id);
+            if (s_idx != -1) {
+                let s = tratamientosrow[s_idx];
+                selecthash[s.id] = {
+                    ...s,
+                };
+            }
+        }
+    }
+</script>
+<svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador
         {tratamientosrow}
@@ -672,9 +724,7 @@
         {clickFilter}
     />
     <!--Ordenar-->
-    <div
-        class="block md:hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
-    >
+    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
         <button aria-label="Ordenar" class="w-full" onclick={clickOrdenar}>
             <div class="flex justify-between items-center px-1">
                 <h1 class="font-semibold text-lg py-2">Ordenar</h1>
@@ -766,41 +816,25 @@
                 />
             </div>
         </div>
-
-        <div class="block w-full md:hidden justify-items-center mx-1">
-            {#each tratamientosrow as t}
-                <div
-                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                >
-                    <button onclick={() => irDetalle(t.id)}>
-                        <div class="block p-4">
-                            <div class="grid grid-cols-2 gap-y-2">
-                                <div class="flex items-start">
-                                    <span>Fecha:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {new Date(t.fecha).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span>Caravana:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {`${shorterWord(t.expand.animal.caravana)}`}
-                                    </span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span>Tipo:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {`${t.expand.tipo.nombre}`}
-                                    </span>
-                                </div>
-                                <div class="col-span-2 flex items-start">
-                                    <span>{`${t.observacion}`}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-                </div>
-            {/each}
+        <div
+            class={`
+             md:hidden
+            w-full grid grid-cols-1
+            mx-auto py-6 px-4 max-w-7xl
+        `}
+        >
+            <ListaTratamientos
+            bind:pageSize
+                    {selecthash}
+                    tratamientosrows={tratamientosrow}
+                    {ordenarTratamientos}
+                    openEditModal={irDetalle}
+                    openViewModal={irDetalle}
+                    openDelModal={eliminar}
+                    {clickTodos}
+                    {clickFila}
+                    {todos}
+            />
         </div>
     {/if}
 </Navbar2>

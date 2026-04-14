@@ -78,8 +78,8 @@
     //movimientos
 
     //movimiento
-    let seccionAbierta = $state("");
-    let nuevacategoria = $state("");
+    let seccionAbierta = $state("CATEGORIA");
+    let nuevacategoria = $state(categorias[0]);
     let nuevolote = $state("");
     let nuevorodeo = $state("");
     let tipotratamiento = $state("");
@@ -723,9 +723,9 @@
         }
     }
     function saveDetalleMovmiento() {
-        detallemovimiento.categoria = categoria;
-        detallemovimiento.lote = lote;
-        detallemovimiento.rodeo = rodeo;
+        detallemovimiento.categoria = nuevacategoria;
+        detallemovimiento.lote = nuevolote;
+        detallemovimiento.rodeo = nuevorodeo;
         detallemovimiento.fecha = fecha;
         detallemovimiento.motivo = motivo;
         detallemovimiento.fechabaja = fechabaja;
@@ -775,13 +775,14 @@
         await getLotes();
         await getTipos();
         cargadosmovs = true;
+
         loadDetalleMovimiento();
     });
     function nuevo() {
         openNewModal();
     }
     function siguiente() {
-        saveDetalleMovmiento()
+        saveDetalleMovmiento();
         goto(pre + "/movimientos/detalle");
     }
     function verAnimal(id) {
@@ -829,9 +830,9 @@
                     {rodeos}
                     {categorias}
                     {motivos}
-                    bind:categoria
-                    bind:lote
-                    bind:rodeo
+                    bind:categoria={nuevacategoria}
+                    bind:lote = { nuevolote}
+                    bind:rodeo = {nuevorodeo}
                     bind:fecha
                     bind:motivo
                     bind:codigo

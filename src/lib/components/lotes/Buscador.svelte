@@ -68,11 +68,7 @@
                 `}
                 onclick={nuevo}
             >
-                {#if esCelu}
-                    Lote
-                {:else}
-                    + Nuevo lote
-                {/if}
+                + Nuevo lote
             </button>
             {#if esdev}
                 <button

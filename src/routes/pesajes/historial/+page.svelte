@@ -19,7 +19,11 @@
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import { goto } from "$app/navigation";
     import TablaPesajes from "$lib/components/pesajes/TablaPesajes.svelte";
-
+    
+    import ListaPesajes from "$lib/components/pesajes/ListaPesajes.svelte";
+    let innerWidth = $state(0);
+    let innerHeight = $state(0);
+    let esCelu = $derived(innerWidth <= 1100);
     let caber = createCaber();
     let cab = caber.cab;
     let ruta = import.meta.env.VITE_RUTA;
@@ -196,7 +200,6 @@
 </script>
 
 <Navbar2>
-    
     <HistorialPesajes
         {pesajesrows}
         bind:isOpenFilter
@@ -238,45 +241,24 @@
                 />
             </div>
         </div>
-
-        <!--Lista de pesajes sin ordenar-->
-        <div class="block w-full md:hidden justify-items-center mx-1">
-            {#each pesajesrows as p}
-                <div
-                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                >
-                    <button onclick={() => openDetalle(p.id)}>
-                        <div class="block p-4">
-                            <div class="grid grid-cols-2 gap-y-2">
-                                <div class="flex items-start">
-                                    <span>Fecha:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {new Date(p.fecha).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span>Caravana:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {`${p.expand.animal.caravana}`}
-                                    </span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span>Peso anterior:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {`${p.pesoanterior}`}
-                                    </span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span>Peso nuevo:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {`${p.pesonuevo}`}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-                </div>
-            {/each}
+        <div
+            class={`
+             md:hidden
+            w-full grid grid-cols-1
+            mx-auto py-6 px-4 max-w-7xl
+        `}
+        >
+            <ListaPesajes
+                bind:pageSize
+                {selecthash}
+                {pesajesrows}
+                openViewModal={openDetalle}
+                openEditModal={openEditDetalle}
+                openDelModal={confirmDelete}
+                {clickTodos}
+                {clickFila}
+                bind:todos
+            />
         </div>
     {/if}
 </Navbar2>
@@ -431,7 +413,7 @@
                         class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                         onclick={editarPesaje}
                     >
-                    Guardar
+                        Guardar
                     </button>
                 {:else}
                     <button
@@ -447,7 +429,7 @@
                     >
                         Editar
                     </button>
-                    {/if}
+                {/if}
             </div>
         </div>
     </div>

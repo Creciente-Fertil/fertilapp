@@ -64,11 +64,7 @@
                 `}
                 onclick={nuevo}
             >
-                {#if esCelu}
-                    Rodeo
-                {:else}
-                    + Nuevo rodeo
-                {/if}
+                + Nuevo rodeo
             </button>
         </div>
         <!--Filtros-->

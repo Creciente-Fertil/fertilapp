@@ -286,12 +286,13 @@
                             focus:outline-none focus:ring-2 
                             focus:ring-green-500 
                             focus:border-green-500
+                            ps-3
                             ${estilos.bgdark2} 
                         `}
                             bind:value={nombre}
                         />
                     {:else}
-                        <label for="nombre" class="label py-0 my-0">
+                        <label for="nombre" class="label py-0 my-0 ps-3">
                             <span
                                 class={`text-lg ${estilos.labelcolor} py-0 my-0`}
                                 >{nombre}</span

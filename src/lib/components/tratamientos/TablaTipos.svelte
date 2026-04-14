@@ -23,7 +23,8 @@
         forma = "",
         isOpenForm =false,
         idtipo = "",
-        nombretipo=$bindable("")
+        nombretipo=$bindable(""),
+        esCelu=false
     } = $props();
     let firstRun = true;
     function onChangePageSize() {
@@ -46,8 +47,8 @@
     let totalPaginas = $derived(Math.ceil(count / pageSize));
     let pyfila = "py-1";
 </script>
-<div class="max-h-[600px] overflow-y-auto custom-scrollbar">
-    <table class="table table-lg w-full bg-white dark:bg-slate-900">
+<div class="max-h-[600px] overflow-y-auto custom-scrollbar ">
+    <table class="table table-lg w-full bg-white dark:bg-slate-900 rounded-none">
         <thead class={`${estilos.tableheader}  sticky top-0 z-5 shadow-sm`}>
             <tr>
                 <th
@@ -65,35 +66,6 @@
             </tr>
         </thead>
         <tbody>
-        {#if isOpenForm}
-                <tr>
-                    <td class={`text-base mx-2 px-2 w-16 ${pyfila} w-3/5`} >
-                    <input
-                                id="nombre"
-                                type="text"
-                                class={`
-                                    input 
-                                    w-full
-                                    py-0 my-1
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    ${estilos.bgdark2} 
-                                    
-                                `}
-                                bind:value={nombretipo}
-                                
-                            />
-                    </td>
-                    <td
-                        class={`flex items-center justify-center  ${pyfila}`}
-                    >
-                        <button onclick={guardarTipo}>
-                            <Plus size="size-5" />
-                        </button>
-                    </td>
-                </tr>
-            {/if}
             {#each rows as t}
                 <tr>
                     <td class={`text-base mx-1 px-4 ${pyfila}`}>
@@ -102,9 +74,7 @@
                     <td
                         class={`flex items-center justify-center gap-2 px-1 ${pyfila}`}
                     >
-                        <button onclick={() => openViewModal(t.id)}>
-                            <Eye size="size-5" />
-                        </button>
+                        
                         <button onclick={() => openEditModal(t.id)}>
                             <Pencil size="size-5" />
                         </button>
@@ -124,4 +94,5 @@
     bind:pageSize
     {totalPaginas}
     {onChangePageSize}
+    {esCelu}
 />

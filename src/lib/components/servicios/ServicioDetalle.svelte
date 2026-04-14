@@ -21,7 +21,7 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-1 p-2 pt-0">
     <div class="col-span-1 md:col-span-2">
-        <label for="madre" class="label pt-1">
+        <label for="datosgenerales" class="label pt-1">
             <span class={`label-text font-medium text-lg ${estilos.subtitle}`}>Datos generales</span>
         </label>
     </div>

@@ -4,57 +4,47 @@
     import Eye from "$lib/svgs/eye.svelte";
     import Trash from "$lib/svgs/trash.svelte";
     import Pencil from "$lib/svgs/pencil.svelte";
-    import Badge from "../Badge.svelte";
+
+    import { shorterWord } from "$lib/stringutil/lib";
+    let pre = import.meta.env.VITE_PRE;
     let {
-        pageSize = $bindable(10),
-        selecthash,
-        serviciosrow,
-        ordenarServicios = (campo, mantener) => {},
+        pageSize = $bindable(15),
+        selecthash = {},
+        observacionesrows = [],
+        ordenarObservaciones = (campo, mantener) => {},
         openViewModal = (_p) => {},
-        openViewModalIns = (_p) => {},
         openEditModal = (_p) => {},
-        openEditModalIns = (_p) => {},
         openDelModal = (_p) => {},
-        openDelModalIns = (_p) => {},
-        shorterWord = (s) => {},
-        getNombrePadres = (p) => {},
         clickTodos = () => {},
         clickFila = (id) => {},
         todos = $bindable(false),
-        ascendente,
-        forma,
-    } = $props();
+        ascendente = false,
 
+        forma = "",
+    } = $props();
     let firstRun = true;
     function onChangePageSize() {
         paginaActual = 1;
     }
-    //$effect(() => {
-    //    if (firstRun) {
-    //        firstRun = false;
-    //        return;
-    //    }
-    //    paginaActual = 1;
-    //
-    //});
 
     let paginaActual = $state(1);
 
     let paginaAnterior = $derived(paginaActual - 1);
 
     let rows = $derived(
-        serviciosrow.slice(paginaAnterior * pageSize, paginaActual * pageSize),
+        observacionesrows.slice(
+            paginaAnterior * pageSize,
+            paginaActual * pageSize,
+        ),
     );
 
-    let count = $derived(serviciosrow.length);
+    let count = $derived(observacionesrows.length);
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
-    let pyfila = "py-0";
+    let pyfila = "py-1";
 </script>
 
-<div
-    class="max-h-[600px] overflow-y-auto custom-scrollbar pb-16 bg-white dark:bg-slate-900"
->
+<div class="max-h-[600px] overflow-y-auto custom-scrollbar">
     <!-- Select all -->
     <div class="flex items-center gap-3 px-1 mb-2">
         <button
@@ -91,21 +81,20 @@
             </span>
         {/if}
     </div>
-
     <!-- Cards -->
     <div class="flex flex-col gap-3">
-        {#each rows as s}
+        {#each rows as o}
             <div
                 class={`
                 rounded-xl border p-4 transition-all
                 ${
-                    selecthash[s.id]
+                    selecthash[o.id]
                         ? "border-emerald-600 bg-emerald-50 dark:bg-emerald-950/30"
                         : "border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900"
                 }
             `}
             >
-                <!-- Cabecera con checkbox y madre/animal -->
+                <!-- Cabecera con checkbox y animal -->
                 <div class="flex items-start justify-between gap-3 mb-3">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
                         <label
@@ -113,8 +102,8 @@
                         >
                             <input
                                 type="checkbox"
-                                checked={selecthash[s.id] ? true : false}
-                                onchange={() => clickFila(s.id)}
+                                checked={selecthash[o.id] ? true : false}
+                                onchange={() => clickFila(o.id)}
                                 class="peer sr-only"
                             />
                             <span
@@ -151,9 +140,7 @@
                             <p
                                 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate"
                             >
-                                {s.fechadesde
-                                    ? shorterWord(s.expand.madre.caravana)
-                                    : shorterWord(s.expand.animal.caravana)}
+                                {o.expand.animal.caravana}
                             </p>
                         </div>
                     </div>
@@ -161,31 +148,19 @@
                     <!-- Acciones -->
                     <div class="flex items-center gap-2 shrink-0">
                         <button
-                            onclick={() => {
-                                s.fechadesde
-                                    ? openViewModal(s.id)
-                                    : openViewModalIns(s.id);
-                            }}
+                            onclick={() => openViewModal(o.id)}
                             class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         >
                             <Eye size="size-5" />
                         </button>
                         <button
-                            onclick={() => {
-                                s.fechadesde
-                                    ? openEditModal(s.id)
-                                    : openEditModalIns(s.id);
-                            }}
+                            onclick={() => openEditModal(o.id)}
                             class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         >
                             <Pencil size="size-5" />
                         </button>
                         <button
-                            onclick={() => {
-                                s.fechadesde
-                                    ? openDelModal(s.id)
-                                    : openDelModalIns(s.id);
-                            }}
+                            onclick={() => openDelModal(o.id)}
                             class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         >
                             <Trash size="size-5" />
@@ -193,77 +168,34 @@
                     </div>
                 </div>
 
-                <!-- Grid de datos (2 columnas) -->
-                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <!-- Grid de datos (1 columna para observaciones) -->
+                <div class="flex flex-col gap-2 text-sm">
                     <div>
                         <span class="text-xs text-gray-500 dark:text-gray-400"
-                            >Fecha Desde</span
+                            >Fecha</span
                         >
                         <p class="text-gray-900 dark:text-gray-100 font-medium">
-                            {s.fechadesde
-                                ? new Date(s.fechadesde).toLocaleDateString()
-                                : s.fechainseminacion
-                                  ? new Date(
-                                        s.fechainseminacion,
-                                    ).toLocaleDateString()
-                                  : "-"}
+                            {new Date(o.fecha).toLocaleDateString()}
                         </p>
                     </div>
-                    <div>
-                        <span class="text-xs text-gray-500 dark:text-gray-400"
-                            >Fecha Hasta</span
-                        >
-                        <p class="text-gray-900 dark:text-gray-100 font-medium">
-                            {s.fechahasta
-                                ? new Date(s.fechahasta).toLocaleDateString()
-                                : "-"}
-                        </p>
-                    </div>
-                    <div>
-                        <span class="text-xs text-gray-500 dark:text-gray-400"
-                            >Fecha Parto</span
-                        >
-                        <p class="text-gray-900 dark:text-gray-100 font-medium">
-                            {s.fechaparto
-                                ? new Date(s.fechaparto).toLocaleDateString()
-                                : "-"}
-                        </p>
-                    </div>
-                    <div>
-                        <span class="text-xs text-gray-500 dark:text-gray-400"
-                            >Tipo</span
-                        >
-                        <p class="text-gray-900 dark:text-gray-100 font-medium">
-                            {#if s.tipo == "NATURAL_SERVICE"}
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                    >Natural</span
-                                >
-                            {:else}
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                                    >Artificial</span
-                                >
-                            {/if}
-                        </p>
-                    </div>
-                    <div class="col-span-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400"
-                            >Padres / Pajuela</span
-                        >
-                        <p class="text-gray-900 dark:text-gray-100 font-medium">
-                            {s.fechadesde
-                                ? getNombrePadres(s.padres)
-                                : s.pajuela}
-                        </p>
-                    </div>
+                    {#if o.observacion}
+                        <div>
+                            <span
+                                class="text-xs text-gray-500 dark:text-gray-400"
+                                >Observación</span
+                            >
+                            <p class="text-gray-900 dark:text-gray-100 mt-1">
+                                {o.observacion}
+                            </p>
+                        </div>
+                    {/if}
                 </div>
             </div>
         {/each}
     </div>
 </div>
 <Paginacion
-    rows={serviciosrow}
+    rows={observacionesrows}
     bind:paginaActual
     bind:pageSize
     {totalPaginas}

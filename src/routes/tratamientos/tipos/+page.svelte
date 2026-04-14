@@ -8,7 +8,7 @@
     import { createUserer } from "$lib/stores/user.svelte";
     import { createPer } from "$lib/stores/permisos.svelte";
     import BuscadorTipos from "$lib/components/tratamientos/BuscadorTipos.svelte";
-
+    import NuevoTipo from "$lib/components/tratamientos/NuevoTipo.svelte";
     import { createStorageProxy } from "$lib/filtros/filtros";
     import TablaTipos from "$lib/components/tratamientos/TablaTipos.svelte";
     import { getPermisosCabUser } from "$lib/permisosutil/lib";
@@ -38,6 +38,7 @@
     let buscador = $state("");
     //datos
     let tipotratamientos = $state([]);
+    let tipotratamientosrows = $state([]);
     let isOpenForm = $state(false);
 
     let idtipo = $state("");
@@ -71,13 +72,9 @@
         }
     }
     function nuevoTipo() {
-        if (isOpenForm) {
-            isOpenForm = false;
-        } else {
-            idtipo = "";
-            nombretipo = "";
-            isOpenForm = true;
-        }
+        idtipo = "";
+        nombretipo = "";
+        isOpenForm = true;
     }
     async function guardarTipo() {
         if (idtipo == "") {
@@ -114,6 +111,9 @@
         } else {
             await editarTipo();
         }
+        idtipo = ""
+        nombretipo = ""
+        isOpenForm = false
     }
     async function editarTipo() {
         try {
@@ -125,7 +125,7 @@
                 .update(idtipo, data);
             let item = { ...data, id: idtipo };
             tipotratamientos = tipotratamientos.filter(
-                (tp) => tp.id != idtipotratamiento,
+                (tp) => tp.id != idtipo,
             );
             tipotratamientos.push(item);
             tipotratamientos.sort((tp1, tp2) =>
@@ -140,17 +140,17 @@
             Swal.fire("Error editar", "No se logró editar el tipo", "error");
         }
     }
-    async function eliminarTipo(id) {
-        idtipo = id;
+    async function eliminarTipo() {
+        
         try {
             let data = {
                 active: false,
             };
             const record = await pb
                 .collection("tipotratamientos")
-                .update(idtipotratamiento, data);
+                .update(idtipo, data);
             tipotratamientos = tipotratamientos.filter(
-                (tp) => tp.id != idtipotratamiento,
+                (tp) => tp.id != idtipo,
             );
             tipotratamientos.sort((tp1, tp2) =>
                 tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase()
@@ -168,6 +168,20 @@
             );
         }
     }
+    async function eliminar(id) {
+        Swal.fire({
+            title: "Eliminar tipo de tratamiento",
+            text: "¿Seguro que deseas eliminar el tipo?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Si",
+            cancelButtonText: "No",
+        }).then(async (result) => {
+            if (result.value) {
+                await editarTipo(id)
+            }
+        });
+    }
     function loadTipos() {
         detallestipos = proxy.load();
         tipotratamientos = detallestipos.tipos;
@@ -184,9 +198,23 @@
         per.setPer(respermisos.permisos, usuarioid);
         userpermisos = getPermisosList(per.per.permisos);
         loadTipos();
+        filterUpdate()
+        if(esCelu){
+            pageSize = 5
+        }
     });
+    function filterUpdate(){
+        tipotratamientosrows = tipotratamientos
+        if (buscador != "") {
+            tipotratamientosrows = tipotratamientosrows.filter((tt) =>
+                tt.nombre
+                    .toLocaleLowerCase()
+                    .includes(buscador.toLocaleLowerCase()),
+            );
+        }
+    }
 </script>
-
+<svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <div
         class="
@@ -218,31 +246,42 @@
     </div>
     <BuscadorTipos
         nuevo={nuevoTipo}
-        editar={editarTipo}
         bind:buscador
         bind:idtipo
         bind:nombretipo
-        {isOpenForm}
+        {filterUpdate}
     />
+    {#if isOpenForm}
+    <NuevoTipo
+        nuevo={guardarTipo}
+        editar={guardarTipo}
+        bind:idtipo
+        bind:nombretipo
+    />
+    {/if}
     <!--Tabla-->
     <div
         class={`
                 w-full xl:w-3/4 md:grid
-                mx-auto py-1 px-4 max-w-7xl  
+                mx-auto py-0 my-0 px-4 max-w-7xl  
             `}
     >
         <div
             class={`
-                    overflow-hidden rounded-xl
+                    py-0 my-0
+                    overflow-hidden rounded-b-xl
                     border dark:border-gray-700
                 `}
         >
             <TablaTipos 
-            
-            {idtipo}
-            bind:nombretipo
-            {isOpenForm}
-            tiposrows={tipotratamientos} 
+                bind:pageSize
+                {idtipo}
+                bind:nombretipo
+                tiposrows={tipotratamientosrows} 
+                openEditModal = {openEditTipoModal}
+                openDelModal = {eliminar}
+                {esCelu}
+
 
             />
         </div>

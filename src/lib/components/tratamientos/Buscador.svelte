@@ -74,11 +74,7 @@
                 `}
                 onclick={nuevo}
             >
-                {#if esCelu}
-                    Tratamiento
-                {:else}
-                    + Nuevo tratamiento
-                {/if}
+                + Nuevo tratamiento
             </button>
             <button
                 class={`

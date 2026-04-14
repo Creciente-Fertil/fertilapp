@@ -28,7 +28,10 @@
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import TablaTactos from "$lib/components/tactos/TablaTactos.svelte";
-
+    import ListaTactos from "$lib/components/tactos/ListaTactos.svelte";
+    let innerWidth = $state(0);
+    let innerHeight = $state(0);
+    let esCelu = $derived(innerWidth <= 1100);
     let caber = createCaber();
     let cab = caber.cab;
     let per = createPer();
@@ -51,7 +54,7 @@
     let ninguno = $state(true);
     let selectfilas = $state([]);
     let selecthash = $state({});
-    let pageSize = $state(15)
+    let pageSize = $state(15);
     let isOpenFilter = $state(false);
     let caravana = $state("");
     let malcaravana = $state(false);
@@ -78,7 +81,7 @@
     let proxy = createStorageProxy("listatactos", defaultfiltro);
     //detalle
     let tactovacio = {
-        edit:false,
+        edit: false,
         idtacto: "",
         animal: "",
         caravana: "",
@@ -197,7 +200,7 @@
         detalletacto.categoria = categoria;
         detalletacto.prenada = prenada;
         detalletacto.tipo = tipo;
-        detalletacto.edit = false
+        detalletacto.edit = false;
         proxytacto.save(detalletacto);
         goto(pre + "/tactos/cab/" + idtacto);
     }
@@ -218,7 +221,7 @@
         detalletacto.categoria = categoria;
         detalletacto.prenada = prenada;
         detalletacto.tipo = tipo;
-        detalletacto.edit = true
+        detalletacto.edit = true;
         proxytacto.save(detalletacto);
         goto(pre + "/tactos/cab/" + idtacto);
         //if (permisos[4]) {
@@ -356,6 +359,9 @@
         await getTactos();
         filterUpdate();
         await getAnimales();
+        if(esCelu){
+            pageSize = 5
+        }
     });
     function onSelectAnimal() {
         if (animal == "agregar") {
@@ -570,14 +576,56 @@
     function nuevo() {
         goto(pre + "/tactos/cab/movimiento");
     }
-    function clickTodos(){
+    function clickTodos() {
+        if (todos) {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        } else if (ninguno) {
+            ninguno = false;
+            todos = true;
 
+            for (let i = 0; i < tactosrow.length; i++) {
+                let s = tactosrow[i];
+                selecthash[s.id] = { ...s };
+            }
+        } else {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        }
     }
-    function clickFila(id){
-
+    function clickFila(id) {
+        if (selecthash[id]) {
+            if (todos) {
+                todos = false;
+                algunos = true;
+            }
+            delete selecthash[id];
+            if (Object.keys(selecthash).length == 0) {
+                todos = false;
+                algunos = false;
+                ninguno = true;
+            }
+        } else {
+            if (ninguno) {
+                algunos = true;
+                ninguno = false;
+            }
+            let s_idx = tactosrow.findIndex((s) => s.id == id);
+            if (s_idx != -1) {
+                let s = tactosrow[s_idx];
+                selecthash[s.id] = {
+                    ...s,
+                };
+            }
+        }
     }
 </script>
 
+<svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador
         {tactosrow}
@@ -598,219 +646,9 @@
         {filterUpdate}
         {clickFilter}
     />
-    <div
-        class="hidden grid grid-cols-1 lg:grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12"
-    >
-        <div>
-            <h1 class="text-2xl">Tactos</h1>
-        </div>
-        <div class="flex col-span-2 gap-1 justify-start lg:justify-end">
-            <div>
-                <button
-                    class={` btn btn-primary rounded-lg ${estilos.btntext}`}
-                    data-theme="forest"
-                    onclick={() => goto(pre + "/tactos/cab/movimiento")}
-                >
-                    <span class="text-xl">Nuevo</span>
-                </button>
-            </div>
-            <div class="">
-                <Exportar
-                    titulo={"Tactos"}
-                    filtros={[]}
-                    confiltros={false}
-                    data={tactosrow}
-                    sheetname={"Tactos"}
-                    establecimiento={cab.nombre}
-                    {prepararData}
-                />
-            </div>
-            <div class="hidden">
-                <button
-                    onclick={() => goto(pre + "/tactos/cab/movimiento")}
-                    class={`
-                        bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
-                        ${estilos.btnsecondary}
-                        rounded-full
-                        px-4 pt-2 pb-3
-                    `}
-                    aria-label="Exportar"
-                >
-                    <span class="text-xl font-semibold">Múltiples</span>
-                </button>
-            </div>
-        </div>
-    </div>
-    <div
-        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 gap-2 lg:gap-10 mb-2 mt-1 mx-1 lg:mx-10 w-11/12"
-    >
-        <div class="w-full lg:w-1/2">
-            <label
-                class={`
-                    input input-bordered flex items-center gap-2
-                    ${estilos.bgdark2}
-                `}
-            >
-                <input
-                    type="text"
-                    class="grow"
-                    placeholder="Buscar..."
-                    bind:value={buscar}
-                    oninput={filterUpdate}
-                />
-            </label>
-        </div>
-        <div class="w-11/12">
-            <Limpiar {limpiarFiltros} />
-        </div>
-    </div>
-    <!--Filtrar-->
-    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
-        <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
-            <div class="flex justify-between items-center px-1">
-                <h1 class="font-semibold text-lg py-2">Filtros</h1>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class={`size-6 transition-all duration-300 ${isOpenFilter ? "transform rotate-180" : ""}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
-                    />
-                </svg>
-            </div>
-        </button>
-        <div>
-            <span class="text-lg mx-1"
-                >Total de tactos encontrados: {totalTactosEncontrados}</span
-            >
-        </div>
-        {#if isOpenFilter}
-            <div transition:slide>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-1 w-full">
-                    <div class="">
-                        <label
-                            class="block tracking-wide mb-2"
-                            for="grid-first-name"
-                        >
-                            Fecha desde
-                        </label>
-                        <input
-                            id="fechadesde"
-                            type="date"
-                            class={`
-                            w-full md:w-1/2
-                                input input-bordered
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={fechadesde}
-                            onchange={filterUpdate}
-                        />
-                    </div>
-                    <div class="">
-                        <label
-                            class="block tracking-wide mb-2"
-                            for="grid-first-name"
-                        >
-                            Fecha Hasta
-                        </label>
-                        <input
-                            id="fechadesde"
-                            type="date"
-                            class={`
-                            w-full md:w-1/2
-                                input input-bordered
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={fechahasta}
-                            onchange={filterUpdate}
-                        />
-                    </div>
-                    <div>
-                        <label for="categoria" class="tracking-wide label">
-                            <span class="label-text text-base">Categoria</span>
-                        </label>
-                        <label class="input-group">
-                            <select
-                                class={`
-                                    select select-bordered w-full
-                                    rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    ${estilos.bgdark2}
-                                `}
-                                bind:value={buscarcategoria}
-                                onchange={filterUpdate}
-                            >
-                                <option value="">Todos</option>
-                                {#each categorias.filter((cat) => cat.sexo == "H") as s}
-                                    <option value={s.id}>{s.nombre}</option>
-                                {/each}
-                            </select>
-                        </label>
-                    </div>
-                    <div>
-                        <label for="tipotacto" class="tracking-wide label">
-                            <span class="label-text text-base">Tipo</span>
-                        </label>
-                        <label class="input-group">
-                            <select
-                                class={`
-                                    select select-bordered w-full
-                                    rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    ${estilos.bgdark2}
-                                `}
-                                bind:value={buscartipo}
-                                onchange={filterUpdate}
-                            >
-                                <option value="">Todos</option>
-                                {#each tipostacto as s}
-                                    <option value={s.id}>{s.nombre}</option>
-                                {/each}
-                            </select>
-                        </label>
-                    </div>
-                    <div>
-                        <label for="estado" class=" tracking-wide label">
-                            <span class="label-text text-base">Estado</span>
-                        </label>
-                        <label class="input-group">
-                            <select
-                                class={`
-                                    select select-bordered w-full
-                                    rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    ${estilos.bgdark2}
-                                `}
-                                bind:value={buscarestado}
-                                onchange={filterUpdate}
-                            >
-                                <option value="">Todos</option>
-                                {#each estados as s}
-                                    <option value={s.id}>{s.nombre}</option>
-                                {/each}
-                            </select>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        {/if}
-    </div>
+
     <!--Ordenar-->
-    <div
-        class="block md:hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
-    >
+    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
         <button aria-label="Ordenar" class="w-full" onclick={clickOrdenar}>
             <div class="flex justify-between items-center px-1">
                 <h1 class="font-semibold text-lg py-2">Ordenar</h1>
@@ -900,53 +738,32 @@
                     {ordenarTactos}
                     openViewModal={irDetalle}
                     openEditModal={openModalEdit}
-                    openDelModal = {eliminar}
+                    openDelModal={eliminar}
                     {clickTodos}
                     {clickFila}
                     {todos}
                 />
             </div>
         </div>
-        <div class="block w-full md:hidden justify-items-center mx-1">
-            {#each tactosrow as t}
-                <div
-                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                >
-                    <button onclick={() => irDetalle(t.id)}>
-                        <div class="block p-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <h3 class="font-medium">
-                                    {`${new Date(t.fecha).toLocaleDateString()}`}
-                                </h3>
-                                {#if t.prenada != 1}
-                                    <div
-                                        class={`badge badge-outline badge-${getEstadoColor(t.prenada)}`}
-                                    >
-                                        {getEstadoNombre(t.prenada)}
-                                    </div>
-                                {/if}
-                            </div>
-                            <div class="grid grid-cols-2 gap-y-2">
-                                <div class="flex items-start">
-                                    <span>Caravana:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {t.expand.animal.caravana}
-                                    </span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span>Tipo:</span>
-                                    <span class="mx-2 font-semibold">
-                                        {`${t.tipo == "eco" ? "Ecografía" : "Tacto"}`}
-                                    </span>
-                                </div>
-                                <div class="col-span-2 flex items-start">
-                                    <span>{`${t.observacion}`}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-                </div>
-            {/each}
+        <div
+            class={`
+             md:hidden
+            w-full grid grid-cols-1
+            mx-auto py-6 px-4 max-w-7xl
+        `}
+        >
+            <ListaTactos
+                bind:pageSize
+                {selecthash}
+                {tactosrow}
+                {ordenarTactos}
+                openViewModal={irDetalle}
+                openEditModal={openModalEdit}
+                openDelModal={eliminar}
+                {clickTodos}
+                {clickFila}
+                {todos}
+            />
         </div>
     {/if}
 

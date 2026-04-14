@@ -86,11 +86,7 @@
                 `}
                 onclick={nuevo}
             >
-                {#if esCelu}
-                    Servicio
-                {:else}
-                    + Nuevo servicio
-                {/if}
+                + Nuevo servicio
             </button>
             <button
                 class={`

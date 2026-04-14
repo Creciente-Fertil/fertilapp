@@ -539,6 +539,7 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <div class={classmove}>
+    
         <DetalleMovimientoHeader
             {lotes}
             {rodeos}

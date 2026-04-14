@@ -6,7 +6,8 @@
         paginaActual = $bindable(1),
         totalPaginas,
         onChangePageSize = () => {},
-        rounded = "rounded-b-xl"
+        rounded = "rounded-b-xl",
+        esCelu=false
     } = $props();
     let minimo = $derived((paginaActual - 1) * pageSize + 1);
     let maximo = $derived(Math.min(paginaActual * pageSize, rows.length));
@@ -53,7 +54,7 @@
             </select>
         </div>
         <!-- Botones de navegación y números de página -->
-        <div class="flex items-center space-x-1">
+        <div class={`flex ${esCelu?"items-end":"items-center"}   space-x-1`}>
             <!-- Botón "Anterior" -->
             <button
                 disabled={paginaActual === 1}
@@ -69,7 +70,9 @@
                     ${paginaActual === 1 ? "opacity-50 cursor-not-allowed" : ""}
                 `}
             >
-                ‹ Anterior
+                ‹ {#if !esCelu}
+                    Anterior
+                {/if}
             </button>
 
             {#if paginaActual != 1}
@@ -171,7 +174,9 @@
                     }
                 `}
             >
-                Siguiente ›
+                {#if !esCelu}
+                    Siguiente
+                {/if}›
             </button>
         </div>
     </div>

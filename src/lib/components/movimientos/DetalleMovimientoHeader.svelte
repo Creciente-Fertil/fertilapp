@@ -1,6 +1,7 @@
 <script>
     import estilos from "$lib/stores/estilos";
     import estados from "$lib/stores/estados";
+
     let pre = import.meta.env.VITE_PRE;
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -11,7 +12,7 @@
         categorias = [],
         motivos = [],
         seccionAbierta = "",
-        
+
         nuevacategoria = $bindable(""),
         nuevolote = $bindable(""),
         nuevorodeo = $bindable(""),
@@ -21,6 +22,33 @@
         motivo = $bindable(""),
         codigo = $bindable(""),
     } = $props();
+    function getNombre(id) {
+        let s = "";
+        if (seccionAbierta == "CATEGORIA") {
+            let idx_c = categorias.findIndex((c) => c.id == id);
+
+            if (idx_c != -1) {
+                s = categorias[idx_c].nombre;
+
+            }
+        } else if (seccionAbierta == "LOTE") {
+            let idx_c = lotes.findIndex((c) => c.id == id);
+            if (idx_c != -1) {
+                s = lotes[idx_c].nombre;
+            }
+        } else if (seccionAbierta == "RODEO") {
+            let idx_c = rodeos.findIndex((c) => c.id == id);
+            if (idx_c != -1) {
+                s = rodeos[idx_c].nombre;
+            }
+        } else if (seccionAbierta == "BAJA") {
+            let idx_c = motivos.findIndex((c) => c.id == id);
+            if (idx_c != -1) {
+                s = motivos[idx_c].nombre;
+            }
+        }
+        return s;
+    }
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
@@ -74,8 +102,13 @@
                             >
                         </label>
                         <label class="input-group">
+                            <span
+                                class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
+                                >{getNombre(nuevacategoria)}</span
+                            >
                             <select
                                 class={`
+                                hidden
                                 select select-bordered w-full
                                 rounded-md
                                 focus:outline-none 
@@ -107,8 +140,13 @@
                             >
                         </label>
                         <label class="input-group">
+                            <span
+                                class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
+                                >{getNombre(nuevolote)}</span
+                            >
                             <select
                                 class={`
+                                hidden
                                 select select-bordered w-full
                                 rounded-md
                                 focus:outline-none 
@@ -140,8 +178,13 @@
                             >
                         </label>
                         <label class="input-group">
+                            <span
+                                class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
+                                >{getNombre(nuevorodeo)}</span
+                            >
                             <select
                                 class={`
+                                hidden
                                 select select-bordered w-full
                                 rounded-md
                                 focus:outline-none 
@@ -160,12 +203,26 @@
                 {/if}
                 {#if seccionAbierta === "BAJA"}
                     <div>
-                        <label for="fecha" class="label">
-                            <span class="label-text text-base">Motivo</span>
+                        <label for="mot" class="label mb-0 pb-0">
+                            <span
+                                class="
+                                    label-text tracking-wide
+                                    text-md uppercase
+                                    font-semibold dark:text-gray-400
+                                    text-gray-500
+                                "
+                            >
+                                Motivo  </span
+                            >
                         </label>
                         <label class="input-group">
+                            <span
+                                class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
+                                >{getNombre(motivo)}</span
+                            >
                             <select
                                 class={`
+                                hidden
                                 select select-bordered w-full
                                 rounded-md
                                 focus:outline-none 
@@ -181,7 +238,7 @@
                             </select>
                         </label>
                     </div>
-                    <div>
+                    <div class="hidden">
                         <label for="fecha" class="label">
                             <span class="label-text text-base">Fecha</span>
                         </label>
@@ -217,28 +274,32 @@
                     </div>
                 {/if}
             </div>
-            <div class="grid grid-cols-1">
-                <div>
-                    <label for="fecha" class="label">
-                        <span
-                            class="
+            {#if seccionAbierta == "BAJA"}
+                <div class="grid grid-cols-1">
+                    <div>
+                        <label for="fecha" class="label">
+                            <span
+                                class="
                                     label-text tracking-wide
                                     text-md uppercase
                                     font-semibold dark:text-gray-400
                                     text-gray-500
                                 "
-                        >
-                            Fecha
-                        </span>
-                    </label>
-                    {#if fecha.length > 0}
-                        <span
-                            class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-                            >{new Date(fecha).toLocaleDateString()}</span
-                        >
-                    {/if}
+                            >
+                                Fecha baja
+                            </span>
+                        </label>
+                        {#if fechabaja.length > 0}
+                            <span
+                                class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+                                >{new Date(
+                                    fechabaja,
+                                ).toLocaleDateString()}</span
+                            >
+                        {/if}
+                    </div>
                 </div>
-            </div>
+            {/if}
         </div>
     </div>
 </div>

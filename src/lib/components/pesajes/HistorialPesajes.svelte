@@ -75,11 +75,7 @@
                 `}
                 onclick={nuevo}
             >
-                {#if esCelu}
-                    Pesaje
-                {:else}
-                    + Nuevo Pesaje
-                {/if}
+                + Nuevo Pesaje
             </button>
             <button
                 class={`

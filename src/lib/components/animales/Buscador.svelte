@@ -85,11 +85,7 @@
                 `}
                 onclick={nuevo}
             >
-                {#if esCelu}
-                    <span class="text-lg">Nuevo</span>
-                {:else}
-                    <span class="text-lg">+ Nuevo animal</span>
-                {/if}
+                <span class="text-lg">+ Nuevo animal</span>
             </button>
             <button
                 class={`

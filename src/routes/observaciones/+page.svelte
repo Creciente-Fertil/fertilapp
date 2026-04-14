@@ -23,6 +23,10 @@
     import PredictSelect from "$lib/components/PredictSelect.svelte";
     import { capitalize } from "$lib/stringutil/lib";
     import { goto } from "$app/navigation";
+    import ListaObservaciones from "$lib/components/observaciones/ListaObservaciones.svelte";
+    let innerWidth = $state(0);
+    let innerHeight = $state(0);
+    let esCelu = $derived(innerWidth <= 1100);
     let pre = import.meta.env.VITE_PRE;
     let caber = createCaber();
     let cab = caber.cab;
@@ -89,15 +93,15 @@
     });
     let proxy = createStorageProxy("listaobservaciones", defaultfiltro);
     //detalle observacion
-    let defaulobservacion={
-        id:"",
-        animal:"",
-        caravana:"",
-        categoria:"",
-        fecha:"",
-        observacion:"",
-        edit:false
-    }
+    let defaulobservacion = {
+        id: "",
+        animal: "",
+        caravana: "",
+        categoria: "",
+        fecha: "",
+        observacion: "",
+        edit: false,
+    };
     let detalleobservacion = $state({ ...defaulobservacion });
     let proxydetalleobservacion = createStorageProxy(
         "detalleobservacion",
@@ -153,7 +157,7 @@
         nombreanimal = "";
         animal = "";
         cadenaanimal = "";
-        goto(pre+"/observaciones/0")
+        goto(pre + "/observaciones/0");
         //nuevoModal.showModal();
     }
 
@@ -173,8 +177,7 @@
             );
         }
     }
-    function irDetalle(id){
-
+    function irDetalle(id) {
         idobservacion = id;
         let obs = observaciones.filter((o) => o.id == idobservacion)[0];
         observacion = obs.observacion;
@@ -182,18 +185,17 @@
         fecha = obs.fecha.split(" ")[0];
         animal = obs.animal;
         nombreanimal = obs.expand.animal.caravana;
-        detalleobservacion ={
+        detalleobservacion = {
             id,
             observacion,
             categoria,
-            caravana:nombreanimal,
+            caravana: nombreanimal,
             fecha,
-            edit:false,
-            animal
-        }
-        proxydetalleobservacion.save(detalleobservacion)
+            edit: false,
+            animal,
+        };
+        proxydetalleobservacion.save(detalleobservacion);
         goto(pre + "/observaciones/" + idobservacion);
-        
     }
     function openModalEditar(id) {
         botonhabilitado = true;
@@ -206,18 +208,18 @@
         fecha = obs.fecha.split(" ")[0];
         animal = obs.animal;
         nombreanimal = obs.expand.animal.caravana;
-        detalleobservacion ={
+        detalleobservacion = {
             id,
             observacion,
             categoria,
-            caravana:nombreanimal,
+            caravana: nombreanimal,
             fecha,
-            edit:true,
-            animal
-        }
-        proxydetalleobservacion.save(detalleobservacion)
+            edit: true,
+            animal,
+        };
+        proxydetalleobservacion.save(detalleobservacion);
         goto(pre + "/observaciones/" + idobservacion);
-        
+
         //nuevoModal.showModal();
     }
     function eliminar(id) {
@@ -336,6 +338,9 @@
         await getObservaciones();
         filterUpdate();
         await getAnimales();
+        if(esCelu){
+            pageSize = 5
+        }
     });
     async function guardar() {
         if (agregaranimal) {
@@ -573,10 +578,55 @@
     function nuevo() {
         openNewModal();
     }
-    function clickTodos() {}
-    function clickFila(id) {}
-</script>
+    function clickTodos() {
+        if (todos) {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        } else if (ninguno) {
+            ninguno = false;
+            todos = true;
 
+            for (let i = 0; i < observacionesrow.length; i++) {
+                let s = observacionesrow[i];
+                selecthash[s.id] = { ...s };
+            }
+        } else {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        }
+    }
+    function clickFila(id) {
+        if (selecthash[id]) {
+            if (todos) {
+                todos = false;
+                algunos = true;
+            }
+            delete selecthash[id];
+            if (Object.keys(selecthash).length == 0) {
+                todos = false;
+                algunos = false;
+                ninguno = true;
+            }
+        } else {
+            if (ninguno) {
+                algunos = true;
+                ninguno = false;
+            }
+            let s_idx = observacionesrow.findIndex((s) => s.id == id);
+            if (s_idx != -1) {
+                let s = observacionesrow[s_idx];
+                selecthash[s.id] = {
+                    ...s,
+                };
+            }
+        }
+    }
+</script>
+<svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador
         {observacionesrow}
@@ -839,168 +889,22 @@
 
         <div
             class={`
-            hidden w-full 
-            mx-auto py-6 px-4 max-w-7xl
-        `}
-        >
-            <div
-                class={`
-                overflow-hidden rounded-xl
+                md:hidden
+                w-full grid grid-cols-1
+                mx-auto py-6 px-4 max-w-7xl
             `}
-            >
-                <table class="table table-lg w-full">
-                    <thead
-                        class="bg-emerald-600 text-white dark:bg-emerald-700"
-                    >
-                        <tr>
-                            <th
-                                onclick={() => ordenarObservaciones("fecha")}
-                                class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                            >
-                                <div class="flex flex-row justify-between">
-                                    Fecha
-                                    {#if forma == "fecha"}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M19 9l-7 7-7-7"
-                                            />
-                                        </svg>
-                                    {/if}
-                                </div>
-                            </th>
-                            <th
-                                onclick={() => ordenarObservaciones("animal")}
-                                class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                            >
-                                <div class="flex flex-row justify-between">
-                                    Animal
-                                    {#if forma == "animal"}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M19 9l-7 7-7-7"
-                                            />
-                                        </svg>
-                                    {/if}
-                                </div>
-                            </th>
-                            <th
-                                onclick={() =>
-                                    ordenarObservaciones("categoria")}
-                                class={`
-                                text-base p-3 
-                                border-b border-emerald-700
-                                hover:cursor-pointer
-                                hover:bg-emerald-800   
-                            `}
-                            >
-                                <div class="flex flex-row justify-between">
-                                    Categoria
-                                    {#if forma == "categoria"}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            class={`size-5 transition-all duration-300 ${!ascendente ? "transform rotate-180" : ""}`}
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M19 9l-7 7-7-7"
-                                            />
-                                        </svg>
-                                    {/if}
-                                </div>
-                            </th>
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >
-                                Observacion
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each observacionesrow as o}
-                            <tr
-                                onclick={() => openModalEditar(o.id)}
-                                class="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-900"
-                            >
-                                <td class="text-base">
-                                    {`${new Date(o.fecha).toLocaleDateString()}`}
-                                </td>
-                                <td class="text-base">
-                                    {`${o.expand.animal.caravana}`}
-                                </td>
-                                <td class="text-base">
-                                    {`${capitalize(o.categoria)}`}
-                                </td>
-                                <td class="text-base">
-                                    {`${o.observacion}`}
-                                </td>
-                            </tr>
-                        {/each}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="block w-full md:hidden justify-items-center mx-1">
-            {#each observacionesrow as o}
-                <div
-                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                >
-                    <button onclick={() => openModalEditar(o.id)}>
-                        <div class="block p-4">
-                            <div class="grid grid-cols-2 gap-y-2">
-                                <div class="flex items-start">
-                                    <span>Fecha:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {new Date(o.fecha).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span>Caravana:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {`${o.expand.animal.caravana}`}
-                                    </span>
-                                </div>
-                                <div class="col-span-2 flex items-start">
-                                    <span>{`${o.observacion}`}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-                </div>
-            {/each}
+        >
+            <ListaObservaciones
+                bind:pageSize
+                {selecthash}
+                observacionesrows={observacionesrow}
+                {ordenarObservaciones}
+                openEditModal={openModalEditar}
+                openViewModal={irDetalle}
+                openDelModal={eliminar}
+                {clickFila}
+                {clickTodos}
+            />
         </div>
     {/if}
 </Navbar2>

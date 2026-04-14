@@ -10,7 +10,6 @@
         buscador = $bindable(""),
         idtipo = "",
         nombretipo = $bindable(),
-        isOpenForm = false,
         nuevo = () => {},
         editar = (id) => {},
         filterUpdate = () => {},
@@ -94,80 +93,20 @@
                     />
                 </svg>
             </div>
-            <div class="flex flex-wrap gap-2 items-bottom">
+            <div class="flex flex-wrap gap-2">
                 <button
-                    onclick={nuevo}
                     class={`
-                        border rounded-full px-3 py-1 text-md flex 
-                        items-center gap-1
                         
-                        ${
-                            isOpenForm
-                                ? "bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white"
-                                : "bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white"
-                        }
+                        border rounded-full px-3 py-1 text-md flex items-center gap-1
+                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
+                        dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
                     `}
+                    onclick={nuevo}
                 >
                     <Plus size="size-4" />
-                    Nuevo tipo
+                    Nuevo
                 </button>
             </div>
         </div>
-        {#if isOpenForm}
-            <div transition:slide>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-1">
-                    <div class="col-span-1 md:col-span-2">
-                        <label for="nombre" class="label">
-                            <span class="label-text text-base">Nombre</span>
-                        </label>
-                        <label class="input-group">
-                            <input
-                                id="nombre"
-                                type="text"
-                                class={`
-                                    input input-bordered 
-                                    w-full
-                                    border border-gray-300 rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    ${estilos.bgdark2} 
-                                    
-                                `}
-                                bind:value={nombretipo}
-                                oninput={validarBotonTipo}
-                            />
-                        </label>
-                    </div>
-                    {#if idtipo == ""}
-                        <div class="flex items-center justify-end">
-                            <button
-                                onclick={nuevo}
-                                class={`
-                                border rounded-full px-3 py-1 text-md flex 
-                                items-center gap-1
-                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
-                            `}
-                            >
-                                Guardar
-                            </button>
-                        </div>
-                    {:else}
-                        <div class="flex items-end ">
-                            <button
-                                onclick={() => editar(idtipo)}
-                                class={`
-                                border rounded-full px-3 py-1 text-md flex 
-                                items-center gap-1
-                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
-                            `}
-                            >
-                                Editar
-                            </button>
-                        </div>
-                    {/if}
-                </div>
-            </div>
-        {/if}
     </div>
 </div>

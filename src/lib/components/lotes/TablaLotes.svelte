@@ -6,8 +6,8 @@
     import Pencil from "$lib/svgs/pencil.svelte";
     let {
         pageSize = $bindable(15),
-        selecthash,
-        lotesrows,
+        selecthash = {},
+        lotesrows = [],
         openView = (id) => {},
         openEdit = (id) => {},
         openEliminar = (id) => {},
@@ -15,6 +15,7 @@
         clickFila = (id) => {},
         todos = $bindable(false),
         shorterWord = (s) => {},
+        esCelu = false,
     } = $props();
     let firstRun = true;
     function onChangePageSize() {
@@ -31,15 +32,15 @@
     let count = $derived(lotesrows.length);
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
-    let pyfila = "py-2"
+    let pyfila = "py-1";
 </script>
 
 <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
-    <table class="table table-lg w-full bg-white dark:bg-slate-900">
+    <table class="table table-lg w-full bg-white dark:bg-slate-900 rounded-none">
         <thead class={`${estilos.tableheader}  sticky top-0 z-5 shadow-sm`}>
             <tr>
                 <th
-                    class="text-base mx-2 px-2 w-16 flex items-center justify-center"
+                    class={`text-base mx-2 px-2 w-16  flex ${esCelu ? "items-start ps-6" : "items-center justify-center"}`}
                 >
                     <button
                         type="button"
@@ -78,6 +79,7 @@
                 >
                     Total
                 </th>
+
                 <th class="text-base mx-1 px-1 text-center uppercase">
                     Acciones
                 </th>
@@ -86,9 +88,9 @@
         <tbody>
             {#each rows as l}
                 <tr>
-                    <td class={`text-base mx-2 px-2 w-16 ${pyfila}` }>
+                    <td class={`text-base mx-2 px-2 w-16 ${pyfila}`}>
                         <label
-                            class="flex items-center justify-center cursor-pointer"
+                            class={`flex  ${esCelu ? "items-start ps-6" : "items-center justify-center"} cursor-pointer`}
                         >
                             <!-- Input real (oculto pero funcional) -->
                             <input
@@ -136,7 +138,10 @@
                     <td class={`text-base mx-1 px-1 text-center ${pyfila}`}>
                         {l.total}
                     </td>
-                    <td class={`flex items-center justify-center gap-2 px-1 ${pyfila}`}>
+
+                    <td
+                        class={`flex items-center justify-center gap-2 px-1 ${pyfila}`}
+                    >
                         <button
                             onclick={() => {
                                 openView(l.id);
@@ -165,7 +170,7 @@
     </table>
 </div>
 <Paginacion
-rows={lotesrows}
+    rows={lotesrows}
     bind:paginaActual
     bind:pageSize
     {totalPaginas}

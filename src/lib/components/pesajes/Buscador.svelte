@@ -77,11 +77,7 @@
                 data-theme="forest"
                 onclick={nuevo}
             >
-                {#if esCelu}
-                    <span class="text-lg">Nuevos</span>
-                {:else}
-                    <span class="text-lg">+ Nuevos pesajes</span>
-                {/if}
+                <span class="text-lg">+ Nuevo pesaje</span>
             </button>
             <button
                 class={`hidden btn btn-primary rounded-lg ${estilos.btntext2}`}

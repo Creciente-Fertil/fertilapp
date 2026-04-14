@@ -5,76 +5,70 @@
     import Trash from "$lib/svgs/trash.svelte";
     import Pencil from "$lib/svgs/pencil.svelte";
     import Badge from "../Badge.svelte";
+    let pre = import.meta.env.VITE_PRE;
     let {
-        pageSize = $bindable(10),
+        pageSize = $bindable(15),
         selecthash,
-        serviciosrow,
-        ordenarServicios = (campo, mantener) => {},
+        nacimientosrow,
+        ordenarNacimientos = (campo) => {},
         openViewModal = (_p) => {},
-        openViewModalIns = (_p) => {},
+
         openEditModal = (_p) => {},
-        openEditModalIns = (_p) => {},
+
         openDelModal = (_p) => {},
-        openDelModalIns = (_p) => {},
+
         shorterWord = (s) => {},
-        getNombrePadres = (p) => {},
+
         clickTodos = () => {},
         clickFila = (id) => {},
         todos = $bindable(false),
         ascendente,
         forma,
     } = $props();
-
     let firstRun = true;
     function onChangePageSize() {
         paginaActual = 1;
     }
-    //$effect(() => {
-    //    if (firstRun) {
-    //        firstRun = false;
-    //        return;
-    //    }
-    //    paginaActual = 1;
-    //
-    //});
 
     let paginaActual = $state(1);
 
     let paginaAnterior = $derived(paginaActual - 1);
 
     let rows = $derived(
-        serviciosrow.slice(paginaAnterior * pageSize, paginaActual * pageSize),
+        nacimientosrow.slice(
+            paginaAnterior * pageSize,
+            paginaActual * pageSize,
+        ),
     );
 
-    let count = $derived(serviciosrow.length);
+    let count = $derived(nacimientosrow.length);
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
-    let pyfila = "py-0";
+    let pyfila = "py-1";
 </script>
 
-<div
-    class="max-h-[600px] overflow-y-auto custom-scrollbar pb-16 bg-white dark:bg-slate-900"
->
+<div class="max-h-[600px] overflow-y-auto custom-scrollbar">
     <!-- Select all -->
     <div class="flex items-center gap-3 px-1 mb-2">
         <button
             type="button"
             onclick={clickTodos}
             class={`
-            w-5 h-5
-            flex items-center justify-center
-            rounded-full
-            border-2
-            transition-all duration-200 ease-in-out
-            focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900
-            ${
-                todos
-                    ? "bg-emerald-700 border-emerald-700"
-                    : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-500 hover:border-emerald-500 dark:hover:border-emerald-400"
-            }
-        `}
+                                w-5 h-5
+                                flex items-center justify-center
+                                rounded-full
+                                border-2
+                                transition-all duration-200 ease-in-out
+                                focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900
+                                ${
+                                    todos
+                                        ? "bg-emerald-700 border-emerald-700"
+                                        : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-500 hover:border-emerald-500 dark:hover:border-emerald-400"
+                                }
+                            `}
             aria-label={todos ? "Deseleccionar todos" : "Seleccionar todos"}
         >
+            <!-- El icono de check (solo visible cuando todos es true) -->
         </button>
         <span class="text-sm text-gray-500 cursor-pointer"
             >Seleccionar todos</span
@@ -91,32 +85,34 @@
             </span>
         {/if}
     </div>
-
     <!-- Cards -->
     <div class="flex flex-col gap-3">
-        {#each rows as s}
+        {#each rows as n}
             <div
                 class={`
                 rounded-xl border p-4 transition-all
                 ${
-                    selecthash[s.id]
+                    selecthash[n.id]
                         ? "border-emerald-600 bg-emerald-50 dark:bg-emerald-950/30"
                         : "border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-900"
                 }
             `}
             >
-                <!-- Cabecera con checkbox y madre/animal -->
+                <!-- Cabecera con checkbox y caravana -->
                 <div class="flex items-start justify-between gap-3 mb-3">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
                         <label
-                            class="flex items-center justify-center cursor-pointer shrink-0"
+                            class="flex items-center justify-center cursor-pointer"
                         >
+                            <!-- Input real (oculto pero funcional) -->
                             <input
                                 type="checkbox"
-                                checked={selecthash[s.id] ? true : false}
-                                onchange={() => clickFila(s.id)}
+                                checked={selecthash[n.id] ? true : false}
+                                onchange={() => clickFila(n.id)}
                                 class="peer sr-only"
                             />
+
+                            <!-- La caja circular personalizada -->
                             <span
                                 class="
                                 w-5 h-5
@@ -130,6 +126,7 @@
                                 hover:border-emerald-500 dark:hover:border-emerald-400
                             "
                             >
+                                <!-- Icono de check (visible solo cuando está marcado) -->
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
@@ -151,9 +148,7 @@
                             <p
                                 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate"
                             >
-                                {s.fechadesde
-                                    ? shorterWord(s.expand.madre.caravana)
-                                    : shorterWord(s.expand.animal.caravana)}
+                                {shorterWord(n.caravana)}
                             </p>
                         </div>
                     </div>
@@ -161,31 +156,19 @@
                     <!-- Acciones -->
                     <div class="flex items-center gap-2 shrink-0">
                         <button
-                            onclick={() => {
-                                s.fechadesde
-                                    ? openViewModal(s.id)
-                                    : openViewModalIns(s.id);
-                            }}
+                            onclick={() => openViewModal(n.id)}
                             class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         >
                             <Eye size="size-5" />
                         </button>
                         <button
-                            onclick={() => {
-                                s.fechadesde
-                                    ? openEditModal(s.id)
-                                    : openEditModalIns(s.id);
-                            }}
+                            onclick={() => openEditModal(n.id)}
                             class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         >
                             <Pencil size="size-5" />
                         </button>
                         <button
-                            onclick={() => {
-                                s.fechadesde
-                                    ? openDelModal(s.id)
-                                    : openDelModalIns(s.id);
-                            }}
+                            onclick={() => openDelModal(n.id)}
                             class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         >
                             <Trash size="size-5" />
@@ -197,64 +180,30 @@
                 <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                     <div>
                         <span class="text-xs text-gray-500 dark:text-gray-400"
-                            >Fecha Desde</span
+                            >Fecha</span
                         >
                         <p class="text-gray-900 dark:text-gray-100 font-medium">
-                            {s.fechadesde
-                                ? new Date(s.fechadesde).toLocaleDateString()
-                                : s.fechainseminacion
-                                  ? new Date(
-                                        s.fechainseminacion,
-                                    ).toLocaleDateString()
-                                  : "-"}
+                            {new Date(n.fecha).toLocaleDateString()}
                         </p>
                     </div>
                     <div>
                         <span class="text-xs text-gray-500 dark:text-gray-400"
-                            >Fecha Hasta</span
+                            >Madre</span
                         >
-                        <p class="text-gray-900 dark:text-gray-100 font-medium">
-                            {s.fechahasta
-                                ? new Date(s.fechahasta).toLocaleDateString()
-                                : "-"}
+                        <p
+                            class="text-gray-900 dark:text-gray-100 font-medium truncate"
+                        >
+                            {shorterWord(n.nombremadre)}
                         </p>
                     </div>
                     <div>
                         <span class="text-xs text-gray-500 dark:text-gray-400"
-                            >Fecha Parto</span
+                            >Padre</span
                         >
-                        <p class="text-gray-900 dark:text-gray-100 font-medium">
-                            {s.fechaparto
-                                ? new Date(s.fechaparto).toLocaleDateString()
-                                : "-"}
-                        </p>
-                    </div>
-                    <div>
-                        <span class="text-xs text-gray-500 dark:text-gray-400"
-                            >Tipo</span
+                        <p
+                            class="text-gray-900 dark:text-gray-100 font-medium truncate"
                         >
-                        <p class="text-gray-900 dark:text-gray-100 font-medium">
-                            {#if s.tipo == "NATURAL_SERVICE"}
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                    >Natural</span
-                                >
-                            {:else}
-                                <span
-                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                                    >Artificial</span
-                                >
-                            {/if}
-                        </p>
-                    </div>
-                    <div class="col-span-2">
-                        <span class="text-xs text-gray-500 dark:text-gray-400"
-                            >Padres / Pajuela</span
-                        >
-                        <p class="text-gray-900 dark:text-gray-100 font-medium">
-                            {s.fechadesde
-                                ? getNombrePadres(s.padres)
-                                : s.pajuela}
+                            {shorterWord(n.nombrepadre)}
                         </p>
                     </div>
                 </div>
@@ -263,10 +212,10 @@
     </div>
 </div>
 <Paginacion
-    rows={serviciosrow}
+    rows={nacimientosrow}
     bind:paginaActual
     bind:pageSize
     {totalPaginas}
     {onChangePageSize}
-    esCelu={true}
+    esCelu={false}
 />
