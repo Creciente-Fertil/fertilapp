@@ -23,6 +23,16 @@
     import TablaTratamientos from "$lib/components/tratamientos/TablaTratamientos.svelte";
     import Success from "$lib/components/botones/Success.svelte";
     import ListaTratamientos from "$lib/components/tratamientos/ListaTratamientos.svelte";
+    import {
+        getAll,
+        getAllTipos,
+    } from "$lib/java/tratamientos/tratamientosback";
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getTiposTratamientos();
+        await getTratamientos();
+    }
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -215,20 +225,34 @@
         );
     }
     async function getTratamientos() {
-        const records = await pb.collection("tratamientos").getFullList({
-            filter: `cab='${cab.id}' && active = true`,
-            expand: "animal,tipo",
-            sort: "-created",
-        });
+        let records = [];
+        if (!versionjava) {
+            records = await pb.collection("tratamientos").getFullList({
+                filter: `cab='${cab.id}' && active = true`,
+                expand: "animal,tipo",
+                sort: "-created",
+            });
+        } else {
+            records = await getAll();
+            
+        }
+
         tratamientos = records;
         tratamientosrow = records;
         cargadostratamientos = true;
     }
     async function getTiposTratamientos() {
-        const records = await pb.collection("tipotratamientos").getFullList({
-            filter: `(cab='${cab.id}' || generico = true) && active = true`,
-            sort: "-created",
-        });
+        let records = [];
+        if (!versionjava) {
+            records = await pb.collection("tipotratamientos").getFullList({
+                filter: `(cab='${cab.id}' || generico = true) && active = true`,
+                sort: "-created",
+            });
+        } else {
+            records = await getAllTipos();
+            
+        }
+
         tipotratamientos = records;
         tipotratamientos.sort((tp1, tp2) =>
             tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase()
@@ -588,8 +612,8 @@
         await getTiposTratamientos();
         await getAnimales();
         filterUpdate();
-        if(esCelu){
-            pageSize = 5
+        if (esCelu) {
+            pageSize = 5;
         }
     });
     function prepararData(item) {
@@ -703,6 +727,7 @@
         }
     }
 </script>
+
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador
@@ -722,6 +747,8 @@
         {nuevotipo}
         {filterUpdate}
         {clickFilter}
+        {versionjava}
+        {toggleJava}
     />
     <!--Ordenar-->
     <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
@@ -824,16 +851,16 @@
         `}
         >
             <ListaTratamientos
-            bind:pageSize
-                    {selecthash}
-                    tratamientosrows={tratamientosrow}
-                    {ordenarTratamientos}
-                    openEditModal={irDetalle}
-                    openViewModal={irDetalle}
-                    openDelModal={eliminar}
-                    {clickTodos}
-                    {clickFila}
-                    {todos}
+                bind:pageSize
+                {selecthash}
+                tratamientosrows={tratamientosrow}
+                {ordenarTratamientos}
+                openEditModal={irDetalle}
+                openViewModal={irDetalle}
+                openDelModal={eliminar}
+                {clickTodos}
+                {clickFila}
+                {todos}
             />
         </div>
     {/if}

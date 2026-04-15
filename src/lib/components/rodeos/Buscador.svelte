@@ -26,6 +26,8 @@
         filterUpdate = () => {},
         clickFilter = () => {},
         prepararData = () => {},
+        toggleJava = ()=>{},
+        versionjava = false
     } = $props();
 </script>
 
@@ -65,6 +67,15 @@
                 onclick={nuevo}
             >
                 + Nuevo rodeo
+            </button>
+            <button
+                class={`
+                    ${estilos.btnbuscador}
+                    ${estilos.btntextbuscador}
+                `}
+                onclick={toggleJava}
+            >
+                {versionjava?"Cerrar java":"Ver java"}
             </button>
         </div>
         <!--Filtros-->

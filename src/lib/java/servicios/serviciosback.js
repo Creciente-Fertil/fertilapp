@@ -45,8 +45,15 @@ function processServicios(data) {
     return servicios
 }
 export async function getAllServices() {
+    let token = localStorage.getItem("token") || "";
     let ruta_all = `${RUTA_JAVA}${RUTA_SERVICIOS}/all`
-    let res_all = await fetch(ruta_all)
+    let options = {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    }
+    let res_all = await fetch(ruta_all, options)
 
     let data_all = await res_all.json()
 
@@ -56,12 +63,15 @@ export async function getAllServices() {
 }
 export async function saveServicio(data) {
     let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}`
+    let token = localStorage.getItem("token") || "";
+
     let res_post = await fetch(ruta,
         {
             method: "POST",
             body: JSON.stringify(data), // data can be `string` or {object}!
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
         }
     )
@@ -72,12 +82,14 @@ export async function saveServicio(data) {
 
 export async function editServicio(id, data) {
     let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}/${id}`
+    let token = localStorage.getItem("token") || "";
     let res_post = await fetch(ruta,
         {
             method: "PUT",
             body: JSON.stringify(data), // data can be `string` or {object}!
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
         }
     )
@@ -87,12 +99,14 @@ export async function editServicio(id, data) {
 }
 export async function eliminarServicio(id) {
     let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}/delete/${id}`
+    let token = localStorage.getItem("token") || "";
     let res_post = await fetch(ruta,
         {
             method: "POST",
-//            body: JSON.stringify({}), // data can be `string` or {object}!
+            //            body: JSON.stringify({}), // data can be `string` or {object}!
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
             },
         }
     )

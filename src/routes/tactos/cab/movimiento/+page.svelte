@@ -31,8 +31,15 @@
     import NuevoTacto from "$lib/components/tactos/NuevoTacto.svelte";
     import AnimalesSeleccionados from "$lib/components/tactos/AnimalesSeleccionados.svelte";
     import TablaMovimiento from "$lib/components/TablaMovimiento.svelte";
+    import { getAll } from "$lib/java/animales/animalesback";
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getAnimales();
+    }
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
+    let esdev = import.meta.env.VITE_DEV == "si";
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
     const today = new Date();
@@ -124,7 +131,7 @@
         for (let i = 0; i < selectanimales.length; i++) {
             selectanimales[i].tipotacto = tipotactoselect;
         }
-        setDetalle()
+        setDetalle();
     }
     function setDetalle() {
         detallemovimento.selecthashmap = selecthashmap;
@@ -319,10 +326,15 @@
         //ordenarNombre(rodeos)
     }
     async function getAnimales() {
-        const recordsa = await pb.collection("Animalestacto").getFullList({
-            filter: `active=true && cab='${cab.id}' && sexo = 'H'`,
-            expand: "rodeo,lote",
-        });
+        let recordsa = [];
+        if (!versionjava) {
+            recordsa = await pb.collection("Animalestacto").getFullList({
+                filter: `active=true && cab='${cab.id}' && sexo = 'H'`,
+                expand: "rodeo,lote",
+            });
+        } else {
+            recordsa = await getAll();
+        }
 
         animales = recordsa;
         animales.sort((a1, a2) =>
@@ -543,10 +555,10 @@
         detallemovimento = proxymovimiento.load();
 
         selecthashmap = detallemovimento.selecthashmap;
-        fecha = detallemovimento.fecha
-        tipotactoselect = detallemovimento.tipotactoselect
-        prenada = detallemovimento.prenada
-        observaciongeneral = detallemovimento.observaciongeneral
+        fecha = detallemovimento.fecha;
+        tipotactoselect = detallemovimento.tipotactoselect;
+        prenada = detallemovimento.prenada;
+        observaciongeneral = detallemovimento.observaciongeneral;
         selectanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
@@ -652,6 +664,21 @@
                     Nuevo tactos
                 </h1>
             </div>
+            {#if esdev}
+                <button
+                    class={`
+                            ${estilos.btnbuscador}
+                            ${estilos.btntextbuscador}
+                        `}
+                    onclick={toggleJava}
+                >
+                    {#if versionjava}
+                        <span class="text-lg">Cerrar java</span>
+                    {:else}
+                        <span class="text-lg">Ver java</span>
+                    {/if}
+                </button>
+            {/if}
         </div>
         <div class="grid grid-cols-1 max-h-screen gap-1 md:gap-2">
             <!--Lado izquierd-->

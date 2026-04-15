@@ -10,6 +10,8 @@
     import { quintOut } from "svelte/easing";
     import { randomString } from "$lib/stringutil/lib";
     import Terminos from "$lib/components/nuevouser/Terminos.svelte";
+    const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/";
+    const SIGNUP = "users";
 
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -28,7 +30,7 @@
     let botonhabilitado = false;
     let condiciones = false;
 
-    let clickeado = false
+    let clickeado = false;
     function isEmpty(str) {
         return !str || str.length === 0;
     }
@@ -91,10 +93,76 @@
             }
         }
     }
+    async function guardarJava() {
+        clickeado = true;
+        if (!botonhabilitado || !condiciones) {
+            return;
+        }
+        if (isEmpty(usuarioemail)) {
+            Swal.fire("Error guardar", "Nombre usuario vacio", "error");
+            return;
+        }
+        if (isEmpty(contra)) {
+            Swal.fire("Error guardar", "Contraseña vacia", "error");
+            return;
+        }
+        if (isEmpty(confirmcontra)) {
+            Swal.fire(
+                "Error guardar",
+                "Confirmar contraseña no puede estar vacio",
+                "error",
+            );
+            return;
+        }
+        let nombredata = nombre
+            .trim()
+            .split(" ")
+            .filter((w) => w !== "")
+            .join(".");
+        let apellidodata = apellido
+            .trim()
+            .split(" ")
+            .filter((w) => w !== "")
+            .join(".");
+        let randomnumber = randomString(5, "n");
+        let data = {
+            username: nombredata + "." + apellidodata + randomnumber,
+            password: contra,
+            email: usuarioemail.trim(),
+            firstName: nombredata,
+            lastName: apellidodata,
+            level: 1,
+            couponCode: null,
+            avatar: null,
+            roleId: 1,
+        };
+        if (cupon.trim().length > 0) {
+            data["couponCode"] = cupon;
+        }
+        let ruta = `${RUTA_JAVA}${SIGNUP}`;
+        try {
+            let res_signup = await fetch(ruta, {
+                method: "POST",
+                body: JSON.stringify(data), // data can be `string` or {object}!
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            let data_signup = await res_signup.json()
+            Swal.fire("Éxito guardar","Se logró registrar el usuario","success")
+            goto(pre + "/");
+        } catch (err) {
+            Swal.fire(
+                "Error guardar",
+                "No se puede guardar el usaurio ",
+                "error",
+            );
+        }
+    }
     async function guardar() {
-        clickeado = true
-        if(!botonhabilitado || !condiciones){
-            return 
+        clickeado = true;
+        if (!botonhabilitado || !condiciones) {
+            return;
         }
         if (isEmpty(usuarioemail)) {
             Swal.fire("Error guardar", "Nombre usuario vacio", "error");
@@ -370,15 +438,29 @@
                             w-full  ${botonhabilitado && condiciones ? "bg-[#115642]" : "bg-[#126a50]"} 
                             text-white rounded-md py-2 px-4 
                             ${
-                                botonhabilitado && condiciones ?
-                                "hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                                :""
+                                botonhabilitado && condiciones
+                                    ? "hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                    : ""
                             }
                             transition
                         `}
-                        
                     >
                         Crear cuenta
+                    </button>
+                    <button
+                        onclick={guardar}
+                        class={`
+                            w-full  ${botonhabilitado && condiciones ? "bg-[#115642]" : "bg-[#126a50]"} 
+                            text-white rounded-md py-2 px-4 
+                            ${
+                                botonhabilitado && condiciones
+                                    ? "hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                    : ""
+                            }
+                            transition
+                        `}
+                    >
+                        Crear cuenta java
                     </button>
                     {#if clickeado && !condiciones}
                         <div class="label">
@@ -406,8 +488,7 @@
                             text-md text-[#115642] dark:text-[#168561]
                             hover:text-[#24a579] dark:hover:text-[#126a50] 
                             transition
-                            `
-                        }
+                            `}
                     >
                         Volver
                     </a>
@@ -434,6 +515,6 @@
             >
         </form>
 
-        <Terminos/>
+        <Terminos />
     </div>
 </dialog>

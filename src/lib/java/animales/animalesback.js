@@ -58,7 +58,14 @@ export async function getAll() {
 }
 export async function getAnimalId(id) {
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/${id}`
-    let res_all = await fetch(ruta)
+    let token =localStorage.getItem("token")||"";
+    let options = {
+        headers:{
+            "Content-Type": "application/json",
+            "Authorization":`Bearer ${token}`
+        }
+    }
+    let res_all = await fetch(ruta,options)
     let data_all = await res_all.json()
     let procesada = processAnimal(data_all)
     return procesada
@@ -75,11 +82,13 @@ function postData(data) {
 export async function saveAnimal(data) {
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}`
     let data_animal = postData(data)
+    let token =localStorage.getItem("token")||"";
     let res_save = await fetch(ruta, {
         method: "POST",
         body: JSON.stringify(data_animal), // data can be `string` or {object}!
         headers: {
             "Content-Type": "application/json",
+            "Authorization":`Bearer ${token}`
         },
     })
     let data_save = await res_save.json()

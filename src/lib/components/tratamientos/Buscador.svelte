@@ -9,6 +9,7 @@
     import Filter from "$lib/svgs/filter.svelte";
     import Limpiar from "$lib/svgs/limpiar.svelte";
     import Sticky from "./Sticky.svelte";
+    let esdev = import.meta.env.VITE_DEV == "si";
 
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -36,6 +37,8 @@
         tipos = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
+        versionjava = false,
+        toggleJava = () => {},
     } = $props();
 </script>
 
@@ -85,6 +88,21 @@
             >
                 Tipos
             </button>
+            {#if esdev}
+                <button
+                    class={`
+                            ${estilos.btnbuscador}
+                            ${estilos.btntextbuscador}
+                        `}
+                    onclick={toggleJava}
+                >
+                    {#if versionjava}
+                        <span class="text-lg">Cerrar java</span>
+                    {:else}
+                        <span class="text-lg">Ver java</span>
+                    {/if}
+                </button>
+            {/if}
         </div>
         <!--Filtros-->
         <div

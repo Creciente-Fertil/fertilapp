@@ -29,6 +29,12 @@
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import TablaTactos from "$lib/components/tactos/TablaTactos.svelte";
     import ListaTactos from "$lib/components/tactos/ListaTactos.svelte";
+    import { getAll } from "$lib/java/tactos/tactosback";
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getTactos();
+    }
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -119,14 +125,21 @@
         isOpenFilter = !isOpenFilter;
     }
     async function getTactos() {
-        const recordst = await pb.collection("tactos").getFullList({
-            filter: `cab='${cab.id}' && active=True`,
-            sort: "-fecha",
-            expand: "animal",
-        });
-        tactos = recordst;
-        tactosrow = tactos;
-        cargadostactos = true;
+        if (!versionjava) {
+            const recordst = await pb.collection("tactos").getFullList({
+                filter: `cab='${cab.id}' && active=True`,
+                sort: "-fecha",
+                expand: "animal",
+            });
+            tactos = recordst;
+            tactosrow = tactos;
+            cargadostactos = true;
+        } else {
+            let data_tactos = await getAll();
+            
+            tactosrow = data_tactos;
+            cargadostactos = true;
+        }
     }
     function isEmpty(str) {
         return !str || str.length === 0;
@@ -359,8 +372,8 @@
         await getTactos();
         filterUpdate();
         await getAnimales();
-        if(esCelu){
-            pageSize = 5
+        if (esCelu) {
+            pageSize = 5;
         }
     });
     function onSelectAnimal() {
@@ -645,6 +658,8 @@
         {nuevo}
         {filterUpdate}
         {clickFilter}
+        {versionjava}
+        {toggleJava}
     />
 
     <!--Ordenar-->

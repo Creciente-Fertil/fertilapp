@@ -31,7 +31,13 @@
     import CustomDate from "$lib/components/CustomDate.svelte";
     import TablaNacimientos from "$lib/components/nacimientos/TablaNacimientos.svelte";
     import ListaNacimientos from "$lib/components/nacimientos/ListaNacimientos.svelte";
-    
+    import { getAll } from "$lib/java/nacimientos/nacimientosback";
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getNacimientos();
+        filterUpdate()
+    }
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -163,14 +169,22 @@
         );
     }
     async function getNacimientos() {
-        const recordsn = await pb.collection("nacimientosall").getFullList({
-            filter: `cab='${cab.id}'`,
-            sort: "-fecha",
-            expand: "madre,padre",
-        });
-        nacimientos = recordsn;
-        nacimientosrow = nacimientos;
-        cargadonacimientos = true;
+        if (!versionjava) {
+            const recordsn = await pb.collection("nacimientosall").getFullList({
+                filter: `cab='${cab.id}'`,
+                sort: "-fecha",
+                expand: "madre,padre",
+            });
+            nacimientos = recordsn;
+            nacimientosrow = nacimientos;
+            cargadonacimientos = true;
+        } else {
+            let data_nacimientos = await getAll()
+            nacimientos = data_nacimientos;
+            nacimientosrow = nacimientos;
+            cargadonacimientos = true;
+            
+        }
     }
     async function guardar() {
         if (agregaranimal) {
@@ -727,6 +741,8 @@
         {filterUpdate}
         {nuevo}
         {clickFilter}
+        {toggleJava}
+        {versionjava}
     />
 
     <!--Ordenar-->

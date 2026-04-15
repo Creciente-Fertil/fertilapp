@@ -10,8 +10,9 @@
     import PocketBase from "pocketbase";
     import { fade, fly } from "svelte/transition";
     import { quintOut } from "svelte/easing";
-    const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
-    const LOGIN="auth/login"
+    import { setUser } from "$lib/userstorage/usersotrage";
+    const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/";
+    const LOGIN = "auth/login";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     let go_server = import.meta.env.VITE_RUTA_GO_SERVER;
@@ -41,23 +42,43 @@
         }
     }
     async function ingresarJava() {
+        if (isEmpty(usuarioname)) {
+            Swal.fire("Error login", "Nombre usuario vacio", "error");
+            return;
+        }
+        if (isEmpty(contra)) {
+            Swal.fire("Error login", "Contraseña vacia", "error");
+            return;
+        }
         let data = {
-            email: "nahuel.n.piguillem+1@gmail.com",
-            password: "secreto",
+            email: usuarioname,
+            password: contra,
         };
-        let ruta = `${RUTA_JAVA}${LOGIN}`
-        let res_login = await fetch(
-            ruta,
-            {
+        let ruta = `${RUTA_JAVA}${LOGIN}`;
+        try {
+            let res_login = await fetch(ruta, {
                 method: "POST",
-            body: JSON.stringify(data), // data can be `string` or {object}!
-            headers: {
-                "Content-Type": "application/json",
-            },
+                body: JSON.stringify(data), // data can be `string` or {object}!
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            let data_login = await res_login.json();
+            let storage_data = {
+                useremail,
+                token:data_login.token
             }
-        )
-        let data_login = await res_login.json()
-        console.log(login)
+            setUser(storage_data)
+            enabled.set("si");
+            goto(pre + "/");
+
+        } catch (err) {
+            Swal.fire(
+                "Error login",
+                "Puede que esten mal las credenciales",
+                "error",
+            );
+        }
     }
     async function ingresar() {
         if (isEmpty(usuarioname)) {

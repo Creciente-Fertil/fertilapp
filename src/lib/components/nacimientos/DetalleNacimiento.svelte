@@ -2,6 +2,7 @@
     import estilos from "$lib/stores/estilos";
     import AgregarAnimal from "../eventos/AgregarAnimal.svelte";
     import PredictSelect from "../PredictSelect.svelte";
+    let esdev = import.meta.env.VITE_DEV == "si";
     let {
         edit = false,
         add = false,
@@ -30,6 +31,8 @@
         onwriteMadre = () => {},
         onelegirPadre = () => {},
         onwritePadre = () => {},
+        toggleJava = () => {},
+        versionjava = false,
     } = $props();
     let cadena = $state("");
 </script>
@@ -42,6 +45,21 @@
             >
         </label>
     </div>
+    {#if esdev}
+        <button
+            class={`
+                            ${estilos.btnbuscador}
+                            ${estilos.btntextbuscador}
+                        `}
+            onclick={toggleJava}
+        >
+            {#if versionjava}
+                <span class="text-lg">Cerrar java</span>
+            {:else}
+                <span class="text-lg">Ver java</span>
+            {/if}
+        </button>
+    {/if}
     {#if add}
         <div class="col-span-1 md:col-span-2">
             <AgregarAnimal
@@ -73,8 +91,7 @@
             <span class="label-text text-sm py-0 mb-3">Fecha nacimiento</span>
         </label>
         {#if edit}
-            <label class="input-group px-2 ">
-            
+            <label class="input-group px-2">
                 <input
                     id="fechanacimiento"
                     type="date"

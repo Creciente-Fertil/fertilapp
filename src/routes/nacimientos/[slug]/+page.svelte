@@ -19,6 +19,14 @@
     import { createStorageProxy } from "$lib/filtros/filtros";
     import DetalleNacimiento from "$lib/components/nacimientos/DetalleNacimiento.svelte";
     import PredictSelect from "$lib/components/PredictSelect.svelte";
+    import { saveBirth } from "$lib/java/nacimientos/nacimientosback";
+    import { getAll } from "$lib/java/animales/animalesback";
+    let versionjava = $state(false);
+
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getAnimales();
+    }
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -114,10 +122,16 @@
         goto(pre + "/servicios");
     }
     async function getAnimales() {
-        let recordsa = await pb.collection("animales").getFullList({
-            filter: `active=true && cab='${cab.id}' && delete = false`,
-            expand: "nacimiento",
-        });
+        let recordsa = [];
+        if (!versionjava) {
+            recordsa = await pb.collection("animales").getFullList({
+                filter: `active=true && cab='${cab.id}' && delete = false`,
+                expand: "nacimiento",
+            });
+        } else {
+            let data_animales = await getAll();
+            recordsa = data_animales;
+        }
         recordsa = recordsa.sort((a, b) =>
             a.caravana.toLocaleLowerCase() < b.caravana.toLocaleLowerCase()
                 ? -1
@@ -192,7 +206,64 @@
         cargado = true;
     });
     async function guardar() {
-        try {
+        if (!versionjava) {
+            try {
+                let ms = madres.filter((ma) => ma.id == madre);
+                let m = {
+                    id: "",
+                    nombremadre: "",
+                    rodeo: "",
+                    lote: "",
+                };
+                if (ms.length > 0) {
+                    m.id = ms[0].id;
+                    m.nombremadre = ms[0].caravana;
+                    m.lote = ms[0].lote;
+                    m.rodeo = ms[0].rodeo;
+                }
+                let tipomadre = m.categoria;
+                let dataparicion = {
+                    madre: m.id,
+                    padre,
+                    fecha: fecha + " 03:00:00",
+                    nombremadre: m.nombremadre,
+                    nombrepadre,
+                    observacion,
+                    cab: cab.id,
+                };
+                const recordparicion = await pb
+                    .collection("nacimientos")
+                    .create(dataparicion);
+                if (agregaranimal) {
+                    let data = {
+                        caravana,
+                        active: true,
+                        delete: false,
+                        fechanacimiento: fecha + " 03:00:00",
+                        sexo,
+                        cab: cab.id,
+                        peso,
+                        lote: m.lote,
+                        rodeo: m.rodeo,
+                        nacimiento: recordparicion.id,
+                    };
+                    let recorda = await pb.collection("animales").create(data);
+                }
+                Swal.fire(
+                    "Éxito guardar",
+                    "Se pudo guardar el nacimiento con exito",
+                    "success",
+                );
+                goto(pre + "/nacimientos");
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error guardar",
+                    "Hubo un error para guardar el nacimiento",
+                    "error",
+                );
+            }
+        } else {
             let ms = madres.filter((ma) => ma.id == madre);
             let m = {
                 id: "",
@@ -206,7 +277,6 @@
                 m.lote = ms[0].lote;
                 m.rodeo = ms[0].rodeo;
             }
-            let tipomadre = m.categoria;
             let dataparicion = {
                 madre: m.id,
                 padre,
@@ -214,39 +284,24 @@
                 nombremadre: m.nombremadre,
                 nombrepadre,
                 observacion,
-                cab: cab.id,
-            }; 
-            const recordparicion = await pb
-                .collection("nacimientos")
-                .create(dataparicion);
-            if (agregaranimal) {
-                let data = {
-                    caravana,
-                    active: true,
-                    delete: false,
-                    fechanacimiento: fecha + " 03:00:00",
-                    sexo,
-                    cab: cab.id,
-                    peso,
-                    lote: m.lote,
-                    rodeo: m.rodeo,
-                    nacimiento: recordparicion.id,
-                };
-                let recorda = await pb.collection("animales").create(data);
+                cab: cab.id
+            };
+            try {
+                let res = await saveBirth(dataparicion);
+                Swal.fire(
+                    "Éxito guardar",
+                    "Se pudo guardar el nacimiento con exito",
+                    "success",
+                );
+                goto(pre + "/nacimientos");
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error guardar",
+                    "Hubo un error para guardar el nacimiento",
+                    "error",
+                );
             }
-            Swal.fire(
-                "Éxito guardar",
-                "Se pudo guardar el nacimiento con exito",
-                "success",
-            );
-            goto(pre+"/nacimientos")
-        } catch (err) {
-            console.error(err);
-            Swal.fire(
-                "Error guardar",
-                "Hubo un error para guardar el nacimiento",
-                "error",
-            );
         }
     }
     async function editar() {
@@ -367,6 +422,8 @@
             {onelegirPadre}
             {onwritePadre}
             {onwriteMadre}
+            {toggleJava}
+            {versionjava}
         />
         <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
 

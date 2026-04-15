@@ -9,7 +9,7 @@
     onMount(() => {
         const params = new URLSearchParams(window.location.search)
         const token = params.get('token')
-        console.log(token)
+        
         if (token) {
             usuario.set(token)
             enabled.set('si')

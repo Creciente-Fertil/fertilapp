@@ -117,7 +117,7 @@
             let data = {
                 nombre,
                 active: true,
-                cab: cab.id,
+                cab: 1,
             };
             let res = await saveLot(data);
             Swal.fire("Éxito guardar", "Se pudo guardar el lote", "success");
@@ -241,9 +241,9 @@
                     {#if esdev}
                         <button
                             class={`
-                    ${estilos.btnbuscador}
-                    ${estilos.btntextbuscador}
-                `}
+                            ${estilos.btnbuscador}
+                            ${estilos.btntextbuscador}
+                        `}
                             onclick={toggleJava}
                         >
                             {#if versionjava}

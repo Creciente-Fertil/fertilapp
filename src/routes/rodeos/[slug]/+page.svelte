@@ -19,6 +19,11 @@
     import Danger from "$lib/components/botones/Danger.svelte";
     import Secondary from "$lib/components/botones/Secondary.svelte";
     import Success from "$lib/components/botones/Success.svelte";
+    import { saveHerd } from "$lib/java/rodeos/rodeosback";
+    let versionjava = $state(false);
+    function toggleJava() {
+        versionjava = !versionjava;
+    }
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -103,18 +108,37 @@
         }
     }
     async function guardarNuevo() {
-        try {
+        if (!versionjava) {
+            try {
+                let data = {
+                    nombre,
+                    active: true,
+                    cab: cab.id,
+                };
+                let record = await pb.collection("rodeos").create(data);
+                volver();
+                Swal.fire(
+                    "Éxito guardar",
+                    "Se pudo guardar el rodeo",
+                    "success",
+                );
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error guardar",
+                    "No se pudo guardar el rodeo",
+                    "error",
+                );
+            }
+        } else {
             let data = {
                 nombre,
                 active: true,
-                cab: cab.id,
+                cab: 1,
             };
-            let record = await pb.collection("rodeos").create(data);
+            let res = await saveHerd(data);
+            Swal.fire("Éxito guardar", "Se pudo guardar el lote", "success");
             volver();
-            Swal.fire("Éxito guardar", "Se pudo guardar el rodeo", "success");
-        } catch (err) {
-            console.error(err);
-            Swal.fire("Error guardar", "No se pudo guardar el rodeo", "error");
         }
     }
     async function getAnimales() {}
@@ -205,6 +229,21 @@
                             Rodeo
                         </h1>
                     </button>
+                    {#if esdev}
+                        <button
+                            class={`
+                            ${estilos.btnbuscador}
+                            ${estilos.btntextbuscador}
+                        `}
+                            onclick={toggleJava}
+                        >
+                            {#if versionjava}
+                                <span class="text-lg">Cerrar java</span>
+                            {:else}
+                                <span class="text-lg">Ver java</span>
+                            {/if}
+                        </button>
+                    {/if}
                 </div>
 
                 <div class="hidden md:block text-[#115642]">

@@ -8,11 +8,11 @@
     import Filter from "$lib/svgs/filter.svelte";
     import Limpiar from "$lib/svgs/limpiar.svelte";
     import Sticky from "./Sticky.svelte";
-    
+    let esdev = import.meta.env.VITE_DEV == "si";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
-    
+
     let {
         nacimientosrow = [],
         selecthash = {},
@@ -25,7 +25,6 @@
         buscar = $bindable(""),
         buscarmadre = $bindable(""),
         buscarpadre = $bindable(""),
-        
 
         //funciones
         limpiarFiltros = () => {},
@@ -33,7 +32,9 @@
         nuevo = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
-        
+
+        toggleJava = () => {},
+        versionjava = false,
     } = $props();
 
     //buscador
@@ -74,19 +75,25 @@
                 `}
                 onclick={nuevo}
             >
-                {#if esCelu}
-                    Nacimiento
-                {:else}
-                    + Nuevo nacimiento
-                {/if}
+                + Nuevo nacimiento
             </button>
-            
+            {#if esdev}
+                <button
+                    class={`
+                    ${estilos.btnbuscador}
+                    ${estilos.btntextbuscador}
+                `}
+                    onclick={toggleJava}
+                >
+                    {versionjava ? "Cerrar java" : "Ver java"}
+                </button>
+            {/if}
         </div>
         <!--Filtros-->
         <div
             class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-1 md:p-2 bg-transparent rounded-lg"
         >
-        <!-- Input de búsqueda -->
+            <!-- Input de búsqueda -->
             <div
                 class={`
                   flex items-center flex-1

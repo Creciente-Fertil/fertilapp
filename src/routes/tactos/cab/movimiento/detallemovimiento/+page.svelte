@@ -18,7 +18,13 @@
     import DetalleMovimiento from "$lib/components/tactos/DetalleMovimiento.svelte";
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
     import DetallesAnimalesMovimiento from "$lib/components/tactos/DetallesAnimalesMovimiento.svelte";
-
+    import { saveTacto } from "$lib/java/tactos/tactosback";
+    import Secondary from "$lib/components/botones/Secondary.svelte";
+    //java
+    let versionjava = $state(false);
+    function toggleJava() {
+        versionjava = !versionjava;
+    }
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -35,24 +41,23 @@
     let usuarioid = $state("");
     let listaanimales = $state([]);
     let selecthashmap = $state({});
-    
 
     //valores
     //movimiento
-    let animal = $state({})
+    let animal = $state({});
     let tipotactoselect = $state("");
     let fecha = $state("");
     let observaciongeneral = $state("");
-    let prenada = $state(0)
+    let prenada = $state(0);
     //validacion
     let malfecha = $state(false);
     let botonhabilitado = $state(false);
     let defaultmovimiento = {
         selecthashmap: {},
-        fecha:"",
-        observaciongeneral:"",
-        tipotactoselect:"",
-        prenada:0
+        fecha: "",
+        observaciongeneral: "",
+        tipotactoselect: "",
+        prenada: 0,
     };
     let detallemovimiento = $state({
         ...defaultmovimiento,
@@ -81,27 +86,30 @@
         detallemovimiento.observaciongeneral = observaciongeneral;
         detallemovimiento.tipotactoselect = tipotactoselect;
         detallemovimiento.prenada = prenada;
-        
+
         proxy.save(detallemovimiento);
+    }
+    function setDefault(){
+        proxy.save(defaultmovimiento);
     }
     function loadDetalle() {
         detallemovimiento = proxy.load();
 
         selecthashmap = detallemovimiento.selecthashmap;
-        fecha = detallemovimiento.fecha
-        tipotactoselect = detallemovimiento.tipotactoselect
-        prenada = detallemovimiento.prenada
-        observaciongeneral = detallemovimiento.observaciongeneral
-        
+        fecha = detallemovimiento.fecha;
+        tipotactoselect = detallemovimiento.tipotactoselect;
+        prenada = detallemovimiento.prenada;
+        observaciongeneral = detallemovimiento.observaciongeneral;
+
         listaanimales = [];
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
                 let fila = value;
-                
+
                 if (fila.observacion.length == 0) {
                     fila.observacion = observaciongeneral;
                 }
-                fila.prenada = prenada
+                fila.prenada = prenada;
                 listaanimales.push(fila);
             }
         }
@@ -118,114 +126,141 @@
         for (let i = 0; i < listaanimales.length; i++) {
             listaanimales[i].observacion = observaciongeneral;
         }
-        
     }
     async function mover() {
         if (fecha == "") {
             Swal.fire("Error tactos", "Debe seleccionar una fecha", "error");
             return;
         }
-        let bulktactos = [];
-        let bulkcambios = [];
-        let bulkhistoriales = [];
-        for (let i = 0; i < listaanimales.length; i++) {
-            let tactoanimal = listaanimales[i];
+        if (listaanimales.length == 0) {
+            Swal.fire("Sin animales", "No hay animales seleccionados", "error");
+            return;
+        }
+        if (!versionjava) {
+            let bulktactos = [];
+            let bulkcambios = [];
+            let bulkhistoriales = [];
+            for (let i = 0; i < listaanimales.length; i++) {
+                let tactoanimal = listaanimales[i];
 
-            let ft = tactoanimal.fechatacto;
-            let fi = tactoanimal.fechains;
-            let fs = tactoanimal.fechaser;
-            let maximafecha = null;
-            const valor1 = ft || "";
-            const valor2 = fi || "";
-            const valor3 = fs || "";
+                let ft = tactoanimal.fechatacto;
+                let fi = tactoanimal.fechains;
+                let fs = tactoanimal.fechaser;
+                let maximafecha = null;
+                const valor1 = ft || "";
+                const valor2 = fi || "";
+                const valor3 = fs || "";
 
-            // Comparar los strings
-            if (valor1 >= valor2 && valor1 >= valor3) {
-                maximafecha = ft;
-            } else if (valor2 >= valor1 && valor2 >= valor3) {
-                maximafecha = fi;
-            } else {
-                maximafecha = fs;
-            }
+                // Comparar los strings
+                if (valor1 >= valor2 && valor1 >= valor3) {
+                    maximafecha = ft;
+                } else if (valor2 >= valor1 && valor2 >= valor3) {
+                    maximafecha = fi;
+                } else {
+                    maximafecha = fs;
+                }
 
-            if (maximafecha == null || fecha > maximafecha) {
-                let dataupdate = {
-                    prenada: tactoanimal.prenada,
-                    id: tactoanimal.id,
-                };
-                bulkcambios.push(dataupdate);
-                let datahistorial = {
+                if (maximafecha == null || fecha > maximafecha) {
+                    let dataupdate = {
+                        prenada: tactoanimal.prenada,
+                        id: tactoanimal.id,
+                    };
+                    bulkcambios.push(dataupdate);
+                    let datahistorial = {
+                        animal: tactoanimal.id,
+                        caravana: tactoanimal.caravana,
+                        user: tactoanimal.user,
+                        active: true,
+                        delete: false,
+                        fechanacimiento: tactoanimal.fechanacimiento,
+                        sexo: tactoanimal.sexo,
+                        peso: tactoanimal.peso,
+                        lote: tactoanimal.lote,
+                        rodeo: tactoanimal.rodeo,
+                        categoria: tactoanimal.categoria,
+                        prenada: tactoanimal.prenada,
+                    };
+                    bulkhistoriales.push(datahistorial);
+                }
+
+                let datatacto = {
+                    fecha: fecha + " 03:00:00",
+                    observacion: tactoanimal.observacion,
                     animal: tactoanimal.id,
-                    caravana: tactoanimal.caravana,
-                    user: tactoanimal.user,
-                    active: true,
-                    delete: false,
-                    fechanacimiento: tactoanimal.fechanacimiento,
-                    sexo: tactoanimal.sexo,
-                    peso: tactoanimal.peso,
-                    lote: tactoanimal.lote,
-                    rodeo: tactoanimal.rodeo,
                     categoria: tactoanimal.categoria,
                     prenada: tactoanimal.prenada,
+                    tipo: tactoanimal.tipotacto,
+                    nombreveterinario: "",
+                    cab: cab.id,
+                    active: true,
                 };
-                bulkhistoriales.push(datahistorial);
+                bulktactos.push(datatacto);
             }
+            try {
+                const batch = pb.createBatch();
+                for (let i = 0; i < bulktactos.length; i++) {
+                    let bt = bulktactos[i];
+                    batch.collection("tactos").create(bt);
+                }
+                for (let i = 0; i < bulkcambios.length; i++) {
+                    let bc = bulkcambios[i];
+                    batch
+                        .collection("animales")
+                        .update(bc.id, { prenada: bc.prenada });
+                }
+                for (let i = 0; i < bulkhistoriales.length; i++) {
+                    let bh = bulkhistoriales[i];
+                    batch.collection("historialanimales").create(bh);
+                }
 
-            let datatacto = {
-                fecha: fecha + " 03:00:00",
-                observacion: tactoanimal.observacion,
-                animal: tactoanimal.id,
-                categoria: tactoanimal.categoria,
-                prenada: tactoanimal.prenada,
-                tipo: tactoanimal.tipotacto,
-                nombreveterinario: "",
-                cab: cab.id,
-                active: true,
-            };
-            bulktactos.push(datatacto);
-        }
-        try {
-            const batch = pb.createBatch();
-            for (let i = 0; i < bulktactos.length; i++) {
-                let bt = bulktactos[i];
-                batch.collection("tactos").create(bt);
+                const result = await batch.send();
+                Swal.fire(
+                    "Éxito guardar",
+                    "Se pudieron guardar los tactos",
+                    "success",
+                );
+                selecthashmap = {};
+                fecha = "";
+                observaciongeneral = "";
+                tipotactoselect = "";
+                prenada = 0;
+                setDetalle();
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error guardar",
+                    "No se pudieron guardar los tactos",
+                    "error",
+                );
             }
-            for (let i = 0; i < bulkcambios.length; i++) {
-                let bc = bulkcambios[i];
-                batch
-                    .collection("animales")
-                    .update(bc.id, { prenada: bc.prenada });
+            volver();
+        } else {
+            let errores = false;
+            let serverrores = [];
+            for (let i = 0; i < listaanimales.length; i++) {
+                let tactoanimal = listaanimales[i];
+                let datatacto = {
+                    fecha: fecha + " 03:00:00",
+                    observacion: tactoanimal.observacion,
+                    animal: tactoanimal.id,
+                    categoria: tactoanimal.categoria,
+                    prenada: tactoanimal.prenada,
+                    tipo: tactoanimal.tipotacto,
+                    nombreveterinario: "",
+                    cab: cab.id,
+                    active: true,
+                };
+                await saveTacto(datatacto)
+                
             }
-            for (let i = 0; i < bulkhistoriales.length; i++) {
-                let bh = bulkhistoriales[i];
-                batch.collection("historialanimales").create(bh);
-            }
+            
 
-            const result = await batch.send();
-            Swal.fire(
-                "Éxito guardar",
-                "Se pudieron guardar los tactos",
-                "success",
-            );
-            selecthashmap={}
-            fecha=""
-            observaciongeneral=""
-            tipotactoselect =""
-            prenada = 0
-            setDetalle()
-        } catch (err) {
-            console.error(err);
-            Swal.fire(
-                "Error guardar",
-                "No se pudieron guardar los tactos",
-                "error",
-            );
         }
-        volver();
+        setDefault()
+        volver()
     }
 
     onMount(async () => {
-        
         let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
         let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
@@ -233,7 +268,6 @@
         per.setPer(respermisos.permisos, usuarioid);
         userpermisos = getPermisosList(per.per.permisos);
         loadDetalle();
-        
     });
     function verAnimal(id) {
         let a_idx = listaanimales.findIndex((a) => a.id == id);
@@ -250,6 +284,12 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <div class={classmove}>
+    {#if esdev}
+        <Secondary
+            texto={versionjava?"Cerrar java":"Ver java"}
+            onclick={toggleJava}
+        />
+        { /if}
         <DetalleMovimiento
             {fecha}
             tipo={tipotactoselect}
@@ -300,7 +340,6 @@
             </button>
         </div>
     </div>
-    
 </Navbar2>
 
 <dialog id="veranimal" class="modal modal-middle rounded-xl">

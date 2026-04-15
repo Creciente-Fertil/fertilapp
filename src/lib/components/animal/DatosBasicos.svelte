@@ -1028,7 +1028,7 @@
                     `}
                         bind:value={prenada}
                     >
-                        {#each estados as s}
+                        {#each estados.filter(es=>es.id>-1) as s}
                             <option value={s.id}>{s.nombre}</option>
                         {/each}
                     </select>

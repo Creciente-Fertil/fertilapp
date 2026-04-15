@@ -1,22 +1,22 @@
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
-const RUTA_LOTES = "lots"
-function processLot(lot){
-    let data_lote = {
-        id:lot.id,
-        nombre:lot.name
+const RUTA_RODEOS = "herds"
+function processHerd(herd){
+    let data_rodeo = {
+        id:herd.id,
+        nombre:herd.name
     }
-    return data_lote
+    return data_rodeo
 } 
-function processLots(data){
-    let data_lotes = []
+function processHerds(data){
+    let data_rodeos = []
     for(let i = 0;i<data.length;i++){
         let fila = data[i]
-        data_lotes.push(processLot(fila))
+        data_rodeos.push(processHerd(fila))
     }
-    return data_lotes
+    return data_rodeos
 }
 export async function getAll() {
-    let ruta = `${RUTA_JAVA}${RUTA_LOTES}/all`
+    let ruta = `${RUTA_JAVA}${RUTA_RODEOS}/all`
     let token =localStorage.getItem("token")||"";
     let options = {
         headers:{
@@ -29,15 +29,15 @@ export async function getAll() {
     let data_all = await res_all.json()
 
 
-    let procesada = processLots(data_all)
-
+    let procesada = processHerds(data_all)
+    
     return procesada
 }
-export async function getLotlId(id) {
-    let ruta = `${RUTA_JAVA}${RUTA_LOTES}/${id}`
+export async function getHerdlId(id) {
+    let ruta = `${RUTA_JAVA}${RUTA_RODEOS}/${id}`
     let res_all = await fetch(ruta)
     let data_all = await res_all.json()
-    let procesada = processLot(data_all)
+    let procesada = processHerds(data_all)
     return procesada
 }
 function postData(data) {
@@ -49,8 +49,8 @@ function postData(data) {
     
     return data_lot
 }
-export async function saveLot(data) {
-    let ruta = `${RUTA_JAVA}${RUTA_LOTES}`
+export async function saveHerd(data) {
+    let ruta = `${RUTA_JAVA}${RUTA_RODEOS}`
     let data_lot = postData(data)
     let token =localStorage.getItem("token")||"";
     

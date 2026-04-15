@@ -15,12 +15,18 @@
     import { shorterWord } from "$lib/stringutil/lib";
     import TablaRodeos from "$lib/components/rodeos/TablaRodeos.svelte";
     import ListaRodeos from "$lib/components/rodeos/ListaRodeos.svelte";
+    import { getAll } from "$lib/java/rodeos/rodeosback";
     let ruta = import.meta.env.VITE_RUTA;
 
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
     let caber = createCaber();
     let cab = caber.cab;
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getRodeos();
+    }
 
     //Datos para mostrar
     let rodeos = $state([]);
@@ -62,11 +68,11 @@
     let proxyanimales = createStorageProxy("listaanimales", defaultfiltro);
     //rodeo
     let defaultRodeo = {
-        id:"",
-        nombre:"",
-        edit:false
-    }
-    let detalleRodeo = $state({...defaultRodeo})
+        id: "",
+        nombre: "",
+        edit: false,
+    };
+    let detalleRodeo = $state({ ...defaultRodeo });
     let proxyLote = createStorageProxy("detalleRodeo", defaultRodeo);
     //Guardar
     let idrodeo = $state("");
@@ -83,19 +89,33 @@
         );
     }
     async function getRodeos() {
-        const records = await pb.collection("rodeos").getFullList({
-            filter: `active=true && cab='${cab.id}'`,
-            sort: "nombre",
-        });
-        rodeos = records;
-        ordenar(rodeos);
-        rodeosrows = rodeos;
-        for (let i = 0; i < rodeos.length; i++) {
-            let total = await getAnimalesTotal(rodeos[i].id);
-            rodeos[i].total = total;
-        }
+        if (!versionjava) {
+            const records = await pb.collection("rodeos").getFullList({
+                filter: `active=true && cab='${cab.id}'`,
+                sort: "nombre",
+            });
+            rodeos = records;
+            ordenar(rodeos);
+            rodeosrows = rodeos;
+            for (let i = 0; i < rodeos.length; i++) {
+                let total = await getAnimalesTotal(rodeos[i].id);
+                rodeos[i].total = total;
+            }
 
-        cargadorodeos = true;
+            cargadorodeos = true;
+        } else {
+            
+            let data_rodeos = await getAll();
+            rodeos = data_rodeos;
+            ordenar(rodeos);
+            rodeosrows = rodeos;
+            for (let i = 0; i < rodeos.length; i++) {
+                
+                rodeos[i].total = 0;
+            }
+
+            cargadorodeos = true;
+        }
     }
     function openNewModal() {
         idrodeo = "";
@@ -124,16 +144,16 @@
         idrodeo = id;
         let rodeo = rodeos.filter((r) => r.id == idrodeo)[0];
         nombre = rodeo.nombre;
-        proxyLote.save({id,edit:true,nombre})
-        goto(pre+"/rodeos/"+id)
+        proxyLote.save({ id, edit: true, nombre });
+        goto(pre + "/rodeos/" + id);
         //nuevoModal.showModal();
     }
     function openViewModal(id) {
         idrodeo = id;
         let rodeo = rodeos.filter((r) => r.id == idrodeo)[0];
         nombre = rodeo.nombre;
-        proxyLote.save({id,edit:false,nombre})
-        goto(pre+"/rodeos/"+id)
+        proxyLote.save({ id, edit: false, nombre });
+        goto(pre + "/rodeos/" + id);
         //nuevoModal.showModal();
     }
     async function editar(id) {
@@ -263,7 +283,7 @@
         }
     }
     function nuevo() {
-        goto(pre+"/rodeos/0")
+        goto(pre + "/rodeos/0");
         //openNewModal();
     }
     function clickTodos() {
@@ -324,6 +344,8 @@
         {filterUpdate}
         {selecthash}
         cabnombre={cab.nombre}
+        {toggleJava}
+        {versionjava}
     />
     {#if cargadorodeos}
         <!--Tabla-->
@@ -364,16 +386,16 @@
         `}
         >
             <ListaRodeos
-            bind:pageSize
-                    {selecthash}
-                    {rodeosrows}
-                    openView={openViewModal}
-                    openEdit={openEditModal}
-                    openEliminar={eliminar}
-                    {clickFila}
-                    {clickTodos}
-                    {todos}
-                    {shorterWord}
+                bind:pageSize
+                {selecthash}
+                {rodeosrows}
+                openView={openViewModal}
+                openEdit={openEditModal}
+                openEliminar={eliminar}
+                {clickFila}
+                {clickTodos}
+                {todos}
+                {shorterWord}
             />
         </div>
     {/if}
