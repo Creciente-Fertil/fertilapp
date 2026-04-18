@@ -80,8 +80,8 @@
     let proxy = createStorageProxy("pesajesanimales", defaultfiltro);
     //movimento
     let defaultmovimiento = {
-        fecha:"",
-        pesogeneral:"",
+        fecha: "",
+        pesogeneral: "",
         selecthashmap: {},
     };
     let detallemovimiento = $state({
@@ -156,8 +156,8 @@
 
     function setDetalle() {
         detallemovimiento.selecthashmap = selecthashmap;
-        detallemovimiento.fecha=fecha
-        detallemovimiento.pesogeneral=pesogeneral
+        detallemovimiento.fecha = fecha;
+        detallemovimiento.pesogeneral = pesogeneral;
         proxymovimiento.save(detallemovimiento);
     }
     function loadDetalle() {
@@ -370,7 +370,7 @@
         for (let i = 0; i < selectanimales.length; i++) {
             selectanimales[i].pesonuevo = pesogeneral;
         }
-        setDetalle()
+        setDetalle();
     }
     async function crearPesaje() {
         let errores = false;
@@ -437,7 +437,7 @@
         goto(pre + "/pesajes");
     }
     function siguiente() {
-        setDetalle()
+        setDetalle();
         goto(pre + "/pesajes/detallemovimiento");
     }
     onMount(async () => {
@@ -505,18 +505,15 @@
                 </h1>
             </div>
         </div>
-        <div
-            class={`grid grid-cols-1   max-h-screen gap-1 md:gap-2`}
-        >
+        <div class={`grid grid-cols-1   max-h-screen gap-1 md:gap-2`}>
             <div>
                 <NuevoPesajes bind:fecha bind:pesogeneral {cambioPesoGeneral} />
                 <div class="hidden">
-<AnimalesSeleccionados
-                    {selecthashmap}
-                    quitarAnimal={clickAnimal}
-                />
+                    <AnimalesSeleccionados
+                        {selecthashmap}
+                        quitarAnimal={clickAnimal}
+                    />
                 </div>
-                
             </div>
             <div class="md:col-span-2">
                 <Buscador

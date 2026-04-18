@@ -333,7 +333,7 @@
                             <input
                                 type="checkbox"
                                 bind:checked={showpass}
-                                class="checkbox"
+                                class="checkbox "
                             />
                         </label>
                     </div>

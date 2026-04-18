@@ -444,11 +444,11 @@
                                     bind:value={nombre}
                                     required
                                     class={`
-                                w-full px-3 py-2 border rounded-md shadow-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                                transition duration-150 ease-in-out
-                                border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                            `}
+                                        w-full px-3 py-2 border rounded-md shadow-sm
+                                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                        transition duration-150 ease-in-out
+                                        border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                                    `}
                                     oninput={() => onChangeEdit("NOMBRE")}
                                 />
                             {/if}
@@ -521,14 +521,14 @@
                                 <label class="input-group">
                                     <select
                                         class={`
-                                    select select-bordered w-full
-                                    rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    
-                                    ${estilos.bgdark2}
-                                `}
+                                            select select-bordered w-full
+                                            rounded-md
+                                            focus:outline-none focus:ring-2 
+                                            focus:ring-green-500 
+                                            focus:border-green-500
+                                            
+                                            ${estilos.bgdark2}
+                                        `}
                                         bind:value={localidad}
                                     >
                                         <option value="" class="rounded"
@@ -567,15 +567,15 @@
                                     bind:value={direccion}
                                     required
                                     class={`
-                                w-full px-3 py-2 border rounded-md shadow-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                                transition duration-150 ease-in-out
-                                ${
-                                    modoedicion
-                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                                }
-                            `}
+                                        w-full px-3 py-2 border rounded-md shadow-sm
+                                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                        transition duration-150 ease-in-out
+                                        ${
+                                            modoedicion
+                                                ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                                : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                        }
+                                    `}
                                 />
                             {/if}
                         </div>
@@ -602,15 +602,15 @@
                                     bind:value={contacto}
                                     required
                                     class={`
-                                w-full px-3 py-2 border rounded-md shadow-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                                transition duration-150 ease-in-out
-                                ${
-                                    modoedicion
-                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                                }
-                            `}
+                                        w-full px-3 py-2 border rounded-md shadow-sm
+                                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                        transition duration-150 ease-in-out
+                                        ${
+                                            modoedicion
+                                                ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                                : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                        }
+                                    `}
                                 />
                             {/if}
                         </div>
@@ -636,15 +636,15 @@
                                     bind:value={telefono}
                                     required
                                     class={`
-                                w-full px-3 py-2 border rounded-md shadow-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                                transition duration-150 ease-in-out
-                                ${
-                                    modoedicion
-                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                                }
-                            `}
+                                        w-full px-3 py-2 border rounded-md shadow-sm
+                                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                        transition duration-150 ease-in-out
+                                        ${
+                                            modoedicion
+                                                ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                                : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                        }
+                                    `}
                                 />
                             {/if}
                         </div>
@@ -670,15 +670,15 @@
                                     bind:value={mail}
                                     required
                                     class={`
-                                w-full px-3 py-2 border rounded-md shadow-sm
-                                focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                                transition duration-150 ease-in-out
-                                ${
-                                    modoedicion
-                                        ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                        : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                                }
-                            `}
+                                        w-full px-3 py-2 border rounded-md shadow-sm
+                                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                        transition duration-150 ease-in-out
+                                        ${
+                                            modoedicion
+                                                ? "border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                                : "bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                        }
+                                    `}
                                 />
                             {/if}
                         </div>
@@ -711,7 +711,7 @@
                             fuentesize="text-md"
                             fuentepeso="font-bold"
                             px="px-6"
-                            py="py-2"
+                            py="py-0"
                             btn="btn"
                         />
                     {:else}
@@ -822,7 +822,7 @@
                         fuentesize="text-md"
                         fuentepeso="font-bold"
                         px="px-6"
-                        py="py-2"
+                        py="py-1"
                         btn="btn"
                     />
                 </div>

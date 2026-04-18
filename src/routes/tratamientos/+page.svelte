@@ -845,10 +845,10 @@
         </div>
         <div
             class={`
-             md:hidden
-            w-full grid grid-cols-1
-            mx-auto py-6 px-4 max-w-7xl
-        `}
+                md:hidden
+                w-full grid grid-cols-1
+                mx-auto py-6 px-4 max-w-7xl
+            `}
         >
             <ListaTratamientos
                 bind:pageSize
