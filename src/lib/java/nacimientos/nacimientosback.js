@@ -1,3 +1,4 @@
+import { getUser } from "$lib/userstorage/usersotrage"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_NACIMIENTOS = "births"
 function processNacimiento(birth){
@@ -9,7 +10,7 @@ function processNacimiento(birth){
         padre:birth.fatherId,
         nombremadre:birth.motherId,
         nombrepadre:birth.fatherId,
-        observaciones:birth.notes,
+        observacion :birth.notes,
         cab:birth.establishmentId
     }
     return data_nacimiento
@@ -23,7 +24,8 @@ function processNacimientos(data){
     return data_nacimientos
 }
 export async function getAll() {
-    let token =localStorage.getItem("token")||"";
+    let user = getUser();
+    let token =  user.token;
 
     let ruta = `${RUTA_JAVA}${RUTA_NACIMIENTOS}/all`
     let options = {
@@ -43,7 +45,8 @@ export async function getAll() {
 }
 export async function getBirthId(id){
     let ruta = `${RUTA_JAVA}${RUTA_NACIMIENTOS}/${id}`
-    let token =localStorage.getItem("token")||"";
+    let user = getUser();
+    let token =  user.token;
     let options = {
         headers:{
             "Content-Type": "application/json",
@@ -64,19 +67,23 @@ function postData(data){
           notes: data.observacion,
           establishmentId: 1
     }
+    return data_nacimiento
 
 }
 export async function saveBirth(data) {
     let ruta = `${RUTA_JAVA}${RUTA_NACIMIENTOS}`
+    
     let data_birth = postData(data)
+    
 
-    let token =localStorage.getItem("token")||"";
+    let user = getUser();
+    let token =  user.token;
 
     let res_save = await fetch(ruta, {
         method: "POST",
         body: JSON.stringify(data_birth), // data can be `string` or {object}!
         headers: {
-            
+            "Content-Type":"application/json",
             "Authorization":`Bearer ${token}`
         },
     })
@@ -85,4 +92,40 @@ export async function saveBirth(data) {
 
     return data_save
 
+}
+export async function editNacimiento(id,data) {
+    let ruta = `${RUTA_JAVA}${RUTA_NACIMIENTOS}/${id}`
+        let user = getUser();
+        let token =  user.token;
+        let res_post = await fetch(ruta,
+            {
+                method: "PUT",
+                body: JSON.stringify(data), // data can be `string` or {object}!
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            }
+        )
+    
+        let data_post = await res_post.json()
+        return data_post
+}
+export async function eliminarNacimiento(id){
+    let ruta = `${RUTA_JAVA}${RUTA_NACIMIENTOS}/delete/${id}`
+        let user = getUser();
+        let token =  user.token;
+        let res_post = await fetch(ruta,
+            {
+                method: "POST",
+                //            body: JSON.stringify({}), // data can be `string` or {object}!
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            }
+        )
+    
+        //let data_post = await res_post.json()
+        return {}
 }

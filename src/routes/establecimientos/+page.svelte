@@ -18,6 +18,13 @@
     import { createPer } from "$lib/stores/permisos.svelte";
     import { usuario } from "$lib/stores/usuario";
     import ListaEstablecimientos from "$lib/components/establecimientos/ListaEstablecimientos.svelte";
+    import { getAll } from "$lib/java/establecimientos/establecimientosback";
+    let esdev = import.meta.env.VITE_DEV == "si";
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getEstablecimientos()
+    }
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -106,35 +113,43 @@
             }
         });
     }
-    async function getEstablecimientosColab(params) {
-        const restxcolab = await pb.collection("estxcolabs").getFullList({
-            filter: `colab.user = '${usuarioid}' && cab.active = true`,
-            expand: "colab,cab",
-        });
-    }
-    onMount(async () => {
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        cab = caber.cab;
-        const records = await pb.collection("cabs").getFullList({
-            filter: `active = True && user = '${usuarioid}'`,
-        });
+    async function getEstablecimientosColab() {
         const restxcolab = await pb.collection("estxcolabs").getFullList({
             filter: `colab.user = '${usuarioid}' && cab.active = true`,
             expand: "colab,cab",
         });
         establecimientoscolab = restxcolab;
 
-        establecimientos = records;
-
-        for (let i = 0; i < establecimientos.length; i++) {
-            totales.push(await getTotalAnimales(establecimientos[i].id));
-        }
         for (let i = 0; i < establecimientoscolab.length; i++) {
             totalescolab.push(
                 await getTotalAnimales(establecimientoscolab[i].expand.cab.id),
             );
         }
+    }
+    async function getEstablecimientos() {
+        if (!versionjava) {
+            const records = await pb.collection("cabs").getFullList({
+                filter: `active = True && user = '${usuarioid}'`,
+            });
+            establecimientos = records;
+
+            for (let i = 0; i < establecimientos.length; i++) {
+                totales.push(await getTotalAnimales(establecimientos[i].id));
+            }
+        } else {
+            let records = await getAll();
+            establecimientos = records;
+            for (let i = 0; i < establecimientos.length; i++) {
+                totales.push(0);
+            }
+        }
+    }
+    onMount(async () => {
+        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+        usuarioid = pb_json.record.id;
+        cab = caber.cab;
+        await getEstablecimientos();
+        await getEstablecimientosColab();
     });
 </script>
 
@@ -176,6 +191,17 @@
                             Nuevo
                         </Success>
                     </div>
+                    {#if esdev}
+                        <div class="flex flex-wrap gap-2">
+                            <Success onclick={toggleJava} conhijo={true}>
+                                {#if versionjava}
+                                    cerrar java
+                                {:else}
+                                    ver java
+                                {/if}
+                            </Success>
+                        </div>
+                    {/if}
                 </div>
             </div>
             <div

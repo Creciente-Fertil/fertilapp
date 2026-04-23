@@ -11,8 +11,9 @@
     import { fade, fly } from "svelte/transition";
     import { quintOut } from "svelte/easing";
     import { setUser } from "$lib/userstorage/usersotrage";
-    const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/";
-    const LOGIN = "auth/login";
+    import { loginJava } from "$lib/java/usuarios/usuariosback";
+    import { getEstablishmentId } from "$lib/java/establecimientos/establecimientosback";
+    import { saveStorageEstablecimiento, saveStoragePermiso } from "$lib/java/establecimientos/establecimientostorage";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     let go_server = import.meta.env.VITE_RUTA_GO_SERVER;
@@ -42,6 +43,7 @@
         }
     }
     async function ingresarJava() {
+        
         if (isEmpty(usuarioname)) {
             Swal.fire("Error login", "Nombre usuario vacio", "error");
             return;
@@ -50,29 +52,29 @@
             Swal.fire("Error login", "Contraseña vacia", "error");
             return;
         }
-        let data = {
-            email: usuarioname,
-            password: contra,
-        };
-        let ruta = `${RUTA_JAVA}${LOGIN}`;
         try {
-            let res_login = await fetch(ruta, {
-                method: "POST",
-                body: JSON.stringify(data), // data can be `string` or {object}!
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            let data_login = await res_login.json();
+            
+            let data_login = await loginJava(usuarioname, contra);
+            
             let storage_data = {
-                useremail,
-                token:data_login.token
-            }
-            setUser(storage_data)
+                useremail:usuarioname,
+                token: data_login.token,
+            };
+            setUser(storage_data);
             enabled.set("si");
-            goto(pre + "/");
 
+            let establecimiento = await getEstablishmentId(1)
+            let data_est = {
+                nombre:establecimiento.nombre,
+                id:establecimiento.id,
+                exist:true,
+            }
+            saveStorageEstablecimiento(data_est)
+            let permisos = {permisos:"0,1,2,3,4,5",id:establecimiento.id}
+            saveStoragePermiso(permisos)
+            goto(pre + "/");
         } catch (err) {
+            console.error(err)
             Swal.fire(
                 "Error login",
                 "Puede que esten mal las credenciales",
@@ -333,7 +335,7 @@
                             <input
                                 type="checkbox"
                                 bind:checked={showpass}
-                                class="checkbox "
+                                class="checkbox"
                             />
                         </label>
                     </div>

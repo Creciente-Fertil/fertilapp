@@ -17,6 +17,8 @@
 
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
     import estilos from "$lib/stores/estilos";
+    import Success from "$lib/components/botones/Success.svelte";
+    import { savePeso } from "$lib/java/pesajes/pesajesback";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -33,7 +35,10 @@
     let usuarioid = $state("");
     let selectanimales = $state([]);
     let selecthashmap = $state({});
-
+    let versionjava = $state(false);
+    function toggleJava() {
+        versionjava = !versionjava;
+    }
     //movimento
     let defaultmovimiento = {
         fecha: "",
@@ -86,60 +91,111 @@
     function volver() {
         goto(pre + "/pesajes");
     }
+    async function moverJava() {}
     async function mover() {
-        let errores = false;
-        let pesajeserror = [];
-        for (let i = 0; i < selectanimales.length; i++) {
-            let ps = selectanimales[i];
+        if (versionjava) {
+            let errores = false;
+            let pesajeserror = [];
+            for (let i = 0; i < selectanimales.length; i++) {
+                let ps = selectanimales[i];
 
-            try {
-                let dataupdate = {
-                    peso: ps.pesonuevo,
-                };
-                let data = {
-                    pesonuevo: ps.pesonuevo,
-                    pesoanterior: ps.peso,
-                    fecha: fecha + " 03:00:00",
-                    animal: ps.id,
-                };
-                await guardarHistorial(pb, selectanimales[i].id);
-                let r = await pb
-                    .collection("animales")
-                    .update(selectanimales[i].id, dataupdate);
-                await pb.collection("pesaje").create(data);
+                try {
+                    let data = {
+                        pesonuevo: ps.pesonuevo,
+                        pesoanterior: ps.peso,
+                        fecha: fecha + " 03:00:00",
+                        animal: ps.id,
+                    };
+                    let res_peso = await savePeso(data);
+
+                } catch (err) {
+                    pesajeserror.push(ps.id);
+                    console.error(err);
+                    errores = true;
+                }
+            }
+            if (errores) {
+                Swal.fire(
+                    "Error pesaje",
+                    "Hubo algun error en algun pesaje",
+                    "error",
+                );
+            } else {
+                Swal.fire(
+                    "Éxito pesaje",
+                    "Se lograron registar todos los pesajes",
+                    "success",
+                );
+            }
+
+            for (let i = 0; i < selectanimales.length; i++) {
+                let ps = selectanimales[i];
+                let i_error = pesajeserror.findIndex((pid) => pid == ps.id);
+                if (i_error == -1) {
+                    delete selecthashmap[ps.id];
+                }
+            }
+            if (errores) {
+                setDetalle();
+            } else {
                 setDefault();
-            } catch (err) {
-                pesajeserror.push(ps.id);
-                console.error(err);
-                errores = true;
             }
-        }
-        if (errores) {
-            Swal.fire(
-                "Error pesaje",
-                "Hubo algun error en algun pesaje",
-                "error",
-            );
         } else {
-            Swal.fire(
-                "Éxito pesaje",
-                "Se lograron registar todos los pesajes",
-                "success",
-            );
+            let errores = false;
+            let pesajeserror = [];
+            for (let i = 0; i < selectanimales.length; i++) {
+                let ps = selectanimales[i];
+
+                try {
+                    let dataupdate = {
+                        peso: ps.pesonuevo,
+                    };
+                    let data = {
+                        pesonuevo: ps.pesonuevo,
+                        pesoanterior: ps.peso,
+                        fecha: fecha + " 03:00:00",
+                        animal: ps.id,
+                    };
+                    await guardarHistorial(pb, selectanimales[i].id);
+                    let r = await pb
+                        .collection("animales")
+                        .update(selectanimales[i].id, dataupdate);
+                    await pb.collection("pesaje").create(data);
+                    setDefault();
+                } catch (err) {
+                    pesajeserror.push(ps.id);
+                    console.error(err);
+                    errores = true;
+                }
+            }
+            if (errores) {
+                Swal.fire(
+                    "Error pesaje",
+                    "Hubo algun error en algun pesaje",
+                    "error",
+                );
+            } else {
+                Swal.fire(
+                    "Éxito pesaje",
+                    "Se lograron registar todos los pesajes",
+                    "success",
+                );
+            }
+
+            for (let i = 0; i < selectanimales.length; i++) {
+                let ps = selectanimales[i];
+                let i_error = pesajeserror.findIndex((pid) => pid == ps.id);
+                if (i_error == -1) {
+                    delete selecthashmap[ps.id];
+                }
+            }
+            if (errores) {
+                setDetalle();
+            } else {
+                setDefault();
+            }
         }
 
-        for (let i = 0; i < selectanimales.length; i++) {
-            let ps = selectanimales[i];
-            let i_error = pesajeserror.findIndex((pid) => pid == ps.id);
-            if (i_error == -1) {
-                delete selecthashmap[ps.id];
-            }
-        }
-        if (errores) {
-            setDetalle();
-        } else {
-            setDefault();
-        }
         volver();
     }
 
@@ -167,6 +223,12 @@
 
 <Navbar2>
     <div class={classmove}>
+        {#if esdev}
+            <Success
+                texto={versionjava ? "Cerrar java" : "Ver java"}
+                onclick={toggleJava}
+            />
+        {/if}
         <DetalleMovimiento {fecha} pesajegeneral={pesogeneral} />
         <DetallesAnimalesMovimiento
             bind:selectanimales

@@ -31,10 +31,11 @@
     import TablaServicios from "$lib/components/servicios/TablaServicios.svelte";
     import ListaServicios from "$lib/components/servicios/ListaServicios.svelte";
     //java
-    import { getAllServices } from "$lib/java/servicios/serviciosback";
+    import { eliminarServicio, getAllServices } from "$lib/java/servicios/serviciosback";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
+    let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -42,6 +43,7 @@
     const today = new Date();
     const DESDE = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const HASTA = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
     let caber = createCaber();
     let userer = createUserer();
     let cab = caber.cab;
@@ -252,6 +254,7 @@
                 edit,
                 id,
                 natural: false,
+                versionjava,
                 caravanamadre,
                 //servicio
 
@@ -363,9 +366,17 @@
     async function eliminar(id, esInseminacion) {
         if (!esInseminacion) {
             try {
-                await pb.collection("servicios").update(id, { active: false });
-                await getServicios();
-                filterUpdate();
+                if (versionjava) {
+                    await eliminarServicio(id)
+                    await getServicios();
+                } else {
+                    await pb
+                        .collection("servicios")
+                        .update(id, { active: false });
+                    await getServicios();
+                    filterUpdate();
+                }
+
                 Swal.fire(
                     "Éxito eliminar",
                     "Se eliminó con éxito el servicio",
@@ -376,11 +387,18 @@
             }
         } else {
             try {
-                await pb
-                    .collection("inseminacion")
-                    .update(id, { active: false });
-                await getInseminaciones();
-                filterUpdate();
+                if (versionjava) {
+                    await eliminarServicio(id)
+                    await getServicios();
+                    filterUpdate();
+                } else {
+                    await pb
+                        .collection("inseminacion")
+                        .update(id, { active: false });
+                    await getInseminaciones();
+                    filterUpdate();
+                }
+
                 Swal.fire(
                     "Éxito eliminar",
                     "Se eliminó con éxito la inseminación",
@@ -584,7 +602,10 @@
                 ? new Date(item.fechaparto).toLocaleDateString()
                 : "",
             OBSERVACION: item.observacion,
-            TIPO: item.fechadesde ? "Servicio" : "Artificial",
+            TIPO:
+                item.tipo == "INSEMINATION"
+                    ? "Inseminación artificial"
+                    : "Servicio Natural",
         };
     }
     function nombreAnimal(valor) {
@@ -615,12 +636,10 @@
 
         filterUpdate();
         //ordenarServicios("fecha")
-        if(esCelu){
-            pageSize = 5
+        if (esCelu) {
+            pageSize = 5;
         }
-
     });
-    
 
     //Para el collapse de los ordenar
     let isOpenOrdenar = $state(false);
@@ -748,6 +767,7 @@
         }
     }
 </script>
+
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador
@@ -774,9 +794,7 @@
     />
 
     <!--Ordenar-->
-    <div
-        class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
-    >
+    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
         <button aria-label="Ordenar" class="w-full" onclick={clickOrdenar}>
             <div class="flex justify-between items-center px-1">
                 <h1 class="font-semibold text-lg py-2">Ordenar</h1>
@@ -877,7 +895,7 @@
         </div>
         <div
             class={`
-                md:hidden
+                md:hidden 
                 w-full grid grid-cols-1
                 mx-auto py-6 px-4 max-w-7xl
             `}

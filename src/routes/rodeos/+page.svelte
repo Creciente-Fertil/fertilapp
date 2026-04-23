@@ -15,7 +15,7 @@
     import { shorterWord } from "$lib/stringutil/lib";
     import TablaRodeos from "$lib/components/rodeos/TablaRodeos.svelte";
     import ListaRodeos from "$lib/components/rodeos/ListaRodeos.svelte";
-    import { getAll } from "$lib/java/rodeos/rodeosback";
+    import { eliminarHerd, getAll } from "$lib/java/rodeos/rodeosback";
     let ruta = import.meta.env.VITE_RUTA;
 
     const pb = new PocketBase(ruta);
@@ -71,6 +71,7 @@
         id: "",
         nombre: "",
         edit: false,
+        versionjava: false,
     };
     let detalleRodeo = $state({ ...defaultRodeo });
     let proxyLote = createStorageProxy("detalleRodeo", defaultRodeo);
@@ -104,13 +105,11 @@
 
             cargadorodeos = true;
         } else {
-            
             let data_rodeos = await getAll();
             rodeos = data_rodeos;
             ordenar(rodeos);
             rodeosrows = rodeos;
             for (let i = 0; i < rodeos.length; i++) {
-                
                 rodeos[i].total = 0;
             }
 
@@ -143,17 +142,23 @@
     function openEditModal(id) {
         idrodeo = id;
         let rodeo = rodeos.filter((r) => r.id == idrodeo)[0];
-        nombre = rodeo.nombre;
-        proxyLote.save({ id, edit: true, nombre });
-        goto(pre + "/rodeos/" + id);
+        if (rodeo) {
+            nombre = rodeo.nombre;
+            proxyLote.save({ id, edit: true, nombre, versionjava });
+            goto(pre + "/rodeos/" + id);
+        }
+
         //nuevoModal.showModal();
     }
     function openViewModal(id) {
         idrodeo = id;
         let rodeo = rodeos.filter((r) => r.id == idrodeo)[0];
-        nombre = rodeo.nombre;
-        proxyLote.save({ id, edit: false, nombre });
-        goto(pre + "/rodeos/" + id);
+        if (rodeo) {
+            nombre = rodeo.nombre;
+            proxyLote.save({ id, edit: false, nombre, versionjava });
+            goto(pre + "/rodeos/" + id);
+        }
+
         //nuevoModal.showModal();
     }
     async function editar(id) {
@@ -168,6 +173,7 @@
             rodeos[idx].total = total;
             ordenar(rodeos);
             filterUpdate();
+
             Swal.fire("Éxito editar", "Se pudo editar el rodeo", "success");
         } catch (err) {
             console.error(err);
@@ -191,9 +197,14 @@
                     let data = {
                         active: false,
                     };
-                    const record = await pb
-                        .collection("rodeos")
-                        .update(idrodeo, data);
+                    if (versionjava) {
+                        await eliminarHerd(idrodeo);
+                    } else {
+                        const record = await pb
+                            .collection("rodeos")
+                            .update(idrodeo, data);
+                    }
+
                     rodeos = rodeos.filter((r) => r.id != idrodeo);
                     ordenar(rodeos);
                     filterUpdate();

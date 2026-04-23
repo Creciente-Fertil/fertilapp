@@ -19,7 +19,11 @@
     import { createStorageProxy } from "$lib/filtros/filtros";
     import DetalleNacimiento from "$lib/components/nacimientos/DetalleNacimiento.svelte";
     import PredictSelect from "$lib/components/PredictSelect.svelte";
-    import { saveBirth } from "$lib/java/nacimientos/nacimientosback";
+    import {
+        editNacimiento,
+        eliminarNacimiento,
+        saveBirth,
+    } from "$lib/java/nacimientos/nacimientosback";
     import { getAll } from "$lib/java/animales/animalesback";
     let versionjava = $state(false);
 
@@ -284,7 +288,7 @@
                 nombremadre: m.nombremadre,
                 nombrepadre,
                 observacion,
-                cab: cab.id
+                cab: cab.id,
             };
             try {
                 let res = await saveBirth(dataparicion);
@@ -336,9 +340,20 @@
             };
             try {
                 //const recorda = await pb.collection('animales').update(idanimal, datanimal);
-                const record = await pb
-                    .collection("nacimientos")
-                    .update(idnacimiento, dataparicion);
+                if (versionjava) {
+                    let data_java = {
+                        date: fecha,
+                        motherId: m.id,
+                        notes: observacion,
+                        establishmentId:1
+                    };
+                    await editNacimiento(idnacimiento, dataparicion);
+                } else {
+                    const record = await pb
+                        .collection("nacimientos")
+                        .update(idnacimiento, dataparicion);
+                }
+
                 Swal.fire(
                     "Éxito editar",
                     "Se pudo editar el nacimiento con exito",
@@ -357,7 +372,12 @@
     }
     async function eliminar() {
         try {
-            await pb.collection("nacimientos").delete(idnacimiento);
+            if (versionjava) {
+                await eliminarNacimiento(idnacimiento);
+            } else {
+                await pb.collection("nacimientos").delete(idnacimiento);
+            }
+
             goto(pre + "/nacimientos");
 
             Swal.fire(

@@ -24,6 +24,7 @@
     import Success from "$lib/components/botones/Success.svelte";
     import ListaTratamientos from "$lib/components/tratamientos/ListaTratamientos.svelte";
     import {
+        eliminarTratamiento,
         getAll,
         getAllTipos,
     } from "$lib/java/tratamientos/tratamientosback";
@@ -33,6 +34,7 @@
         await getTiposTratamientos();
         await getTratamientos();
     }
+    let esdev = import.meta.env.VITE_DEV == "si";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -89,6 +91,8 @@
         fecha: "",
         tipo: "",
         observacion: "",
+        versionjava: false,
+        edit: false,
         tipos: [],
     };
     let detalletratamiento = $state({ ...vaciotratamiento });
@@ -234,7 +238,6 @@
             });
         } else {
             records = await getAll();
-            
         }
 
         tratamientos = records;
@@ -250,7 +253,6 @@
             });
         } else {
             records = await getAllTipos();
-            
         }
 
         tipotratamientos = records;
@@ -358,9 +360,14 @@
             if (result.value) {
                 let data = { active: false };
                 try {
-                    const record = await pb
-                        .collection("tratamientos")
-                        .update(id, data);
+                    if (versionjava) {
+                        await eliminarTratamiento(id);
+                    } else {
+                        const record = await pb
+                            .collection("tratamientos")
+                            .update(id, data);
+                    }
+
                     tratamientos = tratamientos.filter((t) => t.id != id);
                     tratamientosrow = tratamientos;
                     Swal.fire(
@@ -525,15 +532,15 @@
         detalletratamiento.tipo = tipo;
         detalletratamiento.observacion = observacion;
         detalletratamiento.tipos = tipotratamientos;
+        detalletratamiento.versionjava = versionjava;
+        detalletratamiento.edit = false;
         proxydetalletratamiento.save(detalletratamiento);
 
         goto(pre + "/tratamientos/" + idtratamiento);
     }
     function openEditModal(id) {
         idtratamiento = id;
-
         let tratamiento = tratamientos.filter((t) => t.id == id)[0];
-
         fecha = tratamiento.fecha.split(" ")[0];
         animal = tratamiento.animal;
         caravaedit = tratamiento.expand.animal.caravana;
@@ -542,7 +549,18 @@
         categoria = tratamiento.expand.animal.categoria;
         observacion = tratamiento.observacion;
 
-        nuevoModal.showModal();
+        detalletratamiento.idtratamiento = idtratamiento;
+        detalletratamiento.animal = animal;
+        detalletratamiento.caravana = caravaedit;
+        detalletratamiento.categoria = categoria;
+        detalletratamiento.fecha = fecha;
+        detalletratamiento.tipo = tipo;
+        detalletratamiento.observacion = observacion;
+        detalletratamiento.tipos = tipotratamientos;
+        detalletratamiento.versionjava = versionjava;
+        detalletratamiento.edit = true;
+        proxydetalletratamiento.save(detalletratamiento);
+        goto(pre + "/tratamientos/" + idtratamiento);
     }
     function setFilters() {
         buscar = proxyfiltros.buscar;
@@ -750,6 +768,12 @@
         {versionjava}
         {toggleJava}
     />
+    {#if esdev}
+        <Success
+            texto={versionjava ? "Cerrar java" : "Ver java"}
+            onclick={toggleJava}
+        />
+    {/if}
     <!--Ordenar-->
     <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
         <button aria-label="Ordenar" class="w-full" onclick={clickOrdenar}>
@@ -834,7 +858,7 @@
                     {selecthash}
                     tratamientosrows={tratamientosrow}
                     {ordenarTratamientos}
-                    openEditModal={irDetalle}
+                    {openEditModal}
                     openViewModal={irDetalle}
                     openDelModal={eliminar}
                     {clickTodos}
@@ -855,7 +879,7 @@
                 {selecthash}
                 tratamientosrows={tratamientosrow}
                 {ordenarTratamientos}
-                openEditModal={irDetalle}
+                {openEditModal}
                 openViewModal={irDetalle}
                 openDelModal={eliminar}
                 {clickTodos}

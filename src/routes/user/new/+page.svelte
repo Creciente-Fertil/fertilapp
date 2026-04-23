@@ -10,8 +10,7 @@
     import { quintOut } from "svelte/easing";
     import { randomString } from "$lib/stringutil/lib";
     import Terminos from "$lib/components/nuevouser/Terminos.svelte";
-    const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/";
-    const SIGNUP = "users";
+    import { saveUser } from "$lib/java/usuarios/usuariosback";
 
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -139,19 +138,17 @@
         if (cupon.trim().length > 0) {
             data["couponCode"] = cupon;
         }
-        let ruta = `${RUTA_JAVA}${SIGNUP}`;
+
         try {
-            let res_signup = await fetch(ruta, {
-                method: "POST",
-                body: JSON.stringify(data), // data can be `string` or {object}!
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            let data_signup = await res_signup.json()
-            Swal.fire("Éxito guardar","Se logró registrar el usuario","success")
+            let data_signup = await saveUser(data);
+            Swal.fire(  
+                "Éxito guardar",
+                "Se logró registrar el usuario",
+                "success",
+            );
             goto(pre + "/");
         } catch (err) {
+            console.error(err)
             Swal.fire(
                 "Error guardar",
                 "No se puede guardar el usaurio ",
@@ -448,7 +445,7 @@
                         Crear cuenta
                     </button>
                     <button
-                        onclick={guardar}
+                        onclick={guardarJava}
                         class={`
                             w-full  ${botonhabilitado && condiciones ? "bg-[#115642]" : "bg-[#126a50]"} 
                             text-white rounded-md py-2 px-4 

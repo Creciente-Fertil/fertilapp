@@ -31,7 +31,7 @@
     let count = $derived(rodeosrows.length);
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
-    let pyfila = "py-2"
+    let pyfila = "py-1"
 </script>
 
 <div class="max-h-[600px] overflow-y-auto custom-scrollbar">

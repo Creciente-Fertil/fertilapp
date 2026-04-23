@@ -24,11 +24,15 @@
     import { capitalize } from "$lib/stringutil/lib";
     import { goto } from "$app/navigation";
     import ListaObservaciones from "$lib/components/observaciones/ListaObservaciones.svelte";
+    import * as AnimalService from "$lib/java/animales/animalesback";
+    import * as ObservacionService from "$lib/java/observaciones/observacionesback";
+    import Success from "$lib/components/botones/Success.svelte";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
     let pre = import.meta.env.VITE_PRE;
     let caber = createCaber();
+    let esdev = import.meta.env.VITE_DEV == "si";
     let cab = caber.cab;
     let ruta = import.meta.env.VITE_RUTA;
 
@@ -37,6 +41,13 @@
     const today = new Date();
     const DESDE = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const HASTA = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getObservaciones();
+        await getAnimales();
+    }
 
     let animales = $state([]);
     let animalesactivos = $derived(
@@ -101,6 +112,7 @@
         fecha: "",
         observacion: "",
         edit: false,
+        versionjava: false,
     };
     let detalleobservacion = $state({ ...defaulobservacion });
     let proxydetalleobservacion = createStorageProxy(
@@ -123,28 +135,48 @@
         return !str || str.length === 0;
     }
     async function getAnimales() {
-        //Estaria joya que el animal venga con todos los chiches
-        const recordsa = await pb.collection("animales").getFullList({
-            filter: `cab='${cab.id}'`,
-            expand: "nacimiento",
-        });
-        animales = recordsa;
-        animales.sort((a1, a2) =>
-            a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase()
-                ? 1
-                : -1,
-        );
-        cargadoanimales = true;
+        if (versionjava) {
+            let recordsa = await AnimalService.getAll();
+            animales = recordsa;
+            animales.sort((a1, a2) =>
+                a1.caravana.toLocaleLowerCase() >
+                a2.caravana.toLocaleLowerCase()
+                    ? 1
+                    : -1,
+            );
+            cargadoanimales = true;
+        } else {
+            //Estaria joya que el animal venga con todos los chiches
+            const recordsa = await pb.collection("animales").getFullList({
+                filter: `cab='${cab.id}'`,
+                expand: "nacimiento",
+            });
+            animales = recordsa;
+            animales.sort((a1, a2) =>
+                a1.caravana.toLocaleLowerCase() >
+                a2.caravana.toLocaleLowerCase()
+                    ? 1
+                    : -1,
+            );
+            cargadoanimales = true;
+        }
     }
     async function getObservaciones() {
-        const records = await pb.collection("observaciones").getFullList({
-            filter: `active=true && cab='${cab.id}'`,
-            expand: "animal",
-            sort: "-fecha",
-        });
-        observaciones = records;
-        observacionesrow = observaciones;
-        cargadosobservaciones = true;
+        if (versionjava) {
+            let records = await ObservacionService.getAll();
+            observaciones = records;
+            observacionesrow = observaciones;
+            cargadosobservaciones = true;
+        } else {
+            const records = await pb.collection("observaciones").getFullList({
+                filter: `active=true && cab='${cab.id}'`,
+                expand: "animal",
+                sort: "-fecha",
+            });
+            observaciones = records;
+            observacionesrow = observaciones;
+            cargadosobservaciones = true;
+        }
     }
     function openNewModal() {
         idobservacion = "";
@@ -193,6 +225,7 @@
             fecha,
             edit: false,
             animal,
+            versionjava,
         };
         proxydetalleobservacion.save(detalleobservacion);
         goto(pre + "/observaciones/" + idobservacion);
@@ -216,6 +249,7 @@
             fecha,
             edit: true,
             animal,
+            versionjava,
         };
         proxydetalleobservacion.save(detalleobservacion);
         goto(pre + "/observaciones/" + idobservacion);
@@ -237,9 +271,14 @@
                     active: false,
                 };
                 try {
-                    const recordedit = await pb
-                        .collection("observaciones")
-                        .update(idobservacion, data);
+                    if (versionjava) {
+                        await ObservacionService.eliminarComment(id);
+                    } else {
+                        const recordedit = await pb
+                            .collection("observaciones")
+                            .update(idobservacion, data);
+                    }
+
                     observaciones = observaciones.filter(
                         (o) => o.id != idobservacion,
                     );
@@ -338,8 +377,8 @@
         await getObservaciones();
         filterUpdate();
         await getAnimales();
-        if(esCelu){
-            pageSize = 5
+        if (esCelu) {
+            pageSize = 5;
         }
     });
     async function guardar() {
@@ -626,6 +665,7 @@
         }
     }
 </script>
+
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador
@@ -643,6 +683,12 @@
         {filterUpdate}
         {clickFilter}
     />
+    {#if esdev}
+        <Success
+            texto={versionjava ? "Cerrar java" : "ver java"}
+            onclick={toggleJava}
+        />
+    {/if}
     <div
         class="hidden grid grid-cols-2 lg:grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12"
     >

@@ -1,3 +1,4 @@
+import { getUser } from "$lib/userstorage/usersotrage"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_ANIMALES = "animals"
 
@@ -38,7 +39,8 @@ function processAnimales(data) {
 }
 export async function getAll() {
     
-    let token =localStorage.getItem("token")||"";
+    let user = getUser();
+    let token =  user.token;
 
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/all`
     let options = {
@@ -58,7 +60,8 @@ export async function getAll() {
 }
 export async function getAnimalId(id) {
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/${id}`
-    let token =localStorage.getItem("token")||"";
+    let user = getUser();
+    let token =  user.token;
     let options = {
         headers:{
             "Content-Type": "application/json",
@@ -82,7 +85,8 @@ function postData(data) {
 export async function saveAnimal(data) {
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}`
     let data_animal = postData(data)
-    let token =localStorage.getItem("token")||"";
+    let user = getUser();
+    let token =  user.token;
     let res_save = await fetch(ruta, {
         method: "POST",
         body: JSON.stringify(data_animal), // data can be `string` or {object}!

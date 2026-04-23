@@ -19,7 +19,7 @@
     import Danger from "$lib/components/botones/Danger.svelte";
     import Secondary from "$lib/components/botones/Secondary.svelte";
     import Success from "$lib/components/botones/Success.svelte";
-    import { saveHerd } from "$lib/java/rodeos/rodeosback";
+    import { editHerd, eliminarHerd, saveHerd } from "$lib/java/rodeos/rodeosback";
     let versionjava = $state(false);
     function toggleJava() {
         versionjava = !versionjava;
@@ -45,6 +45,7 @@
         id: "",
         nombre: "",
         edit: false,
+        versionjava: false,
     };
     let detalleRodeo = $state({ ...defaultRodeo });
     let proxyLote = createStorageProxy("detalleRodeo", defaultRodeo);
@@ -54,6 +55,7 @@
         detalleRodeo = proxyLote.load();
         nombre = detalleRodeo.nombre;
         edit = detalleRodeo.edit;
+        versionjava = detalleRodeo.versionjava;
     }
     onMount(async () => {
         slug = $page.params.slug;
@@ -78,7 +80,12 @@
             let data = {
                 active: false,
             };
-            const record = await pb.collection("rodeos").update(slug, data);
+            if (versionjava) {
+                await eliminarHerd(slug);
+            } else {
+                const record = await pb.collection("rodeos").update(slug, data);
+            }
+
             goto(pre + "/rodeos");
             //ver como hago para actualizar la lista
             Swal.fire(
@@ -99,7 +106,17 @@
             let data = {
                 nombre,
             };
-            const record = await pb.collection("rodeos").update(slug, data);
+            if (versionjava) {
+                let data_java = {
+                    name: nombre,
+                    establishmentId: 1,
+                    characteristic: "Vaquillonas primer servicio",
+                };
+                await editHerd(slug,data_java)
+            } else {
+                const record = await pb.collection("rodeos").update(slug, data);
+            }
+            
             volver();
             Swal.fire("Éxito editar", "Se pudo editar el rodeo", "success");
         } catch (err) {

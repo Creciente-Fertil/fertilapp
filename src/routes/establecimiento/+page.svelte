@@ -28,6 +28,10 @@
     import localidades from "$lib/stores/geo/localidades";
     import estilos from "$lib/stores/estilos";
     import HorizontalTab from "$lib/components/establecimiento/HorizontalTab.svelte";
+    import {
+        getEstablishmentId,
+        saveEstablishment,
+    } from "$lib/java/establecimientos/establecimientosback";
     //Size
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -35,8 +39,17 @@
 
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
+    let esdev = import.meta.env.VITE_DEV == "si";
+
     const pb = new PocketBase(ruta);
     const regexRenspa = /^\d{2}\.\d{3}\.\d\.\d{5}\.\d{2}$/;
+
+    //ver java
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getCabaña()
+    }
     let usuarioid = $state("");
     let cab = $state({
         exist: false,
@@ -53,7 +66,7 @@
         { id: "colaboradores", nombre: "Colaboradores" },
     ]);
     let tab = $state("datos");
-    let textodetalle = $state("Registra tu establecimiento")
+    let textodetalle = $state("Registra tu establecimiento");
     //Datos cabaña
     let nombre = $state("");
     let direccion = $state("");
@@ -110,13 +123,11 @@
         }
     }
     async function getCabaña() {
-        try {
-            const record = await pb
-                .collection("cabs")
-                .getFirstListItem(`id='${cab.id}' && active=true`, {});
+        if (versionjava) {
+            let record = await getEstablishmentId(1);
             datosviejos = { ...record };
             nombre = record.nombre;
-            textodetalle = nombre
+            textodetalle = nombre;
             direccion = record.direccion;
             contacto = record.contacto;
             codigo = record.codigo;
@@ -126,24 +137,51 @@
             provincia = record.provincia;
             telefono = record.telefono;
             mail = record.mail;
-
             localidadesProv = localidades.filter(
                 (lo) => lo.idProv == provincia,
             );
-            caber.setCab(record.nombre, record.id);
-        } catch (err) {
-            caber.setDefault();
-            nombre = "";
-            direccion = "";
-            contacto = "";
-            codigo = "";
-            contacto = "";
-            renspa = "";
-            localidad = "";
-            provincia = "";
-            telefono = "";
-            mail = "";
-            goto(pre + "/");
+            let data_est = {
+                nombre: record.nombre,
+                id: record.id,
+                exist: true,
+            };
+            saveStorageEstablecimiento(data_est);
+        } else {
+            try {
+                const record = await pb
+                    .collection("cabs")
+                    .getFirstListItem(`id='${cab.id}' && active=true`, {});
+                datosviejos = { ...record };
+                nombre = record.nombre;
+                textodetalle = nombre;
+                direccion = record.direccion;
+                contacto = record.contacto;
+                codigo = record.codigo;
+                contacto = record.contacto;
+                renspa = record.renspa;
+                localidad = record.localidad;
+                provincia = record.provincia;
+                telefono = record.telefono;
+                mail = record.mail;
+
+                localidadesProv = localidades.filter(
+                    (lo) => lo.idProv == provincia,
+                );
+                caber.setCab(record.nombre, record.id);
+            } catch (err) {
+                caber.setDefault();
+                nombre = "";
+                direccion = "";
+                contacto = "";
+                codigo = "";
+                contacto = "";
+                renspa = "";
+                localidad = "";
+                provincia = "";
+                telefono = "";
+                mail = "";
+                goto(pre + "/");
+            }
         }
     }
     async function getColabs() {
@@ -203,36 +241,76 @@
         }
     }
     async function guardarCabaña() {
-        let codigo = await codigoSinRepetirEstablecimiento(pb);
-        const data = {
-            nombre,
-            direccion,
-            user: usuarioid,
-            active: true,
-            contacto,
-            renspa,
-            localidad,
-            provincia,
-            telefono,
-            mail,
-            codigo,
-        };
-        textodetalle = nombre
-        try {
-            const record = await pb.collection("cabs").create(data);
-            Swal.fire(
-                "Exito guadar",
-                "Se pudo guardar la cabaña con éxito",
-                "success",
-            );
-            caber.setCab(nombre, record.id);
-            per.setPer("0,1,2,3,4,5", usuarioid);
-            goto(pre + "/");
-        } catch (err) {
-            console.error(err);
-            Swal.fire("Error guardar", "No se pudo guardar la cabaña", "error");
+        if (versionjava) {
+            const data = {
+                nombre,
+                direccion,
+                user: usuarioid,
+                active: true,
+                contacto,
+                renspa,
+                localidad,
+                provincia,
+                telefono,
+                mail,
+                codigo: "",
+            };
+            textodetalle = nombre;
+            try {
+                const record = await saveEstablishment(data);
+                Swal.fire(
+                    "Exito guadar",
+                    "Se pudo guardar la cabaña con éxito",
+                    "success",
+                );
+                caber.setCab(nombre, record.id);
+                per.setPer("0,1,2,3,4,5", usuarioid);
+                goto(pre + "/");
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error guardar",
+                    "No se pudo guardar la cabaña",
+                    "error",
+                );
+            }
+            renspaValido = true;
+        } else {
+            let codigo = await codigoSinRepetirEstablecimiento(pb);
+            const data = {
+                nombre,
+                direccion,
+                user: usuarioid,
+                active: true,
+                contacto,
+                renspa,
+                localidad,
+                provincia,
+                telefono,
+                mail,
+                codigo,
+            };
+            textodetalle = nombre;
+            try {
+                const record = await pb.collection("cabs").create(data);
+                Swal.fire(
+                    "Exito guadar",
+                    "Se pudo guardar la cabaña con éxito",
+                    "success",
+                );
+                caber.setCab(nombre, record.id);
+                per.setPer("0,1,2,3,4,5", usuarioid);
+                goto(pre + "/");
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error guardar",
+                    "No se pudo guardar la cabaña",
+                    "error",
+                );
+            }
+            renspaValido = true;
         }
-        renspaValido = true;
     }
     function reestablercerCabaña() {
         nombre = datosviejos.nombre;
@@ -244,7 +322,7 @@
         provincia = datosviejos.provincia;
         telefono = datosviejos.telefono;
         mail = datosviejos.mail;
-        textodetalle = nombre
+        textodetalle = nombre;
     }
     async function editarCabaña() {
         let listapermisos = getPermisosList(permisos.permisos);
@@ -264,7 +342,7 @@
             telefono,
             mail,
         };
-        textodetalle = nombre
+        textodetalle = nombre;
         try {
             const record = await pb.collection("cabs").update(cab.id, data);
             Swal.fire(
@@ -756,76 +834,74 @@
                 />
                 <ListaColabs bind:colabs />
             {/if}
-            
         {:else}
             <div class="space-y-4">
-                    <div>
-                        <label
-                            for="nombre"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            Nombre*
-                        </label>
-                        <input
-                            type="nombre"
-                            id="nombre"
-                            oninput={() => onChangeNuevo("NOMBRE")}
-                            bind:value={nombre}
-                            required
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                        />
-                        {#if malnombre}
-                            <div class="label">
-                                <span class="label-text-alt text-red-500"
-                                    >Debe escribir algún nombre</span
-                                >
-                            </div>
-                        {/if}
-                    </div>
-                    <div>
-                        <label
-                            for="direccion"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            Dirección
-                        </label>
-                        <input
-                            type="direccion"
-                            id="direccion"
-                            bind:value={direccion}
-                            required
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            for="contacto"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            Redes
-                        </label>
-                        <input
-                            type="contacto"
-                            id="contacto"
-                            bind:value={contacto}
-                            required
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-                        />
-                    </div>
+                <div>
+                    <label
+                        for="nombre"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                    >
+                        Nombre*
+                    </label>
+                    <input
+                        type="nombre"
+                        id="nombre"
+                        oninput={() => onChangeNuevo("NOMBRE")}
+                        bind:value={nombre}
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+                    />
+                    {#if malnombre}
+                        <div class="label">
+                            <span class="label-text-alt text-red-500"
+                                >Debe escribir algún nombre</span
+                            >
+                        </div>
+                    {/if}
                 </div>
-                <div class="mt-8 flex justify-end">
-                    
-                    <Success
-                        texto={"Guardar establecimiento"}
-                        onclick={guardarCabaña}
-                        disabled={!botonhabilitado}
-                        fuentesize="text-md"
-                        fuentepeso="font-bold"
-                        px="px-6"
-                        py="py-1"
-                        btn="btn"
+                <div>
+                    <label
+                        for="direccion"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                    >
+                        Dirección
+                    </label>
+                    <input
+                        type="direccion"
+                        id="direccion"
+                        bind:value={direccion}
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
                     />
                 </div>
+                <div>
+                    <label
+                        for="contacto"
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                    >
+                        Redes
+                    </label>
+                    <input
+                        type="contacto"
+                        id="contacto"
+                        bind:value={contacto}
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+                    />
+                </div>
+            </div>
+            <div class="mt-8 flex justify-end">
+                <Success
+                    texto={"Guardar establecimiento"}
+                    onclick={guardarCabaña}
+                    disabled={!botonhabilitado}
+                    fuentesize="text-md"
+                    fuentepeso="font-bold"
+                    px="px-6"
+                    py="py-1"
+                    btn="btn"
+                />
+            </div>
         {/if}
     </DetalleEstablecimiento>
 </Navbar2>

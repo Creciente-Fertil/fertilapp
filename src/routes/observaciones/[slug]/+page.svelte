@@ -19,12 +19,25 @@
     import { createStorageProxy } from "$lib/filtros/filtros";
     import categorias from "$lib/stores/categorias";
     import DetalleObservaciones from "$lib/components/observaciones/DetalleObservaciones.svelte";
+    import { getAll } from "$lib/java/animales/animalesback";
+    import Success from "$lib/components/botones/Success.svelte";
+    import {
+        editComment,
+        eliminarComment,
+        saveComment,
+    } from "$lib/java/observaciones/observacionesback";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
     const today = new Date();
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+
+        await getAnimales();
+    }
     let caber = createCaber();
     let cab = caber.cab;
     let cargado = $state(false);
@@ -61,23 +74,39 @@
         "detalleobservacion",
         defaulobservacion,
     );
-    async function getAnimales() {
-        //Estaria joya que el animal venga con todos los chiches
-        const recordsa = await pb.collection("animales").getFullList({
-            filter: `cab='${cab.id}'`,
-            expand: "nacimiento",
-        });
-        animales = recordsa;
-        animales.sort((a1, a2) =>
-            a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase()
-                ? 1
-                : -1,
-        );
 
-        cargadoanimales = true;
+    async function getAnimales() {
+        if (versionjava) {
+            let recordsa = await getAll();
+            animales = recordsa;
+            animales.sort((a1, a2) =>
+                a1.caravana.toLocaleLowerCase() >
+                a2.caravana.toLocaleLowerCase()
+                    ? 1
+                    : -1,
+            );
+
+            cargadoanimales = true;
+        } else {
+            //Estaria joya que el animal venga con todos los chiches
+            const recordsa = await pb.collection("animales").getFullList({
+                filter: `cab='${cab.id}'`,
+                expand: "nacimiento",
+            });
+            animales = recordsa;
+            animales.sort((a1, a2) =>
+                a1.caravana.toLocaleLowerCase() >
+                a2.caravana.toLocaleLowerCase()
+                    ? 1
+                    : -1,
+            );
+
+            cargadoanimales = true;
+        }
     }
     async function guardarNuevo() {
-        try {
+        if (versionjava) {
+            try {
                 let data = {
                     animal,
                     fecha: fecha + " 03:00:00",
@@ -86,10 +115,9 @@
                     observacion,
                     active: true,
                 };
-                const record = await pb
-                    .collection("observaciones")
-                    .create(data);
-                volver()
+                let res_obs = await saveComment(data);
+
+                volver();
                 Swal.fire(
                     "Éxito guardar",
                     "Se pudo guardar la observación",
@@ -103,6 +131,34 @@
                     "error",
                 );
             }
+        } else {
+            try {
+                let data = {
+                    animal,
+                    fecha: fecha + " 03:00:00",
+                    categoria,
+                    cab: cab.id,
+                    observacion,
+                    active: true,
+                };
+                const record = await pb
+                    .collection("observaciones")
+                    .create(data);
+                volver();
+                Swal.fire(
+                    "Éxito guardar",
+                    "Se pudo guardar la observación",
+                    "success",
+                );
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error guardar",
+                    "No se pudo guardar la observación",
+                    "error",
+                );
+            }
+        }
     }
     async function editar() {
         if (!edit) {
@@ -115,10 +171,19 @@
                 categoria,
                 observacion,
             };
-            const record = await pb
-                .collection("observaciones")
-                .update(idobservacion, data);
-
+            if (versionjava) {
+                let data_java = {
+                    animalId: animal,
+                    observationDate: fecha,
+                    notes: observacion,
+                };
+                await editComment(idobservacion, data_java);
+            } else {
+                const record = await pb
+                    .collection("observaciones")
+                    .update(idobservacion, data);
+            }
+            volver()
             Swal.fire(
                 "Éxito editar",
                 "Se pudo editar la observación",
@@ -147,9 +212,13 @@
                     active: false,
                 };
                 try {
-                    const recordedit = await pb
-                        .collection("observaciones")
-                        .update(idobservacion, data);
+                    if (versionjava) {
+                        await eliminarComment(idobservacion);
+                    } else {
+                        const recordedit = await pb
+                            .collection("observaciones")
+                            .update(idobservacion, data);
+                    }
 
                     Swal.fire(
                         "Observación eliminada!",
@@ -186,6 +255,7 @@
         fecha = detalleobservacion.fecha;
         observacion = detalleobservacion.observacion;
         edit = detalleobservacion.edit;
+        versionjava = detalleobservacion.versionjava;
         cargado = true;
     }
     onMount(async () => {
@@ -207,6 +277,12 @@
 
 <Navbar2>
     <CardObservacion cardsize="max-w-7xl" {edit} {add}>
+        {#if esdev}
+            <Success
+                texto={versionjava ? "Cerrar java" : "Ver java"}
+                onclick={toggleJava}
+            />
+        {/if}
         <DetalleObservaciones
             {edit}
             {add}

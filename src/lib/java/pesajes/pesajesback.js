@@ -1,85 +1,75 @@
 import { getUser } from "$lib/userstorage/usersotrage"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
-const RUTA_LOTES = "lots"
-function processLot(lot){
-    let data_lote = {
-        id:lot.lotId,
-        nombre:lot.name,
-        active:lot.isActive
-
-    }
-    return data_lote 
-} 
-function processLots(data){
-    let data_lotes = []
-    for(let i = 0;i<data.length;i++){
-        let fila = data[i]
-        data_lotes.push(processLot(fila))
-    }
-    return data_lotes
-}
-export async function getAll() {
-    let ruta = `${RUTA_JAVA}${RUTA_LOTES}/all`
-    let user = getUser();
-    let token = user.token;
-    let options = {
-        headers:{
-            "Content-Type": "application/json",
-            "Authorization":`Bearer ${token}`
+const RUTA_PESOS = "weights"
+function processPeso(peso) {
+    let data_peso = {
+        id: peso.weightId,
+        fecha: peso.weightDate,
+        pesoanterior: 0,
+        pesonuevo: peso.weight,
+        animal: peso.animalId,
+        expand:{
+            animal:{
+                id:peso.animalId,
+                caravana:peso.animalId
+            }
         }
     }
-    let res_all = await fetch(ruta,options)
-
-    let data_all = await res_all.json()
-
-
-    let procesada = processLots(data_all)
-    procesada = procesada.filter(l=>l.active)
-    return procesada
+    return data_peso
 }
-export async function getLotlId(id) {
-    let ruta = `${RUTA_JAVA}${RUTA_LOTES}/${id}`
+function processPesos(data) {
+    let data_pesos = []
+    for (let i = 0; i < data.length; i++) {
+        let fila = data[i]
+        data_pesos.push(processPeso(fila))
+    }
+    return data_pesos
+}
+export async function getAll() {
     let user = getUser();
     let token = user.token;
+    let ruta = `${RUTA_JAVA}${RUTA_PESOS}/all`
     let options = {
         headers: {
-            
+            "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(ruta,options)
+    let res_all = await fetch(ruta, options)
     let data_all = await res_all.json()
-    let procesada = processLot(data_all)
+    let procesada = processPesos(data_all)
     return procesada
 }
 function postData(data) {
-    let data_lot = {
-        name: data.nombre,
-        
-        establishmentId: 1
+    let data_peso = {
+        animalId: data.animal,
+        weightDate: data.fecha.split(" ")[0],
+        weight: data.pesonuevo,
+        notes: ""
     }
-    
-    return data_lot
+    return data_peso
 }
-export async function saveLot(data) {
-    let ruta = `${RUTA_JAVA}${RUTA_LOTES}`
-    let data_lot = postData(data)
+export async function savePeso(data) {
+    let ruta = `${RUTA_JAVA}${RUTA_PESOS}`
+    
+    let data_peso = postData(data)
+    
     let user = getUser();
     let token = user.token;
-    
     let res_save = await fetch(ruta, {
         method: "POST",
-        body: JSON.stringify(data_lot), // data can be `string` or {object}!
+        body: JSON.stringify(data_peso), // data can be `string` or {object}!
         headers: {
             "Content-Type": "application/json",
-            "Authorization":`Bearer ${token}`
+            "Authorization": `Bearer ${token}`
         },
     })
     let data_save = await res_save.json()
     return data_save
+
 }
-export async function editLote(id, data) {
-    let ruta = `${RUTA_JAVA}${RUTA_LOTES}/${id}`
+export async function editPeso(id, data) {
+    let ruta = `${RUTA_JAVA}${RUTA_PESOS}/${id}`
 
     let user = getUser();
     let token = user.token;
@@ -97,8 +87,8 @@ export async function editLote(id, data) {
     let data_post = await res_post.json()
     return data_post
 }
-export async function eliminarLote(id) {
-    let ruta = `${RUTA_JAVA}${RUTA_LOTES}/delete/${id}`
+export async function eliminarPeso(id) {
+    let ruta = `${RUTA_JAVA}${RUTA_PESOS}/delete/${id}`
     let user = getUser();
     let token = user.token;
     let res_post = await fetch(ruta,

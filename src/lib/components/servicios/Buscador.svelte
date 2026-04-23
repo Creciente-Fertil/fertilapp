@@ -14,6 +14,7 @@
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
+    let esdev = import.meta.env.VITE_DEV == "si";
     let opcionservicio = [
         { id: 0, nombre: "Todos" },
         { id: 1, nombre: "Solo servicios" },
@@ -44,8 +45,8 @@
         nuevoInseminacion = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
-        versionjava=false,
-        toggleJava=()=>{}
+        versionjava = false,
+        toggleJava = () => {},
     } = $props();
 
     //buscador
@@ -88,19 +89,22 @@
             >
                 + Nuevo servicio
             </button>
-            <button
-                class={`
+            {#if esdev}
+                <button
+                    class={`
+                    
                     ${estilos.btnbuscador}
                     ${estilos.btntextbuscador}
                 `}
-                onclick={toggleJava}
-            >
-                {#if versionjava}
-                    Cerrar java
-                {:else}
-                    Ver java
-                {/if}
-            </button>
+                    onclick={toggleJava}
+                >
+                    {#if versionjava}
+                        Cerrar java
+                    {:else}
+                        Ver java
+                    {/if}
+                </button>
+            {/if}
             <button
                 class={`hidden 
                     ${estilos.btnbuscador}
@@ -230,7 +234,6 @@
                                 ${estilos.bgdark2}
                             `}
                             bind:value={fechaservdesdefiltro}
-                            
                         />
                     </div>
                     <div class="">
@@ -249,7 +252,6 @@
                                 ${estilos.bgdark2}
                             `}
                             bind:value={fechaservhastafiltro}
-                            
                         />
                     </div>
                     <div class="">
@@ -268,7 +270,6 @@
                                 ${estilos.bgdark2}
                             `}
                             bind:value={fechapartodesde}
-                            
                         />
                     </div>
                     <div class="">
@@ -287,11 +288,13 @@
                                 ${estilos.bgdark2}
                             `}
                             bind:value={fechapartohasta}
-                            
                         />
                     </div>
                     <div class="">
-                        <label for="tiposer" class="block tracking-wide text-base font-medium mb-2">
+                        <label
+                            for="tiposer"
+                            class="block tracking-wide text-base font-medium mb-2"
+                        >
                             Tipo servicio
                         </label>
                         <label class="input-group">
@@ -306,7 +309,6 @@
                                     ${estilos.bgdark2}
                                 `}
                                 bind:value={filtroservicio}
-                                
                             >
                                 {#each opcionservicio as s}
                                     <option value={s.id}>{s.nombre}</option>
@@ -315,7 +317,10 @@
                         </label>
                     </div>
                     <div class="">
-                        <label for="nombrepadre" class="block tracking-wide text-base font-medium mb-2">
+                        <label
+                            for="nombrepadre"
+                            class="block tracking-wide text-base font-medium mb-2"
+                        >
                             Pajuela
                         </label>
                         <label class="input-group md:flex">
@@ -333,7 +338,6 @@
                                     ${estilos.bgdark2} 
                                 `}
                                 bind:value={buscarpadre}
-                                
                             />
                         </label>
                     </div>

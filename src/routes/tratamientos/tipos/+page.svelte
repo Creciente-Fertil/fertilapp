@@ -2,7 +2,7 @@
     import estilos from "$lib/stores/estilos";
     import Navbar2 from "$lib/components/Navbar2.svelte";
     import Swal from "sweetalert2";
-    import PocketBase from "pocketbase";
+    import PocketBase, { getTokenPayload } from "pocketbase";
     import { onMount } from "svelte";
     import { createCaber } from "$lib/stores/cab.svelte";
     import { createUserer } from "$lib/stores/user.svelte";
@@ -12,7 +12,18 @@
     import { createStorageProxy } from "$lib/filtros/filtros";
     import TablaTipos from "$lib/components/tratamientos/TablaTipos.svelte";
     import { getPermisosCabUser } from "$lib/permisosutil/lib";
+
     import { getPermisosList } from "$lib/permisosutil/lib";
+    import {
+        editTipo,
+        saveTipo,
+    } from "$lib/java/tratamientos/tratamientosback";
+    import Success from "$lib/components/botones/Success.svelte";
+
+    let versionjava = $state(false);
+    function toggleJava() {
+        versionjava = !versionjava;
+    }
 
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -76,6 +87,7 @@
         nombretipo = "";
         isOpenForm = true;
     }
+
     async function guardarTipo() {
         if (idtipo == "") {
             try {
@@ -84,10 +96,22 @@
                     active: true,
                     cab: cab.id,
                 };
-                const record = await pb
-                    .collection("tipotratamientos")
-                    .create(data);
-                tipotratamientos.push(record);
+                if (versionjava) {
+                    let data_java = {
+                        nombre: nombretipo,
+                        active: true,
+                        cab: cab.id,
+                    };
+                    let res_tipo = await saveTipo(data_java);
+
+                    tipotratamientos.push(res_tipo);
+                } else {
+                    const record = await pb
+                        .collection("tipotratamientos")
+                        .create(data);
+                    tipotratamientos.push(record);
+                }
+
                 tipotratamientos.sort((tp1, tp2) =>
                     tp1.nombre.toLocaleLowerCase() >
                     tp2.nombre.toLocaleLowerCase()
@@ -95,6 +119,7 @@
                         : -1,
                 );
                 saveTipos();
+                filterUpdate();
                 Swal.fire(
                     "Exito guardar",
                     "Se logró guardar el tipo",
@@ -111,28 +136,36 @@
         } else {
             await editarTipo();
         }
-        idtipo = ""
-        nombretipo = ""
-        isOpenForm = false
+        idtipo = "";
+        nombretipo = "";
+
+        isOpenForm = false;
     }
     async function editarTipo() {
         try {
             let data = {
                 nombre: nombretipo,
             };
-            const record = await pb
-                .collection("tipotratamientos")
-                .update(idtipo, data);
+            if (versionjava) {
+                let data_java = {
+                    name: nombretipo,
+                };
+                await editTipo(idtipo, data_java);
+            } else {
+                const record = await pb
+                    .collection("tipotratamientos")
+                    .update(idtipo, data);
+            }
+
             let item = { ...data, id: idtipo };
-            tipotratamientos = tipotratamientos.filter(
-                (tp) => tp.id != idtipo,
-            );
+            tipotratamientos = tipotratamientos.filter((tp) => tp.id != idtipo);
             tipotratamientos.push(item);
             tipotratamientos.sort((tp1, tp2) =>
                 tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase()
                     ? 1
-                    : -11,
+                    : -1,
             );
+            filterUpdate();
             saveTipos();
             Swal.fire("Exito editar", "Se logró editar el tipo", "success");
         } catch (err) {
@@ -140,24 +173,27 @@
             Swal.fire("Error editar", "No se logró editar el tipo", "error");
         }
     }
-    async function eliminarTipo() {
-        
+    async function eliminarTipo(p_id) {
         try {
             let data = {
                 active: false,
             };
-            const record = await pb
-                .collection("tipotratamientos")
-                .update(idtipo, data);
-            tipotratamientos = tipotratamientos.filter(
-                (tp) => tp.id != idtipo,
-            );
+            if (versionjava) {
+                await eliminarTipo(p_id);
+            } else {
+                const record = await pb
+                    .collection("tipotratamientos")
+                    .update(p_id, data);
+            }
+
+            tipotratamientos = tipotratamientos.filter((tp) => tp.id != p_id);
             tipotratamientos.sort((tp1, tp2) =>
                 tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase()
                     ? 1
-                    : -11,
+                    : -1,
             );
             saveTipos();
+            filterUpdate();
             Swal.fire("Exito eliminar", "Se logró eliminar el tipo", "success");
         } catch (err) {
             console.error(err);
@@ -178,13 +214,14 @@
             cancelButtonText: "No",
         }).then(async (result) => {
             if (result.value) {
-                await editarTipo(id)
+                await eliminarTipo(id);
             }
         });
     }
     function loadTipos() {
         detallestipos = proxy.load();
         tipotratamientos = detallestipos.tipos;
+        versionjava = detallestipos.versionjava;
     }
     function saveTipos() {
         detallestipos.tipos = tipotratamientos;
@@ -198,13 +235,13 @@
         per.setPer(respermisos.permisos, usuarioid);
         userpermisos = getPermisosList(per.per.permisos);
         loadTipos();
-        filterUpdate()
-        if(esCelu){
-            pageSize = 5
+        filterUpdate();
+        if (esCelu) {
+            pageSize = 5;
         }
     });
-    function filterUpdate(){
-        tipotratamientosrows = tipotratamientos
+    function filterUpdate() {
+        tipotratamientosrows = tipotratamientos;
         if (buscador != "") {
             tipotratamientosrows = tipotratamientosrows.filter((tt) =>
                 tt.nombre
@@ -214,6 +251,7 @@
         }
     }
 </script>
+
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <div
@@ -251,13 +289,19 @@
         bind:nombretipo
         {filterUpdate}
     />
+    {#if esdev}
+        <Success
+            texto={versionjava ? "Cerrar java" : "ver java"}
+            onclick={toggleJava}
+        />
+    {/if}
     {#if isOpenForm}
-    <NuevoTipo
-        nuevo={guardarTipo}
-        editar={guardarTipo}
-        bind:idtipo
-        bind:nombretipo
-    />
+        <NuevoTipo
+            nuevo={guardarTipo}
+            editar={guardarTipo}
+            bind:idtipo
+            bind:nombretipo
+        />
     {/if}
     <!--Tabla-->
     <div
@@ -273,16 +317,14 @@
                     border dark:border-gray-700
                 `}
         >
-            <TablaTipos 
+            <TablaTipos
                 bind:pageSize
                 {idtipo}
                 bind:nombretipo
-                tiposrows={tipotratamientosrows} 
-                openEditModal = {openEditTipoModal}
-                openDelModal = {eliminar}
+                tiposrows={tipotratamientosrows}
+                openEditModal={openEditTipoModal}
+                openDelModal={eliminar}
                 {esCelu}
-
-
             />
         </div>
     </div>

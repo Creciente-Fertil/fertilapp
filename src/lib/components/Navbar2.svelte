@@ -33,6 +33,9 @@
     import Home from "$lib/svgs/home.svelte";
     import Topbar from "./navbar/Topbar.svelte";
     import Sidebar from "./navbar/Sidebar.svelte";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { getEstablishmentId } from "$lib/java/establecimientos/establecimientosback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     //tamaño
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -41,7 +44,14 @@
     let pageurl = $page.url.pathname;
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
+    let esdev = import.meta.env.VITE_DEV == "si";
     let esCelu = $derived(innerWidth <= 1100);
+
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getNavData();
+    }
 
     const pb = new PocketBase(ruta);
     let darker = createDarker();
@@ -67,28 +77,42 @@
         //document.removeEventListener("click", handleClickOutsideMenu);
         //document.removeEventListener("click", handleClickOutsideNoti);
     });
+    async function getNavData() {
+        if (versionjava) {
+            let user = getUser();
+            let establecimiento = loadStorageEstablecimiento();
+            nombreestablecimiento = establecimiento.nombre;
+            if (window.innerWidth <= 600) {
+                // Pantallas pequeñas
+                nombreestablecimiento = nombreestablecimiento.slice(0, 15);
+            }
+            usuarioid = 1;
+            nombreusuario = user.useremail;
+        } else {
+            let caber = createCaber();
+            nombreestablecimiento = caber.cab.nombre;
+            if (window.innerWidth <= 600) {
+                // Pantallas pequeñas
+                nombreestablecimiento = nombreestablecimiento.slice(0, 15);
+            }
 
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            nombreusuario = pb_json.record.username;
+
+            let hab = $enabled;
+            if (hab === "no") {
+                goto(pre + "/");
+            }
+
+            cab = caber.cab;
+            await getNotis();
+        }
+    }
     onMount(async () => {
         //document.addEventListener("click", handleClickOutsideMenu);
         //document.addEventListener("click", handleClickOutsideNoti);
-        let caber = createCaber();
-        nombreestablecimiento = caber.cab.nombre;
-        if (window.innerWidth <= 600) {
-            // Pantallas pequeñas
-            nombreestablecimiento = nombreestablecimiento.slice(0, 15);
-        }
-
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        nombreusuario = pb_json.record.username;
-
-        let hab = $enabled;
-        if (hab === "no") {
-            goto(pre + "/");
-        }
-
-        cab = caber.cab;
-        await getNotis();
+        await getNavData();
     });
     //menu
     let containerMenu = $state(null); // referencia al div principal
@@ -221,6 +245,8 @@
         {cambiarEstablecimiento}
         {verManual}
         {salir}
+        {toggleJava}
+        {versionjava}
     />
     <div
         class="scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pt-16 fixed min-h-screen overflow-y-auto"
@@ -272,6 +298,8 @@
             {cambiarEstablecimiento}
             {verManual}
             {salir}
+            {toggleJava}
+            {versionjava}
         />
 
         <main class={`pt-16 ${estilos.bgmain}`}>

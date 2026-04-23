@@ -20,6 +20,7 @@
   import Success from "$lib/components/botones/Success.svelte";
   import Secondary from "$lib/components/botones/Secondary.svelte";
   import Cancel from "$lib/components/botones/Cancel.svelte";
+    import { saveEstablishment } from "$lib/java/establecimientos/establecimientosback";
   //tamaño
   let innerWidth = $state(0);
   let innerHeight = $state(0);
@@ -130,7 +131,28 @@
   }
 
   async function guardarJava() {
-    
+   const data = {
+      nombre: nombreest,
+      direccion: direccionest,
+      user: usuarioid,
+      active: true,
+      contacto: contactoest
+    };
+    try{
+      let res_est = await saveEstablishment(data)
+      
+
+      Swal.fire(
+        "Exito guadar",
+        "Se pudo guardar el establecimiento con éxito",
+        "success",
+      );
+      volver();
+    } 
+    catch(err){
+      console.error(err)
+      Swal.fire("Error guardar", "No se pudo guardar el establecimiento", "error");
+    }
   }
   let bgnav = "dark:bg-gray-900 bg-gray-50";
   let classtext = `text-lg px-2 font-light ${estilos.sidebartextocolor}`;
@@ -154,7 +176,7 @@
         <a
           href={pre + "/inicio"}
           class={`pl-0 pr-1 btn btn-ghost text-2xl ${classtextnavbar}`}
-          >
+        >
           {#if esCelu}
             <Creciente margenes="m-0" alto="h-8" largo="w-24" />
           {:else}
@@ -254,10 +276,7 @@
             onclick={guardarEstablecimiento}
             texto="Guardar establecimiento"
           />
-          <Success
-            onclick={guardarJava}
-            texto="Guardar java"
-          />
+          <Success onclick={guardarJava} texto="Guardar java" />
         </div>
       </CardBase>
     </main>

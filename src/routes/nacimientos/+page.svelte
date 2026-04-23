@@ -31,12 +31,15 @@
     import CustomDate from "$lib/components/CustomDate.svelte";
     import TablaNacimientos from "$lib/components/nacimientos/TablaNacimientos.svelte";
     import ListaNacimientos from "$lib/components/nacimientos/ListaNacimientos.svelte";
-    import { getAll } from "$lib/java/nacimientos/nacimientosback";
+    import {
+        eliminarNacimiento,
+        getAll,
+    } from "$lib/java/nacimientos/nacimientosback";
     let versionjava = $state(false);
     async function toggleJava() {
         versionjava = !versionjava;
         await getNacimientos();
-        filterUpdate()
+        filterUpdate();
     }
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -179,11 +182,10 @@
             nacimientosrow = nacimientos;
             cargadonacimientos = true;
         } else {
-            let data_nacimientos = await getAll()
+            let data_nacimientos = await getAll();
             nacimientos = data_nacimientos;
             nacimientosrow = nacimientos;
             cargadonacimientos = true;
-            
         }
     }
     async function guardar() {
@@ -513,10 +515,17 @@
                 idnacimiento = id;
 
                 try {
-                    await pb.collection("nacimientos").delete(idnacimiento);
-                    nacimientos = nacimientos.filter(
-                        (n) => n.id != idnacimiento,
-                    );
+                    if (versionjava) {
+                        await eliminarNacimiento(id);
+                        nacimientos = nacimientos.filter(
+                            (n) => n.id != idnacimiento,
+                        );
+                    } else {
+                        await pb.collection("nacimientos").delete(idnacimiento);
+                        nacimientos = nacimientos.filter(
+                            (n) => n.id != idnacimiento,
+                        );
+                    }
 
                     //const recorda = await pb.collection('animales').getFirstListItem(`nacimiento='${idnacimiento}'`, {});
 

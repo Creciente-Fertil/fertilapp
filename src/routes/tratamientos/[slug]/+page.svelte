@@ -20,12 +20,24 @@
     import { createStorageProxy } from "$lib/filtros/filtros";
     import categorias from "$lib/stores/categorias";
     import DetalleTratamiento from "$lib/components/tratamientos/DetalleTratamiento.svelte";
+    import Success from "$lib/components/botones/Success.svelte";
+    import {
+    editTratamiento,
+        eliminarTipo,
+        eliminarTratamiento,
+    } from "$lib/java/tratamientos/tratamientosback";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
+    let versionjava = $state(false);
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
     const today = new Date();
+
+    function toggleJava() {
+        versionjava = !versionjava;
+    }
+
     let caber = createCaber();
     let cab = caber.cab;
     let cargado = $state(false);
@@ -36,7 +48,7 @@
     let usuarioid = $state("");
     let tipos = $state([]);
     //Datos tratamiento
-    let edit = $state(false)
+    let edit = $state(false);
     let idtratamiento = $state("");
     let animal = $state("");
     let caravana = $state("");
@@ -49,7 +61,7 @@
     let maltipo = $state(false);
     let botonhabilitado = $state(false);
     let vaciotratamiento = {
-        edit:false,
+        edit: false,
         idtratamiento: "",
         animal: "",
         caravana: "",
@@ -58,6 +70,8 @@
         tipo: "",
         observacion: "",
         tipos: [],
+        versionjava: false,
+        edit:false
     };
     let detalletratamiento = $state({ ...vaciotratamiento });
     let proxytratamiento = createStorageProxy(
@@ -100,26 +114,25 @@
         fecha = detalletratamiento.fecha;
         tipo = detalletratamiento.tipo;
         observacion = detalletratamiento.observacion;
-        
-        edit = detalletratamiento.edit
-        tipos = detalletratamiento.tipos
-        cargado = true
+
+        edit = detalletratamiento.edit;
+        tipos = detalletratamiento.tipos;
+        versionjava = detalletratamiento.versionjava;
+        cargado = true;
     }
     function setDetalle() {}
     function volver() {
-        if(edit)
-        {
-            edit = false
-            return    
+        if (edit) {
+            edit = false;
+            return;
         }
         goto(pre + "/tratamientos");
     }
-    
+
     async function editar() {
-        if(!edit)
-        {
-            edit = true
-            return    
+        if (!edit) {
+            edit = true;
+            return;
         }
         try {
             let data = {
@@ -129,9 +142,20 @@
                 observacion,
                 fecha: fecha + " 03:00:00",
             };
-            const record = await pb
-                .collection("tratamientos")
-                .update(idtratamiento, data);
+            if (versionjava) {
+                let data_java = {
+                    animalId: animal,
+                    establishmentId: 1,
+                    treatmentTypeId: tipo,
+                    treatmentDate: fecha,
+                    notes: observacion,
+                };
+                await editTratamiento(idtratamiento,data_java)
+            } else {
+                const record = await pb
+                    .collection("tratamientos")
+                    .update(idtratamiento, data);
+            }
 
             Swal.fire(
                 "Éxito editar",
@@ -161,9 +185,13 @@
             if (result.value) {
                 let data = { active: false };
                 try {
-                    const record = await pb
-                        .collection("tratamientos")
-                        .update(id, data);
+                    if (versionjava) {
+                        await eliminarTratamiento(idtratamiento);
+                    } else {
+                        const record = await pb
+                            .collection("tratamientos")
+                            .update(idtratamiento, data);
+                    }
 
                     Swal.fire(
                         "Éxito eliminar",
@@ -183,19 +211,25 @@
             }
         });
     }
-    onMount(async ()=>{
+    onMount(async () => {
         let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
         let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
 
         per.setPer(respermisos.permisos, usuarioid);
         userpermisos = getPermisosList(per.per.permisos);
-        loadDetalle()
-    })
+        loadDetalle();
+    });
 </script>
 
 <Navbar2>
     <CardTratamiento cardsize="max-w-7xl" {edit}>
+        {#if esdev}
+            <Success
+                texto={versionjava ? "Cerrar java" : "Version java"}
+                onclick={toggleJava}
+            />
+        {/if}
         <DetalleTratamiento
             {edit}
             {cargado}
@@ -211,25 +245,25 @@
         />
         <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
         {#if edit}
-            <div class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
-                
-
+            <div
+                class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
                 <!-- Botón Cancelar -->
                 <button
                     class="
                         hidden md:block
-                        mt-2 px-10 py-2 
+                        mt-2 px-10 py-2
                         dark:bg-transparent
-                        bg-white 
-                        text-gray-800 
+                        bg-white
+                        text-gray-800
                         dark:text-white
-                        font-medium 
-                        rounded-full shadow-sm border 
-                        border-gray-300 
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
                         hover:bg-gray-200
                         dark:hover:bg-gray-800
-                        transition-colors 
-                        text-base"  
+                        transition-colors
+                        text-base"
                     onclick={volver}
                 >
                     Cancelar
@@ -244,7 +278,9 @@
                 </button>
             </div>
         {:else}
-            <div class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
+            <div
+                class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
                 <button
                     class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
                     onclick={eliminar}

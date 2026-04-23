@@ -1,20 +1,20 @@
+import { getUser } from "$lib/userstorage/usersotrage";
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_TACTOS = "pregnancy-checks"
 function processTacto(tacto) {
     let data_tacto = {
+        id: tacto.pregnancyCheckId,
         fecha: tacto.date,
         observacion: tacto.notes,
         animal: tacto.animalId,
         prenada: 0,
-        categoria:"",
+        categoria: "",
         expand: {
             animal: {
                 id: tacto.animalId,
                 caravana: tacto.animalId,
             }
         }
-
-
     }
     return data_tacto;
 }
@@ -28,7 +28,8 @@ function processTactos(data) {
 }
 export async function getAll() {
 
-    let token = localStorage.getItem("token") || "";
+    let user = getUser();
+    let token = user.token;
 
     let ruta = `${RUTA_JAVA}${RUTA_TACTOS}/all`
     let options = {
@@ -46,10 +47,25 @@ export async function getAll() {
 
     return procesada
 }
+export async function getTactoId(id) {
+    let ruta = `${RUTA_JAVA}${RUTA_TACTOS}/${id}`
+    let user = getUser();
+    let token = user.token;
+    let options = {
+        headers: {
+            
+            "Authorization": `Bearer ${token}`
+        }
+    }
+    let res_all = await fetch(ruta,options)
+    let data_all = await res_all.json()
+    let procesada = processTacto(data_all)
+    return procesada
+}
 function postData(data) {
     let data_tacto = {
-        animalId: data.id,
-        date: data.fecha,
+        animalId: data.animal,
+        date: data.fecha.split(" ")[0],
         checkType: "ECOGRAFIA",
 
         isPregnant: true,
@@ -61,17 +77,57 @@ function postData(data) {
 
 export async function saveTacto(data) {
     let ruta = `${RUTA_JAVA}${RUTA_TACTOS}`
+
     let data_tacto = postData(data)
-    let token = localStorage.getItem("token") || "";
+
+    let user = getUser();
+    let token = user.token;
     let res_save = await fetch(ruta, {
         method: "POST",
         body: JSON.stringify(data_tacto), // data can be `string` or {object}!
         headers: {
-
+            "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         },
     })
     let data_save = await res_save.json()
     return data_save
 
+}
+export async function editTacto(id, data) {
+    let ruta = `${RUTA_JAVA}${RUTA_TACTOS}/${id}`
+
+    let user = getUser();
+    let token = user.token;
+    let res_post = await fetch(ruta,
+        {
+            method: "PUT",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        }
+    )
+
+    let data_post = await res_post.json()
+    return data_post
+}
+export async function eliminarTacto(id) {
+    let ruta = `${RUTA_JAVA}${RUTA_TACTOS}/delete/${id}`
+    let user = getUser();
+    let token = user.token;
+    let res_post = await fetch(ruta,
+        {
+            method: "POST",
+            //            body: JSON.stringify({}), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        }
+    )
+
+    //let data_post = await res_post.json()
+    return {}
 }

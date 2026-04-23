@@ -1,8 +1,10 @@
 <script>
     import estilos from "$lib/stores/estilos";
     import Creciente from "$lib/svgs/creciente.svelte";
+    
     import Oscuro from "../Oscuro.svelte";
     let pre = import.meta.env.VITE_PRE;
+    let esdev = import.meta.env.VITE_DEV == "si";
     let {
         escritorio=true,
         bgnav,
@@ -18,7 +20,9 @@
         cambiarEstablecimiento,
         verManual,
         salir,
-        esCelu
+        toggleJava=()=>{},
+        esCelu,
+        versionjava=false
     } = $props()
 </script>
 
@@ -132,6 +136,9 @@
                             >Establecimientos</button
                         >
                     </li>
+                    {#if esdev}
+                    <li><button onclick={toggleJava}>{versionjava?"Cerrar java":"Ver java"}</button></li>
+                    {/if}
                     <li><button onclick={verManual}>Manual</button></li>
                     <li><button onclick={salir}>Salir</button></li>
                 </ul>

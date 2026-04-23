@@ -57,7 +57,7 @@
         >
             <div
                 class={`
-                    bg-transparent
+                    bg-transpa rent
                     py-2
                 `}
             >
@@ -91,6 +91,7 @@
             {#if esdev}
                 <button
                     class={`
+                        hidden
                             ${estilos.btnbuscador}
                             ${estilos.btntextbuscador}
                         `}

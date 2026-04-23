@@ -18,7 +18,7 @@
     import Danger from "$lib/components/botones/Danger.svelte";
     import Secondary from "$lib/components/botones/Secondary.svelte";
     import Success from "$lib/components/botones/Success.svelte";
-    import { saveLot } from "$lib/java/lotes/lotesback";
+    import { editLote, eliminarLote, saveLot } from "$lib/java/lotes/lotesback";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -40,13 +40,14 @@
     //ver java
     let versionjava = $state(false);
 
-    async function toggleJava() {
+    function toggleJava() {
         versionjava = !versionjava;
     }
     let defaultLote = {
         id: "",
         nombre: "",
         edit: false,
+        versionjava: false,
     };
     let detalleLote = $state({ ...defaultLote });
     let proxyLote = createStorageProxy("detalleLote", defaultLote);
@@ -56,6 +57,7 @@
         detalleLote = proxyLote.load();
         nombre = detalleLote.nombre;
         edit = detalleLote.edit;
+        versionjava = detalleLote.versionjava;
     }
     onMount(async () => {
         slug = $page.params.slug;
@@ -82,7 +84,12 @@
             let data = {
                 active: false,
             };
-            const record = await pb.collection("lotes").update(slug, data);
+            if (versionjava) {
+                await eliminarLote(slug);
+            } else {
+                const record = await pb.collection("lotes").update(slug, data);
+            }
+
             goto(`${pre + "/lotes"}`);
             //ver como hago para actualizar la lista
             Swal.fire(
@@ -103,7 +110,17 @@
             let data = {
                 nombre,
             };
-            const record = await pb.collection("lotes").update(slug, data);
+            if (versionjava) {
+                let data_java = {
+                    name: nombre,
+                    establishmentId: 1,
+                    latitude: -34.6037,
+                    longitude: -58.3816
+                };
+                await editLote(slug, data_java);
+            } else {
+                const record = await pb.collection("lotes").update(slug, data);
+            }
 
             Swal.fire("Éxito editar", "Se pudo editar el lote", "success");
             volver();

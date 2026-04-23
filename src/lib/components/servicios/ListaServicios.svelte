@@ -53,10 +53,10 @@
 </script>
 
 <div
-    class="max-h-[600px] overflow-y-auto custom-scrollbar pb-16 bg-white dark:bg-slate-900"
+    class="max-h-[600px] overflow-y-auto custom-scrollbar pb-16 bg-white dark:bg-slate-900  rounded-xl"
 >
     <!-- Select all -->
-    <div class="flex items-center gap-3 px-1 mb-2">
+    <div class="flex items-center gap-3 px-1 my-2">
         <button
             type="button"
             onclick={clickTodos}
@@ -162,7 +162,7 @@
                     <div class="flex items-center gap-2 shrink-0">
                         <button
                             onclick={() => {
-                                s.fechadesde
+                                s.tipo=="NATURAL_SERVICE"
                                     ? openViewModal(s.id)
                                     : openViewModalIns(s.id);
                             }}
@@ -172,7 +172,7 @@
                         </button>
                         <button
                             onclick={() => {
-                                s.fechadesde
+                                s.tipo=="NATURAL_SERVICE"
                                     ? openEditModal(s.id)
                                     : openEditModalIns(s.id);
                             }}
@@ -182,7 +182,7 @@
                         </button>
                         <button
                             onclick={() => {
-                                s.fechadesde
+                                s.tipo=="NATURAL_SERVICE"
                                     ? openDelModal(s.id)
                                     : openDelModalIns(s.id);
                             }}

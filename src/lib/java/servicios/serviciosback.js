@@ -1,4 +1,4 @@
-
+import { getUser } from "$lib/userstorage/usersotrage"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_SERVICIOS = "services"
 export function tipoServicios() {
@@ -12,6 +12,7 @@ function processServicio(fila) {
 
         id: fila.serviceId,
         fechadesde: fila.startDate,
+        fechainseminacion: fila.startDate,
         fechahasta: fila.endDate,
         madre: fila.animalId,
         pajuelas: "",
@@ -45,7 +46,8 @@ function processServicios(data) {
     return servicios
 }
 export async function getAllServices() {
-    let token = localStorage.getItem("token") || "";
+    let user = getUser();
+    let token =  user.token;
     let ruta_all = `${RUTA_JAVA}${RUTA_SERVICIOS}/all`
     let options = {
         headers: {
@@ -63,7 +65,8 @@ export async function getAllServices() {
 }
 export async function saveServicio(data) {
     let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}`
-    let token = localStorage.getItem("token") || "";
+    let user = getUser();
+    let token =  user.token;
 
     let res_post = await fetch(ruta,
         {
@@ -82,7 +85,8 @@ export async function saveServicio(data) {
 
 export async function editServicio(id, data) {
     let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}/${id}`
-    let token = localStorage.getItem("token") || "";
+    let user = getUser();
+    let token =  user.token;
     let res_post = await fetch(ruta,
         {
             method: "PUT",
@@ -99,7 +103,8 @@ export async function editServicio(id, data) {
 }
 export async function eliminarServicio(id) {
     let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}/delete/${id}`
-    let token = localStorage.getItem("token") || "";
+    let user = getUser();
+    let token =  user.token;
     let res_post = await fetch(ruta,
         {
             method: "POST",

@@ -19,6 +19,7 @@
     } from "$lib/components/estadosutils/lib";
     import { getSexoNombre } from "$lib/stringutil/lib";
     import { shorterWord } from "$lib/stringutil/lib";
+    import Success from "$lib/components/botones/Success.svelte";
     //FILTROS
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
@@ -27,9 +28,11 @@
     import AnimalesSeleccionados from "$lib/components/pesajes/AnimalesSeleccionados.svelte";
     import TablaMovimiento from "$lib/components/TablaMovimiento.svelte";
     import NuevoPesajes from "$lib/components/pesajes/NuevoPesajes.svelte";
+    import { getAll } from "$lib/java/animales/animalesback";
 
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
+    let esdev = import.meta.env.VITE_DEV == "si";
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
     const today = new Date();
@@ -38,6 +41,11 @@
     let caber = createCaber();
     let cab = caber.cab;
     let cargado = $state(false);
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getAnimales();
+    }
     //boton
     let textoboton = $state("Mover");
     //paginacon
@@ -325,20 +333,35 @@
         tipos.sort((tp1, tp2) => (tp1.nombre > tp2.nombre ? 1 : -1));
     }
     async function getAnimales() {
-        const recordsa = await pb.collection("animales").getFullList({
-            filter: `active=true && delete=false && cab='${cab.id}'`,
-            expand: "rodeo,lote",
-        });
+        if (versionjava) {
+            let recordsa = await getAll();
+            animales = recordsa;
+            animales.sort((a1, a2) =>
+                a1.caravana.toLocaleLowerCase() >
+                a2.caravana.toLocaleLowerCase()
+                    ? 1
+                    : -1,
+            );
+            animalesrows = animales;
+            cargado = true;
+            filterUpdate();
+        } else {
+            const recordsa = await pb.collection("animales").getFullList({
+                filter: `active=true && delete=false && cab='${cab.id}'`,
+                expand: "rodeo,lote",
+            });
 
-        animales = recordsa;
-        animales.sort((a1, a2) =>
-            a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase()
-                ? 1
-                : -1,
-        );
-        animalesrows = animales;
-        cargado = true;
-        filterUpdate();
+            animales = recordsa;
+            animales.sort((a1, a2) =>
+                a1.caravana.toLocaleLowerCase() >
+                a2.caravana.toLocaleLowerCase()
+                    ? 1
+                    : -1,
+            );
+            animalesrows = animales;
+            cargado = true;
+            filterUpdate();
+        }
     }
     function irDetalle() {
         if (ninguno) {
@@ -505,6 +528,12 @@
                 </h1>
             </div>
         </div>
+        {#if esdev}
+            <Success
+                texto={versionjava ? "Cerrar java" : "Ver java"}
+                onclick={toggleJava}
+            />
+        {/if}
         <div class={`grid grid-cols-1   max-h-screen gap-1 md:gap-2`}>
             <div>
                 <NuevoPesajes bind:fecha bind:pesogeneral {cambioPesoGeneral} />

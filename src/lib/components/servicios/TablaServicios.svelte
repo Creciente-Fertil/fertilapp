@@ -278,7 +278,7 @@
 
                         <button
                             onclick={() => {
-                                s.fechadesde
+                                s.tipo=="NATURAL_SERVICE"
                                     ? openViewModal(s.id)
                                     : openViewModalIns(s.id);
                             }}
@@ -287,7 +287,7 @@
                         </button>
                         <button
                             onclick={() => {
-                                s.fechadesde
+                                s.tipo=="NATURAL_SERVICE"
                                     ? openEditModal(s.id)
                                     : openEditModalIns(s.id);
                             }}
@@ -296,7 +296,7 @@
                         </button>
                         <button
                             onclick={() => {
-                                s.fechadesde
+                                s.tipo=="NATURAL_SERVICE"
                                     ? openDelModal(s.id)
                                     : openDelModalIns(s.id);
                             }}

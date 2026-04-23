@@ -23,7 +23,10 @@
     import categorias from "$lib/stores/categorias";
     import DetalleTacto from "$lib/components/tactos/DetalleTacto.svelte";
     import estados from "$lib/stores/estados";
+    import Success from "$lib/components/botones/Success.svelte";
+    import { editTacto, eliminarTacto } from "$lib/java/tactos/tactosback";
 
+    let versionjava = $state(false);
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -37,6 +40,10 @@
     let userpermisos = $state([]);
     let slug = $state("");
 
+    function toggleJava() {
+        versionjava = !versionjava;
+    }
+
     let usuarioid = $state("");
     let defaultacto = {
         edit: false,
@@ -48,6 +55,7 @@
         prenada: 1,
         tipo: "",
         categoria: "",
+        versionjava: false,
     };
     let detalletacto = $state({ ...defaultacto });
     let proxytacto = createStorageProxy("detalletacto", defaultacto);
@@ -75,6 +83,7 @@
         tipo = detalletacto.tipo;
         categoria = detalletacto.categoria;
         edit = detalletacto.edit;
+        versionjava = detalletacto.versionjava;
     }
     function saveTacto() {
         detalletacto.idtacto = idtacto;
@@ -85,6 +94,7 @@
         detalletacto.prenada = prenada;
         detalletacto.tipo = tipo;
         detalletacto.categoria = categoria;
+        versionjava = detalletacto.versionjava;
         proxytacto.save(detalletacto);
     }
     function validarBoton() {
@@ -118,11 +128,24 @@
                 prenada,
                 tipo,
             };
-            const record = await pb.collection("tactos").update(idtacto, data);
-
-            await pb.collection("animales").update(animal, {
-                prenada,
-            });
+            if (versionjava) {
+                let data_java = {
+                    animalId: animal,
+                    date: fecha,
+                    checkType: "ECOGRAFIA",
+                    isPregnant: true,
+                    notes: observacion,
+                    establishmentId: 1,
+                };
+                await editTacto(idtacto, data_java);
+            } else {
+                const record = await pb
+                    .collection("tactos")
+                    .update(idtacto, data);
+                await pb.collection("animales").update(animal, {
+                    prenada,
+                });
+            }
 
             Swal.fire("Éxito guardar", "Se pudo guardar el tacto", "success");
         } catch (err) {
@@ -152,9 +175,13 @@
                     active: false,
                 };
                 try {
-                    let recordaedit = await pb
-                        .collection("tactos")
-                        .update(idtacto, data);
+                    if (versionjava) {
+                        await eliminarTacto(idtacto);
+                    } else {
+                        let recordaedit = await pb
+                            .collection("tactos")
+                            .update(idtacto, data);
+                    }
 
                     Swal.fire(
                         "Tacto eliminado!",
@@ -187,6 +214,12 @@
 
 <Navbar2>
     <CardTacto cardsize="max-w-7xl">
+        {#if esdev}
+            <Success
+                texto={versionjava ? "Cerrar java" : "Ver jjava"}
+                onclick={toggleJava}
+            />
+        {/if}
         <DetalleTacto
             {edit}
             {idtacto}
@@ -202,25 +235,25 @@
         <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
 
         {#if edit}
-            <div class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
-                
-
+            <div
+                class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
                 <!-- Botón Cancelar -->
                 <button
                     class="
                         hidden md:block
-                        mt-2 px-10 py-2 
+                        mt-2 px-10 py-2
                         dark:bg-transparent
-                        bg-white 
-                        text-gray-800 
+                        bg-white
+                        text-gray-800
                         dark:text-white
-                        font-medium 
-                        rounded-full shadow-sm border 
-                        border-gray-300 
+                        font-medium
+                        rounded-full shadow-sm border
+                        border-gray-300
                         hover:bg-gray-200
                         dark:hover:bg-gray-800
-                        transition-colors 
-                        text-base"  
+                        transition-colors
+                        text-base"
                     onclick={volver}
                 >
                     Cancelar
@@ -235,7 +268,9 @@
                 </button>
             </div>
         {:else}
-            <div class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
+            <div
+                class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+            >
                 <button
                     class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
                     onclick={eliminar}

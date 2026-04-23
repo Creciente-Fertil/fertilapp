@@ -17,7 +17,12 @@
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
     import DetalleMovimiento from "$lib/components/tratamientos/DetalleMovimiento.svelte";
     import DetallesAnimalesMovimiento from "$lib/components/tratamientos/DetallesAnimalesMovimiento.svelte";
-
+    import Success from "$lib/components/botones/Success.svelte";
+    import { saveTrata } from "$lib/java/tratamientos/tratamientosback";
+    let versionjava = $state(false);
+    function toggleJava() {
+        versionjava = !versionjava;
+    }
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -107,7 +112,98 @@
             selectanimales[i].observacionnuevo = observaciongeneral;
         }
     }
-    async function mover() {}
+    async function mover() {
+        if (versionjava) {
+            let errores = false;
+
+            let errorestrata = [];
+            for (let i = 0; i < selectanimales.length; i++) {
+                let tratamientoanimal = selectanimales[i];
+                let datatratamiento = {
+                    fecha: fecha + " 03:00:00",
+                    observacion: tratamientoanimal.observacionnuevo,
+                    categoria: tratamientoanimal.categoria,
+                    animal: tratamientoanimal.id,
+                    tipo: tipotratamientoselect,
+                    active: true,
+                    cab: cab.id,
+                };
+                try {
+                    let res_trata = await saveTrata(datatratamiento);
+                } catch (err) {
+                    errorestrata.push(tratamientoanimal.id);
+                    console.error(err);
+                    errores = true;
+                }
+            }
+            if (!errores) {
+                Swal.fire(
+                    "Éxito guardar",
+                    "Se logró guardar los tratamientos",
+                    "success",
+                );
+            } else {
+                Swal.fire(
+                    "Error guardar",
+                    "No se logró guardar todos los tratamientos",
+                    "error",
+                );
+            }
+            volver()
+        } else {
+
+            let errores = false;
+            let bulkdata = [];
+            let errorestrata = [];
+            for (let i = 0; i < selectanimales.length; i++) {
+                let tratamientoanimal = selectanimales[i];
+                let datatratamiento = {
+                    fecha: fecha + " 03:00:00",
+                    observacion: tratamientoanimal.observacionnuevo,
+                    categoria: tratamientoanimal.categoria,
+                    animal: tratamientoanimal.id,
+                    tipo: tipotratamientoselect,
+                    active: true,
+                    cab: cab.id,
+                };
+                try {
+                    await pb.collection("tratamientos").create(datatratamiento);
+                } catch (err) {
+                    errorestrata.push(tratamientoanimal.id);
+                    console.error(err);
+                    errores = true;
+                }
+            }
+            // await guardarBulkTratamiento(bulkdata)
+            fecha = "";
+            malfecha = false;
+            maltipo = false;
+            tipotratamientoselect = "";
+            botonhabilitado = false;
+            for (let i = 0; i < selectanimales.length; i++) {
+                let ts = selectanimales[i];
+                let i_error = errorestrata.findIndex((pid) => pid == ts.id);
+                if (i_error == -1) {
+                    delete selecthashmap[ts.id];
+                }
+            }
+            if (!errores) {
+                Swal.fire(
+                    "Éxito guardar",
+                    "Se logró guardar los tratamientos",
+                    "success",
+                );
+            } else {
+                Swal.fire(
+                    "Error guardar",
+                    "No se logró guardar todos los tratamientos",
+                    "error",
+                );
+            }
+            selectanimales = [];
+            volver()
+        }
+    }
     onMount(async () => {
         let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
@@ -132,6 +228,12 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <div class={classmove}>
+        {#if esdev}
+            <Success
+                texto={versionjava ? "cerrar java" : "ver java"}
+                onclick={toggleJava}
+            />
+        {/if}
         <DetalleMovimiento
             {fecha}
             tipo={tipotratamientoselect}

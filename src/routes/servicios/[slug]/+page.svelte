@@ -138,6 +138,7 @@
             edit = true;
             return;
         }
+
         if (natural) {
             try {
                 let dataser = {
@@ -153,9 +154,9 @@
                 if (versionjava) {
                     let data_java = {
                         startDate: fechadesde,
-                        
+
                         expectedBirthDate: fechaparto,
-                        notes:  observacion,
+                        notes: observacion,
                     };
                     if (fechahasta != "") {
                         data_java.endDate = fechahasta;
@@ -184,9 +185,19 @@
                     observacion,
                     categoria,
                 };
-                const record = await pb
-                    .collection("inseminacion")
-                    .update(id, data);
+                if (versionjava) {
+                    let data_java = {
+                        startDate: fechadesde,
+
+                        expectedBirthDate: fechaparto,
+                        notes: observacion,
+                    };
+                    await editServicio(id, data_java);
+                } else {
+                    const record = await pb
+                        .collection("inseminacion")
+                        .update(id, data);
+                }
 
                 Swal.fire(
                     "Éxito editar",
@@ -241,11 +252,14 @@
             }
         } else {
             try {
-                await pb
-                    .collection("inseminacion")
-                    .update(id, { active: false });
+                if (versionjava) {
+                    await eliminarServicio(id);
+                } else {
+                    await pb
+                        .collection("inseminacion")
+                        .update(id, { active: false });
+                }
 
-                filterUpdate();
                 Swal.fire(
                     "Éxito eliminar",
                     "Se eliminó con éxito la inseminación",

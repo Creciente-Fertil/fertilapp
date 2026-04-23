@@ -29,7 +29,7 @@
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import TablaTactos from "$lib/components/tactos/TablaTactos.svelte";
     import ListaTactos from "$lib/components/tactos/ListaTactos.svelte";
-    import { getAll } from "$lib/java/tactos/tactosback";
+    import { eliminarTacto, getAll } from "$lib/java/tactos/tactosback";
     let versionjava = $state(false);
     async function toggleJava() {
         versionjava = !versionjava;
@@ -96,6 +96,7 @@
         prenada: 1,
         tipo: "",
         categoria: "",
+        versionjava: false,
     };
     let detalletacto = $state({ ...tactovacio });
     let proxytacto = createStorageProxy("detalletacto", tactovacio);
@@ -136,8 +137,8 @@
             cargadostactos = true;
         } else {
             let data_tactos = await getAll();
-            
-            tactosrow = data_tactos;
+            tactos = data_tactos
+            tactosrow = tactos;
             cargadostactos = true;
         }
     }
@@ -199,7 +200,13 @@
     function irDetalle(id) {
         idtacto = id;
         tacto = tactos.filter((t) => t.id == idtacto)[0];
-        fecha = tacto.fecha.split(" ")[0];
+        
+        if (versionjava) {
+            fecha = tacto.fecha;
+        } else {
+            fecha = tacto.fecha.split(" ")[0];
+        }
+
         observacion = tacto.observacion;
         animal = tacto.animal;
         categoria = tacto.categoria;
@@ -213,6 +220,7 @@
         detalletacto.categoria = categoria;
         detalletacto.prenada = prenada;
         detalletacto.tipo = tipo;
+        detalletacto.versionjava = versionjava;
         detalletacto.edit = false;
         proxytacto.save(detalletacto);
         goto(pre + "/tactos/cab/" + idtacto);
@@ -235,6 +243,7 @@
         detalletacto.prenada = prenada;
         detalletacto.tipo = tipo;
         detalletacto.edit = true;
+        detalletacto.versionjava = versionjava;
         proxytacto.save(detalletacto);
         goto(pre + "/tactos/cab/" + idtacto);
         //if (permisos[4]) {
@@ -259,7 +268,7 @@
         //    );
         //}
     }
-    function eliminar(id) {
+    async function eliminar(id) {
         Swal.fire({
             title: "Eliminar tacto",
             text: "¿Seguro que deseas eliminar el tacto?",
@@ -274,9 +283,14 @@
                     active: false,
                 };
                 try {
-                    let recordaedit = await pb
-                        .collection("tactos")
-                        .update(idtacto, data);
+                    if (versionjava) {
+                        await eliminarTacto(idtacto);
+                    } else {
+                        let recordaedit = await pb
+                            .collection("tactos")
+                            .update(idtacto, data);
+                    }
+
                     tactos = tactos.filter((t) => t.id != idtacto);
                     filterUpdate();
                     Swal.fire(
@@ -1250,3 +1264,4 @@
         </div>
     </div>
 </dialog>
+

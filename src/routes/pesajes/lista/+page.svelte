@@ -12,20 +12,31 @@
     import estilos from "$lib/stores/estilos";
     import { shorterWord } from "$lib/stringutil/lib";
     import * as XLSX from "xlsx";
+    import Success from "$lib/components/botones/Success.svelte";
     //FILTROS
     import { createStorageProxy } from "$lib/filtros/filtros";
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import { goto } from "$app/navigation";
     import HistorialPesajes from "$lib/components/pesajes/HistorialPesajes.svelte";
+    import { getAll } from "$lib/java/pesajes/pesajesback";
+    import { editPeso,eliminarPeso } from "$lib/java/pesajes/pesajesback";
     let caber = createCaber();
     let cab = caber.cab;
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
+    let esdev = import.meta.env.VITE_DEV == "si";
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
     const today = new Date();
     const DESDE = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const HASTA = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getPesajes();
+        filterUpdate();
+    }
+
     let isOpenFilter = $state(false);
     //Datos filtrar
     let cargados = $state(false);
@@ -59,13 +70,19 @@
         isOpenFilter = !isOpenFilter;
     }
     async function getPesajes() {
-        const records = await pb.collection("pesaje").getFullList({
-            sort: "-fecha",
-            expand: "animal,animal.cab",
-            filter: `animal.cab = '${cab.id}'`,
-        });
-        pesajes = records;
-        cargados = true;
+        if (versionjava) {
+            let records = await getAll();
+            pesajes = records;
+            cargados = true;
+        } else {
+            const records = await pb.collection("pesaje").getFullList({
+                sort: "-fecha",
+                expand: "animal,animal.cab",
+                filter: `animal.cab = '${cab.id}'`,
+            });
+            pesajes = records;
+            cargados = true;
+        }
     }
     function setFilters() {
         buscarcaravana = proxyfiltros.buscarcaravana;
@@ -118,7 +135,20 @@
                     new Date(fecha).toISOString().split("T")[0] + " 03:00:00",
                 pesonuevo,
             };
-            await pb.collection("pesaje").update(idpesaje, data);
+            if (versionjava) {
+                let p_idx = pesajes.findIndex((p) => p.id == idpesaje);
+                if (p_idx != -1) {
+                    let pes = pesajes[p_idx];
+                    let data_java = {
+                        animalId: pes.animal,
+                        weightDate: fecha,
+                        weight: pesonuevo,
+                    };
+                    await editPeso(idpesaje,data_java)
+                }
+            } else {
+                await pb.collection("pesaje").update(idpesaje, data);
+            }
             await getPesajes();
             filterUpdate();
             Swal.fire(
@@ -138,7 +168,11 @@
     }
     async function eliminar() {
         try {
-            await pb.collection("pesaje").delete(idpesaje);
+            if (versionjava) {
+                await eliminarPeso(idpesaje);
+            } else {
+                await pb.collection("pesaje").delete(idpesaje);
+            }
             await getPesajes();
             Swal.fire(
                 "Éxito eliminar pesaje",
@@ -333,7 +367,12 @@
         {filterUpdate}
         {clickFilter}
     />
-
+    {#if esdev}
+        <Success
+            texto={versionjava ? "Cerrar java" : "Ver java"}
+            onclick={toggleJava}
+        />
+    {/if}
     {#if cargados}
         <!--Tabla grande-->
         <div
@@ -648,7 +687,6 @@
                         Editar
                     </button>
                 {/if}
-                
             </div>
         </div>
     </div>

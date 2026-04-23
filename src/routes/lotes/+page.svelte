@@ -15,7 +15,7 @@
     import Limpiar from "$lib/filtros/Limpiar.svelte";
     import TablaLotes from "$lib/components/lotes/TablaLotes.svelte";
     import { shorterWord } from "$lib/stringutil/lib";
-    import { getAll } from "$lib/java/lotes/lotesback";
+    import { eliminarLote, getAll } from "$lib/java/lotes/lotesback";
     import ListaLotes from "$lib/components/lotes/ListaLotes.svelte";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -84,6 +84,7 @@
         id: "",
         nombre: "",
         edit: false,
+        versionjava:false
     };
     let detalleLote = $state({ ...defaultLote });
     let proxyLote = createStorageProxy("detalleLote", defaultLote);
@@ -184,7 +185,7 @@
         idlote = id;
         let lote = lotes.filter((r) => r.id == idlote)[0];
         nombre = lote.nombre;
-        proxyLote.save({ id, nombre, edit: true });
+        proxyLote.save({ id, nombre, edit: true,versionjava });
         goto(pre + "/lotes/" + idlote);
 
         //nuevoModal.showModal();
@@ -193,7 +194,7 @@
         idlote = id;
         let lote = lotes.filter((r) => r.id == idlote)[0];
         nombre = lote.nombre;
-        proxyLote.save({ id, nombre, edit: false });
+        proxyLote.save({ id, nombre, edit: false,versionjava });
         goto(pre + "/lotes/" + idlote);
 
         //nuevoModal.showModal();
@@ -203,6 +204,7 @@
             let data = {
                 nombre,
             };
+
             const record = await pb.collection("lotes").update(idlote, data);
             let idx = lotes.findIndex((r) => r.id == idlote);
             let total = lotes[idx].total;
@@ -233,9 +235,14 @@
                     let data = {
                         active: false,
                     };
-                    const record = await pb
-                        .collection("lotes")
-                        .update(idlote, data);
+                    if (versionjava) {
+                        await eliminarLote(idlote);
+                    } else {
+                        const record = await pb
+                            .collection("lotes")
+                            .update(idlote, data);
+                    }
+
                     lotes = lotes.filter((r) => r.id != idlote);
                     ordenar(lotes);
                     filterUpdate();
