@@ -9,6 +9,9 @@
     import PredictSelect from "../PredictSelect.svelte";
     import InfoAnimal from "../InfoAnimal.svelte";
     import CustomDate from "../CustomDate.svelte";
+    import Success from "../botones/Success.svelte";
+    import Cancel from "../botones/Cancel.svelte";
+    import Danger from "../botones/Danger.svelte";
     let {
         caravana = $bindable(""),
         peso = $bindable(""),
@@ -123,8 +126,25 @@
         <label for="prenada" class="label">
             <span class={estilos.labelForm}>Estado</span>
         </label>
-
-        <RadioButton bind:option={prenadatacto} deshabilitado={false} />
+        <select
+                class={`
+                    select select-bordered w-full
+                    border border-gray-300 rounded-md
+                    focus:outline-none focus:ring-2 
+                    focus:ring-green-500 
+                    focus:border-green-500
+                    ${estilos.bgdark2}
+                `}
+                
+                bind:value={prenadatacto}
+            >
+                <option value={2}>Preñada</option>
+                <option value={0}>Vacia</option>
+            </select>
+        <div class="hidden">
+<RadioButton bind:option={prenadatacto} deshabilitado={false} />
+        </div>  
+        
     </div>
     <!--<CustomDate etiqueta="Fecha prueba" bind:fecha = {tacto.fechatacto} onchange = {() => oninputTacto("FECHA")}/>-->
     
@@ -196,17 +216,25 @@
         />
     </label>
 </div>
-<div class="modal-action justify-start">
-    <form method="dialog">
+<div class="modal-action justify-end">
+    <form method="dialog" class="flex flex-row gap-2">
         <!-- if there is a button, it will close the modal -->
         <button
-            class="btn btn-success text-white"
+            class="hidden btn btn-success text-white"
             disabled={!tacto.botonhabilitadotacto}
             onclick={guardarTacto}>Guardar</button
         >
+        <Success
+            disabled={!tacto.botonhabilitadotacto}
+            onclick={guardarTacto}
+            texto = "Guardar"
+        />
         
+        <Danger
+            texto = "Cerrar "
+        />
         <button
-            class="btn btn-error text-white"
+            class="hidden btn btn-error text-white"
             
             >Cerrar</button
         >

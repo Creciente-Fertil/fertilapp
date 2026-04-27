@@ -4,7 +4,7 @@
     import { goto } from "$app/navigation";
     
     import Paginacion from "../paginacion.svelte";
-    let { colabs = $bindable([]), pageSize = $bindable(15) } = $props();
+    let {versionjava=false, colabs = $bindable([]), pageSize = $bindable(15) } = $props();
     import Eye from "$lib/svgs/eye.svelte";
     let pre = import.meta.env.VITE_PRE;
     let firstRun = true;
@@ -72,10 +72,10 @@
                     {#each colabs as c}
                         <tr>
                             <td class={`text-base mx-1 px-1 text-center ${pyfila}`}
-                                >{c.expand.colab.nombre}</td
+                                >{versionjava?c.nombre:c.expand.colab.nombre}</td
                             >
                             <td class={`text-base mx-1 px-1 text-center ${pyfila}`}
-                                >{c.expand.colab.apellido}</td
+                                >{versionjava?c.apellido:c.expand.colab.apellido}</td
                             >
                             <td
                                 class={`flex items-center justify-center gap-2 px-1 ${pyfila}`}

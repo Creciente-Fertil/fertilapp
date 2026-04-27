@@ -125,6 +125,21 @@
                 </span>
             </a>
         </li>
+        <li
+            transition:slide
+            class={`
+                    
+                    ${cab.exist ? "" : "disabled"}
+                `}
+        >
+            <a class={`px-3 py-0 ${classtext}`} href={pre + "/establecimientos"}>
+                <Estable size="size-8" margenes=""></Estable>
+
+                <span class="flex items-center">
+                    <div>Establecimientos</div>
+                </span>
+            </a>
+        </li>
         <!--Lotes-->
         <li
             transition:slide

@@ -9,6 +9,8 @@
     import categorias from "$lib/stores/categorias";
     import PredictSelect from "../PredictSelect.svelte";
     import InfoAnimal from "../InfoAnimal.svelte";
+    import Success from "../botones/Success.svelte";
+    import Danger from "../botones/Danger.svelte";
     const HOY = new Date().toISOString().split("T")[0];
 
     let {
@@ -174,16 +176,24 @@
         bind:value={observacion.observacionobs}
     />
 </div>
-<div class="modal-action justify-start">
-    <form method="dialog">
-        <!-- if there is a button, it will close the modal -->
+<div class="modal-action justify-end">
+    <form method="dialog" class="flex flex-row  gap-2">
+        <!-- if there is a button, it will close the  modal -->
+        <Success
+        disabled={!botonhabilitadoobs}
+        onclick={guardarObservacion}
+        texto="Guardar"
+        />
+        <Danger
+            texto="Cancelar"
+        />
         <button
-            class="btn btn-success text-white"
+            class="hidden btn btn-success text-white"
             disabled={!botonhabilitadoobs}
             onclick={guardarObservacion}>Guardar</button
         >
         <button
-            class="btn btn-error text-white"
+            class="hidden btn btn-error text-white"
             
             >Cerrar</button
         >

@@ -11,7 +11,7 @@ function processComment(comment){
         expand:{
             animal:{
                 id:comment.animalId,
-                caravana:comment.animalId
+                caravana:comment.animalTagNumber
             }
         }
     }

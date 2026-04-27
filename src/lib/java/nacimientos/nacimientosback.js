@@ -5,13 +5,23 @@ function processNacimiento(birth){
     let data_nacimiento = {
         id:birth.birthId,
         fecha:birth.date,
-        caravana:"",
+        caravana:birth.animalTagNumber,
         madre:birth.motherId,
         padre:birth.fatherId,
         nombremadre:birth.motherId,
         nombrepadre:birth.fatherId,
         observacion :birth.notes,
-        cab:birth.establishmentId
+        cab:birth.establishmentId,
+        expadnd:{
+            madre:{
+                id:birth.motherId,
+                nombre:birth.motherTagNumber
+            },
+            padre:{
+                id:birth.fatherId,
+                nombre:birth.fatherTagNumber
+            },
+        }
     }
     return data_nacimiento
 }
@@ -58,15 +68,16 @@ export async function getBirthId(id){
     let procesada = processNacimiento(data_all)
     return procesada
 }
-function postData(data){
-
+function postData(data,establishmentId=1){
+    
     let data_nacimiento = {
           date: data.fecha.split(" ")[0],
           motherId: data.madre,
           fatherId: data.padre,
           notes: data.observacion,
-          establishmentId: 1
+          establishmentId
     }
+    
     return data_nacimiento
 
 }

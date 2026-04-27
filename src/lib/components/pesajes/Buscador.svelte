@@ -72,20 +72,6 @@
                     Selección de animales
                 </h1>
             </div>
-            <button
-                class={`hidden btn btn-primary rounded-lg ${estilos.btntext2}`}
-                data-theme="forest"
-                onclick={nuevo}
-            >
-                <span class="text-lg">+ Nuevo pesaje</span>
-            </button>
-            <button
-                class={`hidden btn btn-primary rounded-lg ${estilos.btntext2}`}
-                data-theme="forest"
-                onclick={ultimos}
-            >
-                Últimos
-            </button>
         </div>
         <!--Filtros-->
         <div
@@ -96,7 +82,7 @@
                 class={`
                   flex items-center flex-1 
                   shadow-2xl
-                  rounded-t-full p-3
+                  rounded-full p-3
                    bg-white dark:bg-gray-900
                   shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
                   dark:shadow-[0_4px_8px_-2px_rgba(255,255,255,0.1)]

@@ -11,7 +11,8 @@ export function getUser(){
     else{
         return {
             useremail:"",
-            token:""
+            token:"",
+            id:0
         };
     }
 }

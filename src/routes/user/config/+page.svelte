@@ -11,6 +11,13 @@
     import estilos from "$lib/stores/estilos";
     import { usuario } from "$lib/stores/usuario";
     import { enabled } from "$lib/stores/enabled";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import { editUser, getUserId, processUser } from "$lib/java/usuarios/usuariosback";
+    import Success from "$lib/components/botones/Success.svelte";
+    import Danger from "$lib/components/botones/Danger.svelte";
+    let versionjava = $state(false);
+    let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -30,9 +37,14 @@
     let malcontra = $state("");
     let malconfcontra = $state("");
     let botonhabilitado = $state(false);
-
+    let olddata = $state({});
     let darker = createDarker();
     let modoedicion = $state(false);
+
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getData();
+    }
 
     let cab = $state({
         exist: false,
@@ -47,16 +59,29 @@
             apellido,
         };
         try {
-            const record = await pb.collection("users").update(usuarioid, data);
-            const colabs = await pb.collection("colaboradores").getList(1, 1, {
-                filter: `user = '${usuarioid}'`,
-                skipTotal: false,
-            });
-            if (colabs.items.length > 0) {
-                await pb
+            if (versionjava) {
+                let new_data = { ...olddata };
+                new_data.firstName = nombre;
+                new_data.lastName = apellido;
+                new_data.username = username;
+                await editUser(new_data, usuarioid);
+            } else {
+                const record = await pb
+                    .collection("users")
+                    .update(usuarioid, data);
+                const colabs = await pb
                     .collection("colaboradores")
-                    .update(colabs.items[0].id, { nombre, apellido });
+                    .getList(1, 1, {
+                        filter: `user = '${usuarioid}'`,
+                        skipTotal: false,
+                    });
+                if (colabs.items.length > 0) {
+                    await pb
+                        .collection("colaboradores")
+                        .update(colabs.items[0].id, { nombre, apellido });
+                }
             }
+
             Swal.fire(
                 "Exito modificar",
                 "Se pudo modificar el usuario con éxito",
@@ -158,7 +183,7 @@
             showConfirmButton: false,
             //confirmButtonText: "Confirmación",
             cancelButtonText: `Cancelar`,
-            denyButtonText: `Eliminar`
+            denyButtonText: `Eliminar`,
         }).then(async (result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isDenied) {
@@ -175,34 +200,61 @@
             }
         });
     }
+    async function getData() {
+        if (versionjava) {
+            let usuario = getUser();
+            usuarioid = usuario.id;
+            let user_java = await getUserId(usuarioid);
+            olddata = user_java;
+            let user_data = processUser(user_java);
+            usermail = user_data.email;
+            username = user_data.username;
+            nombre = user_data.nombre;
+            apellido = user_data.apellido;
+            totalanimales = 0;
+            totalesta = 0;
+            nivel = user_data.nivel;
+
+            tokencolab = "";
+            cab = loadStorageEstablecimiento();
+        } else {
+            let caber = createCaber();
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            usermail = pb_json.record.email;
+            username = pb_json.record.username;
+            nombre = pb_json.record.nombre;
+            apellido = pb_json.record.apellido;
+
+            //const record = await pb.collection("users").getOne(usuarioid);
+
+            //nivel = record.nivel;
+            nivel = pb_json.record.nivel;
+
+            tokencolab = pb_json.record.codigo;
+            cab = caber.cab;
+            const resans = await pb.collection("Animalesxuser").getList(1, 1, {
+                filter: `user='${usuarioid}' && active = true`,
+            });
+            const rescab = await pb.collection("cabs").getList(1, 1, {
+                filter: `user = '${usuarioid}' && active = true`,
+            });
+            totalanimales = resans.totalItems;
+            totalesta = rescab.totalItems;
+        }
+    }
     onMount(async () => {
-        let caber = createCaber();
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        usermail = pb_json.record.email;
-        username = pb_json.record.username;
-        nombre = pb_json.record.nombre;
-        apellido = pb_json.record.apellido;
-        
-        //const record = await pb.collection("users").getOne(usuarioid);
-        
-        //nivel = record.nivel;
-        nivel = pb_json.record.nivel
-        let light = !darker.dark;
-        tokencolab = pb_json.record.codigo;
-        cab = caber.cab;
-        const resans = await pb
-            .collection("Animalesxuser")
-            .getList(1, 1, { filter: `user='${usuarioid}' && active = true` });
-        const rescab = await pb.collection("cabs").getList(1, 1, {
-            filter: `user = '${usuarioid}' && active = true`,
-        });
-        totalanimales = resans.totalItems;
-        totalesta = rescab.totalItems;
+        await getData();
     });
 </script>
 
 <Navbar2>
+    {#if esdev}
+        <Success
+            texto={versionjava ? "Cerrar java" : "Ver java"}
+            onclick={toggleJava}
+        />
+    {/if}
     <CardBase titulo="Configuración" cardsize="max-w-5xl">
         <div class="rounded-2xl shadow p-6 mb-6 text-xl">
             <h2
@@ -329,38 +381,25 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-8 flex justify-start mb-3">
+            <div class="mt-8 flex justify-end mb-3 gap-2">
                 {#if !modoedicion}
-                    <button
+                    <Success
+                        texto="Editar información personal"
                         onclick={() => (modoedicion = true)}
-                        class=" 
-                        btn px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md
-                        text-white font-bold font-lg focus:outline-none
-                        focus:ring-2 focus:ring-offset-2 focus:ring-green-500
-                    "
-                    >
-                        Editar información personal
-                    </button>
+                    />
                 {:else}
-                    <button
+                    <Danger
+                        texto="Cancelar"
                         onclick={() => (modoedicion = false)}
-                        class="
-                        btn btn-error
-                        text-white
-                        font-bold font-lg
-                    "
-                    >
-                        Cancelar
-                    </button>
-                    <button
+                    />
+
+                    <Success
                         onclick={async () => {
                             modoedicion = false;
                             await editarUsuario();
                         }}
-                        class="btn px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md text-white font-bold font-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                    >
-                        Guardar
-                    </button>
+                        texto="Guardar"
+                    />
                 {/if}
             </div>
         </div>
@@ -369,27 +408,13 @@
             <div class="grid grid-cols-1 mt-2 gap-1">
                 <!--<div class="mt-2 flex justify-start">-->
                 <div class="">
-                    <button
-                        onclick={openCambioContra}
-                        class=" 
-                            btn px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md
-                            text-white font-bold font-lg focus:outline-none
-                            focus:ring-2 focus:ring-offset-2 focus:ring-green-500
-                        "
-                    >
-                        Cambiar contraseña
-                    </button>
-                    <button
-                        onclick={eliminarCuenta}
-                        class="
-                                hidden
-                                btn btn-error
-                                text-white
-                                font-bold font-lg
-                            "
-                    >
-                        Eliminar
-                    </button>
+                    <div class="flex justify-end">
+                        <Success
+                            onclick={openCambioContra}
+                            texto="Cambiar contraseña"
+                        />
+                    </div>
+
                     <div
                         class="
                             bg-red-50 border border-red-300 rounded-2xl p-5 mt-10
@@ -415,18 +440,9 @@
                             Esta acción eliminará permanentemente todos tus
                             datos y no podrá deshacerse.
                         </p>
-
-                        <button
-                            onclick={eliminarCuenta}
-                            class="
-                                bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-md
-                                focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
-                                dark:focus:ring-offset-gray-900
-                                transition-all duration-150 ease-in-out
-                            "
-                        >
-                            Eliminar
-                        </button>
+                        <div class="flex justify-end">
+                            <Danger texto="Eliminar" onclick={eliminarCuenta} />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -477,16 +493,12 @@
                     </label>
                 </div>
                 <div class="mt-2 col-span-1 md:col-span-2">
-                    <button
-                        onclick={() => goto(pre + "/user/nivel")}
-                        class=" 
-                        btn px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md
-                        text-white font-bold font-lg focus:outline-none
-                        focus:ring-2 focus:ring-offset-2 focus:ring-green-500
-                    "
-                    >
-                        Cambiar plan
-                    </button>
+                    <div class="flex justify-end">
+                        <Success
+                            onclick={() => goto(pre + "/user/nivel")}
+                            texto="Cambiar plan"
+                        />
+                    </div>
                 </div>
             </div>
         </div>

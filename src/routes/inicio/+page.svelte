@@ -50,10 +50,26 @@
     import { goto } from "$app/navigation";
     import { dolar } from "$lib/stores/dolarprecio.svelte";
     import { getDolarPrice } from "$lib/stores/dolar";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import * as AnimalService from "$lib/java/animales/animalesback";
+    import * as TactoService from "$lib/java/tactos/tactosback";
+    import * as NacimientoService from "$lib/java/nacimientos/nacimientosback";
+    import * as RodeoService from "$lib/java/rodeos/rodeosback";
+    import * as LoteService from "$lib/java/lotes/lotesback";
+    import * as TratamientoService from "$lib/java/tratamientos/tratamientosback";
+    import * as ObservacionService from "$lib/java/observaciones/observacionesback";
+    import * as PesajeService from "$lib/java/pesajes/pesajesback";
+    import * as ServicioService from "$lib/java/servicios/serviciosback";
+    import Observaciones from "$lib/components/animal/Observaciones.svelte";
 
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     let esdev = import.meta.env.VITE_DEV == "si";
+    let versionjava = $state(false);
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getData();
+    }
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
 
@@ -243,12 +259,17 @@
         };
     }
     async function getAnimales() {
-        //Estaria joya que el animal venga con todos los chiches
-        const recordsa = await pb.collection("animales").getFullList({
-            filter: `active=true && cab='${cab.id}' && delete = false`,
-            expand: "nacimiento",
-        });
-        animales = recordsa;
+        if (versionjava) {
+            const recordsa = await AnimalService.getAll();
+            animales = recordsa;
+        } else {
+            const recordsa = await pb.collection("animales").getFullList({
+                filter: `active=true && cab='${cab.id}' && delete = false`,
+                expand: "nacimiento",
+            });
+            animales = recordsa;
+        }
+
         animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
         totaleventos.animales = animales.length;
 
@@ -279,11 +300,19 @@
         );
     }
     async function getTiposTratamientos() {
-        const records = await pb.collection("tipotratamientos").getFullList({
-            filter: `(cab='${cab.id}' || generico = true) && active = true`,
-            sort: "-created",
-        });
-        tipotratamientos = records;
+        if (versionjava) {
+            const records = await TratamientoService.getAllTipos();
+            tipotratamientos = records;
+        } else {
+            const records = await pb
+                .collection("tipotratamientos")
+                .getFullList({
+                    filter: `(cab='${cab.id}' || generico = true) && active = true`,
+                    sort: "-created",
+                });
+            tipotratamientos = records;
+        }
+
         tipotratamientos.sort((tp1, tp2) =>
             tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase()
                 ? 1
@@ -385,15 +414,20 @@
             rodeo,
             nacimiento: idnacimiento,
         };
-        let listapermisos = getPermisosList(permisos.permisos);
-        if (!listapermisos[5]) {
-            Swal.fire("Error permisos", getPermisosMessage(5), "error");
-            return { id: -1 };
+        //let listapermisos = getPermisosList(permisos.permisos);
+        //if (!listapermisos[5]) {
+        //    Swal.fire("Error permisos", getPermisosMessage(5), "error");
+        //    return { id: -1 };
+        //}
+        if (versionjava) {
+            let recorda = await AnimalService.saveAnimal(data);
+            totaleventos.animales += 1;
+            return recorda;
+        } else {
+            let recorda = await pb.collection("animales").create(data);
+            totaleventos.animales += 1;
+            return recorda;
         }
-
-        let recorda = await pb.collection("animales").create(data);
-        totaleventos.animales += 1;
-        return recorda;
     }
     async function guardarAnimal(esTacto, esInseminacion) {
         //let verificar = await verificarNivel(cab.id)
@@ -424,15 +458,33 @@
         if (esInseminacion) {
             data.prenada = 3;
         }
-        let listapermisos = getPermisosList(permisos.permisos);
-        if (!listapermisos[5]) {
-            Swal.fire("Error permisos", getPermisosMessage(5), "error");
-            return { id: -1 };
-        }
+        //let listapermisos = getPermisosList(permisos.permisos);
+        //if (!listapermisos[5]) {
+        //    Swal.fire("Error permisos", getPermisosMessage(5), "error");
+        //    return { id: -1 };
+        //}
+        if (versionjava) {
+            let recorda = await AnimalService.saveAnimal(data);
 
-        let recorda = await pb.collection("animales").create(data);
-        totaleventos.animales += 1;
-        return recorda;
+            totaleventos.animales += 1;
+            caravana = "";
+            categoriaseleccion = "";
+            fechanacimiento = "";
+            sexo = "";
+            peso = 0;
+
+            return recorda;
+        } else {
+            let recorda = await pb.collection("animales").create(data);
+            totaleventos.animales += 1;
+            caravana = "";
+            categoriaseleccion = "";
+            fechanacimiento = "";
+            sexo = "";
+            peso = 0;
+            totaleventos.animales += 1;
+            return recorda;
+        }
     }
     async function guardarTacto() {
         if (agregaranimal) {
@@ -445,12 +497,11 @@
                 return;
             }
             try {
-                let listapermisos = getPermisosList(permisos.permisos);
-                if (!listapermisos[4]) {
-                    Swal.fire("Error permisos", getPermisosMessage(4), "error");
-
-                    return false;
-                }
+                //let listapermisos = getPermisosList(permisos.permisos);
+                //if (!listapermisos[4]) {
+                //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+                //    return false;
+                //}
                 let a = await guardarAnimal(true, false);
                 if (a.id == -1) {
                     return;
@@ -467,8 +518,11 @@
                     cab: cab.id,
                     active: true,
                 };
-
-                const record = await pb.collection("tactos").create(data);
+                if (versionjava) {
+                    let record = await TactoService.saveTacto(data);
+                } else {
+                    const record = await pb.collection("tactos").create(data);
+                }
 
                 //let recordtactos = await pb.collection('tactos').getList(1,1,{
                 //    filter:`active=True && cab='${cab.id}'`
@@ -500,13 +554,17 @@
                     cab: cab.id,
                     active: true,
                 };
-                let listapermisos = getPermisosList(permisos.permisos);
-                if (!listapermisos[4]) {
-                    Swal.fire("Error permisos", getPermisosMessage(4), "error");
-
-                    return false;
+                //let listapermisos = getPermisosList(permisos.permisos);
+                //if (!listapermisos[4]) {
+                //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+                //    return false;
+                //}
+                if (versionjava) {
+                    let record = await TactoService.saveTacto(data);
+                } else {
+                    const record = await pb.collection("tactos").create(data);
                 }
-                const record = await pb.collection("tactos").create(data);
+
                 //await guardarHistorial(pb, tacto.animaltacto);
                 //await pb.collection("animales").update(tacto.animaltacto, {
                 //    prenada: prenadatacto,
@@ -554,39 +612,48 @@
                 observacion: nacimiento.observacionnac,
                 cab: cab.id,
             };
-            let listapermisos = getPermisosList(permisos.permisos);
-            if (!listapermisos[4]) {
-                Swal.fire("Error permisos", getPermisosMessage(4), "error");
+            //let listapermisos = getPermisosList(permisos.permisos);
+            //if (!listapermisos[4]) {
+            //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+            //    return false;
+            //}
+            if (versionjava) {
+                let recordparicion =
+                    await NacimientoService.saveBirth(dataparicion);
+                if (agregaranimal) {
+                    //if (!listapermisos[5]) {
+                    //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+                    //    return false;
+                    //}
+                    //Laburar esta parte
+                    let a = await guardarAnimalParicion(
+                        nacimiento.madrenac,
+                        recordparicion.id,
+                        nacimiento.fechanac,
+                    );
 
-                return false;
-            }
-            const recordparicion = await pb
-                .collection("nacimientos")
-                .create(dataparicion);
-
-            if (agregaranimal) {
-                if (!listapermisos[5]) {
-                    Swal.fire("Error permisos", getPermisosMessage(4), "error");
-
-                    return false;
+                    await getAnimales();
                 }
-                //Laburar esta parte
-                let a = await guardarAnimalParicion(
-                    nacimiento.madrenac,
-                    recordparicion.id,
-                    nacimiento.fechanac,
-                );
+            } else {
+                const recordparicion = await pb
+                    .collection("nacimientos")
+                    .create(dataparicion);
+                if (agregaranimal) {
+                    //if (!listapermisos[5]) {
+                    //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+                    //    return false;
+                    //}
+                    //Laburar esta parte
+                    let a = await guardarAnimalParicion(
+                        nacimiento.madrenac,
+                        recordparicion.id,
+                        nacimiento.fechanac,
+                    );
 
-                await getAnimales();
-                //await pb
-                //    .collection("animales")
-                //    .update(a.id, { nacimiento: recordparicion.id });
+                    await getAnimales();
+                }
             }
-            //let recordnacimientos = await pb
-            //    .collection("nacimientos")
-            //    .getList(1, 1, {
-            //        filter: `cab='${cab.id}'`,
-            //    });
+
             totaleventos.nacimientos += 1;
             Swal.fire(
                 "Éxito guardar",
@@ -634,14 +701,16 @@
                     observacion: tratamiento.observaciontrat,
                     cab: cab.id,
                 };
+                if (versionjava) {
+                    await TratamientoService.saveTrata(data);
+                } else {
+                    const record = await pb
+                        .collection("tratamientos")
+                        .create(data);
+                }
 
-                const record = await pb.collection("tratamientos").create(data);
                 await getAnimales();
-                let recordtratamientos = await pb
-                    .collection("tratamientos")
-                    .getList(1, 1, {
-                        filter: `active=True && cab='${cab.id}'`,
-                    });
+
                 totaleventos.tratamientos += 1;
                 Swal.fire(
                     "Éxito guardar",
@@ -658,12 +727,11 @@
             }
         } else {
             try {
-                let listapermisos = getPermisosList(permisos.permisos);
-                if (!listapermisos[4]) {
-                    Swal.fire("Error permisos", getPermisosMessage(4), "error");
-
-                    return false;
-                }
+                //let listapermisos = getPermisosList(permisos.permisos);
+                //if (!listapermisos[4]) {
+                //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+                //    return false;
+                //}
                 let data = {
                     animal: tratamiento.animaltrat,
                     categoria: tratamiento.categoriatrat,
@@ -673,12 +741,14 @@
                     observacion: tratamiento.observaciontrat,
                     cab: cab.id,
                 };
-                const record = await pb.collection("tratamientos").create(data);
-                let recordtratamientos = await pb
-                    .collection("tratamientos")
-                    .getList(1, 1, {
-                        filter: `active=True && cab='${cab.id}'`,
-                    });
+                if (versionjava) {
+                    await TratamientoService.saveTrata(data);
+                } else {
+                    const record = await pb
+                        .collection("tratamientos")
+                        .create(data);
+                }
+
                 totaleventos.tratamientos += 1;
                 Swal.fire(
                     "Éxito guardar",
@@ -726,13 +796,18 @@
                 categoria: a.categoria,
             };
             try {
-                const record = await pb.collection("inseminacion").create(data);
+                if (versionjava) {
+                    data.tipo = "INSEMINATION";
+                    let data_java = ServicioService.postInseminacion(data);
+                    await ServicioService.saveServicio(data_java);
+                } else {
+                    const record = await pb
+                        .collection("inseminacion")
+                        .create(data);
+                }
+
                 await getAnimales();
-                let recordinseminaciones = await pb
-                    .collection("inseminacion")
-                    .getList(1, 1, {
-                        filter: `active=True && cab='${cab.id}'`,
-                    });
+
                 totaleventos.inseminaciones += 1;
                 Swal.fire(
                     "Éxito guardar",
@@ -748,12 +823,11 @@
                 );
             }
         } else {
-            let listapermisos = getPermisosList(permisos.permisos);
-            if (!listapermisos[4]) {
-                Swal.fire("Error permisos", getPermisosMessage(4), "error");
-
-                return false;
-            }
+            //let listapermisos = getPermisosList(permisos.permisos);
+            //if (!listapermisos[4]) {
+            //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+            //    return false;
+            //}
             let data = {
                 cab: cab.id,
                 animal: inseminacion.idanimalins,
@@ -766,19 +840,28 @@
                 observacion: inseminacion.observacion,
             };
             try {
-                const record = await pb.collection("inseminacion").create(data);
+                if (versionjava) {
+                    data.tipo = "INSEMINATION";
+                    let data_java = ServicioService.postInseminacion(data);
+                    await ServicioService.saveServicio(data_java);
+                } else {
+                    const record = await pb
+                        .collection("inseminacion")
+                        .create(data);
+                }
+
                 //revisar las fechas
-                await guardarHistorial(pb, inseminacion.idanimalins);
-                await pb
-                    .collection("animales")
-                    .update(inseminacion.idanimalins, {
-                        prenada: 3,
-                    });
-                let recordinseminaciones = await pb
-                    .collection("inseminacion")
-                    .getList(1, 1, {
-                        filter: `active=True && cab='${cab.id}'`,
-                    });
+                //await guardarHistorial(pb, inseminacion.idanimalins);
+                //await pb
+                //    .collection("animales")
+                //    .update(inseminacion.idanimalins, {
+                //        prenada: 3,
+                //    });
+                //let recordinseminaciones = await pb
+                //    .collection("inseminacion")
+                //    .getList(1, 1, {
+                //        filter: `active=True && cab='${cab.id}'`,
+                //    });
                 totaleventos.inseminaciones += 1;
                 Swal.fire(
                     "Éxito guardar",
@@ -828,14 +911,16 @@
                 dataser.fechahasta = servicio.fechahastaserv + " 03:00:00";
             }
             try {
-                await pb.collection("servicios").create(dataser);
+                if (versionjava) {
+                    dataser.tipo = "NATURAL_SERVICE";
+                    let data_java = ServicioService.postServicio(dataser);
+                    await ServicioService.saveServicio(data_java);
+                } else {
+                    await pb.collection("servicios").create(dataser);
+                }
 
                 await getAnimales();
-                let recordservicios = await pb
-                    .collection("servicios")
-                    .getList(1, 1, {
-                        filter: `cab='${cab.id}'`,
-                    });
+
                 totaleventos.servicios += 1;
                 Swal.fire(
                     "Éxito guardar",
@@ -851,12 +936,11 @@
                 );
             }
         } else {
-            let listapermisos = getPermisosList(permisos.permisos);
-            if (!listapermisos[4]) {
-                Swal.fire("Error permisos", getPermisosMessage(4), "error");
-
-                return false;
-            }
+            //let listapermisos = getPermisosList(permisos.permisos);
+            //if (!listapermisos[4]) {
+            //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+            //    return false;
+            //}
             let dataser = {
                 fechadesde: servicio.fechadesdeserv + " 03:00:00",
                 fechaparto: servicio.fechapartoser + " 03:00:00",
@@ -870,17 +954,24 @@
                 dataser.fechahasta = servicio.fechahastaserv + " 03:00:00";
             }
             try {
-                await pb.collection("servicios").create(dataser);
+                if (versionjava) {
+                    dataser.tipo = "NATURAL_SERVICE";
+                    let data_java = ServicioService.postServicio(dataser);
+                    await ServicioService.saveServicio(data_java);
+                } else {
+                    await pb.collection("servicios").create(dataser);
+                }
+
                 // Revisar las fechas
-                await pb.collection("animales").update(servicio.idanimalser, {
-                    prenada: 3,
-                });
-                await guardarHistorial(pb, servicio.idanimalser);
-                let recordservicios = await pb
-                    .collection("servicios")
-                    .getList(1, 1, {
-                        filter: `cab='${cab.id}'`,
-                    });
+                //await pb.collection("animales").update(servicio.idanimalser, {
+                //    prenada: 3,
+                //});
+                //await guardarHistorial(pb, servicio.idanimalser);
+                //let recordservicios = await pb
+                //    .collection("servicios")
+                //    .getList(1, 1, {
+                //        filter: `cab='${cab.id}'`,
+                //    });
                 totaleventos.servicios += 1;
                 Swal.fire(
                     "Éxito guardar",
@@ -900,16 +991,16 @@
     async function guardarObservacion() {
         if (agregaranimal) {
             try {
-                let listapermisos = getPermisosList(permisos.permisos);
-                if (!listapermisos[4]) {
-                    Swal.fire("Error permisos", getPermisosMessage(4), "error");
-
-                    return false;
-                }
+                //let listapermisos = getPermisosList(permisos.permisos);
+                //if (!listapermisos[4]) {
+                //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+                //    return false;
+                //}
                 let a = await guardarAnimal(false, false);
                 if (a.id == -1) {
                     return;
                 }
+
                 let data = {
                     animal: a.id,
                     categoria: a.categoria,
@@ -918,14 +1009,15 @@
                     observacion: observacion.observacionobs,
                     active: true,
                 };
-                const record = await pb
-                    .collection("observaciones")
-                    .create(data);
-                let recordobservaciones = await pb
-                    .collection("observaciones")
-                    .getList(1, 1, {
-                        filter: `active=True && cab='${cab.id}'`,
-                    });
+                if (versionjava) {
+                    
+                    await ObservacionService.saveComment(data);
+                } else {
+                    const record = await pb
+                        .collection("observaciones")
+                        .create(data);
+                }
+
                 totaleventos.observaciones += 1;
                 await getAnimales();
                 Swal.fire(
@@ -943,12 +1035,11 @@
             }
         } else {
             try {
-                let listapermisos = getPermisosList(permisos.permisos);
-                if (!listapermisos[4]) {
-                    Swal.fire("Error permisos", getPermisosMessage(4), "error");
-
-                    return false;
-                }
+                //let listapermisos = getPermisosList(permisos.permisos);
+                //if (!listapermisos[4]) {
+                //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+                //    return false;
+                //}
                 let data = {
                     animal: observacion.animalobs,
                     fecha: observacion.fechaobs + " 03:00:00",
@@ -957,14 +1048,19 @@
                     observacion: observacion.observacionobs,
                     active: true,
                 };
-                const record = await pb
-                    .collection("observaciones")
-                    .create(data);
-                let recordobservaciones = await pb
-                    .collection("observaciones")
-                    .getList(1, 1, {
-                        filter: `active=True && cab='${cab.id}'`,
-                    });
+                if (versionjava) {
+                    await ObservacionService.saveComment(data);
+                } else {
+                    const record = await pb
+                        .collection("observaciones")
+                        .create(data);
+                }
+
+                //let recordobservaciones = await pb
+                //    .collection("observaciones")
+                //    .getList(1, 1, {
+                //        filter: `active=True && cab='${cab.id}'`,
+                //    });
                 totaleventos.observaciones += 1;
                 Swal.fire(
                     "Éxito guardar",
@@ -982,52 +1078,84 @@
         }
     }
     async function getTotales() {
-        let recordtactos = await pb.collection("tactos").getList(1, 1, {
-            filter: `active=True && cab='${cab.id}'`,
-        });
-        let recordnacimientos = await pb
-            .collection("nacimientos")
-            .getList(1, 1, {
-                filter: `cab='${cab.id}'`,
-            });
-        let recordtratamientos = await pb
-            .collection("tratamientos")
-            .getList(1, 1, {
-                filter: `active=True && cab='${cab.id}'`,
-            });
-        let recordinseminaciones = await pb
-            .collection("inseminacion")
-            .getList(1, 1, {
-                filter: `active=True && cab='${cab.id}'`,
-            });
-        let recordobservaciones = await pb
-            .collection("observaciones")
-            .getList(1, 1, {
-                filter: `active=True && cab='${cab.id}'`,
-            });
-        let recordpesajes = await pb.collection("pesaje").getList(1, 1, {
-            expand: "animal",
-            filter: `animal.cab='${cab.id}'`,
-        });
-        let recordservicios = await pb.collection("servicios").getList(1, 1, {
-            filter: `cab='${cab.id}' && active = True`,
-        });
-        const recordslotes = await pb.collection("lotes").getList(1, 1, {
-            filter: `active=True && cab='${cab.id}'`,
-        });
+        if (versionjava) {
 
-        const recordsrodeos = await pb.collection("rodeos").getList(1, 1, {
-            filter: `active=True && cab='${cab.id}'`,
-        });
-        totaleventos.tactos = recordtactos.totalItems;
-        totaleventos.inseminaciones = recordinseminaciones.totalItems;
-        totaleventos.nacimientos = recordnacimientos.totalItems;
-        totaleventos.tratamientos = recordtratamientos.totalItems;
-        totaleventos.observaciones = recordobservaciones.totalItems;
-        totaleventos.pesajes = recordpesajes.totalItems;
-        totaleventos.servicios = recordservicios.totalItems;
-        totaleventos.lotes = recordslotes.totalItems;
-        totaleventos.rodeos = recordsrodeos.totalItems;
+            let recordtactos = await TactoService.getAll();
+            let recordnacimientos = await NacimientoService.getAll();
+            let recordtratamientos = await TratamientoService.getAll();
+            let servicios = await ServicioService.getAllServices();
+            let recordservicios = servicios.filter(
+                (s) => s.tipo == "NATURAL_SERVICE",
+            );
+
+            let recordinseminaciones = servicios.filter(
+                (s) => s.tipo == "INSEMINATION",
+            );
+            let recordobservaciones = await ObservacionService.getAll();
+            let recordpesajes = await PesajeService.getAll();
+
+            const recordslotes = await LoteService.getAll();
+
+            const recordsrodeos = await RodeoService.getAll();
+            totaleventos.tactos = recordtactos.length;
+            totaleventos.inseminaciones = recordinseminaciones.length;
+            totaleventos.nacimientos = recordnacimientos.length;
+            totaleventos.tratamientos = recordtratamientos.length;
+            totaleventos.observaciones = recordobservaciones.length;
+            totaleventos.pesajes = recordpesajes.length;
+            totaleventos.servicios = recordservicios.length;
+            totaleventos.lotes = recordslotes.length;
+            totaleventos.rodeos = recordsrodeos.length;
+        } else {
+            let recordtactos = await pb.collection("tactos").getList(1, 1, {
+                filter: `active=True && cab='${cab.id}'`,
+            });
+            let recordnacimientos = await pb
+                .collection("nacimientos")
+                .getList(1, 1, {
+                    filter: `cab='${cab.id}'`,
+                });
+            let recordtratamientos = await pb
+                .collection("tratamientos")
+                .getList(1, 1, {
+                    filter: `active=True && cab='${cab.id}'`,
+                });
+            let recordinseminaciones = await pb
+                .collection("inseminacion")
+                .getList(1, 1, {
+                    filter: `active=True && cab='${cab.id}'`,
+                });
+            let recordobservaciones = await pb
+                .collection("observaciones")
+                .getList(1, 1, {
+                    filter: `active=True && cab='${cab.id}'`,
+                });
+            let recordpesajes = await pb.collection("pesaje").getList(1, 1, {
+                expand: "animal",
+                filter: `animal.cab='${cab.id}'`,
+            });
+            let recordservicios = await pb
+                .collection("servicios")
+                .getList(1, 1, {
+                    filter: `cab='${cab.id}' && active = True`,
+                });
+            const recordslotes = await pb.collection("lotes").getList(1, 1, {
+                filter: `active=True && cab='${cab.id}'`,
+            });
+
+            const recordsrodeos = await pb.collection("rodeos").getList(1, 1, {
+                filter: `active=True && cab='${cab.id}'`,
+            });
+            totaleventos.tactos = recordtactos.totalItems;
+            totaleventos.inseminaciones = recordinseminaciones.totalItems;
+            totaleventos.nacimientos = recordnacimientos.totalItems;
+            totaleventos.tratamientos = recordtratamientos.totalItems;
+            totaleventos.observaciones = recordobservaciones.totalItems;
+            totaleventos.pesajes = recordpesajes.totalItems;
+            totaleventos.servicios = recordservicios.totalItems;
+            totaleventos.lotes = recordslotes.totalItems;
+            totaleventos.rodeos = recordsrodeos.totalItems;
+        }
     }
     async function tetstnewback() {
         let res_back = await fetch(
@@ -1037,10 +1165,10 @@
         console.info(data_back);
     }
     async function posttnewback() {
-        tetstnewback()
-        
+        tetstnewback();
+
         let data = {
-            tagNumber: "TzAG-001"+Math.random(),
+            tagNumber: "TzAG-001" + Math.random(),
             birthDate: "2022-01-10",
             sex: "F",
             isPregnant: true,
@@ -1062,7 +1190,47 @@
         );
         let data_back = await res_back.json();
         console.info(data_back);
-        
+    }
+    async function getData() {
+        if (versionjava) {
+            cab = loadStorageEstablecimiento();
+            if (cab.exist) {
+                initNacimiento();
+                initTacto();
+                initTratamiento();
+                initObservacion();
+                initServicio();
+                await getAnimales();
+                await getTiposTratamientos();
+                await getTotales();
+                cargados = true;
+            }
+        } else {
+            cab = caber.cab;
+
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+
+            usuarioid = pb_json.record.id;
+            if (cab.exist) {
+                let respermisos = await getPermisosCabUser(
+                    pb,
+                    usuarioid,
+                    cab.id,
+                );
+
+                per.setPer(respermisos.permisos, usuarioid);
+                permisos = per.per;
+                initNacimiento();
+                initTacto();
+                initTratamiento();
+                initObservacion();
+                initServicio();
+                await getAnimales();
+                await getTiposTratamientos();
+                await getTotales();
+                cargados = true;
+            }
+        }
     }
     onMount(async () => {
         try {
@@ -1070,28 +1238,7 @@
         } catch (err) {
             console.error("Error con el dolar");
         }
-
-        cab = caber.cab;
-
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-
-        usuarioid = pb_json.record.id;
-        if (cab.exist) {
-            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-
-            per.setPer(respermisos.permisos, usuarioid);
-            permisos = per.per;
-            initNacimiento();
-            initTacto();
-            initTratamiento();
-            initObservacion();
-            initServicio();
-            await getAnimales();
-            await getTiposTratamientos();
-            await getTotales();
-            cargados = true;
-        }
-        
+        await getData();
     });
 </script>
 
@@ -1104,7 +1251,10 @@
     {#if esdev}
         premisos {JSON.stringify(permisos, null, 2)}
         <br />
-        <button class="btn px-10" onclick={posttnewback}> porobar post </button>
+
+        <button class="btn px-10" onclick={toggleJava}>
+            {versionjava ? "Cerrar java" : "Ver java"}
+        </button>
     {/if}
     {#if cab.exist}
         <CardBase titulo="Información general" cardsize="max-w-5xl">

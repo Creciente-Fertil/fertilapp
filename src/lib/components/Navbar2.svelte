@@ -81,6 +81,7 @@
         if (versionjava) {
             let user = getUser();
             let establecimiento = loadStorageEstablecimiento();
+            
             nombreestablecimiento = establecimiento.nombre;
             if (window.innerWidth <= 600) {
                 // Pantallas pequeñas

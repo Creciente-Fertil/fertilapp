@@ -7,12 +7,13 @@ function processTacto(tacto) {
         fecha: tacto.date,
         observacion: tacto.notes,
         animal: tacto.animalId,
-        prenada: 0,
+        tipo:tacto.checkType,
+        prenada: tacto.isPregnant?2:0,
         categoria: "",
         expand: {
             animal: {
                 id: tacto.animalId,
-                caravana: tacto.animalId,
+                caravana: tacto.animalTagNumber,
             }
         }
     }
@@ -62,15 +63,16 @@ export async function getTactoId(id) {
     let procesada = processTacto(data_all)
     return procesada
 }
-function postData(data) {
+function postData(data,establishmentId=1) {
+    
     let data_tacto = {
         animalId: data.animal,
         date: data.fecha.split(" ")[0],
-        checkType: "ECOGRAFIA",
+        checkType: data.tipo,
 
-        isPregnant: true,
+        isPregnant: data.prenada==2,
         notes: data.observacion,
-        establishmentId: 1
+        establishmentId
     }
     return data_tacto
 }

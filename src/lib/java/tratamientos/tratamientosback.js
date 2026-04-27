@@ -26,7 +26,7 @@ function processTratamiento(treatment) {
             },
             tipo: {
                 id: treatment.treatmentTypeId,
-                nombre: treatment.treatmentTypeId
+                nombre: treatment.treatmentTypeName
             }
 
         }

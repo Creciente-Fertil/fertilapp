@@ -18,13 +18,15 @@
     import { createPer } from "$lib/stores/permisos.svelte";
     import { usuario } from "$lib/stores/usuario";
     import ListaEstablecimientos from "$lib/components/establecimientos/ListaEstablecimientos.svelte";
-    import { getAll } from "$lib/java/establecimientos/establecimientosback";
+    import {
+        deleteEstablishment,
+        getAll,
+        getAllColabs,
+    } from "$lib/java/establecimientos/establecimientosback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let esdev = import.meta.env.VITE_DEV == "si";
     let versionjava = $state(false);
-    async function toggleJava() {
-        versionjava = !versionjava;
-        await getEstablecimientos()
-    }
+    
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -41,6 +43,17 @@
         { id: "ajenos", nombre: "Establecimientos asociados" },
     ]);
     let tab = $state("propios");
+    async function toggleJava() {
+        versionjava = !versionjava;
+        if(versionjava){
+            cab = loadStorageEstablecimiento()
+        }
+        else{
+            cab = caber.cab
+        }
+        await getEstablecimientos();
+        await getEstablecimientosColab()
+    }
     //Guardar establecimiento
     async function irEstablecimientoColab(id) {
         let per = createPer();
@@ -86,44 +99,55 @@
             if (result.value) {
                 let data = { active: false };
                 try {
-                    await pb.collection("cabs").update(id, data);
+                    if (versionjava) {
+                        await deleteEstablishment(id);
+                        await getEstablecimientos();
+                        await getEstablecimientosColab();
+                    } else {
+                        await pb.collection("cabs").update(id, data);
+                        await getEstablecimientos();
+                        await getEstablecimientosColab();
+                    }
+
                     Swal.fire(
                         "Éxito",
                         "Se pudo eliminar el establecimiento",
                         "success",
                     );
                 } catch (err) {
+                    console.error(err);
                     Swal.fire(
                         "Error eliminar",
                         "No se pudo eliminar el establecimiento",
                         "error",
                     );
                 }
-                const records = await pb.collection("cabs").getFullList({
-                    filter: `active = True && user = '${usuarioid}'`,
-                });
-
-                establecimientos = records;
-                totales = [];
-                for (let i = 0; i < establecimientos.length; i++) {
-                    totales.push(
-                        await getTotalAnimales(establecimientos[i].id),
-                    );
-                }
             }
         });
     }
     async function getEstablecimientosColab() {
-        const restxcolab = await pb.collection("estxcolabs").getFullList({
-            filter: `colab.user = '${usuarioid}' && cab.active = true`,
-            expand: "colab,cab",
-        });
-        establecimientoscolab = restxcolab;
-
-        for (let i = 0; i < establecimientoscolab.length; i++) {
-            totalescolab.push(
-                await getTotalAnimales(establecimientoscolab[i].expand.cab.id),
-            );
+        if (versionjava) {
+            totalescolab = []
+            establecimientoscolab = await getAllColabs();
+            
+            for (let i = 0; i < establecimientoscolab.length; i++) {
+                totalescolab.push(0);
+            }
+        
+        } else {
+            const restxcolab = await pb.collection("estxcolabs").getFullList({
+                filter: `colab.user = '${usuarioid}' && cab.active = true`,
+                expand: "colab,cab",
+            });
+            establecimientoscolab = restxcolab;
+            totalescolab = []
+            for (let i = 0; i < establecimientoscolab.length; i++) {
+                totalescolab.push(
+                    await getTotalAnimales(
+                        establecimientoscolab[i].expand.cab.id,
+                    ),
+                );
+            }
         }
     }
     async function getEstablecimientos() {
@@ -132,13 +156,14 @@
                 filter: `active = True && user = '${usuarioid}'`,
             });
             establecimientos = records;
-
+            totales = []
             for (let i = 0; i < establecimientos.length; i++) {
                 totales.push(await getTotalAnimales(establecimientos[i].id));
             }
         } else {
             let records = await getAll();
             establecimientos = records;
+            totales = []
             for (let i = 0; i < establecimientos.length; i++) {
                 totales.push(0);
             }
@@ -218,88 +243,6 @@
                     {totales}
                 />
             </div>
-            <div class="hidden grid grid-cols-1 gap-2">
-                {#each establecimientos as e, i}
-                    <div class="flex items-center justify-center">
-                        <div
-                            class={`
-                            bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-2 w-full 
-                            max-w-5xl
-                    `}
-                        >
-                            <h1 class="text-2xl font-bold mb-1 text-start p-2">
-                                {e.nombre}
-                            </h1>
-                            <div class="p-2 grid grid-cols-3 lg:grid-cols-6">
-                                <span class="text-xl font-semibold text-start"
-                                    >Direccion:</span
-                                >
-
-                                <span class="text-xl font-medium text-end"
-                                    >{e.direccion}</span
-                                >
-                            </div>
-                            <div class="p-2 grid grid-cols-3 lg:grid-cols-6">
-                                <span class="text-xl font-semibold text-start"
-                                    >Animales:</span
-                                >
-
-                                <span class="text-xl font-medium text-end"
-                                    >{totales[i]}</span
-                                >
-                            </div>
-                            <div class="p-2">
-                                <button
-                                    onclick={() => irEstablecimiento(e.id)}
-                                    class={`mt-3  hover:text-gray-500 dark:hover:text-gray-600 inline-flex items-center `}
-                                    >Ir establecimiento
-                                    <svg
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        class="w-4 h-4 ml-2"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path d="M5 12h14M12 5l7 7-7 7"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            {#if e.id != cab.id}
-                                <button
-                                    aria-label="Eliminar"
-                                    onclick={() => eliminar(e.id)}
-                                    class={`
-                                flex 
-                                items-center p-2
-                                rounded-full 
-                                focus:ring-offset-2 transition-colors duration-300 focus:outline-none focus:ring-2
-                                bg-red-600 text-white hover:bg-red-700  focus:ring-red-500 
-                                
-                                
-                            `}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="size-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                                        />
-                                    </svg>
-                                </button>
-                            {/if}
-                        </div>
-                    </div>
-                {/each}
-            </div>
         {:else}
             {#if establecimientoscolab.length != 0}
                 <!--Header-->
@@ -339,77 +282,13 @@
                 `}
             >
                 <ListaEstablecimientos
-                    esColab={true}
+                    esColab={versionjava?false:true}
                     establecimientos={establecimientoscolab}
                     irEstablecimiento={async () =>
                         await irEstablecimientoColab(e.id)}
                     {cab}
                     {totales}
                 />
-            </div>
-            <div class="hidden grid grid-cols-1 gap-2">
-                {#if establecimientoscolab.length != 0}
-                    {#each establecimientoscolab as e, i}
-                        <div class="flex items-center justify-center">
-                            <div
-                                class={`
-                        bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-2 w-full 
-                        max-w-5xl
-                `}
-                            >
-                                <h1
-                                    class="text-2xl font-bold mb-1 text-start p-2"
-                                >
-                                    {e.expand.cab.nombre}
-                                </h1>
-                                <div
-                                    class="p-2 grid grid-cols-3 lg:grid-cols-6"
-                                >
-                                    <span
-                                        class="text-xl font-semibold text-start"
-                                        >Direccion:</span
-                                    >
-
-                                    <span class="text-xl font-medium text-end"
-                                        >{e.expand.cab.direccion}</span
-                                    >
-                                </div>
-                                <div
-                                    class="p-2 grid grid-cols-3 lg:grid-cols-6"
-                                >
-                                    <span
-                                        class="text-xl font-semibold text-start"
-                                        >Animales:</span
-                                    >
-
-                                    <span class="text-xl font-medium text-end"
-                                        >{totalescolab[i]}</span
-                                    >
-                                </div>
-                                <div class="p-2">
-                                    <button
-                                        onclick={async () =>
-                                            await irEstablecimientoColab(e.id)}
-                                        class={`mt-3  hover:text-gray-500 dark:hover:text-gray-600 inline-flex items-center `}
-                                        >Ir establecimiento
-                                        <svg
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            class="w-4 h-4 ml-2"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path d="M5 12h14M12 5l7 7-7 7"
-                                            ></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    {/each}
-                {/if}
             </div>
         {/if}
     </div>

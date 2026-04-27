@@ -11,7 +11,7 @@ function processPeso(peso) {
         expand:{
             animal:{
                 id:peso.animalId,
-                caravana:peso.animalId
+                caravana:peso.animalTagNumber
             }
         }
     }

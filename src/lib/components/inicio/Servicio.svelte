@@ -11,6 +11,8 @@
     import MultipleToros from "$lib/components/MultipleToros.svelte";
     import categorias from "$lib/stores/categorias";
     import InfoAnimal from "../InfoAnimal.svelte";
+    import Success from "../botones/Success.svelte";
+    import Danger from "../botones/Danger.svelte";
 
     let {
         caravana = $bindable(""),
@@ -335,15 +337,21 @@
                 bind:value={servicio.observacionser}
             />
         </div>
-        <div class="modal-action justify-start">
-            <form method="dialog">
+        <div class="modal-action justify-end">
+            <form method="dialog" class="flex flex-row gap-2">
+                <Success
+                    disabled={!botonhabilitadoser}
+                    onclick={guardarServicio}
+                    texto="Guardar"
+                />
+                <Danger texto="Cerrar" />
                 <!-- if there is a button, it will close the modal -->
                 <button
-                    class="btn btn-success text-white"
+                    class="hidden btn btn-success text-white"
                     disabled={!botonhabilitadoser}
                     onclick={guardarServicio}>Guardar</button
                 >
-                <button class="btn btn-error text-white">Cerrar</button>
+                <button class="hidden btn btn-error text-white">Cerrar</button>
             </form>
         </div>
     </div>
@@ -474,15 +482,21 @@
             bind:value={inseminacion.observacion}
         />
     </div>
-    <div class="modal-action justify-start">
-        <form method="dialog">
+    <div class="modal-action justify-end">
+        <form method="dialog" class="flex flex-row gap-2">
+            <Success
+                disabled={!botonhabilitadoins}
+                onclick={guardarInseminacion}
+                texto="Guardar"
+            />
+            <Danger texto="Cerrar" />
             <button
-                class="btn btn-success text-white"
+                class="hidden btn btn-success text-white"
                 disabled={!botonhabilitadoins}
                 onclick={guardarInseminacion}>Guardar</button
             >
-            
-            <button class="btn btn-error text-white">Cerrar</button>
+
+            <button class="hidden btn btn-error text-white">Cerrar</button>
         </form>
     </div>
 {/if}

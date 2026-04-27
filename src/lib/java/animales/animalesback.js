@@ -16,7 +16,7 @@ function processAnimal(animal) {
         cab: animal.establishmentId,
         rodeo: animal.herdId,
         fechafallecimiento: animal.deathDate,
-        lote: animal.herdId,
+        lote: animal.lotId,
         categoria: animal.categoryId,
         prenada: animal.reproductiveStatus,
         motivobaja: "",
@@ -25,6 +25,21 @@ function processAnimal(animal) {
         rp: animal.rpCode,
         created: animal.creationDate,
         updated: animal.updateDate,
+        expand:{
+            lote:{
+                id:animal.lotId,
+                nombre:animal.lotName
+            },
+            rodeo:{
+                id:animal.herdId,
+                nombre:animal.herdName
+            },
+            nacimiento:{
+                id:animal.birthId,
+                fecha:animal.birthDate
+            }
+        }
+
 
     }
     return data_animal
@@ -73,18 +88,19 @@ export async function getAnimalId(id) {
     let procesada = processAnimal(data_all)
     return procesada
 }
-function postData(data) {
+function postData(data,establishmentId=1) {
     let data_animal = {
         tagNumber: data.caravana,
         sex: data.sexo == "H" ? "F" : "M",
         rpCode: data.rp,
-        establishmentId: 1
+        establishmentId,
+        birthDate:data.fechanacimiento?data.fechanacimiento.split(" ")[0]:""
     }
     return data_animal
 }
-export async function saveAnimal(data) {
+export async function saveAnimal(data,establishmentId=1) {
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}`
-    let data_animal = postData(data)
+    let data_animal = postData(data,establishmentId)
     let user = getUser();
     let token =  user.token;
     let res_save = await fetch(ruta, {
@@ -96,6 +112,44 @@ export async function saveAnimal(data) {
         },
     })
     let data_save = await res_save.json()
-    return data_save
+    let animal = processAnimal(data_save)
+    return animal
 
+}
+export async function editAnimal(id, data) {
+    let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/${id}`
+
+    let user = getUser();
+    let token = user.token;
+    let res_post = await fetch(ruta,
+        {
+            method: "PUT",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        }
+    )
+
+    let data_post = await res_post.json()
+    return data_post
+}
+export async function eliminarAnimal(id) {
+    let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/delete/${id}`
+    let user = getUser();
+    let token = user.token;
+    let res_post = await fetch(ruta,
+        {
+            method: "POST",
+            //            body: JSON.stringify({}), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        }
+    )
+
+    //let data_post = await res_post.json()
+    return {}
 }

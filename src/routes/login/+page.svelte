@@ -13,7 +13,10 @@
     import { setUser } from "$lib/userstorage/usersotrage";
     import { loginJava } from "$lib/java/usuarios/usuariosback";
     import { getEstablishmentId } from "$lib/java/establecimientos/establecimientosback";
-    import { saveStorageEstablecimiento, saveStoragePermiso } from "$lib/java/establecimientos/establecimientostorage";
+    import {
+        saveStorageEstablecimiento,
+        saveStoragePermiso,
+    } from "$lib/java/establecimientos/establecimientostorage";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     let go_server = import.meta.env.VITE_RUTA_GO_SERVER;
@@ -43,7 +46,6 @@
         }
     }
     async function ingresarJava() {
-        
         if (isEmpty(usuarioname)) {
             Swal.fire("Error login", "Nombre usuario vacio", "error");
             return;
@@ -53,28 +55,50 @@
             return;
         }
         try {
-            
             let data_login = await loginJava(usuarioname, contra);
-            
+
             let storage_data = {
-                useremail:usuarioname,
+                useremail: usuarioname,
                 token: data_login.token,
+                id: data_login.userId,
             };
             setUser(storage_data);
             enabled.set("si");
-
-            let establecimiento = await getEstablishmentId(1)
-            let data_est = {
-                nombre:establecimiento.nombre,
-                id:establecimiento.id,
-                exist:true,
+            let establecimientoid = data_login.establishmentId
+                ? data_login.establishmentId
+                : 0;
+            
+            if (establecimientoid > 0) {
+                let establecimiento =
+                    await getEstablishmentId(establecimientoid);
+                let data_est = {
+                    nombre: establecimiento.nombre,
+                    id: establecimiento.id,
+                    exist: true,
+                };
+                saveStorageEstablecimiento(data_est);
+                let permisos = {
+                    permisos: "0,1,2,3,4,5",
+                    id: establecimiento.id,
+                };
+                saveStoragePermiso(permisos);
+                goto(pre + "/");
+            } else {
+                let data_est = {
+                    nombre: "",
+                    id: "",
+                    exist: false,
+                };
+                saveStorageEstablecimiento(data_est);
+                let permisos = {
+                    permisos: "0,1,2,3,4,5",
+                    id: 0
+                };
+                saveStoragePermiso(permisos);
+                goto(pre + "/");
             }
-            saveStorageEstablecimiento(data_est)
-            let permisos = {permisos:"0,1,2,3,4,5",id:establecimiento.id}
-            saveStoragePermiso(permisos)
-            goto(pre + "/");
         } catch (err) {
-            console.error(err)
+            console.error(err);
             Swal.fire(
                 "Error login",
                 "Puede que esten mal las credenciales",

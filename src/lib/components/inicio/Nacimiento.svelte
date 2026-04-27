@@ -5,6 +5,9 @@
     import sexos from '$lib/stores/sexos';
     import AgregarAnimal from "../eventos/AgregarAnimal.svelte";
     import InfoAnimal from "../InfoAnimal.svelte";
+    import Success from "../botones/Success.svelte";
+    import Cancel from "../botones/Cancel.svelte";
+    import Danger from "../botones/Danger.svelte";
     const HOY = new Date().toISOString().split("T")[0]
     //ESTE REPRESENTA EL MODAL DE NACIMIENTO EN INICIO
     //El final de guardar lo hace el inicio
@@ -202,14 +205,22 @@
     </label>
 
 </div>
-<div class="modal-action justify-start ">
-    <form method="dialog" >
+<div class="modal-action justify-end gap-2 ">
+    <form method="dialog" class="flex flex-row gap-2" >
       <!-- if there is a button, it will close the modal -->
-      <button class="btn btn-success text-white" 
+      <button class="hidden btn btn-success text-white" 
       disabled = {!nacimiento.fechanac || nacimiento.fechanac.length == 0 || !madrenac || madrenac.length == 0}
       onclick={guardarNacimiento} >Guardar</button>
+      <Success
+        disabled = {!nacimiento.fechanac || nacimiento.fechanac.length == 0 || !madrenac || madrenac.length == 0}
+        onclick ={guardarNacimiento}
+        texto="Guardar"
+      />
+      <Danger
+        texto ="Cerrar"
+      />
       <button
-            class="btn btn-error text-white"
+            class="hidden btn btn-error text-white"
             
             >Cerrar</button
         >

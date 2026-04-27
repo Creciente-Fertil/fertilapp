@@ -31,7 +31,12 @@
     import {
         getEstablishmentId,
         saveEstablishment,
+        updateEstablishment,
     } from "$lib/java/establecimientos/establecimientosback";
+    import {
+        loadStorageEstablecimiento,
+        saveStorageEstablecimiento,
+    } from "$lib/java/establecimientos/establecimientostorage";
     //Size
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -48,7 +53,8 @@
     let versionjava = $state(false);
     async function toggleJava() {
         versionjava = !versionjava;
-        await getCabaña()
+        await getCabaña();
+        await getColabs()
     }
     let usuarioid = $state("");
     let cab = $state({
@@ -60,6 +66,7 @@
     let per = createPer();
     let permisos = $state({});
     let colabs = $state([]);
+    let colaboradores = $state([]);
     let modoedicion = $state(false);
     let pestañas = $state([
         { id: "datos", nombre: "Establecimiento" },
@@ -124,7 +131,9 @@
     }
     async function getCabaña() {
         if (versionjava) {
-            let record = await getEstablishmentId(1);
+            let establecimientoStorage = loadStorageEstablecimiento();
+            let record = await getEstablishmentId(establecimientoStorage.id);
+
             datosviejos = { ...record };
             nombre = record.nombre;
             textodetalle = nombre;
@@ -137,6 +146,7 @@
             provincia = record.provincia;
             telefono = record.telefono;
             mail = record.mail;
+            colaboradores = record.colaboradores;
             localidadesProv = localidades.filter(
                 (lo) => lo.idProv == provincia,
             );
@@ -145,6 +155,7 @@
                 id: record.id,
                 exist: true,
             };
+            cab = data_est;
             saveStorageEstablecimiento(data_est);
         } else {
             try {
@@ -168,6 +179,7 @@
                     (lo) => lo.idProv == provincia,
                 );
                 caber.setCab(record.nombre, record.id);
+                cab.nombre = record.nombre;
             } catch (err) {
                 caber.setDefault();
                 nombre = "";
@@ -185,12 +197,16 @@
         }
     }
     async function getColabs() {
-        const records = await pb.collection("estxcolabs").getFullList({
-            expand: "colab",
-            filter: `cab='${cab.id}'`,
-            sort: "colab.apellido",
-        });
-        colabs = records;
+        if (versionjava) {
+            colabs = colaboradores;
+        } else {
+            const records = await pb.collection("estxcolabs").getFullList({
+                expand: "colab",
+                filter: `cab='${cab.id}'`,
+                sort: "colab.apellido",
+            });
+            colabs = records;
+        }
     }
 
     async function guardarColab(data) {
@@ -325,12 +341,12 @@
         textodetalle = nombre;
     }
     async function editarCabaña() {
-        let listapermisos = getPermisosList(permisos.permisos);
-        if (!listapermisos[0]) {
-            Swal.fire("Error permisos", getPermisosMessage(0), "error");
-            reestablercerCabaña();
-            return;
-        }
+        //let listapermisos = getPermisosList(permisos.permisos);
+        //if (!listapermisos[0]) {
+        //    Swal.fire("Error permisos", getPermisosMessage(0), "error");
+        //    reestablercerCabaña();
+        //    return;
+        //}
         const data = {
             nombre,
             direccion,
@@ -344,13 +360,19 @@
         };
         textodetalle = nombre;
         try {
-            const record = await pb.collection("cabs").update(cab.id, data);
+            if (versionjava) {
+                const record = await updateEstablishment(data, cab.id);
+                cab.nombre = record.nombre;
+            } else {
+                const record = await pb.collection("cabs").update(cab.id, data);
+                caber.setCab(nombre, cab.id);
+            }
+
             Swal.fire(
                 "Exito modificar",
                 "Se pudo modificar la cabaña con éxito",
                 "success",
             );
-            caber.setCab(nombre, cab.id);
         } catch (err) {
             console.error(err);
             Swal.fire(
@@ -455,6 +477,12 @@
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
+    {#if esdev}
+        <Success
+            texto={versionjava ? "Cerrar java" : "Ver java"}
+            onclick={toggleJava}
+        />
+    {/if}
     <DetalleEstablecimiento {textodetalle}>
         {#if cab.exist}
             <HorizontalTab bind:pestañas bind:tab />
@@ -484,12 +512,12 @@
                                         bind:value={renspa}
                                         required
                                         class={`
-                                    w-full px-3 py-2 border rounded-md shadow-sm
-                                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                                    transition duration-150 ease-in-out
-                                    border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                                    pl-2
-                                `}
+                                            w-full px-3 py-2 border rounded-md shadow-sm
+                                            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                                            transition duration-150 ease-in-out
+                                            border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                                            pl-2
+                                        `}
                                     />
                                     <div class="label">
                                         <span class="label-text-alt"
@@ -803,7 +831,7 @@
                             fuentesize="text-md"
                             fuentepeso="font-bold"
                             px="px-6"
-                            py="py-2"
+                            py="py-1"
                             btn="btn"
                         />
                         <Success
@@ -816,7 +844,7 @@
                             fuentesize="text-md"
                             fuentepeso="font-bold"
                             px="px-6"
-                            py="py-2"
+                            py="py-1"
                             btn="btn"
                         />
                     {/if}
@@ -832,7 +860,7 @@
                     {cab}
                     bind:permisos
                 />
-                <ListaColabs bind:colabs />
+                <ListaColabs bind:colabs {versionjava} />
             {/if}
         {:else}
             <div class="space-y-4">

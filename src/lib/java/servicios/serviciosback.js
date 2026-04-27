@@ -8,6 +8,7 @@ export function tipoServicios() {
     ]
 }
 function processServicio(fila) {
+
     let data_ser = {
 
         id: fila.serviceId,
@@ -15,8 +16,8 @@ function processServicio(fila) {
         fechainseminacion: fila.startDate,
         fechahasta: fila.endDate,
         madre: fila.animalId,
-        pajuelas: "",
-        padres: "",
+        pajuelas: fila.fatherTagNumbers.join(),
+        padres: fila.fatherIds.join(),
         observacion: fila.notes,
         fechaparto: fila.expectedBirthDate,
         active: fila.isActive,
@@ -27,11 +28,11 @@ function processServicio(fila) {
         expand: {
             madre: {
                 id: fila.animalId,
-                caravana: fila.animalId
+                caravana: fila.animalTagNumber
             },
             animal: {
                 id: fila.animalId,
-                caravana: fila.animalId
+                caravana: fila.animalTagNumber
             }
         }
     }
@@ -47,7 +48,7 @@ function processServicios(data) {
 }
 export async function getAllServices() {
     let user = getUser();
-    let token =  user.token;
+    let token = user.token;
     let ruta_all = `${RUTA_JAVA}${RUTA_SERVICIOS}/all`
     let options = {
         headers: {
@@ -63,11 +64,42 @@ export async function getAllServices() {
 
     return servicios
 }
+export function postServicio(data) {
+    let data_java = {
+        animalId: data.madre,
+        establishmentId: data.cab,
+        serviceType: data.tipo,
+        startDate: data.fechadesde.split(" ")[0],
+        endDate: data.fechahasta && data.fechahasta.length > 0 ? data.fechahasta.split(" ")[0] : "",
+        strawCode: "",
+        fatherIds: data.padres.split(",").map(item => Number(item)),
+        expectedBirthDate: data.fechaparto.split(" ")[0],
+        notes: data.observacion
+    }
+    
+    return data_java;
+    
+}
+export function postInseminacion(data){
+    let data_java = {
+        animalId: data.animal,
+        establishmentId: data.cab,
+        serviceType: data.tipo,
+        startDate: data.fechainseminacion.split(" ")[0],
+        endDate: "",
+        strawCode: "",
+        fatherIds: [data.padre],
+        expectedBirthDate: data.fechaparto.split(" ")[0],
+        notes: data.observacion
+    }
+    
+    return data_java;
+}
 export async function saveServicio(data) {
     let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}`
     let user = getUser();
-    let token =  user.token;
-
+    let token = user.token;
+    //let data_java = postServicio(data)
     let res_post = await fetch(ruta,
         {
             method: "POST",
@@ -86,7 +118,7 @@ export async function saveServicio(data) {
 export async function editServicio(id, data) {
     let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}/${id}`
     let user = getUser();
-    let token =  user.token;
+    let token = user.token;
     let res_post = await fetch(ruta,
         {
             method: "PUT",
@@ -104,7 +136,7 @@ export async function editServicio(id, data) {
 export async function eliminarServicio(id) {
     let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}/delete/${id}`
     let user = getUser();
-    let token =  user.token;
+    let token = user.token;
     let res_post = await fetch(ruta,
         {
             method: "POST",

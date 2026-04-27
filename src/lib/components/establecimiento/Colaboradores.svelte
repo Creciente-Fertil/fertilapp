@@ -34,6 +34,7 @@
     let titulo = $state("Colaboradores");
 
     //Nuevo colaborador
+    let mostrarnuevo = $state(false);
     let nombre = $state("");
     let apellido = $state("");
     let telefono = $state("");
@@ -52,6 +53,7 @@
     let correoasociar = $state("");
     let malcorreo = $state(false);
     let codigoasociar = $state("");
+
     async function asociar() {
         let listapermisos = getPermisosList(permisos.permisos);
         if (!listapermisos[0]) {
@@ -227,11 +229,34 @@
     }
     function openAsociar() {
         mostrarasociacion = true;
+        closeNuevo();
     }
     function closeAsociar() {
         mostrarasociacion = false;
         correoasociar = "";
         malcorreo = false;
+    }
+    function openNuevo() {
+        
+        mostrarnuevo = true;
+        
+        closeAsociar();
+    }
+
+    function closeNuevo() {
+        mostrarnuevo = false;
+        nombre = "";
+        apellido = "";
+        telefono = "";
+        email = "";
+        contra = "";
+        confirmcontra = "";
+        malnombre = false;
+        malapellido = false;
+        malemail = false;
+        malcontra = false;
+        malconfirmcontra = false;
+        botonhabilitadocolab = false;
     }
     async function guardarColaborador() {
         let data = {
@@ -343,9 +368,12 @@
                 </h1>
             </div>
             <div class="flex flex-wrap gap-2">
-                <Success onclick={openNewModalColaborador} conhijo={true}>
+                <Success
+                    onclick={()=>mostrarnuevo ? closeNuevo() : openNuevo()}
+                    conhijo={true}
+                >
                     <Plus size="size-4" margenes="" />
-                    Nuevo
+                    {mostrarnuevo ? "Cerrar" : "Nuevo"}
                 </Success>
 
                 <Secondary
@@ -354,7 +382,7 @@
                     conhijo={true}
                 >
                     <Userplus size="size-4" margenes="" />
-                    Asociar
+                    {mostrarasociacion ? "Cerrar" : "Asociar"}
                 </Secondary>
                 {#if asociado}
                     <div>
@@ -413,24 +441,22 @@
         </label>
     </div>
 {/if}
-<dialog
-    id="modalNuevoColaborador"
-    class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"
->
-    <div
-        class="
-            modal-box w-11/12 max-w-xl
-            bg-gradient-to-br from-white to-gray-100
-            dark:from-gray-900 dark:to-gray-800
-        "
-    >
-        <form method="dialog">
-            <button
-                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
-                >✕</button
-            >
-        </form>
-        <h3 class="text-lg font-bold">Nueva colaborador</h3>
+{#if mostrarnuevo}
+    <div transition:slide class="px-4 w-full">
+        <!-- Fila Superior: Label a la izquierda, Botón a la derecha -->
+        <div class="flex justify-between items-center w-full mb-1">
+            <label for="correo" class="label p-0 min-h-fit">
+                <h4 class="label-text text-lg font-medium"
+                    >Nuevo colaborador</h4
+                >
+            </label>
+
+            <Success
+                disabled={!botonhabilitadocolab}
+                onclick={guardarColaborador}
+                texto="Guardar"
+            />
+        </div>
         <div class="form-control">
             <label for="nombre" class="label">
                 <span class="label-text text-base">Nombre</span>
@@ -513,27 +539,6 @@
                     </div>
                 {/if}
             </label>
-            <div class="hidden">
-                <label for="tel" class="label">
-                    <span class="label-text text-base">Teléfono</span>
-                </label>
-                <label class="input-group">
-                    <input
-                        id="tel"
-                        type="text"
-                        class={`
-                            input input-bordered 
-                            w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2}   
-                        `}
-                        bind:value={telefono}
-                    />
-                </label>
-            </div>
 
             <label for="pass" class="label">
                 <span class="label-text text-base">Contraseña</span>
@@ -581,24 +586,7 @@
                     bind:value={confirmcontra}
                     oninput={() => onInputNuevo("CONFIRM")}
                 />
-                {#if malconfirmcontra}
-                    <div class="label">
-                        <span class="label-text-alt text-red-500"
-                            >Deben coincidir las contraseñas</span
-                        >
-                    </div>
-                {/if}
             </label>
         </div>
-        <div class="modal-action justify-start">
-            <form method="dialog">
-                <!-- if there is a button, it will close the modal -->
-                <button
-                    class="btn btn-success text-white"
-                    disabled={!botonhabilitadocolab}
-                    onclick={guardarColaborador}>Guardar</button
-                >
-            </form>
-        </div>
     </div>
-</dialog>
+{/if}

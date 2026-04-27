@@ -9,6 +9,8 @@
     import categorias from "$lib/stores/categorias";
     import PredictSelect from "../PredictSelect.svelte";
     import InfoAnimal from "../InfoAnimal.svelte";
+    import Success from "../botones/Success.svelte";
+    import Danger from "../botones/Danger.svelte";
     const HOY = new Date().toISOString().split("T")[0];
     let {
         caravana = $bindable(""),
@@ -226,13 +228,21 @@
         />
     </label>
 </div>
-<div class="modal-action justify-start">
-    <form method="dialog">
+<div class="modal-action justify-end">
+    <form method="dialog" class="flex flex-row gap-2">
+        <Success
+        disabled={!botonhabilitadotrat}
+        onclick={guardarTrat}
+        texto ="Guardar"
+        />
+        <Danger
+            texto="Cerrar"
+        />
         <button
-            class="btn btn-success text-white"
+            class="hidden btn btn-success text-white"
             disabled={!botonhabilitadotrat}
             onclick={guardarTrat}>Guardar</button
         >
-        <button class="btn btn-error text-white">Cerrar</button>
+        <button class="hidden btn btn-error text-white">Cerrar</button>
     </form>
 </div>
