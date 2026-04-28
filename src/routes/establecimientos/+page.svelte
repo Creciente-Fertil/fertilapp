@@ -25,7 +25,7 @@
     } from "$lib/java/establecimientos/establecimientosback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let esdev = import.meta.env.VITE_DEV == "si";
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;

@@ -41,13 +41,14 @@
     import AccionesTab from "$lib/components/animal/AccionesTab.svelte";
     import Transferir from "$lib/components/animal/Transferir.svelte";
     import { getAnimalId } from "$lib/java/animales/animalesback";
+    import { getUser } from "$lib/userstorage/usersotrage";
 
     //ver java
-    let versionjava = $state(false);
-    
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
+
     async function toggleJava() {
         versionjava = !versionjava;
-        await perfilAnimal(slug);
+        await getData(slug);
     }
 
     //Size
@@ -137,9 +138,9 @@
         }
     }
     async function darBaja(fechafallecimiento, motivo) {
-        if (!userpermisos[5]) {
-            Swal.fire("Error permisos", getPermisosMessage(5), "error");
-        }
+        //if (!userpermisos[5]) {
+        //    Swal.fire("Error permisos", getPermisosMessage(5), "error");
+        //}
         try {
             const data = {
                 active: false,
@@ -165,20 +166,22 @@
         }
     }
     function openEliminarModal() {
-        if (userpermisos[5]) {
-            tab = "eliminar";
-        } else {
-            Swal.fire(
-                "Sin permisos",
-                "No tienes permisos para administrar animales",
-                "error",
-            );
-        }
+        tab = "eliminar";
+        //if (userpermisos[5]) {
+        //    tab = "eliminar";
+        //} else {
+        //    Swal.fire(
+        //        "Sin permisos",
+        //        "No tienes permisos para administrar animales",
+        //        "error",
+        //    );
+        //}
     }
     async function eliminar() {
-        if (!userpermisos[5]) {
-            Swal.fire("Error permisos", getPermisosMessage(5), "error");
-        }
+        //if (!userpermisos[5]) {
+        //    Swal.fire("Error permisos", getPermisosMessage(5), "error");
+        //      return;
+        //}
 
         try {
             const data = {
@@ -200,9 +203,10 @@
         }
     }
     async function transferir(codigo) {
-        if (!userpermisos[5]) {
-            Swal.fire("Error permisos", getPermisosMessage(5), "error");
-        }
+        //if (!userpermisos[5]) {
+        //    Swal.fire("Error permisos", getPermisosMessage(5), "error");
+        //    return
+        //}
         const resultcab = await pb.collection("cabs").getList(1, 1, {
             filter: `active = true && renspa = '${codigo}'`,
         });
@@ -335,7 +339,7 @@
         motivobaja = "";
 
         cargado = true;
-        
+
         tab = "datos";
         calcularNuevasTabs();
     }
@@ -387,12 +391,13 @@
         } else {
             if (slug != "") {
                 let recorda = await getAnimalId(slug);
+
                 animal = recorda;
                 caravana = recorda.caravana;
                 color = recorda.raza;
                 raza = recorda.color;
                 active = recorda.active;
-                fechanacimiento = recorda.fechanacimiento.split(" ")[0];
+                fechanacimiento = recorda.fechanacimiento && recorda.fechanacimiento.length>0?recorda.fechanacimiento.split(" ")[0]:"";
 
                 nacimiento = "";
                 nacimientoobj = {};
@@ -427,9 +432,9 @@
         pestañas = [];
     }
     function calcularTabs() {
-        if(add){
-            calcularNuevasTabs()
-            return
+        if (add) {
+            calcularNuevasTabs();
+            return;
         }
         if (sexo.toLowerCase() == "h") {
             pestañas = [
@@ -462,22 +467,42 @@
             ];
         }
     }
+    async function getData() {
+        if (versionjava) {
+            let _id = $page.params.slug;
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            if (_id == "0") {
+                add = true;
+                perfilNuevoAnimal();
+            } else {
+                await perfilAnimal(_id);
+            }
+
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+            per.setPer(respermisos.permisos, usuarioid);
+
+            userpermisos = getPermisosList(per.per.permisos);
+        } else {
+            let _id = $page.params.slug;
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            if (_id == "0") {
+                add = true;
+                perfilNuevoAnimal();
+            } else {
+                await perfilAnimal(_id);
+            }
+
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+            per.setPer(respermisos.permisos, usuarioid);
+
+            userpermisos = getPermisosList(per.per.permisos);
+        }
+    }
     //Necesito una funcion que traiga toda la informacion del animal
     onMount(async () => {
-        let _id = $page.params.slug;
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        if (_id == "0") {
-            add = true;
-            perfilNuevoAnimal();
-        } else {
-            await perfilAnimal(_id);
-        }
-
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-        per.setPer(respermisos.permisos, usuarioid);
-
-        userpermisos = getPermisosList(per.per.permisos);
+        await getData()
     });
 </script>
 
@@ -502,16 +527,16 @@
             </button>
         {/if}
         {#if !add}
-        <div class="flex justify-center mt-1">
-            <div class="w-full max-w-7xl px-4">
-                <!-- Combo alineado al borde izquierdo de la card -->
-                {#if esCelu}
-                    <SelectTab bind:pestañas bind:tab />
-                {:else}
-                    <HorizontalTabs bind:pestañas bind:tab />
-                {/if}
+            <div class="flex justify-center mt-1">
+                <div class="w-full max-w-7xl px-4">
+                    <!-- Combo alineado al borde izquierdo de la card -->
+                    {#if esCelu}
+                        <SelectTab bind:pestañas bind:tab />
+                    {:else}
+                        <HorizontalTabs bind:pestañas bind:tab />
+                    {/if}
+                </div>
             </div>
-        </div>
         {/if}
 
         {#if cargado}

@@ -33,9 +33,12 @@
     import Home from "$lib/svgs/home.svelte";
     import Topbar from "./navbar/Topbar.svelte";
     import Sidebar from "./navbar/Sidebar.svelte";
-    import { getUser } from "$lib/userstorage/usersotrage";
+    import { getUser, setUserDefault } from "$lib/userstorage/usersotrage";
     import { getEstablishmentId } from "$lib/java/establecimientos/establecimientosback";
-    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import {
+        loadStorageEstablecimiento,
+        saveStorageEstablecimientoDefault,
+    } from "$lib/java/establecimientos/establecimientostorage";
     //tamaño
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -47,7 +50,7 @@
     let esdev = import.meta.env.VITE_DEV == "si";
     let esCelu = $derived(innerWidth <= 1100);
 
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
         await getNavData();
@@ -81,7 +84,7 @@
         if (versionjava) {
             let user = getUser();
             let establecimiento = loadStorageEstablecimiento();
-            
+
             nombreestablecimiento = establecimiento.nombre;
             if (window.innerWidth <= 600) {
                 // Pantallas pequeñas
@@ -89,6 +92,11 @@
             }
             usuarioid = 1;
             nombreusuario = user.useremail;
+            cab = establecimiento
+            let hab = $enabled;
+            if (hab === "no") {
+                goto(pre + "/");
+            }
         } else {
             let caber = createCaber();
             nombreestablecimiento = caber.cab.nombre;
@@ -149,10 +157,17 @@
     }
 
     function salir() {
-        pb.authStore.clear();
-        usuario.set("");
-        enabled.set("no");
-        goto(pre + "/");
+        if (!versionjava) {
+            pb.authStore.clear();
+            usuario.set("");
+            enabled.set("no");
+            goto(pre + "/");
+        } else {
+            setUserDefault();
+            saveStorageEstablecimientoDefault();
+            enabled.set("no");
+            goto(pre + "/");
+        }
     }
     function editarUser() {
         goto(pre + "/user/config");

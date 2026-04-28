@@ -19,7 +19,7 @@
     import DetallesAnimalesMovimiento from "$lib/components/tratamientos/DetallesAnimalesMovimiento.svelte";
     import Success from "$lib/components/botones/Success.svelte";
     import { saveTrata } from "$lib/java/tratamientos/tratamientosback";
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     function toggleJava() {
         versionjava = !versionjava;
     }

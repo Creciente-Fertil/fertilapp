@@ -20,8 +20,9 @@
     import DetallesAnimalesMovimiento from "$lib/components/tactos/DetallesAnimalesMovimiento.svelte";
     import { saveTacto } from "$lib/java/tactos/tactosback";
     import Secondary from "$lib/components/botones/Secondary.svelte";
+    import { getUser } from "$lib/userstorage/usersotrage";
     //java
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     function toggleJava() {
         versionjava = !versionjava;
     }
@@ -72,8 +73,8 @@
                 if (value != null) {
                     listaanimales.push({
                         ...value,
-                        estadonuevo: 0,
-                        tipotacto: "tacto",
+                        estadonuevo: prenada,
+                        tipotacto: tipotactoselect,
                         observacion: "",
                     });
                 }
@@ -245,7 +246,7 @@
                     animal: tactoanimal.id,
                     categoria: tactoanimal.categoria,
                     prenada: tactoanimal.prenada,
-                    tipo: tactoanimal.tipotacto,
+                    tipo: tipotactoselect,
                     nombreveterinario: "",
                     cab: cab.id,
                     active: true,
@@ -259,15 +260,28 @@
         setDefault()
         volver()
     }
+    async function getData(){
+        if(versionjava){
+            let user_data = getUser()
+        usuarioid = user_data.id;
+        
 
-    onMount(async () => {
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+        
+        userpermisos = [];
+        loadDetalle();
+        }
+        else{
+let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
         let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
 
         per.setPer(respermisos.permisos, usuarioid);
         userpermisos = getPermisosList(per.per.permisos);
         loadDetalle();
+        }
+    }
+    onMount(async () => {
+        await getData()
     });
     function verAnimal(id) {
         let a_idx = listaanimales.findIndex((a) => a.id == id);

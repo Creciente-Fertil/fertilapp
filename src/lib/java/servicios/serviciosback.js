@@ -18,6 +18,8 @@ function processServicio(fila) {
         madre: fila.animalId,
         pajuelas: fila.fatherTagNumbers.join(),
         padres: fila.fatherIds.join(),
+        
+        padre: fila.fatherIds.join(),
         observacion: fila.notes,
         fechaparto: fila.expectedBirthDate,
         active: fila.isActive,

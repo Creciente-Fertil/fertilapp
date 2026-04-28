@@ -20,7 +20,7 @@
     import Secondary from "$lib/components/botones/Secondary.svelte";
     import Success from "$lib/components/botones/Success.svelte";
     import { editHerd, eliminarHerd, saveHerd } from "$lib/java/rodeos/rodeosback";
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     function toggleJava() {
         versionjava = !versionjava;
     }

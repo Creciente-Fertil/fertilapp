@@ -29,6 +29,10 @@
     import DetalleMovimiento from "$lib/components/movimientos/DetalleMovimiento.svelte";
     import TablaMovimiento from "$lib/components/TablaMovimiento.svelte";
     import InfoAnimal from "$lib/components/InfoAnimal.svelte";
+    import * as LotesService from "$lib/java/lotes/lotesback";
+    import * as RodeosService from "$lib/java/rodeos/rodeosback";
+    import * as AnimalService from "$lib/java/animales/animalesback";
+    import Success from "$lib/components/botones/Success.svelte";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -40,7 +44,12 @@
     let cab = caber.cab;
     let per = createPer();
     let userpermisos = getPermisosList(per.per.permisos);
-
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
+    let esdev = import.meta.env.VITE_DEV == "si";
+    async function toggleJava() {
+        versionjava = !versionjava;
+        await getData()
+    }
     //boton
     let textoboton = $state("Mover");
     //Datos animales
@@ -102,6 +111,7 @@
         rodeos: [],
         categorias: [],
         seccion: "",
+        versionjava:false
     };
     let detallemovimiento = $state({
         ...defaultmovimiento,
@@ -251,20 +261,32 @@
         saveDetalleMovmiento();
     }
     async function getLotes() {
-        const records = await pb.collection("lotes").getFullList({
-            filter: `active = true && cab ~ '${cab.id}'`,
-            sort: "nombre",
-        });
-        lotes = records;
-        ordenarNombre(lotes);
+        if (versionjava) {
+            const records = await LotesService.getAll();
+            lotes = records;
+            ordenarNombre(lotes);
+        } else {
+            const records = await pb.collection("lotes").getFullList({
+                filter: `active = true && cab ~ '${cab.id}'`,
+                sort: "nombre",
+            });
+            lotes = records;
+            ordenarNombre(lotes);
+        }
     }
     async function getRodeos() {
-        const records = await pb.collection("rodeos").getFullList({
-            filter: `active = true && cab ~ '${cab.id}'`,
-            sort: "nombre",
-        });
-        rodeos = records;
-        //ordenarNombre(rodeos)
+        if (versionjava) {
+            const records = await RodeosService.getAll();
+            rodeos = records;
+            ordenarNombre(rodeos);
+        } else {
+            const records = await pb.collection("rodeos").getFullList({
+                filter: `active = true && cab ~ '${cab.id}'`,
+                sort: "nombre",
+            });
+            rodeos = records;
+            ordenarNombre(rodeos);
+        }
     }
     async function getTipos() {
         const records = await pb.collection("tipotratamientos").getFullList({
@@ -275,12 +297,19 @@
         tipos.sort((tp1, tp2) => (tp1.nombre > tp2.nombre ? 1 : -1));
     }
     async function getAnimales() {
-        const recordsa = await pb.collection("animales").getFullList({
-            filter: `active=true && delete=false && cab='${cab.id}'`,
-            expand: "rodeo,lote,cab",
-        });
+        if (versionjava) {
+            const recordsa = await AnimalService.getAll();
 
-        animales = recordsa;
+            animales = recordsa;
+        } else {
+            const recordsa = await pb.collection("animales").getFullList({
+                filter: `active=true && delete=false && cab='${cab.id}'`,
+                expand: "rodeo,lote,cab",
+            });
+
+            animales = recordsa;
+        }
+
         animales.sort((a1, a2) =>
             a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase()
                 ? 1
@@ -736,6 +765,7 @@
         detallemovimiento.rodeos = rodeos;
         detallemovimiento.categorias = categorias;
         detallemovimiento.seccion = seccionAbierta;
+        detallemovimiento.versionjava = versionjava;
         proxyDetalleMovimiento.save(detallemovimiento);
     }
     function loadDetalleMovimiento() {
@@ -769,11 +799,14 @@
             ninguno = true;
         }
     }
-    onMount(async () => {
+    async function getData() {
         await getAnimales();
         await getRodeos();
         await getLotes();
-        await getTipos();
+        //await getTipos();
+    }
+    onMount(async () => {
+        await getData();
         cargadosmovs = true;
 
         loadDetalleMovimiento();
@@ -822,6 +855,12 @@
                 </h1>
             </div>
         </div>
+        {#if esdev}
+            <Success
+                texto={versionjava?"Cerrar java":"Ver java"}
+                onclick={toggleJava}
+            />
+        {/if}
         <div class="grid grid-cols-1 max-h-screen gap-1 md:gap-2">
             <!--Lado izquierdo-->
             <div>
@@ -831,8 +870,8 @@
                     {categorias}
                     {motivos}
                     bind:categoria={nuevacategoria}
-                    bind:lote = { nuevolote}
-                    bind:rodeo = {nuevorodeo}
+                    bind:lote={nuevolote}
+                    bind:rodeo={nuevorodeo}
                     bind:fecha
                     bind:motivo
                     bind:codigo

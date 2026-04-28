@@ -6,14 +6,23 @@ let defaultcab = {
     nombre: "",
     id: "",
 }
-let defaultper={
-    permisos:"",
+let defaultper = {
+    permisos: "",
     //ID del usuario
-    id:""
+    id: ""
 }
 export function saveStorageEstablecimiento(data) {
     let storageKey = "establecimiento"
     localStorage.setItem(storageKey, JSON.stringify(data));
+}
+export function saveStorageEstablecimientoDefault() {
+    let storageKey = "establecimiento"
+    let estdefault = {
+        exist: false,
+        nombre: "",
+        id: "",
+    }
+    localStorage.setItem(storageKey, JSON.stringify(estdefault));
 }
 export function loadStorageEstablecimiento() {
     let storageKey = "establecimiento"

@@ -32,7 +32,7 @@
     import AnimalesSeleccionados from "$lib/components/tactos/AnimalesSeleccionados.svelte";
     import TablaMovimiento from "$lib/components/TablaMovimiento.svelte";
     import { getAll } from "$lib/java/animales/animalesback";
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
         await getAnimales();
@@ -565,7 +565,7 @@
                 selectanimales.push({
                     ...value,
                     estadonuevo: 0,
-                    tipotacto: "tacto",
+                    tipotacto: tipotactoselect,
                     observacion: "",
                 });
             }

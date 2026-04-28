@@ -21,12 +21,15 @@
     import DetalleMovimientoHeader from "$lib/components/movimientos/DetalleMovimientoHeader.svelte";
     import DetallesAnimalesMovimiento from "$lib/components/movimientos/DetallesAnimalesMovimiento.svelte";
     import motivos from "$lib/stores/motivos";
+    import * as RodeoService from "$lib/java/rodeos/rodeosback";
+    import * as LoteService from "$lib/java/lotes/lotesback";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
     let caber = createCaber();
@@ -49,17 +52,18 @@
         codigo: "",
         listaanimales: [],
         selecthashmap: {},
-        lotes:[],
-        rodeos:[],
-        categorias:[],
-        seccionAbierta:""
+        lotes: [],
+        rodeos: [],
+        categorias: [],
+        seccionAbierta: "",
+        versionjava: false,
     };
     let proxymovimiento = $state({
         ...defaultmovimiento,
     });
     let proxy = createStorageProxy("detallemovimiento", defaultmovimiento);
     //boton
-    let seccionAbierta = $state("CATEGORIA")
+    let seccionAbierta = $state("CATEGORIA");
     let textoboton = $state("Mover categoria");
     let categoria = $state("");
     let lote = $state("");
@@ -82,7 +86,7 @@
     let malcodigo = $state("");
     let habilitarboton = $state(false);
     //Seleecionar
-    let animal = $state({})
+    let animal = $state({});
     let selectcategoria = $state(true);
     let selectlote = $state(false);
     let selectrodeo = $state(false);
@@ -97,8 +101,8 @@
         motivo = proxymovimiento.motivo;
         fechabaja = proxymovimiento.fechabaja;
         codigo = proxymovimiento.codigo;
-        seccionAbierta = proxymovimiento.seccion
-        
+        seccionAbierta = proxymovimiento.seccion;
+        versionjava = proxymovimiento.versionjava;
         listaanimales = [];
         selecthashmap = proxymovimiento.selecthashmap;
 
@@ -137,83 +141,10 @@
     function volver() {
         goto(pre + "/movimientos");
     }
-    function saveDefault(){
-        proxy.save(defaultmovimiento)
+    function saveDefault() {
+        proxy.save(defaultmovimiento);
     }
-    async function moverDetalle() {
-        if (selectcategoria) {
-            if (categoria == "") {
-                Swal.fire(
-                    "Error movimiento",
-                    "Debe seleccionar una categoria",
-                    "error",
-                );
-                return;
-            }
-        }
-        if (selectlote) {
-            if (lote == "") {
-                Swal.fire(
-                    "Error movimiento",
-                    "Debe seleccionar un lote",
-                    "error",
-                );
-                return;
-            }
-        }
-        if (selectrodeo) {
-            if (rodeo == "") {
-                Swal.fire(
-                    "Error movimiento",
-                    "Debe seleccionar un rodeo",
-                    "error",
-                );
-                return;
-            }
-        }
-        
-        if (selectbaja) {
-            
-            if (fechabaja == "" || motivo == "") {
-                Swal.fire(
-                    "Error movimiento",
-                    "Debe seleccionar una fecha y un motivo",
-                    "error",
-                );
-                return
-            }
-
-        }
-        if (selecttransfer) {
-            if (codigo == "") {
-                Swal.fire(
-                    "Error movimiento",
-                    "Debe escribir algun código",
-                    "error",
-                );
-                return
-            }
-            
-        }
-        
-        let lista = [];
-        for (const [key, value] of Object.entries(selecthashmap)) {
-            if (value != null) {
-                lista.push(value);
-            }
-        }
-        if (lista.length == 0) {
-            Swal.fire(
-                "Error movimiento",
-                "No hay animales seleccionados",
-                "error",
-            );
-            rodeo = "";
-            lote = "";
-            categoria = "";
-            return;
-        }
-
+    async function moverDetallePocketbase(lista) {
         //Camino feliz
         let data = {};
         let nombrelote = "";
@@ -235,7 +166,7 @@
             data.motivobaja = motivo;
             data.fechafallecimiento = fechabaja + " 03:00:00";
         }
-        if (selecttransfer) {
+        if (selecttransfer && !versionjava) {
             const resultList = await pb.collection("cabs").getList(1, 1, {
                 filter: `active = true && renspa = '${codigo}'`,
             });
@@ -326,14 +257,94 @@
                 "error",
             );
         }
-        //Limpiar variables
+    }
+    async function moverDetalleJava(lista) {
+        let data_general = {
 
+        }
+    }
+    async function moverDetalle() {
+        if (selectcategoria) {
+            if (categoria == "") {
+                Swal.fire(
+                    "Error movimiento",
+                    "Debe seleccionar una categoria",
+                    "error",
+                );
+                return;
+            }
+        }
+        if (selectlote) {
+            if (lote == "") {
+                Swal.fire(
+                    "Error movimiento",
+                    "Debe seleccionar un lote",
+                    "error",
+                );
+                return;
+            }
+        }
+        if (selectrodeo) {
+            if (rodeo == "") {
+                Swal.fire(
+                    "Error movimiento",
+                    "Debe seleccionar un rodeo",
+                    "error",
+                );
+                return;
+            }
+        }
+
+        if (selectbaja) {
+            if (fechabaja == "" || motivo == "") {
+                Swal.fire(
+                    "Error movimiento",
+                    "Debe seleccionar una fecha y un motivo",
+                    "error",
+                );
+                return;
+            }
+        }
+        if (selecttransfer) {
+            if (codigo == "") {
+                Swal.fire(
+                    "Error movimiento",
+                    "Debe escribir algun código",
+                    "error",
+                );
+                return;
+            }
+        }
+
+        let lista = [];
+        for (const [key, value] of Object.entries(selecthashmap)) {
+            if (value != null) {
+                lista.push(value);
+            }
+        }
+        if (lista.length == 0) {
+            Swal.fire(
+                "Error movimiento",
+                "No hay animales seleccionados",
+                "error",
+            );
+            rodeo = "";
+            lote = "";
+            categoria = "";
+            return;
+        }
+        if(versionjava){
+            await moverDetalleJava()
+        }else{
+            await moverDetallePocketbase()
+        }
         
+        //Limpiar variables
 
         proxy.save(defaultmovimiento);
         volver();
     }
-    
+
     function validarBoton() {
         habilitarboton = true;
         if (selectcategoria) {
@@ -365,7 +376,7 @@
     }
     function oninput(campo) {
         validarBoton();
-        
+
         if (selectcategoria && campo == "CATEGORIA") {
             if (categoria == "") {
                 malcategoria = true;
@@ -423,7 +434,7 @@
         motivo = "";
         codigo = "";
         habilitarboton = false;
-        seccionAbierta = seccion
+        seccionAbierta = seccion;
         if (seccion == "CATEGORIA") {
             selectcategoria = true;
             selectlote = false;
@@ -478,7 +489,7 @@
             selecttransfer = true;
             textoboton = "Transferir";
         }
-        guardarLista()
+        guardarLista();
     }
     function quitarAnimal(id) {
         if (selecthashmap[id]) {
@@ -507,22 +518,27 @@
             lotes,
             categorias,
             rodeos,
-            seccionAbierta
-            
+            seccionAbierta,
         };
         proxy.save(movimiento);
+    }
+    async function getData() {
+        if (versionjava) {
+        } else {
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+
+            per.setPer(respermisos.permisos, usuarioid);
+            userpermisos = getPermisosList(per.per.permisos);
+            await getRodeos();
+            await getLotes();
+        }
     }
     onMount(async () => {
         proxymovimiento = proxy.load();
         setMovimiento();
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-
-        per.setPer(respermisos.permisos, usuarioid);
-        userpermisos = getPermisosList(per.per.permisos);
-        await getRodeos();
-        await getLotes();
+        await getData();
     });
     function verAnimal(id) {
         let a_idx = listaanimales.findIndex((a) => a.id == id);
@@ -539,7 +555,9 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <div class={classmove}>
-    
+        {#if esdev}
+            <span>Version java: {versionjava ? "Si" : "No"}</span>
+        {/if}
         <DetalleMovimientoHeader
             {lotes}
             {rodeos}
@@ -549,17 +567,15 @@
             nuevacategoria={categoria}
             nuevolote={lote}
             nuevorodeo={rodeo}
-            
             {fecha}
             {fechabaja}
             {motivo}
             {codigo}
         />
         <DetallesAnimalesMovimiento
-            bind:selectanimales = {listaanimales}
+            bind:selectanimales={listaanimales}
             {quitarAnimal}
             {verAnimal}
-            
             abierta={false}
         />
         <div
@@ -657,7 +673,7 @@
             </div>
         </div>
     </div>
-    <div class="hidden  container mx-auto py-6 px-4 max-w-7xl">
+    <div class="hidden container mx-auto py-6 px-4 max-w-7xl">
         <div
             class={`
                 rounded-md p-4 shadow-xl mb-4
@@ -683,7 +699,7 @@
             />
         </div>
     </div>
-    <div class="hidden  container mx-auto py-6 px-4 max-w-7xl">
+    <div class="hidden container mx-auto py-6 px-4 max-w-7xl">
         <div
             class={`
                 rounded-md p-4 shadow-xl mb-4

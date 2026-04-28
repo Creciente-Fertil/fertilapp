@@ -25,12 +25,14 @@
         editServicio,
         eliminarServicio,
     } from "$lib/java/servicios/serviciosback";
+    import { getAll } from "$lib/java/animales/animalesback";
+    import { getUser } from "$lib/userstorage/usersotrage";
 
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     let caber = createCaber();
     let cab = caber.cab;
     let cargado = $state(false);
@@ -95,17 +97,27 @@
         fechadesde = detalleServicio.fechadesde;
         fechahasta = detalleServicio.fechahasta;
         padreslist = detalleServicio.padreslist;
+
         animal = detalleServicio.animal;
         fechainseminacion = detalleServicio.fechainseminacion;
+
         padre = detalleServicio.padre;
         pajuela = detalleServicio.pajuela;
         categoria = detalleServicio.categoria;
+
         versionjava = detalleServicio.versionjava;
     }
     async function getToros() {
-        let recordsa = await pb.collection("animales").getFullList({
-            filter: `cab='${cab.id}' && sexo = 'M'`,
-        });
+        let recordsa = [];
+        if (versionjava) {
+            let animales = await getAll();
+            recordsa = animales.filter((a) => a.sexo == "M");
+        } else {
+            recordsa = await pb.collection("animales").getFullList({
+                filter: `cab='${cab.id}' && sexo = 'M'`,
+            });
+        }
+
         recordsa = recordsa.sort((a, b) =>
             a.caravana.toLocaleLowerCase() < b.caravana.toLocaleLowerCase()
                 ? -1
@@ -119,16 +131,26 @@
             };
         });
     }
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
+
+            userpermisos = [];
+        } else {
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+            per.setPer(respermisos.permisos, usuarioid);
+
+            userpermisos = getPermisosList(per.per.permisos);
+        }
+    }
     //Detalles
     onMount(async () => {
         slug = $page.params.slug;
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
 
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-        per.setPer(respermisos.permisos, usuarioid);
-
-        userpermisos = getPermisosList(per.per.permisos);
         loadServicio();
         await getToros();
         cargado = true;

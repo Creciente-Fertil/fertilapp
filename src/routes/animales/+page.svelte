@@ -44,7 +44,10 @@
     import Buscador from "$lib/components/animales/Buscador.svelte";
     import TablaAnimales from "$lib/components/animales/TablaAnimales.svelte";
     import { getAll, saveAnimal } from "$lib/java/animales/animalesback";
+    import * as RodeoService from "$lib/java/rodeos/rodeosback";
+    import * as LoteService from "$lib/java/lotes/lotesback";
     import ListaAnimales from "$lib/components/animales/ListaAnimales.svelte";
+    import { getUser } from "$lib/userstorage/usersotrage";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -56,11 +59,11 @@
     const HOY = new Date().toISOString().split("T")[0];
 
     //ver java
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
 
     async function toggleJava() {
         versionjava = !versionjava;
-        await getAnimales();
+        await getData();
     }
 
     //ver animales
@@ -193,19 +196,31 @@
         filterUpdate();
     }
     async function getRodeos() {
-        const records = await pb.collection("rodeos").getFullList({
-            filter: `active = true && cab = '${cab.id}'`,
-            sort: "nombre",
-        });
-        rodeos = records;
+        if (versionjava) {
+            let records = await RodeoService.getAll();
+            rodeos = records;
+        } else {
+            const records = await pb.collection("rodeos").getFullList({
+                filter: `active = true && cab = '${cab.id}'`,
+                sort: "nombre",
+            });
+            rodeos = records;
+        }
+
         ordenarNombre(rodeos);
     }
     async function getLotes() {
-        const records = await pb.collection("lotes").getFullList({
-            filter: `active = true && cab = '${cab.id}'`,
-            sort: "nombre",
-        });
-        lotes = records;
+        if (versionjava) {
+            let records = await LoteService.getAll();
+            lotes = records;
+        } else {
+            const records = await pb.collection("lotes").getFullList({
+                filter: `active = true && cab = '${cab.id}'`,
+                sort: "nombre",
+            });
+            lotes = records;
+        }
+
         ordenarNombre(lotes);
     }
     async function getAnimales() {
@@ -530,22 +545,39 @@
             botonhabilitado = false;
         }
     }
+    async function getData() {
+        if (versionjava) {
+            proxyfiltros = proxy.load();
+            setFilters();
+
+            let user = getUser();
+            usuarioid = user.id;
+
+            userpermisos = [];
+            await getAnimales();
+            await getRodeos();
+            await getLotes();
+            filterUpdate();
+        } else {
+            proxyfiltros = proxy.load();
+            setFilters();
+
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+
+            per.setPer(respermisos.permisos, usuarioid);
+            userpermisos = getPermisosList(per.per.permisos);
+            await getAnimales();
+            await getRodeos();
+            await getLotes();
+            filterUpdate();
+        }
+    }
     onMount(async () => {
-        proxyfiltros = proxy.load();
-        setFilters();
-
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-
-        per.setPer(respermisos.permisos, usuarioid);
-        userpermisos = getPermisosList(per.per.permisos);
-        await getAnimales();
-        await getRodeos();
-        await getLotes();
-        filterUpdate();
-        if(esCelu){
-            pageSize = 5
+        await getData();
+        if (esCelu) {
+            pageSize = 5;
         }
     });
     function cerrarModal() {
@@ -792,6 +824,7 @@
         }
     }
 </script>
+
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     {#if esdev}
@@ -830,9 +863,7 @@
     />
 
     <!--Ordenar-->
-    <div
-        class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
-    >
+    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
         <button aria-label="Ordenar" class="w-full" onclick={clickOrdenar}>
             <div class="flex justify-between items-center px-1">
                 <h1 class="font-semibold text-lg py-2">Ordenar</h1>

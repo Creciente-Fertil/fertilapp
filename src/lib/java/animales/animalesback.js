@@ -1,7 +1,9 @@
 import { getUser } from "$lib/userstorage/usersotrage"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_ANIMALES = "animals"
-
+function null2string(param){
+    return param?param:""
+}
 function processAnimal(animal) {
     let data_animal = {
 
@@ -9,15 +11,15 @@ function processAnimal(animal) {
         caravana: animal.tagNumber,
         active: animal.isActive,
         delete: false,
-        fechanacimiento: animal.birthDate,
+        fechanacimiento: null2string(animal.birthDate),
         sexo: animal.sex == "F" ? "H" : "M",
-        nacimiento: animal.birthId,
-        peso: 0,
+        nacimiento: null2string(animal.birthId),
+        peso: animal.currentWeight,
         cab: animal.establishmentId,
-        rodeo: animal.herdId,
+        rodeo: null2string(animal.herdId),
         fechafallecimiento: animal.deathDate,
-        lote: animal.lotId,
-        categoria: animal.categoryId,
+        lote: null2string(animal.lotId),
+        categoria: null2string(animal.categoryId),
         prenada: animal.reproductiveStatus,
         motivobaja: "",
         raza: animal.breed,

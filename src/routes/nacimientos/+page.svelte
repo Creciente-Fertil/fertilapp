@@ -35,7 +35,7 @@
         eliminarNacimiento,
         getAll,
     } from "$lib/java/nacimientos/nacimientosback";
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
         await getNacimientos();

@@ -26,9 +26,11 @@
     import ListaAnimales from "$lib/components/servicios/ListaAnimales.svelte";
     import Secondary from "$lib/components/botones/Secondary.svelte";
     import { saveServicio } from "$lib/java/servicios/serviciosback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { getAll } from "$lib/java/animales/animalesback";
 
     //java
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     function toggleJava() {
         versionjava = !versionjava;
     }
@@ -394,7 +396,7 @@
                         "error",
                     );
                 } else {
-                    setDetalleDefault()
+                    setDetalleDefault();
                     Swal.fire(
                         "Éxito inseminaciones",
                         "Se lograron registrar todas las inseminaciones",
@@ -422,15 +424,15 @@
                     establishmentId: 1,
                     serviceType: esNatural ? "NATURAL_SERVICE" : "INSEMINATION",
                     startDate: esNatural ? fechadesdeserv : fechainseminacion,
-                    expectedBirthDate:fechaparto,
-                    notes:servicio.observacion,
-                    isActive:true
+                    expectedBirthDate: fechaparto,
+                    notes: servicio.observacion,
+                    isActive: true,
+                    fatherIds:padreslist
                 };
                 if (esNatural && fechahastaserv != "") {
                     data_java.endDate = fechahastaserv;
                 }
-                await saveServicio(data_java)
-               
+                await saveServicio(data_java);
             }
         }
 
@@ -444,10 +446,15 @@
         goto(pre + "/servicios/movimiento");
     }
     async function getAnimales() {
-        const recordsa = await pb.collection("Animalestacto").getFullList({
-            filter: `active=true && cab='${cab.id}'`,
-            expand: "rodeo,lote,cab",
-        });
+        let recordsa = [];
+        if (versionjava) {
+            recordsa = await getAll();
+        } else {
+            recordsa = await pb.collection("Animalestacto").getFullList({
+                filter: `active=true && cab='${cab.id}'`,
+                expand: "rodeo,lote,cab",
+            });
+        }
 
         let animales = recordsa;
         animales.sort((a1, a2) =>
@@ -466,17 +473,27 @@
         });
         cargadoanimales = true;
     }
-    
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
 
-    onMount(async () => {
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+            userpermisos = [];
+        } else {
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
 
-        per.setPer(respermisos.permisos, usuarioid);
-        userpermisos = getPermisosList(per.per.permisos);
+            per.setPer(respermisos.permisos, usuarioid);
+            userpermisos = getPermisosList(per.per.permisos);
+        }
+
         await getAnimales();
         loadDetalle();
+    }
+
+    onMount(async () => {
+        await getData();
     });
     let classbuscador = "container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4";
     let classmove = "container mx-auto py-3 px-4 max-w-6xl w-full";
@@ -485,14 +502,13 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <!--Este va a ser el componente confirmar-->
 <Navbar2>
-    
     <div class={classmove}>
         {#if esdev}
-        <Secondary
-            texto={versionjava?"Cerrar java":"Ver java"}
-            onclick={toggleJava}
-        />
-        { /if}
+            <Secondary
+                texto={versionjava ? "Cerrar java" : "Ver java"}
+                onclick={toggleJava}
+            />
+        {/if}
         <DetalleMovimiento
             {esNatural}
             {observaciongeneral}

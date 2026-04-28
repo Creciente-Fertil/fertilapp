@@ -31,12 +31,14 @@
     import {
         getEstablishmentId,
         saveEstablishment,
+        setDueñoEstablecimiento,
         updateEstablishment,
     } from "$lib/java/establecimientos/establecimientosback";
     import {
         loadStorageEstablecimiento,
         saveStorageEstablecimiento,
     } from "$lib/java/establecimientos/establecimientostorage";
+    import { getUser } from "$lib/userstorage/usersotrage";
     //Size
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -50,11 +52,10 @@
     const regexRenspa = /^\d{2}\.\d{3}\.\d\.\d{5}\.\d{2}$/;
 
     //ver java
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
-        await getCabaña();
-        await getColabs()
+        await getData ()
     }
     let usuarioid = $state("");
     let cab = $state({
@@ -274,12 +275,18 @@
             textodetalle = nombre;
             try {
                 const record = await saveEstablishment(data);
+                await setDueñoEstablecimiento(record.establishmentId);
+
                 Swal.fire(
                     "Exito guadar",
                     "Se pudo guardar la cabaña con éxito",
                     "success",
                 );
-                caber.setCab(nombre, record.id);
+                saveStorageEstablecimiento({
+                    exist: true ,
+                    nombre: record.name,
+                    id: record.establishmentId,
+                });
                 per.setPer("0,1,2,3,4,5", usuarioid);
                 goto(pre + "/");
             } catch (err) {
@@ -442,36 +449,53 @@
             renspaValido = regexRenspa.test(renspa);
         }
     }
-    onMount(async () => {
-        cab = caber.cab;
+    async function getData() {
+        if (versionjava) {
+            cab = loadStorageEstablecimiento();
+            let user = getUser();
+            if (cab.exist) {
+                permisos = ""
+                await getCabaña();
 
-        let pb_json = await JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        if (cab.exist) {
-            permisos = per.per;
-            await getCabaña();
-            await getColabs();
-            const recordcolab = await pb
-                .collection("colaboradores")
-                .getList(1, 1, {
-                    filter: `user = '${usuarioid}'`,
-                });
-            if (recordcolab.items.length > 0) {
-                const recordestxcolab = await pb
-                    .collection("estxcolabs")
+                await getColabs();
+                
+            }
+        } else {
+            cab = caber.cab;
+
+            let pb_json = await JSON.parse(
+                localStorage.getItem("pocketbase_auth"),
+            );
+            usuarioid = pb_json.record.id;
+            if (cab.exist) {
+                permisos = per.per;
+                await getCabaña();
+                await getColabs();
+                const recordcolab = await pb
+                    .collection("colaboradores")
                     .getList(1, 1, {
-                        filter: `colab = '${recordcolab.items[0].id}' && cab = '${cab.id}'`,
+                        filter: `user = '${usuarioid}'`,
                     });
-                if (recordestxcolab.items.length > 0) {
-                    asociado = true;
-                    idestxcolab = recordestxcolab.items[0].id;
+                if (recordcolab.items.length > 0) {
+                    const recordestxcolab = await pb
+                        .collection("estxcolabs")
+                        .getList(1, 1, {
+                            filter: `colab = '${recordcolab.items[0].id}' && cab = '${cab.id}'`,
+                        });
+                    if (recordestxcolab.items.length > 0) {
+                        asociado = true;
+                        idestxcolab = recordestxcolab.items[0].id;
+                    } else {
+                        asociado = false;
+                    }
                 } else {
                     asociado = false;
                 }
-            } else {
-                asociado = false;
             }
         }
+    }
+    onMount(async () => {
+        await getData()
     });
 </script>
 

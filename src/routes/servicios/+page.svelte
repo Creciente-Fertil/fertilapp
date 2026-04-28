@@ -31,7 +31,11 @@
     import TablaServicios from "$lib/components/servicios/TablaServicios.svelte";
     import ListaServicios from "$lib/components/servicios/ListaServicios.svelte";
     //java
-    import { eliminarServicio, getAllServices } from "$lib/java/servicios/serviciosback";
+    import {
+        eliminarServicio,
+        getAllServices,
+    } from "$lib/java/servicios/serviciosback";
+    import { getAll } from "$lib/java/animales/animalesback";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -60,14 +64,16 @@
     ];
 
     //ver java
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
         if (!versionjava) {
             await getServicios();
             await getInseminaciones();
+            filterUpdate()
         } else {
             await getServicios();
+            filterUpdate()
         }
     }
 
@@ -146,6 +152,7 @@
     let proxy = createStorageProxy("listaservicios", defaultfiltro);
     //Detalle para servicio e inseminacion
     let defaultServicio = {
+        
         edit: false,
         id: "",
         natural: true,
@@ -209,6 +216,7 @@
 
             observacion = ser.observacion;
             padreslist = ser.padres.split(",");
+
             detalleServicio = {
                 edit,
                 id,
@@ -246,6 +254,7 @@
             idanimal = ser.animal;
             fechainseminacion = ser.fechainseminacion.split(" ")[0];
             padre = ser.padre;
+            
             pajuela = ser.pajuela;
             fechaparto = ser.fechaparto.split(" ")[0];
             observacion = ser.observacion;
@@ -367,7 +376,7 @@
         if (!esInseminacion) {
             try {
                 if (versionjava) {
-                    await eliminarServicio(id)
+                    await eliminarServicio(id);
                     await getServicios();
                 } else {
                     await pb
@@ -388,7 +397,7 @@
         } else {
             try {
                 if (versionjava) {
-                    await eliminarServicio(id)
+                    await eliminarServicio(id);
                     await getServicios();
                     filterUpdate();
                 } else {
@@ -444,9 +453,15 @@
         serviciosrow = servicios;
     }
     async function getAnimales() {
-        let recordsa = await pb.collection("animales").getFullList({
-            filter: `cab='${cab.id}'`,
-        });
+        let recordsa = [];
+        if (versionjava) {
+            recordsa = await getAll();
+        } else {
+            recordsa = await pb.collection("animales").getFullList({
+                filter: `cab='${cab.id}'`,
+            });
+        }
+
         recordsa = recordsa.sort((a, b) =>
             a.caravana.toLocaleLowerCase() < b.caravana.toLocaleLowerCase()
                 ? -1
@@ -458,6 +473,7 @@
             (a) => (a.sexo == "H" || a.sexo == "F") && a.active,
         );
         padres = recordsa.filter((a) => a.sexo == "M" && a.active);
+        
         listapadres = padres.map((item) => {
             return {
                 id: item.id,
@@ -610,10 +626,11 @@
     }
     function nombreAnimal(valor) {
         let ps = borrados.filter((p) => p.id == valor);
+
         if (ps.length > 0) {
             return shorterWord(ps[0].caravana) + " , ";
         } else {
-            return "transfer" + " , ";
+            return "transferido" + " , ";
         }
     }
     function getNombrePadres(p_padres) {
@@ -624,8 +641,15 @@
     }
     async function cargarDatos() {
         await getAnimales();
-        await getServicios();
-        await getInseminaciones();
+        if (versionjava) {
+            await getServicios();
+            filterUpdate()
+        } else {
+            await getServicios();
+            await getInseminaciones();
+            filterUpdate()
+        }
+
         cargadoservicios = true;
     }
     onMount(async () => {

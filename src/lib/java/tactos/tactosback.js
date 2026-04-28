@@ -81,7 +81,6 @@ export async function saveTacto(data) {
     let ruta = `${RUTA_JAVA}${RUTA_TACTOS}`
 
     let data_tacto = postData(data)
-
     let user = getUser();
     let token = user.token;
     let res_save = await fetch(ruta, {

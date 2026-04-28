@@ -87,7 +87,7 @@
                 class={`
                   flex items-center flex-1 
                   shadow-2xl
-                  rounded-t-full p-3
+                  rounded-full p-3
                    bg-white dark:bg-gray-900
                   shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
                   dark:shadow-[0_4px_8px_-2px_rgba(255,255,255,0.1)]

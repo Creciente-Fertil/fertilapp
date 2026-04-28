@@ -38,7 +38,7 @@
     let animales = $state([]);
 
     //ver java
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
 
     function toggleJava() {
         versionjava = !versionjava;

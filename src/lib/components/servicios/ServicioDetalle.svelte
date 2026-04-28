@@ -137,7 +137,7 @@
             <span class="label-text text-sm font-normal">Padres</span>
         </label>
         <label class="input-group">
-            {#if cargado && !versionjava}
+            {#if cargado }
                 <MultipleToros
                     {toros}
                     {edit}
@@ -148,7 +148,7 @@
             {/if}
         </label>
     </div>
-    {#if cargado && !versionjava}
+    {#if cargado }
         <div>
             <SelectToros
                 opciones={toros}

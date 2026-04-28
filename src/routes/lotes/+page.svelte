@@ -31,7 +31,7 @@
     let userpermisos = getPermisosList(per.per.permisos);
 
     //ver java
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
 
     async function toggleJava() {
         versionjava = !versionjava;
@@ -137,18 +137,22 @@
         }
     }
     function openNewModal() {
-        if (userpermisos[1]) {
-            idlote = "";
+        idlote = "";
             nombre = "";
             goto(pre + "/lotes/0");
-            //nuevoModal.showModal();
-        } else {
-            Swal.fire(
-                "Error lotes",
-                "No tienes permisos para guardar lotes",
-                "error",
-            );
-        }
+        
+        //if (userpermisos[1]) {
+        //    idlote = "";
+        //    nombre = "";
+        //    goto(pre + "/lotes/0");
+        //    //nuevoModal.showModal();
+        //} else {
+        //    Swal.fire(
+        //        "Error lotes",
+        //        "No tienes permisos para guardar lotes",
+        //        "error",
+        //    );
+        //}
     }
     function setFilters() {
         buscar = proxyfiltros.buscar;

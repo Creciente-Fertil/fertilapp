@@ -26,7 +26,7 @@
     import Success from "$lib/components/botones/Success.svelte";
     import { editTacto, eliminarTacto } from "$lib/java/tactos/tactosback";
 
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;

@@ -16,7 +16,7 @@
     import { editUser, getUserId, processUser } from "$lib/java/usuarios/usuariosback";
     import Success from "$lib/components/botones/Success.svelte";
     import Danger from "$lib/components/botones/Danger.svelte";
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;

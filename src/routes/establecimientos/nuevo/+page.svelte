@@ -20,7 +20,8 @@
   import Success from "$lib/components/botones/Success.svelte";
   import Secondary from "$lib/components/botones/Secondary.svelte";
   import Cancel from "$lib/components/botones/Cancel.svelte";
-    import { saveEstablishment } from "$lib/java/establecimientos/establecimientosback";
+    import { saveEstablishment, setDueñoEstablecimiento } from "$lib/java/establecimientos/establecimientosback";
+    import { saveStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
   //tamaño
   let innerWidth = $state(0);
   let innerHeight = $state(0);
@@ -94,17 +95,17 @@
       .collection("cabs")
       .getList(1, 1, { filter: `user='${usuarioid}' && active = true` });
 
-    if (
-      nivel.establecimientos != -1 &&
-      cabs.totalItems >= nivel.establecimientos
-    ) {
-      Swal.fire(
-        "Error guardar",
-        `No tienes el nivel de la cuenta para tener más de ${nivel.establecimientos} establecimientos`,
-        "error",
-      );
-      return;
-    }
+    //if (
+    //  nivel.establecimientos != -1 &&
+    //  cabs.totalItems >= nivel.establecimientos
+    //) {
+    //  Swal.fire(
+    //    "Error guardar",
+    //    `No tienes el nivel de la cuenta para tener más de ${nivel.establecimientos} establecimientos`,
+    //    "error",
+    //  );
+    //  return;
+    //}
 
     let codigo = await codigoSinRepetirEstablecimiento(pb);
     const data = {
@@ -140,14 +141,15 @@
     };
     try{
       let res_est = await saveEstablishment(data)
+      await setDueñoEstablecimiento(res_est.establishmentId)
       
-
+volver();
       Swal.fire(
         "Exito guadar",
         "Se pudo guardar el establecimiento con éxito",
         "success",
       );
-      volver();
+      
     } 
     catch(err){
       console.error(err)

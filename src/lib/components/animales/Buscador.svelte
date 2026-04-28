@@ -174,7 +174,18 @@
                     <Arrowdown size="size-4" />
                     Importar
                 </button>
-
+                {#if isOpenFilter}
+                <button
+                    onclick={clickFilter}
+                    class={`
+                        border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
+                    `}
+                >
+                    <Filter size="size-4" />
+                    Filtros
+                </button>
+                {:else}
                 <button
                     onclick={clickFilter}
                     class={`
@@ -185,6 +196,7 @@
                     <Filter size="size-4" />
                     Filtros
                 </button>
+                {/if}
                 <ExportarSmall
                     titulo={"Animales"}
                     filtros={[]}

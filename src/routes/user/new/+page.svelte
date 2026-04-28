@@ -14,6 +14,8 @@
     import Guardando from "$lib/components/Guardando.svelte";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
+    let versionjava = import.meta.env.VITE_JAVA == "si";
+    let esdev = import.meta.env.VITE_DEV == "si";
     const pb = new PocketBase(ruta);
     let usuarioemail = "";
     let contra = "";
@@ -30,7 +32,7 @@
     let condiciones = false;
 
     let clickeado = false;
-    let guardando = false
+    let guardando = false;
     function isEmpty(str) {
         return !str || str.length === 0;
     }
@@ -141,17 +143,17 @@
         }
 
         try {
-            guardando = true
+            guardando = true;
             let data_signup = await saveUser(data);
-            guardando = false
-            Swal.fire(  
+            guardando = false;
+            Swal.fire(
                 "Éxito guardar",
                 "Se logró registrar el usuario",
                 "success",
             );
             goto(pre + "/");
         } catch (err) {
-            console.error(err)
+            console.error(err);
             Swal.fire(
                 "Error guardar",
                 "No se puede guardar el usaurio ",
@@ -431,10 +433,12 @@
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
                     />
                 </div>
+
                 <div>
-                    <button
-                        onclick={guardar}
-                        class={`
+                    {#if esdev}
+                        <button
+                            onclick={guardar}
+                            class={`
                             w-full  ${botonhabilitado && condiciones ? "bg-[#115642]" : "bg-[#126a50]"} 
                             text-white rounded-md py-2 px-4 
                             ${
@@ -444,9 +448,10 @@
                             }
                             transition
                         `}
-                    >
-                        Crear cuenta
-                    </button>
+                        >
+                            Crear cuenta
+                        </button>
+                    {/if}
                     <button
                         onclick={guardarJava}
                         class={`
@@ -460,7 +465,7 @@
                             transition
                         `}
                     >
-                        Crear cuenta java
+                        Crear cuenta {esdev ? "java" : ""}
                     </button>
                     {#if clickeado && !condiciones}
                         <div class="label">

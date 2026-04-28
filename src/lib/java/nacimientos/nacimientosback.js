@@ -8,8 +8,8 @@ function processNacimiento(birth){
         caravana:birth.animalTagNumber,
         madre:birth.motherId,
         padre:birth.fatherId,
-        nombremadre:birth.motherId,
-        nombrepadre:birth.fatherId,
+        nombremadre:birth.motherTagNumber,
+        nombrepadre:birth.fatherTagNumber,
         observacion :birth.notes,
         cab:birth.establishmentId,
         expadnd:{

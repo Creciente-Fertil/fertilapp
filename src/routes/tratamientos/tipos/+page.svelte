@@ -19,8 +19,11 @@
         saveTipo,
     } from "$lib/java/tratamientos/tratamientosback";
     import Success from "$lib/components/botones/Success.svelte";
-
-    let versionjava = $state(false);
+    import { getUser } from "$lib/userstorage/usersotrage";
+    
+    
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
+    
     function toggleJava() {
         versionjava = !versionjava;
     }
@@ -221,21 +224,35 @@
     function loadTipos() {
         detallestipos = proxy.load();
         tipotratamientos = detallestipos.tipos;
-        versionjava = detallestipos.versionjava;
+        
     }
     function saveTipos() {
         detallestipos.tipos = tipotratamientos;
         proxy.save(detallestipos);
     }
-    onMount(async () => {
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+    async function getData(){
+        
+        if(versionjava){
+            let user_data = getUser()
+            usuarioid = user_data.id
+            userpermisos = []
+        }
+        else{
+let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
         let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
 
         per.setPer(respermisos.permisos, usuarioid);
         userpermisos = getPermisosList(per.per.permisos);
+        }
+
         loadTipos();
         filterUpdate();
+    }
+    onMount(async () => {
+        
+        await getData()
+        
         if (esCelu) {
             pageSize = 5;
         }
@@ -290,8 +307,10 @@
         {filterUpdate}
     />
     {#if esdev}
+        <span>java: {versionjava}</span>
+        
         <Success
-            texto={versionjava ? "Cerrar java" : "ver java"}
+            texto={versionjava ? "Cerrsar java" : "ver java"}
             onclick={toggleJava}
         />
     {/if}

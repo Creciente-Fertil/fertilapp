@@ -8,7 +8,8 @@ function processTipo(type) {
     let data_tipo = {
         id: type.treatmentTypeId,
         nombre: type.name,
-        generico: type.isGeneric
+        generico: type.isGeneric,
+        active:type.isActive
     }
     return data_tipo
 }
@@ -22,7 +23,7 @@ function processTratamiento(treatment) {
         expand: {
             animal: {
                 id: treatment.animalId,
-                caravana: treatment.animalId
+                caravana: treatment.animalTagNumber
             },
             tipo: {
                 id: treatment.treatmentTypeId,
@@ -105,6 +106,7 @@ function postDataTipo(data) {
     let data_tipo = {
         name: data.nombre,
         isGeneric: false,
+        isActive: true,
         establishmentId: 1
     }
     return data_tipo
@@ -114,6 +116,7 @@ export async function saveTrata(data) {
     let data_trata = postDataTrata(data)
     let user = getUser();
     let token = user.token;
+
     let res_save = await fetch(ruta, {
         method: "POST",
         body: JSON.stringify(data_trata), // data can be `string` or {object}!
@@ -123,7 +126,9 @@ export async function saveTrata(data) {
         },
     })
     let data_save = await res_save.json()
-    return data_save
+    let procesada = processTipo(data_save)
+
+    return procesada    
 }
 export async function saveTipo(data) {
     let ruta = `${RUTA_JAVA}${RUTA_TIPO_TRATAMIENTOS}`

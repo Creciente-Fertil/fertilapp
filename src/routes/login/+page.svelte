@@ -19,8 +19,9 @@
     } from "$lib/java/establecimientos/establecimientostorage";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
+    let esdev = import.meta.env.VITE_DEV == "si";
     let go_server = import.meta.env.VITE_RUTA_GO_SERVER;
-    let versionjava = $state(false);
+    let versionjava = $state(true);
     let usuarioname = $state("");
     let contra = $state("");
     let showpass = $state(false);
@@ -56,7 +57,7 @@
         }
         try {
             let data_login = await loginJava(usuarioname, contra);
-
+            
             let storage_data = {
                 useremail: usuarioname,
                 token: data_login.token,
@@ -367,6 +368,7 @@
                 <div>
                     <button
                         class={`
+                            ${versionjava&&!esdev?"hidden":""}
                             w-full bg-[#115642] dark:bg-[#126a50] text-white rounded-md 
                             py-2 px-4 hover:bg-green-700 hover:dark:bg-[#168561] focus:outline-none 
                             focus:ring-2 focus:ring-green-500 focus:ring-offset-2 
@@ -378,6 +380,7 @@
                     </button>
                     <button
                         class={`
+                            ${versionjava||esdev?"":"hidden"}
                             w-full bg-[#115642] dark:bg-[#126a50] text-white rounded-md 
                             py-2 px-4 hover:bg-green-700 hover:dark:bg-[#168561] focus:outline-none 
                             focus:ring-2 focus:ring-green-500 focus:ring-offset-2 
@@ -385,7 +388,7 @@
                             `}
                         onclick={ingresarJava}
                     >
-                        Ingresar java
+                        Ingresar {esdev?"ajva":""}
                     </button>
                 </div>
 

@@ -97,7 +97,7 @@
         </label>
     </div>
     <div>
-        {#if cargado && !versionjava}
+        {#if cargado }
             <PredictSelect
                 {edit}
                 {onwrite}

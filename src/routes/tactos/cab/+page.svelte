@@ -30,7 +30,7 @@
     import TablaTactos from "$lib/components/tactos/TablaTactos.svelte";
     import ListaTactos from "$lib/components/tactos/ListaTactos.svelte";
     import { eliminarTacto, getAll } from "$lib/java/tactos/tactosback";
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
         await getTactos();

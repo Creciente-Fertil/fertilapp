@@ -25,7 +25,7 @@
         saveBirth,
     } from "$lib/java/nacimientos/nacimientosback";
     import { getAll } from "$lib/java/animales/animalesback";
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
 
     async function toggleJava() {
         versionjava = !versionjava;

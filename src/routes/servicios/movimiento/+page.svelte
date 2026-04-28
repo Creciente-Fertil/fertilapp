@@ -52,7 +52,7 @@
     //propuesta
     let propuesta1 = $state(false);
     //JAVA
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
         await getAnimales();

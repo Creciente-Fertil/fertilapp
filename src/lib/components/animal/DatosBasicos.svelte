@@ -21,6 +21,8 @@
     import InfoAnimal from "../InfoAnimal.svelte";
     import NacimientoPerfil from "./NacimientoPerfil.svelte";
     import { getAll, saveAnimal } from "$lib/java/animales/animalesback";
+    import * as LoteService from "$lib/java/lotes/lotesback";
+    import * as RodeoService from "$lib/java/rodeos/rodeosback";
     let {
         caravana = $bindable(""),
         rodeo = $bindable(""),
@@ -101,11 +103,17 @@
     function onelegir() {}
     //rodeos
     async function getRodeos() {
-        const records = await pb.collection("rodeos").getFullList({
-            filter: `active = true && cab ='${cab.id}'`,
-            sort: "-nombre",
-        });
-        rodeos = records;
+        if (versionjava) {
+            const records = await RodeoService.getAll();
+            rodeos = records;
+        } else {
+            const records = await pb.collection("rodeos").getFullList({
+                filter: `active = true && cab ='${cab.id}'`,
+                sort: "-nombre",
+            });
+            rodeos = records;
+        }
+
         if (rodeo != "") {
             nombrerodeo = rodeos.filter((t) => t.id == rodeo)[0].nombre;
         } else {
@@ -114,11 +122,17 @@
     }
     //Lotes
     async function getLotes() {
-        const records = await pb.collection("lotes").getFullList({
-            filter: `active = true && cab ='${cab.id}'`,
-            sort: "-nombre",
-        });
-        lotes = records;
+        if (versionjava) {
+            const records = await LoteService.getAll();
+            lotes = records;
+        } else {
+            const records = await pb.collection("lotes").getFullList({
+                filter: `active = true && cab ='${cab.id}'`,
+                sort: "-nombre",
+            });
+            lotes = records;
+        }
+
         if (lote != "") {
             nombrelote = lotes.filter((l) => l.id == lote)[0].nombre;
         } else {
@@ -127,10 +141,16 @@
     }
     //Animales
     async function getAnimales() {
-        let recordsa = await pb.collection("animales").getFullList({
-            filter: `active=true && cab='${cab.id}' `,
-            expand: "nacimiento",
-        });
+        let recordsa = [];
+        if (versionjava) {
+            recordsa = await getAll();
+        } else {
+            recordsa = await pb.collection("animales").getFullList({
+                filter: `active=true && cab='${cab.id}' `,
+                expand: "nacimiento",
+            });
+        }
+
         recordsa = recordsa.sort((a, b) =>
             a.caravana.toLocaleLowerCase() < b.caravana.toLocaleLowerCase()
                 ? -1
@@ -170,8 +190,7 @@
     }
 
     function openEditar() {
-        if (userpermisos[5]) {
-            modoedicion = true;
+        modoedicion = true;
             pesoviejo = peso;
             sexoviejo = sexo;
             loteviejo = lote;
@@ -188,13 +207,32 @@
                 padreviejo = padre;
                 observacionviejo = observacion;
             }
-        } else {
-            Swal.fire(
-                "Sin permisos",
-                "No tienes permisos para administrar animales",
-                "error",
-            );
-        }
+        //if (userpermisos[5]) {
+        //    modoedicion = true;
+        //    pesoviejo = peso;
+        //    sexoviejo = sexo;
+        //    loteviejo = lote;
+        //    rodeovieja = rodeo;
+        //    caravanavieja = caravana;
+        //    categoriavieja = categoria;
+        //    prenadaviejo = prenada;
+        //    rpviejo = rp;
+        //    fechaviejo = fecha;
+        //    if (connacimiento) {
+        //        nombremadreviejo = nombremadre;
+        //        nombrepadreviejo = nombrepadre;
+        //        madreviejo = madre;
+        //        padreviejo = padre;
+        //        observacionviejo = observacion;
+        //    }
+        //} else {
+        //    Swal.fire(
+        //        "Sin permisos",
+        //        "No tienes permisos para administrar animales",
+        //        "error",
+        //    );
+        //    return
+        //}
     }
     function cancelarEditar() {
         modoedicion = false;
@@ -256,10 +294,11 @@
             );
         }
     }
+
     async function guardarNacimiento() {
-        if (!userpermisos[4]) {
-            Swal.fire("Error permisos", getPermisosMessage(4), "error");
-        }
+        //if (!userpermisos[4]) {
+        //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+        //}
         try {
             let dataparicion = {
                 madre,
@@ -332,9 +371,10 @@
         }
     }
     async function editarNacimiento() {
-        if (!userpermisos[4]) {
-            Swal.fire("Error permisos", getPermisosMessage(4), "error");
-        }
+        //if (!userpermisos[4]) {
+        //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+        //    return
+        //}
         let data = {
             madre,
             padre,
@@ -495,7 +535,6 @@
         }
     }
     async function guardarAnimal() {
-        
         if (!versionjava) {
             let data = {
                 peso,
@@ -597,8 +636,7 @@
                     "error",
                 );
             }
-        }
-        else{
+        } else {
             let data = {
                 caravana,
                 active: true,
@@ -613,16 +651,11 @@
                 categoria: categoria ? "" : sexo == "M" ? "ternero" : "ternera",
                 cab: cab.id,
             };
-            let res =  await saveAnimal(data);
-            Swal.fire(
-                    "Éxito guardar",
-                    "Se pudo guardar el animal",
-                    "success",
-                );
-                modoedicion = false;
+            let res = await saveAnimal(data);
+            Swal.fire("Éxito guardar", "Se pudo guardar el animal", "success");
+            modoedicion = false;
 
-                goto(pre + "/animales");
-
+            goto(pre + "/animales");
         }
     }
     function cerrarModal() {
@@ -1028,7 +1061,7 @@
                     `}
                         bind:value={prenada}
                     >
-                        {#each estados.filter(es=>es.id>-1) as s}
+                        {#each estados.filter((es) => es.id > -1) as s}
                             <option value={s.id}>{s.nombre}</option>
                         {/each}
                     </select>

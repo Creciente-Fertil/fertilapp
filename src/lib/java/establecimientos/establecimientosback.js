@@ -177,3 +177,17 @@ export async function deleteEstablishment(id) {
 export async function getColaboradores(id){
 
 }
+export async function setDueñoEstablecimiento(establecimientoid){
+    
+
+    let user = getUser();
+    let token = user.token;
+    let usuarioid = user.id
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/user/${usuarioid}`
+    let res_save = await fetch(ruta, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        },
+    })
+}

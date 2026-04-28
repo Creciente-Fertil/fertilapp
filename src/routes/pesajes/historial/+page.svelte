@@ -33,7 +33,7 @@
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
 
-    let versionjava = $state(false);
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
         await getPesajes();
