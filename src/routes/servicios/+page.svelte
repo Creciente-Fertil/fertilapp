@@ -630,7 +630,7 @@
         if (ps.length > 0) {
             return shorterWord(ps[0].caravana) + " , ";
         } else {
-            return "transferido" + " , ";
+            return "Transferido" + " , ";
         }
     }
     function getNombrePadres(p_padres) {
