@@ -1,7 +1,7 @@
 <script>
     import { fade, fly } from "svelte/transition";
     
-    import Observacion from "$lib/svgs/observacion.svelte";
+    import Movimiento from "$lib/svgs/movimiento.svelte";
     import estilos from "$lib/stores/estilos";
     import { goto } from "$app/navigation";
     
@@ -21,7 +21,7 @@
         "
 >
 <a
-        href={`${pre + "/observaciones"}`}
+        href={`${pre + "/movimientos/lista"}`}
         class="
         inline-flex items-center text-sm
         text-gray-700 hover:text-gray-900 dark:text-gray-400
@@ -40,7 +40,7 @@
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
         </svg>
-        Volver a observaciones
+        Volver a movimentos
     </a>
     <!--Header-->
     <div
@@ -60,7 +60,7 @@
                     px-3 py-4 
                 `}
             >
-                <button onclick={() => goto(pre + "/observaciones")}>
+                <button onclick={() => goto(pre + "/movimientos/lista")}>
                     <h1
                         class={`
                             flex text-left
@@ -69,13 +69,13 @@
                         `}
                     >
                         {add?"Nueva":edit ? "Editar" : "Ver"}
-                        Observación
+                        Movimiento
                     </h1>
                 </button>
             </div>
 
             <div class="hidden md:block text-[#115642]">
-                <Observacion size="size-12" />
+                <Movimiento size="size-12" />
             </div>
         </div>
         {@render children()}

@@ -33,6 +33,7 @@
     import * as RodeosService from "$lib/java/rodeos/rodeosback";
     import * as AnimalService from "$lib/java/animales/animalesback";
     import Success from "$lib/components/botones/Success.svelte";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -236,6 +237,13 @@
             };
         }
         saveDetalleMovmiento();
+    }
+    function seleccionarTodos(){
+        selecthashmap = {}
+        ninguno = true
+        todos = false
+        algunos = false
+        clickTodos()
     }
     function clickTodos() {
         if (todos) {
@@ -803,6 +811,12 @@
         await getAnimales();
         await getRodeos();
         await getLotes();
+        if(versionjava){
+            cab = loadStorageEstablecimiento()
+        }
+        else{
+            cab = caber.cab
+        }
         //await getTipos();
     }
     onMount(async () => {
@@ -912,6 +926,7 @@
                         {animalesrows}
                         clickFila={clickAnimal}
                         {clickTodos}
+                        {seleccionarTodos}
                         {todos}
                         {ninguno}
                         {algunos}

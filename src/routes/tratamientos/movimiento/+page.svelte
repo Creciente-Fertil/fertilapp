@@ -315,6 +315,13 @@
         }
         setDetalle();
     }
+    function seleccionarTodos(){
+        selecthashmap = {}
+        ninguno = true
+        todos = false
+        algunos = false
+        clickTodos()
+    }
     function clickTodos() {
         if (todos) {
             todos = false;
@@ -668,6 +675,7 @@
                                 {animalesrows}
                                 clickFila={clickAnimal}
                                 {clickTodos}
+                                {seleccionarTodos}
                                 {todos}
                                 {ninguno}
                                 {algunos}

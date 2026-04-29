@@ -29,7 +29,6 @@
 
             if (idx_c != -1) {
                 s = categorias[idx_c].nombre;
-
             }
         } else if (seccionAbierta == "LOTE") {
             let idx_c = lotes.findIndex((c) => c.id == id);
@@ -212,8 +211,8 @@
                                     text-gray-500
                                 "
                             >
-                                Motivo  </span
-                            >
+                                Motivo
+                            </span>
                         </label>
                         <label class="input-group">
                             <span
@@ -297,6 +296,38 @@
                                 ).toLocaleDateString()}</span
                             >
                         {/if}
+                    </div>
+                </div>
+            {:else}
+                <div class="grid grid-cols-1">
+                    <div>
+                        <label for="fecha" class="label">
+                            <span
+                                class="
+                                    label-text tracking-wide
+                                    text-md uppercase
+                                    font-semibold dark:text-gray-400
+                                    text-gray-500
+                                "
+                            >
+                                Fecha
+                            </span>
+                        </label>
+                        <label class="input-group">
+                            <input
+                                id="fecha"
+                                type="date"
+                                class={`
+                                        input input-bordered w-full
+                                        border border-gray-300 rounded-md
+                                        focus:outline-none focus:ring-2 
+                                        focus:ring-green-500 
+                                        focus:border-green-500
+                                        ${estilos.bgdark2} 
+                                    `}
+                                bind:value={fecha}
+                            />
+                        </label>
                     </div>
                 </div>
             {/if}

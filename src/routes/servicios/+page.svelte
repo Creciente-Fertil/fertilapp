@@ -744,6 +744,7 @@
         goto(pre + "/servicios/movimiento/detallemovimento");
     }
     //Seleccionados
+    
     function clickTodos() {
         if (todos) {
             todos = false;
@@ -913,6 +914,7 @@
                     {selecthash}
                     {clickFila}
                     {clickTodos}
+                    {se}
                     bind:todos
                 />
             </div>

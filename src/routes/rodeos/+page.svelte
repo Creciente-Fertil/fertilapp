@@ -16,12 +16,13 @@
     import TablaRodeos from "$lib/components/rodeos/TablaRodeos.svelte";
     import ListaRodeos from "$lib/components/rodeos/ListaRodeos.svelte";
     import { eliminarHerd, getAll } from "$lib/java/rodeos/rodeosback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let ruta = import.meta.env.VITE_RUTA;
 
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
@@ -91,6 +92,7 @@
     }
     async function getRodeos() {
         if (!versionjava) {
+            cab = caber.cab
             const records = await pb.collection("rodeos").getFullList({
                 filter: `active=true && cab='${cab.id}'`,
                 sort: "nombre",
@@ -105,6 +107,7 @@
 
             cargadorodeos = true;
         } else {
+            cab = loadStorageEstablecimiento()
             let data_rodeos = await getAll();
             rodeos = data_rodeos;
             ordenar(rodeos);
@@ -272,6 +275,7 @@
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
+        
         await getRodeos();
         filterUpdate();
     });

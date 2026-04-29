@@ -17,6 +17,7 @@
         selecthash,
         animalesrows = [],
         clickTodos = () => {},
+        seleccionarTodos=()=>{},
         clickFila = (id) => {},
         verFila = (id) => {},
         todos = false,
@@ -38,6 +39,7 @@
     );
 
     let count = $derived(animalesrows.length);
+    let totalAnimales = $derived(Object.keys(selecthash).length);
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
     let pyfila = "py-2";
@@ -112,6 +114,31 @@
                 </tr>
             </thead>
             <tbody>
+                {#if totalAnimales > 0}
+                    <tr class="bg-slate-100 dark:bg-slate-800">
+                        <td colspan="5">
+                            <!-- Barra de selección -->
+                            <div
+                                class=" flex flex-row items-center justify-center gap-3 text-sm"
+                            >
+                                <span
+                                    class="text-slate-700 dark:text-slate-200"
+                                >
+                                    Se han seleccionado <strong
+                                        >{Object.keys(selecthash)
+                                            .length}</strong
+                                    > animales de la lista.
+                                </span>
+                                <button
+                                    onclick={seleccionarTodos}
+                                    class="text-emerald-700 dark:text-emerald-400 font-medium hover:underline focus:outline-none"
+                                >
+                                    Seleccionar los {count} animales de la lista
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {/if}
                 {#each rows as a}
                     <tr>
                         <td class={`text-base mx-2 px-2 w-16 ${pyfila}`}>
@@ -196,7 +223,6 @@
     {totalPaginas}
     {onChangePageSize}
     rounded={""}
-    
 />
 <AccionesMovimiento {cancelar} {siguiente} />
 

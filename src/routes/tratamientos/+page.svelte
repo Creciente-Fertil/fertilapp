@@ -595,32 +595,33 @@
                     .toLocaleLowerCase()
                     .includes(buscar.toLocaleLowerCase()),
             );
-            totalTratamientosEncontrados = tratamientosrow.length;
+            
         }
         if (fechadesde != "") {
             tratamientosrow = tratamientosrow.filter(
                 (t) => t.fecha >= fechadesde,
             );
-            totalTratamientosEncontrados = tratamientosrow.length;
+            
         }
         if (fechahasta != "") {
             tratamientosrow = tratamientosrow.filter(
                 (t) => t.fecha <= fechahasta,
             );
-            totalTratamientosEncontrados = tratamientosrow.length;
+            
         }
         if (buscarcategoria != "") {
             tratamientosrow = tratamientosrow.filter(
                 (t) => t.categoria == buscarcategoria,
             );
-            totalTratamientosEncontrados = tratamientosrow.length;
+            
         }
         if (buscartipo != "") {
             tratamientosrow = tratamientosrow.filter(
                 (t) => t.tipo == buscartipo,
             );
-            totalTratamientosEncontrados = tratamientosrow.length;
+            
         }
+        totalTratamientosEncontrados = tratamientosrow.length;
         ordenarTratamientosDescendente(forma);
     }
     onMount(async () => {

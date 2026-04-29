@@ -17,6 +17,7 @@
     import { shorterWord } from "$lib/stringutil/lib";
     import { eliminarLote, getAll } from "$lib/java/lotes/lotesback";
     import ListaLotes from "$lib/components/lotes/ListaLotes.svelte";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -26,7 +27,7 @@
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let per = createPer();
     let userpermisos = getPermisosList(per.per.permisos);
 
@@ -129,6 +130,7 @@
             let data_lotes = await getAll();
             lotes = data_lotes;
             lotesrows = lotes;
+            cab = loadStorageEstablecimiento()
             for (let i = 0; i < lotes.length; i++) {
                 lotes[i].total = 0;
             }
@@ -294,6 +296,7 @@
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
+        
         await getLotes();
     });
     function isEmpty(str) {

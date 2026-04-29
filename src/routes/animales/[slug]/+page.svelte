@@ -42,6 +42,7 @@
     import Transferir from "$lib/components/animal/Transferir.svelte";
     import { getAnimalId } from "$lib/java/animales/animalesback";
     import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
 
     //ver java
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
@@ -61,7 +62,7 @@
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let cargado = $state(false);
     let pestañas = $state([]);
     let tab = $state("");
@@ -472,6 +473,8 @@
             let _id = $page.params.slug;
             let user_data = getUser();
             usuarioid = user_data.id;
+            
+            cab = loadStorageEstablecimiento()
             if (_id == "0") {
                 add = true;
                 perfilNuevoAnimal();

@@ -48,6 +48,7 @@
     import * as LoteService from "$lib/java/lotes/lotesback";
     import ListaAnimales from "$lib/components/animales/ListaAnimales.svelte";
     import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -70,7 +71,7 @@
     let caber = createCaber();
     let userer = createUserer();
     let per = createPer();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let userpermisos = $state([]);
 
     let usuarioid = $state("");
@@ -233,7 +234,7 @@
 
             animales = recordsa;
         } else {
-            let data_animales = await getAll();
+            let data_animales = await getAll(cab.id);
 
             animales = data_animales;
         }
@@ -554,6 +555,7 @@
             usuarioid = user.id;
 
             userpermisos = [];
+            cab = loadStorageEstablecimiento()
             await getAnimales();
             await getRodeos();
             await getLotes();

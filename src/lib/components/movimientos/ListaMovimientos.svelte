@@ -9,7 +9,7 @@
     let {
         pageSize = $bindable(15),
         selecthash={},
-        tratamientosrows,
+        movimientosrows,
         ordenarTratamientos = (campo, mantener) => {},
         openViewModal = (_p) => {},
         openEditModal = (_p) => {},
@@ -31,13 +31,13 @@
     let paginaAnterior = $derived(paginaActual - 1);
 
     let rows = $derived(
-        tratamientosrows.slice(
+        movimientosrows.slice(
             paginaAnterior * pageSize,
             paginaActual * pageSize,
         ),
     );
 
-    let count = $derived(tratamientosrows.length);
+    let count = $derived(movimientosrows.length);
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
     let pyfila = "py-1";
@@ -136,7 +136,7 @@
                     
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                            {shorterWord(t.expand.animal.caravana)}
+                            {shorterWord(t.animal)}
                         </p>
                     </div>
                 </div>
@@ -146,7 +146,7 @@
                     <button onclick={() => openViewModal(t.id)} class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         <Eye size="size-5" />
                     </button>
-                    <button onclick={() => openEditModal(t.id)} class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <button onclick={() => openEditModal(t.id)} class="hidden p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         <Pencil size="size-5" />
                     </button>
                     <button onclick={() => openDelModal(t.id)} class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
@@ -163,7 +163,7 @@
                 </div>
                 <div>
                     <span class="text-xs text-gray-500 dark:text-gray-400">Tipo</span>
-                    <p class="text-gray-900 dark:text-gray-100 font-medium truncate">{t.expand.tipo.nombre}</p>
+                    <p class="text-gray-900 dark:text-gray-100 font-medium truncate">{t.tiponombre}</p>
                 </div>
             </div>
         </div>
@@ -171,7 +171,7 @@
 </div>
 </div>
 <Paginacion
-    rows={tratamientosrows}
+    rows={movimientosrows}
     bind:paginaActual
     bind:pageSize
     {totalPaginas}

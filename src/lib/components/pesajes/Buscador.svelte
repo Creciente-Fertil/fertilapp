@@ -244,10 +244,10 @@
                     </div>
                 </div>
                 <div
-                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-transparent "
+                    class="flex flex-col sm:flex-row sm:items-center justify-between md:justify-end gap-3 p-4 bg-transparent "
                 >
                     <!-- Izquierda: texto -->
-                    <div class="text-md text-gray-700 dark:text-white">
+                    <div class="hidden text-md text-gray-700 dark:text-white">
                         Total de animales seleccionados: {Object.keys(
                             selecthashmap,
                         ).length}
@@ -279,4 +279,7 @@
         {/if}
     </div>
 </div>
+<div class="hidden">
 <Sticky total={Object.keys(selecthashmap).length} />
+</div>
+

@@ -320,7 +320,7 @@
                 `}
         >
             {#if cab.exist}
-                <a class={`py-0 px-3 ${classtext}`} href={pre + "/movimientos"}>
+                <a class={`py-0 px-3 ${classtext}`} href={pre + "/movimientos/lista"}>
                     <Movimiento size={"size-8"} margenes=""></Movimiento>
                     <span class="">Movimientos</span>
                 </a>

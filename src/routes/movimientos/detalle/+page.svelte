@@ -23,6 +23,10 @@
     import motivos from "$lib/stores/motivos";
     import * as RodeoService from "$lib/java/rodeos/rodeosback";
     import * as LoteService from "$lib/java/lotes/lotesback";
+    import { editAnimal } from "$lib/java/animales/animalesback";
+    import { saveMove } from "$lib/java/movimientos/movimientosback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -123,23 +127,35 @@
         );
     }
     async function getRodeos() {
-        const records = await pb.collection("rodeos").getFullList({
-            filter: `active = true && cab = '${cab.id}'`,
-            sort: "nombre",
-        });
+        let records = [];
+        if (versionjava) {
+            records = await RodeoService.getAll();
+        } else {
+            records = await pb.collection("rodeos").getFullList({
+                filter: `active = true && cab = '${cab.id}'`,
+                sort: "nombre",
+            });
+        }
+
         rodeos = records;
         ordenarNombre(rodeos);
     }
     async function getLotes() {
-        const records = await pb.collection("lotes").getFullList({
-            filter: `active = true && cab = '${cab.id}'`,
-            sort: "nombre",
-        });
+        let records = [];
+        if (versionjava) {
+            records = await LoteService.getAll();
+        } else {
+            records = await pb.collection("lotes").getFullList({
+                filter: `active = true && cab = '${cab.id}'`,
+                sort: "nombre",
+            });
+        }
+
         lotes = records;
         ordenarNombre(lotes);
     }
     function volver() {
-        goto(pre + "/movimientos");
+        goto(pre + "/movimientos/lista");
     }
     function saveDefault() {
         proxy.save(defaultmovimiento);
@@ -166,7 +182,7 @@
             data.motivobaja = motivo;
             data.fechafallecimiento = fechabaja + " 03:00:00";
         }
-        if (selecttransfer && !versionjava) {
+        if (selecttransfer) {
             const resultList = await pb.collection("cabs").getList(1, 1, {
                 filter: `active = true && renspa = '${codigo}'`,
             });
@@ -259,9 +275,77 @@
         }
     }
     async function moverDetalleJava(lista) {
-        let data_general = {
-
+        if (selectcategoria) {
+            for (let i = 0; i < lista.length; i++) {
+                let fila = lista[i];
+                let id = fila.id;
+                let animal = { ...fila };
+                animal.categoria = categoria;
+                await editAnimal(id, animal);
+            }
         }
+        if (selectlote) {
+            for (let i = 0; i < lista.length; i++) {
+                let fila = lista[i];
+                let id = fila.id;
+                let animal = { ...fila };
+
+                let data_move = {
+                    animalId: id,
+                    establishmentId: cab.id,
+                    movementDate: fecha,
+                    movementType: "LOT",
+                    fromLotId: animal.lote,
+                    toLotId: lote,
+                    fromHerdId: null,
+                    toHerdId: null,
+                    fromEstablishmentId: null,
+                    toEstablishmentId: null,
+                    notes: "",
+                };
+                await saveMove(data_move, cab.id);
+                animal.lote = lote;
+                await editAnimal(id, animal);
+            }
+        }
+        if (selectrodeo) {
+            for (let i = 0; i < lista.length; i++) {
+                let fila = lista[i];
+                let id = fila.id;
+                let animal = { ...fila };
+
+                let data_move = {
+                    animalId: id,
+                    establishmentId: cab.id,
+                    movementDate: fecha,
+                    movementType: "HERD",
+                    fromLotId: null,
+                    toLotId: null,
+                    fromHerdId: animal.rodeo,
+                    toHerdId: rodeo,
+                    fromEstablishmentId: null,
+                    toEstablishmentId: null,
+                    notes: "",
+                };
+                await saveMove(data_move, cab.id);
+                animal.rodeo = rodeo;
+                await editAnimal(id, animal);
+            }
+        }
+
+        //if (selectbaja) {
+        //    for (let i = 0; i < lista.length; i++) {
+        //        let fila = lista[i];
+        //    }
+        //    data.active = false;
+        //    data.motivobaja = motivo;
+        //    data.fechafallecimiento = fechabaja + " 03:00:00";
+        //}
+        //if (selecttransfer) {
+        //    for (let i = 0; i < lista.length; i++) {
+        //        let fila = lista[i];
+        //    }
+        //}
     }
     async function moverDetalle() {
         if (selectcategoria) {
@@ -333,12 +417,12 @@
             categoria = "";
             return;
         }
-        if(versionjava){
-            await moverDetalleJava()
-        }else{
-            await moverDetallePocketbase()
+        if (versionjava) {
+            await moverDetalleJava(lista);
+        } else {
+            await moverDetallePocketbase(lista);
         }
-        
+
         //Limpiar variables
 
         proxy.save(defaultmovimiento);
@@ -524,7 +608,14 @@
     }
     async function getData() {
         if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            cab = loadStorageEstablecimiento();
+            userpermisos = [];
+            await getRodeos();
+            await getLotes();
         } else {
+            cab = caber.cab;
             let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
             usuarioid = pb_json.record.id;
             let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
@@ -538,6 +629,61 @@
     onMount(async () => {
         proxymovimiento = proxy.load();
         setMovimiento();
+        
+        if (seccionAbierta == "CATEGORIA") {
+            selectcategoria = true;
+            selectlote = false;
+            selectrodeo = false;
+            selecttratamiento = false;
+            selectbaja = false;
+            selecttransfer = false;
+            
+        }
+        if (seccionAbierta == "RODEO") {
+            selectcategoria = false;
+            selectlote = false;
+            selectrodeo = true;
+            selecttratamiento = false;
+            selectbaja = false;
+            selecttransfer = false;
+            
+        }
+        if (seccionAbierta == "LOTE") {
+            selectcategoria = false;
+            selectlote = true;
+            selectrodeo = false;
+            selecttratamiento = false;
+            selectbaja = false;
+            selecttransfer = false;
+            
+        }
+        if (seccionAbierta == "TRATAMIENTO") {
+            selectcategoria = false;
+            selectlote = false;
+            selectrodeo = false;
+            selecttratamiento = true;
+            selectbaja = false;
+            selecttransfer = false;
+            
+        }
+        if (seccionAbierta == "BAJA") {
+            selectcategoria = false;
+            selectlote = false;
+            selectrodeo = false;
+            selecttratamiento = false;
+            selectbaja = true;
+            selecttransfer = false;
+            
+        }
+        if (seccionAbierta == "TRANSFERIR") {
+            selectcategoria = false;
+            selectlote = false;
+            selectrodeo = false;
+            selecttratamiento = false;
+            selectbaja = false;
+            selecttransfer = true;
+            
+        }
         await getData();
     });
     function verAnimal(id) {
@@ -567,7 +713,7 @@
             nuevacategoria={categoria}
             nuevolote={lote}
             nuevorodeo={rodeo}
-            {fecha}
+            bind:fecha
             {fechabaja}
             {motivo}
             {codigo}

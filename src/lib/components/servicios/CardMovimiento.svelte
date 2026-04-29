@@ -63,7 +63,7 @@
                             </svg>
                         </div>
 
-                        {titulo}
+                        Movimiento
                     </h1>
                 </button>
             </div>

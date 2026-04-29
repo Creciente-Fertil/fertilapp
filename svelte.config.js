@@ -51,6 +51,8 @@ const config = {
 				"/lotes/1",
 				"/movimientos",
 				"/movimientos/detalle",
+				"/movimientos/lista",
+				"/movimientos/1",
 				"/user/new",
 				"/reportes",
 				"/pesajes",

@@ -26,6 +26,8 @@
         eliminarComment,
         saveComment,
     } from "$lib/java/observaciones/observacionesback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -113,7 +115,7 @@
                     categoria,
                     cab: cab.id,
                     observacion,
-                    active: true,
+                    active: true
                 };
                 let res_obs = await saveComment(data);
 
@@ -175,7 +177,7 @@
                 let data_java = {
                     animalId: animal,
                     observationDate: fecha,
-                    notes: observacion,
+                    notes: observacion
                 };
                 await editComment(idobservacion, data_java);
             } else {
@@ -183,7 +185,7 @@
                     .collection("observaciones")
                     .update(idobservacion, data);
             }
-            volver()
+            volver();
             Swal.fire(
                 "Éxito editar",
                 "Se pudo editar la observación",
@@ -258,20 +260,36 @@
         versionjava = detalleobservacion.versionjava;
         cargado = true;
     }
-    onMount(async () => {
-        slug = $page.params.slug;
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-
-        per.setPer(respermisos.permisos, usuarioid);
-        userpermisos = getPermisosList(per.per.permisos);
-        await getAnimales();
-        if (slug == "0") {
-            add = true;
+    async function getData() {
+        if (versionjava) {
+            slug = $page.params.slug;
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            cab = loadStorageEstablecimiento()
+            await getAnimales();
+            if (slug == "0") {
+                add = true;
+            } else {
+                loadObservacion();
+            }
         } else {
-            loadObservacion();
+            slug = $page.params.slug;
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+
+            per.setPer(respermisos.permisos, usuarioid);
+            userpermisos = getPermisosList(per.per.permisos);
+            await getAnimales();
+            if (slug == "0") {
+                add = true;
+            } else {
+                loadObservacion();
+            }
         }
+    }
+    onMount(async () => {
+        await getData()
     });
 </script>
 

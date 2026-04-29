@@ -307,7 +307,14 @@
         }
         setDetalle();
     }
-
+function seleccionarTodos(){
+        
+        selecthashmap = {}
+        ninguno = true
+        todos = false
+        algunos = false
+        clickTodos()
+    }
     async function getLotes() {
         const records = await pb.collection("lotes").getFullList({
             filter: `active = true && cab ~ '${cab.id}'`,
@@ -586,6 +593,7 @@
                                 selecthash={selecthashmap}
                                 {animalesrows}
                                 clickFila={clickAnimal}
+                                {seleccionarTodos}
                                 {clickTodos}
                                 {todos}
                                 {ninguno}
