@@ -744,7 +744,14 @@
         goto(pre + "/servicios/movimiento/detallemovimento");
     }
     //Seleccionados
-    
+    function seleccionarTodos(){
+        console.log("sele")
+        selecthashmap = {}
+        ninguno = true
+        todos = false
+        algunos = false
+        clickTodos()
+    }
     function clickTodos() {
         if (todos) {
             todos = false;
@@ -914,7 +921,7 @@
                     {selecthash}
                     {clickFila}
                     {clickTodos}
-                    {se}
+                    {seleccionarTodos}
                     bind:todos
                 />
             </div>

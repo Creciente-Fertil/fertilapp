@@ -73,10 +73,11 @@ export async function getAll(cabid=null) {
     }
     let options = {
         headers: {
-            "Content-Type": "application/json",
+            //"Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         }
     }
+    
     let res_all = await fetch(url.toString(), options)
 
     let data_all = await res_all.json()
