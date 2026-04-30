@@ -36,6 +36,7 @@
     import SelectToros from "$lib/components/SelectToros.svelte";
     import { getAll } from "$lib/java/animales/animalesback";
     import ListaMovimiento from "$lib/components/ListaMovimiento.svelte";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esdev = import.meta.env.VITE_DEV == "si";
@@ -55,11 +56,11 @@
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
-        await getAnimales();
+        await getData();
     }
 
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let cargado = $state(false);
     //paginacon
     let pageSize = $state(5);
@@ -1027,13 +1028,22 @@
         }
         onInput("PAJUELA");
     }
+    async function getData() {
+        if(versionjava){
+            cab = loadStorageEstablecimiento()
+        }
+        else{
+            cab = caber.cab
+        }
+        await getAnimales();
+        await getRodeos();
+        await getLotes();
+    }
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
 
-        await getAnimales();
-        await getRodeos();
-        await getLotes();
+        await getData()
 
         cargado = true;
         loadDetalle();

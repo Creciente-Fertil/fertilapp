@@ -136,7 +136,7 @@
                     
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                            {shorterWord(t.animal)}
+                            {shorterWord(t.animalnombre)}
                         </p>
                     </div>
                 </div>

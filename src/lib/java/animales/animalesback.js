@@ -23,7 +23,7 @@ function processAnimal(animal) {
         fechafallecimiento: animal.deathDate,
         lote: null2string(animal.lotId),
         categoria: null2string(animal.categoryId),
-        prenada: animal.reproductiveStatus,
+        prenada: animal.reproductiveStatus=="PRENADA"?2:animal.reproductiveStatus=="EN_SERVICIO"?3:0,
         motivobaja: "",
         raza: animal.breed,
         color: animal.color,
@@ -57,7 +57,7 @@ function processAnimales(data) {
     }
     return data_animales
 }
-export async function getAll(cabid=null) {
+export async function getAll(cabid=null,lotid=null) {
 
     let user = getUser();
     let token = user.token;
@@ -71,13 +71,16 @@ export async function getAll(cabid=null) {
     if (cabid) {
         url.searchParams.append('establishmentId', cabid);
     }
+    if (lotid) {
+        url.searchParams.append('lotId', lotid);
+    }
     let options = {
         headers: {
             //"Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         }
     }
-    
+    //console.log(url.toString())
     let res_all = await fetch(url.toString(), options)
 
     let data_all = await res_all.json()
@@ -118,20 +121,20 @@ function updateData(animal) {
         tagNumber: animal.caravana,
         birthDate: string2null(animal.fechanacimiento),
         sex:animal.sexo == "H" ? "F" : "M",
+        isPregnan:animal.prenada==2,
         deathDate: string2null(animal.fechafallecimiento),
-        reproductiveStatus: animal.prenada,
-        categoryId: string2null(animal.categoria),
+        
         breed: string2null(animal.raza),
         color: string2null(animal.color),
         rpCode: animal.rp,
-
         establishmentId: animal.cab,
+
         birthId: string2null(animal.nacimiento),
         herdId: string2null(animal.rodeo),
-        
+        reproductiveStatus: animal.prenada==2?"PRENADA":animal.prenada==1?"EN_SERVICIO":"VACIA",
         lotId: string2null(animal.lote),
 
-        deathReason: string2null(animal.motivobaja)
+        
     }
     return data_animal
 }
@@ -159,6 +162,7 @@ export async function editAnimal(id, data) {
     let user = getUser();
     let token = user.token;
     let data_animal = updateData(data)
+    console.log(data_animal)
     let res_post = await fetch(ruta,
         {
             method: "PUT",

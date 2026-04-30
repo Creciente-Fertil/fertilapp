@@ -29,6 +29,9 @@
     import Success from "$lib/components/botones/Success.svelte";
     import { getAllTipos } from "$lib/java/tratamientos/tratamientosback";
     import { getAll } from "$lib/java/animales/animalesback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import * as RodeoService from "$lib/java/rodeos/rodeosback";
+    import * as LoteService from "$lib/java/lotes/lotesback";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     let esdev = import.meta.env.VITE_DEV == "si";
@@ -40,19 +43,10 @@
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
-        await getTiposTratamientos();
-        await getAnimales();
-        if(versionjava){
-            
-            detallemovimento = defaultmovimiento
-            
-            setDetalle();
-            loadDetalleMovimiento()
-        }
-        
+        await getData();
     }
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let cargado = $state(false);
     //paginacon
     let pageSize = $state(5);
@@ -176,7 +170,7 @@
         detallemovimento.tipotratamientoselect = tipotratamientoselect;
         detallemovimento.fecha = fecha;
         detallemovimento.observaciongeneral = observaciongeneral;
-        
+
         proxymovimiento.save(detallemovimento);
     }
     function loadDetalleMovimiento() {
@@ -315,12 +309,12 @@
         }
         setDetalle();
     }
-    function seleccionarTodos(){
-        selecthashmap = {}
-        ninguno = true
-        todos = false
-        algunos = false
-        clickTodos()
+    function seleccionarTodos() {
+        selecthashmap = {};
+        ninguno = true;
+        todos = false;
+        algunos = false;
+        clickTodos();
     }
     function clickTodos() {
         if (todos) {
@@ -351,24 +345,36 @@
         }
     }
     async function getLotes() {
-        const records = await pb.collection("lotes").getFullList({
-            filter: `active = true && cab ~ '${cab.id}'`,
-            sort: "nombre",
-        });
+        let records = [];
+        if (versionjava) {
+            records = await LoteService.getAll(cab.id);
+        } else {
+            records = await pb.collection("lotes").getFullList({
+                filter: `active = true && cab ~ '${cab.id}'`,
+                sort: "nombre",
+            });
+        }
+
         lotes = records;
         ordenarNombre(lotes);
     }
     async function getRodeos() {
-        const records = await pb.collection("rodeos").getFullList({
-            filter: `active = true && cab ~ '${cab.id}'`,
-            sort: "nombre",
-        });
+        let records = [];
+        if (versionjava) {
+            records = await RodeoService.getAll(cab.id);
+        } else {
+            records = await pb.collection("rodeos").getFullList({
+                filter: `active = true && cab ~ '${cab.id}'`,
+                sort: "nombre",
+            });
+        }
+
         rodeos = records;
         //ordenarNombre(rodeos)
     }
     async function getTiposTratamientos() {
         if (versionjava) {
-            let records = await getAllTipos();
+            let records = await getAllTipos(cab.id);
             tipotratamientos = records;
             tipotratamientos.sort((tp1, tp2) =>
                 tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase()
@@ -392,7 +398,7 @@
     }
     async function getAnimales() {
         if (versionjava) {
-            let recordsa = await getAll();
+            let recordsa = await getAll(cab.id);
             animales = recordsa;
             animales.sort((a1, a2) =>
                 a1.caravana.toLocaleLowerCase() >
@@ -476,7 +482,6 @@
         }
     }
     async function guardarTratamiento() {
-        
         if (fecha == "" || tipotratamientoselect == "") {
             Swal.fire(
                 "Error tratamientos",
@@ -548,18 +553,25 @@
         goto(pre + "/tratamientos");
     }
     function siguiente() {
-        setDetalle()
+        setDetalle();
         goto(pre + "/tratamientos/movimiento/detallemovimiento");
+    }
+    async function getData() {
+        if (versionjava) {
+            cab = loadStorageEstablecimiento();
+        } else {
+            cab = caber.cab;
+        }
+        await getAnimales();
+        await getLotes();
+        await getRodeos();
+        await getTiposTratamientos();
     }
     function input(campo) {}
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
-        await getAnimales();
-        await getLotes();
-        await getRodeos();
-        await getTiposTratamientos();
-        
+        await getData();
     });
 </script>
 

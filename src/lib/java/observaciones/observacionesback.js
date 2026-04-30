@@ -25,18 +25,22 @@ function processComments(data){
     }
     return data_comments
 }
-export async function getAll() {
+export async function getAll(cabid=null) {
     let user = getUser();
     let token = user.token;
 
     let ruta = `${RUTA_JAVA}${RUTA_OBSERVACIONES}/all`
+    let url = new URL(ruta)
+    if (cabid) {
+        url.searchParams.append('establishmentId', cabid);
+    }
     let options = {
         headers:{
             "Content-Type": "application/json",
             "Authorization":`Bearer ${token}`
         }
     }
-    let res_all = await fetch(ruta,options)
+    let res_all = await fetch(url.toString(),options)
 
     let data_all = await res_all.json()
 

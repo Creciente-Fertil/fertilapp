@@ -36,6 +36,7 @@
         getAllServices,
     } from "$lib/java/servicios/serviciosback";
     import { getAll } from "$lib/java/animales/animalesback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -50,7 +51,7 @@
 
     let caber = createCaber();
     let userer = createUserer();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let caravana = $state("");
     let cargado = $state(false);
     let cargadoservicios = $state(false);
@@ -447,7 +448,7 @@
             });
             servicios = records.map((x) => ({ ...x, tipo: "NATURAL_SERVICE" }));
         } else {
-            servicios = await getAllServices();
+            servicios = await getAllServices(cab.id);
         }
 
         serviciosrow = servicios;
@@ -455,7 +456,7 @@
     async function getAnimales() {
         let recordsa = [];
         if (versionjava) {
-            recordsa = await getAll();
+            recordsa = await getAll(cab.id);
         } else {
             recordsa = await pb.collection("animales").getFullList({
                 filter: `cab='${cab.id}'`,
@@ -640,15 +641,18 @@
         return getWholeWordButLastLetter(nombres);
     }
     async function cargarDatos() {
-        await getAnimales();
+        
         if (versionjava) {
+            cab = loadStorageEstablecimiento()
             await getServicios();
             filterUpdate()
         } else {
+            cab = caber.cab
             await getServicios();
             await getInseminaciones();
             filterUpdate()
         }
+        await getAnimales();
 
         cargadoservicios = true;
     }

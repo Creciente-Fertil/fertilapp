@@ -28,6 +28,7 @@
         getAll,
         getAllTipos,
     } from "$lib/java/tratamientos/tratamientosback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
@@ -39,7 +40,7 @@
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -237,7 +238,7 @@
                 sort: "-created",
             });
         } else {
-            records = await getAll();
+            records = await getAll(cab.id);
         }
 
         tratamientos = records;
@@ -252,7 +253,7 @@
                 sort: "-created",
             });
         } else {
-            records = await getAllTipos();
+            records = await getAllTipos(cab.id);
         }
 
         tipotratamientos = records;
@@ -627,9 +628,15 @@
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
+        if(versionjava){
+            cab = loadStorageEstablecimiento()
+        }
+        else{
+            cab = caber.cab
+        }
         await getTratamientos();
         await getTiposTratamientos();
-        await getAnimales();
+        //await getAnimales();
         filterUpdate();
         if (esCelu) {
             pageSize = 5;

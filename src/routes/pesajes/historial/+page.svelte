@@ -22,13 +22,15 @@
 
     import ListaPesajes from "$lib/components/pesajes/ListaPesajes.svelte";
     import { editPeso, eliminarPeso, getAll } from "$lib/java/pesajes/pesajesback";
+    
     import Success from "$lib/components/botones/Success.svelte";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esdev = import.meta.env.VITE_DEV == "si";
     let esCelu = $derived(innerWidth <= 1100);
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -73,10 +75,12 @@
     }
     async function getPesajes() {
         if (versionjava) {
-            let records = await getAll();
+            cab = loadStorageEstablecimiento()
+            let records = await getAll(cab.id);
             pesajes = records;
             cargados = true;
         } else {
+            cab = caber.cab
             const records = await pb.collection("pesaje").getFullList({
                 sort: "-fecha",
                 expand: "animal,animal.cab",

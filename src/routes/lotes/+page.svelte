@@ -127,12 +127,13 @@
             filterUpdate();
             cargadolotes = true;
         } else {
-            let data_lotes = await getAll();
+            cab = loadStorageEstablecimiento()
+            let data_lotes = await getAll(cab.id);
             lotes = data_lotes;
             lotesrows = lotes;
-            cab = loadStorageEstablecimiento()
+            
             for (let i = 0; i < lotes.length; i++) {
-                lotes[i].total = 0;
+                lotes[i].total = lotes[i].animalCount;
             }
             filterUpdate();
             cargadolotes = true;

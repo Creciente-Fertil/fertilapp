@@ -50,18 +50,22 @@ function processTratamientos(data) {
     }
     return data_tratamientos
 }
-export async function getAllTipos() {
+export async function getAllTipos(cabid=null) {
     let user = getUser();
     let token = user.token;
 
     let ruta = `${RUTA_JAVA}${RUTA_TIPO_TRATAMIENTOS}/all`
+    let url = new URL(ruta)
+    if (cabid) {
+        url.searchParams.append('establishmentId', cabid);
+    }
     let options = {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(ruta, options)
+    let res_all = await fetch(url.toString(), options)
 
     let data_all = await res_all.json()
 
@@ -71,18 +75,22 @@ export async function getAllTipos() {
 
     return procesada
 }
-export async function getAll() {
+export async function getAll(cabid=null) {
     let user = getUser();
     let token = user.token;
 
     let ruta = `${RUTA_JAVA}${RUTA_TRATAMIENTOS}/all`
+    let url = new URL(ruta)
+    if (cabid) {
+        url.searchParams.append('establishmentId', cabid);
+    }
     let options = {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(ruta, options)
+    let res_all = await fetch(url.toString(), options)
 
     let data_all = await res_all.json()
 

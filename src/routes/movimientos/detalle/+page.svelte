@@ -281,32 +281,25 @@
                 let id = fila.id;
                 let animal = { ...fila };
                 animal.categoria = categoria;
+
                 await editAnimal(id, animal);
             }
         }
         if (selectlote) {
-            for (let i = 0; i < lista.length; i++) {
-                let fila = lista[i];
-                let id = fila.id;
-                let animal = { ...fila };
-
-                let data_move = {
-                    animalId: id,
-                    establishmentId: cab.id,
-                    movementDate: fecha,
-                    movementType: "LOT",
-                    fromLotId: animal.lote,
-                    toLotId: lote,
-                    fromHerdId: null,
-                    toHerdId: null,
-                    fromEstablishmentId: null,
-                    toEstablishmentId: null,
-                    notes: "",
-                };
-                await saveMove(data_move, cab.id);
-                animal.lote = lote;
-                await editAnimal(id, animal);
-            }
+            let data_move = {
+                animalIds: lista.map((a) => a.id),
+                establishmentId: cab.id,
+                movementDate: fecha,
+                movementType: "LOT",
+                fromLotId: null,
+                toLotId: lote,
+                fromHerdId: null,
+                toHerdId: null,
+                fromEstablishmentId: null,
+                toEstablishmentId: null,
+                notes: "",
+            };
+            await saveMove(data_move, cab.id);
         }
         if (selectrodeo) {
             for (let i = 0; i < lista.length; i++) {
@@ -629,7 +622,7 @@
     onMount(async () => {
         proxymovimiento = proxy.load();
         setMovimiento();
-        
+
         if (seccionAbierta == "CATEGORIA") {
             selectcategoria = true;
             selectlote = false;
@@ -637,7 +630,6 @@
             selecttratamiento = false;
             selectbaja = false;
             selecttransfer = false;
-            
         }
         if (seccionAbierta == "RODEO") {
             selectcategoria = false;
@@ -646,7 +638,6 @@
             selecttratamiento = false;
             selectbaja = false;
             selecttransfer = false;
-            
         }
         if (seccionAbierta == "LOTE") {
             selectcategoria = false;
@@ -655,7 +646,6 @@
             selecttratamiento = false;
             selectbaja = false;
             selecttransfer = false;
-            
         }
         if (seccionAbierta == "TRATAMIENTO") {
             selectcategoria = false;
@@ -664,7 +654,6 @@
             selecttratamiento = true;
             selectbaja = false;
             selecttransfer = false;
-            
         }
         if (seccionAbierta == "BAJA") {
             selectcategoria = false;
@@ -673,7 +662,6 @@
             selecttratamiento = false;
             selectbaja = true;
             selecttransfer = false;
-            
         }
         if (seccionAbierta == "TRANSFERIR") {
             selectcategoria = false;
@@ -682,7 +670,6 @@
             selecttratamiento = false;
             selectbaja = false;
             selecttransfer = true;
-            
         }
         await getData();
     });

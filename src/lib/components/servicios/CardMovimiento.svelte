@@ -63,7 +63,7 @@
                             </svg>
                         </div>
 
-                        Movimiento
+                        Servicio
                     </h1>
                 </button>
             </div>

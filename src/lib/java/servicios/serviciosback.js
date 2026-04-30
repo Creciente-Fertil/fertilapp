@@ -1,4 +1,4 @@
-import { getUser } from "$lib/userstorage/usersotrage"
+ import { getUser } from "$lib/userstorage/usersotrage"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_SERVICIOS = "services"
 export function tipoServicios() {
@@ -48,17 +48,21 @@ function processServicios(data) {
     }
     return servicios
 }
-export async function getAllServices() {
+export async function getAllServices(cabid=null) {
     let user = getUser();
     let token = user.token;
     let ruta_all = `${RUTA_JAVA}${RUTA_SERVICIOS}/all`
+    let url = new URL(ruta_all)
+    if (cabid) {
+        url.searchParams.append('establishmentId', cabid);
+    }
     let options = {
         headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(ruta_all, options)
+    let res_all = await fetch(url.toString(), options)
 
     let data_all = await res_all.json()
 

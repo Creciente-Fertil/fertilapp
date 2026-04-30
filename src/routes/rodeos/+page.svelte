@@ -108,7 +108,7 @@
             cargadorodeos = true;
         } else {
             cab = loadStorageEstablecimiento()
-            let data_rodeos = await getAll();
+            let data_rodeos = await getAll(cab.id);
             rodeos = data_rodeos;
             ordenar(rodeos);
             rodeosrows = rodeos;

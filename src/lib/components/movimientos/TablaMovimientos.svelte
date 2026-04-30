@@ -156,7 +156,7 @@
                         {new Date(t.fecha).toLocaleDateString()}</td
                     >
                     <td class={`text-base mx-1 px-1 ${pyfila}`}>
-                        {`${shorterWord(t.animal)}`}
+                        {`${shorterWord(t.animalnombre)}`}
                     </td>
                     <td class={`text-base mx-1 px-1 ${pyfila}`}>
                         {`${t.tiponombre}`}

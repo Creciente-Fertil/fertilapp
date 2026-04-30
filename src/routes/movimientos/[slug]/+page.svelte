@@ -1,6 +1,6 @@
 <script>
     import Navbar2 from "$lib/components/Navbar2.svelte";
-    import CardMovimiento from "$lib/components/servicios/CardMovimiento.svelte";
+    import CardMovimiento from "$lib/components/movimientos/CardMovimiento.svelte";
 
     import { onMount } from "svelte";
     import { page } from "$app/stores";

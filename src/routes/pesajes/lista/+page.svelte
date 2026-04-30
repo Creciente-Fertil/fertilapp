@@ -20,8 +20,9 @@
     import HistorialPesajes from "$lib/components/pesajes/HistorialPesajes.svelte";
     import { getAll } from "$lib/java/pesajes/pesajesback";
     import { editPeso,eliminarPeso } from "$lib/java/pesajes/pesajesback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     let esdev = import.meta.env.VITE_DEV == "si";
@@ -71,10 +72,12 @@
     }
     async function getPesajes() {
         if (versionjava) {
-            let records = await getAll();
+            cab = loadStorageEstablecimiento()
+            let records = await getAll(cab.id);
             pesajes = records;
             cargados = true;
         } else {
+            cab = caber.cab
             const records = await pb.collection("pesaje").getFullList({
                 sort: "-fecha",
                 expand: "animal,animal.cab",

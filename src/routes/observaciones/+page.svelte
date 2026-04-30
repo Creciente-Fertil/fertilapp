@@ -27,13 +27,15 @@
     import * as AnimalService from "$lib/java/animales/animalesback";
     import * as ObservacionService from "$lib/java/observaciones/observacionesback";
     import Success from "$lib/components/botones/Success.svelte";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import { getUser } from "$lib/userstorage/usersotrage";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
     let pre = import.meta.env.VITE_PRE;
     let caber = createCaber();
     let esdev = import.meta.env.VITE_DEV == "si";
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let ruta = import.meta.env.VITE_RUTA;
 
     const pb = new PocketBase(ruta);
@@ -163,7 +165,7 @@
     }
     async function getObservaciones() {
         if (versionjava) {
-            let records = await ObservacionService.getAll();
+            let records = await ObservacionService.getAll(cab.id);
             observaciones = records;
             observacionesrow = observaciones;
             cargadosobservaciones = true;
@@ -369,14 +371,29 @@
             totalObservacionesEncontradas = observacionesrow.length;
         }
     }
-    onMount(async () => {
-        proxyfiltros = proxy.load();
-        setFilters();
-        let pb_json = await JSON.parse(localStorage.getItem("pocketbase_auth"));
+    async function getData() {
+        if(versionjava){
+            cab = loadStorageEstablecimiento()
+            let user_data = getUser()
+            usuarioid = user_data.id
+            await getObservaciones();
+        filterUpdate();
+        await getAnimales();
+        }
+        else{
+            cab = caber.cab
+            let pb_json = await JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
+
         await getObservaciones();
         filterUpdate();
         await getAnimales();
+        }
+    }
+    onMount(async () => {
+        proxyfiltros = proxy.load();
+        setFilters();
+        
         if (esCelu) {
             pageSize = 5;
         }

@@ -29,6 +29,9 @@
     import TablaMovimiento from "$lib/components/TablaMovimiento.svelte";
     import NuevoPesajes from "$lib/components/pesajes/NuevoPesajes.svelte";
     import { getAll } from "$lib/java/animales/animalesback";
+    import * as RodeoService from "$lib/java/rodeos/rodeosback";
+    import * as LoteService from "$lib/java/lotes/lotesback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
 
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -39,12 +42,12 @@
     const DESDE = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const HASTA = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let cargado = $state(false);
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
-        await getAnimales();
+        await getData();
     }
     //boton
     let textoboton = $state("Mover");
@@ -307,27 +310,38 @@
         }
         setDetalle();
     }
-function seleccionarTodos(){
-        
-        selecthashmap = {}
-        ninguno = true
-        todos = false
-        algunos = false
-        clickTodos()
+    function seleccionarTodos() {
+        selecthashmap = {};
+        ninguno = true;
+        todos = false;
+        algunos = false;
+        clickTodos();
     }
     async function getLotes() {
-        const records = await pb.collection("lotes").getFullList({
-            filter: `active = true && cab ~ '${cab.id}'`,
-            sort: "nombre",
-        });
+        let records = [];
+        if (versionjava) {
+            records = LoteService.getAll(cab.id);
+        } else {
+            records = await pb.collection("lotes").getFullList({
+                filter: `active = true && cab ~ '${cab.id}'`,
+                sort: "nombre",
+            });
+        }
+
         lotes = records;
         ordenarNombre(lotes);
     }
     async function getRodeos() {
-        const records = await pb.collection("rodeos").getFullList({
-            filter: `active = true && cab ~ '${cab.id}'`,
-            sort: "nombre",
-        });
+        let records = [];
+        if (versionjava) {
+            records = RodeoService.getAll(cab.id);
+        } else {
+            records = await pb.collection("rodeos").getFullList({
+                filter: `active = true && cab ~ '${cab.id}'`,
+                sort: "nombre",
+            });
+        }
+
         rodeos = records;
         //ordenarNombre(rodeos)
     }
@@ -341,7 +355,7 @@ function seleccionarTodos(){
     }
     async function getAnimales() {
         if (versionjava) {
-            let recordsa = await getAll();
+            let recordsa = await getAll(cab.id);
             animales = recordsa;
             animales.sort((a1, a2) =>
                 a1.caravana.toLocaleLowerCase() >
@@ -470,13 +484,20 @@ function seleccionarTodos(){
         setDetalle();
         goto(pre + "/pesajes/detallemovimiento");
     }
-    onMount(async () => {
-        proxyfiltros = proxy.load();
-        setFilters();
+    async function getData() {
+        if (versionjava) {
+            cab = loadStorageEstablecimiento();
+        } else {
+            cab = caber.cab;
+        }
         await getAnimales();
         await getRodeos();
         await getLotes();
-        await getTipos();
+    }
+    onMount(async () => {
+        proxyfiltros = proxy.load();
+        setFilters();
+        await getData();
         loadDetalle();
     });
     function nuevo() {

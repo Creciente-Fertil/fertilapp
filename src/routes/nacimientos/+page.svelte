@@ -35,6 +35,9 @@
         eliminarNacimiento,
         getAll,
     } from "$lib/java/nacimientos/nacimientosback";
+    import * as AnimalService from "$lib/java/animales/animalesback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
@@ -45,7 +48,7 @@
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
     const HOY = new Date().toISOString().split("T")[0];
@@ -136,10 +139,16 @@
         return !str || str.length === 0;
     }
     async function getAnimales() {
-        let recordsa = await pb.collection("animales").getFullList({
-            filter: `active=true && cab='${cab.id}' && delete = false`,
-            expand: "nacimiento",
-        });
+        let recordsa = [];
+        if (versionjava) {
+            recordsa = await AnimalService.getAll(cab.id);
+        } else {
+            recordsa = await pb.collection("animales").getFullList({
+                filter: `active=true && cab='${cab.id}' && delete = false`,
+                expand: "nacimiento",
+            });
+        }
+
         recordsa = recordsa.sort((a, b) =>
             a.caravana.toLocaleLowerCase() < b.caravana.toLocaleLowerCase()
                 ? -1
@@ -182,7 +191,7 @@
             nacimientosrow = nacimientos;
             cargadonacimientos = true;
         } else {
-            let data_nacimientos = await getAll();
+            let data_nacimientos = await getAll(cab.id);
             nacimientos = data_nacimientos;
             nacimientosrow = nacimientos;
             cargadonacimientos = true;
@@ -549,15 +558,31 @@
             }
         });
     }
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            cab = loadStorageEstablecimiento();
+            await getNacimientos();
+            ordenarNacimientos(forma);
+            filterUpdate();
+            await getAnimales();
+        } else {
+            let pb_json = await JSON.parse(
+                localStorage.getItem("pocketbase_auth"),
+            );
+            usuarioid = pb_json.record.id;
+            cab = caber.cab;
+            await getNacimientos();
+            ordenarNacimientos(forma);
+            filterUpdate();
+            await getAnimales();
+        }
+    }
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
-        let pb_json = await JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        await getNacimientos();
-        ordenarNacimientos(forma);
-        filterUpdate();
-        await getAnimales();
+        await getData();
         if (esCelu) {
             pageSize = 5;
         }

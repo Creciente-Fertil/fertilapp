@@ -30,16 +30,18 @@
     import TablaTactos from "$lib/components/tactos/TablaTactos.svelte";
     import ListaTactos from "$lib/components/tactos/ListaTactos.svelte";
     import { eliminarTacto, getAll } from "$lib/java/tactos/tactosback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
-        await getTactos();
+        await getData();
     }
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let per = createPer();
     let userpermisos = getPermisosList(per.per.permisos);
     let ruta = import.meta.env.VITE_RUTA;
@@ -136,8 +138,8 @@
             tactosrow = tactos;
             cargadostactos = true;
         } else {
-            let data_tactos = await getAll();
-            tactos = data_tactos
+            let data_tactos = await getAll(cab.id);
+            tactos = data_tactos;
             tactosrow = tactos;
             cargadostactos = true;
         }
@@ -146,11 +148,16 @@
         return !str || str.length === 0;
     }
     async function getAnimales() {
-        //Estaria joya que el animal venga con todos los chiches
-        const recordsa = await pb.collection("animales").getFullList({
-            filter: `active=true && cab='${cab.id}' && sexo='H'`,
-            expand: "nacimiento",
-        });
+        let recordsa = [];
+        if (versionjava) {
+        } else {
+            //Estaria joya que el animal venga con todos los chiches
+            recordsa = await pb.collection("animales").getFullList({
+                filter: `active=true && cab='${cab.id}' && sexo='H'`,
+                expand: "nacimiento",
+            });
+        }
+
         animales = recordsa;
         animales.sort((a1, a2) =>
             a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase()
@@ -200,7 +207,7 @@
     function irDetalle(id) {
         idtacto = id;
         tacto = tactos.filter((t) => t.id == idtacto)[0];
-        
+
         if (versionjava) {
             fecha = tacto.fecha;
         } else {
@@ -378,14 +385,27 @@
         });
         totalTactosEncontrados = tactosrow.length;
     }
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            cab = loadStorageEstablecimiento();
+        } else {
+            let pb_json = await JSON.parse(
+                localStorage.getItem("pocketbase_auth"),
+            );
+            usuarioid = pb_json.record.id;
+            cab = caber.cab;
+        }
+
+        await getTactos();
+        filterUpdate();
+        //await getAnimales();
+    }
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
-        let pb_json = await JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        await getTactos();
-        filterUpdate();
-        await getAnimales();
+await getData()
         if (esCelu) {
             pageSize = 5;
         }
@@ -1264,4 +1284,3 @@
         </div>
     </div>
 </dialog>
-
