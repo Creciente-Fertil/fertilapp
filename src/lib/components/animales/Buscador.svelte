@@ -11,6 +11,7 @@
     import Rubber from "$lib/svgs/rubber.svelte";
 
     import MultiSelect from "../MultiSelect.svelte";
+    import Plus from "$lib/svgs/plus.svelte";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -61,7 +62,13 @@
     `}
     >
         <div
-            class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 mb-2 border-b dark:border-gray-800"
+            class="
+                flex flex-row
+                md:items-center
+                justify-between gap-4 pb-1 mb-2
+                border-b
+                dark:border-gray-800
+            "
         >
             <div
                 class={`
@@ -79,13 +86,29 @@
                 </h1>
             </div>
             <button
+                onclick={nuevo}
                 class={`
+                bg-[#115642] hover:bg-[#0f4537] 
+                text-white 
+                w-10 h-10 rounded-full 
+                flex items-center justify-center 
+                shadow-md transition-all duration-200
+                md:hidden mt-2
+            `}
+                aria-label="Nuevo animal"
+            >
+                <span class="text-2xl leading-none">+</span>
+            </button>
+            <button
+                class={`
+                    hidden md:block
                     ${estilos.btnbuscador}
                     ${estilos.btntextbuscador}
+                    
                 `}
                 onclick={nuevo}
             >
-                <span class="text-lg">+ Nuevo animal</span>
+                <span class="text-lg hidden md:block">+ Nuevo animal</span>
             </button>
             <button
                 class={`
@@ -99,7 +122,7 @@
             >
                 <span class="text-lg font-semibold">Estadísticas</span>
             </button>
-            {#if isDev}
+            {#if isDev && false}
                 <button
                     class={`
                     ${estilos.btnbuscador}
@@ -115,6 +138,7 @@
                 </button>
             {/if}
         </div>
+
         <!--Filtros-->
         <div
             class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-1 md:p-2 bg-transparent rounded-lg"
@@ -125,7 +149,7 @@
                   flex items-center flex-1 border
                   shadow-2xl
                   rounded-full 
-                  p-3
+                  py-1 px-2 md:p-3
                   dark:border-gray-600 
                   border-transparent bg-white dark:bg-gray-900
                   shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
@@ -164,9 +188,35 @@
             </div>
             <!-- Derecha: botones -->
             <div class="flex flex-wrap gap-2">
+                
+                    {#if isOpenFilter}
+                        <button
+                            onclick={clickFilter}
+                            class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
+                            `}
+                        >
+                            <Filter size="size-4" />
+                            Filtros
+                        </button>
+                    {:else}
+                        <button
+                            onclick={clickFilter}
+                            class={`
+                            border rounded-full px-3 py-1 text-md flex items-center gap-1
+                            bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                        `}
+                        >
+                            <Filter size="size-4" />
+                            Filtros
+                        </button>
+                    {/if}
+                
                 <button
                     class={`
-                        border rounded-full px-3 py-1 text-md flex items-center gap-1
+                        hidden md:flex
+                        border rounded-full px-3 py-1 text-md items-center gap-1
                         bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
                         dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
                     `}
@@ -174,29 +224,7 @@
                     <Arrowdown size="size-4" />
                     Importar
                 </button>
-                {#if isOpenFilter}
-                <button
-                    onclick={clickFilter}
-                    class={`
-                        border rounded-full px-3 py-1 text-md flex items-center gap-1
-                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
-                    `}
-                >
-                    <Filter size="size-4" />
-                    Filtros
-                </button>
-                {:else}
-                <button
-                    onclick={clickFilter}
-                    class={`
-                        border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
-                    `}
-                >
-                    <Filter size="size-4" />
-                    Filtros
-                </button>
-                {/if}
+
                 <ExportarSmall
                     titulo={"Animales"}
                     filtros={[]}
@@ -376,7 +404,7 @@
                             ).length}</span
                         >
                         <span class="xl:hidden">
-                            animales seleccionados: {Object.keys(selecthash)
+                            Animales seleccionados: {Object.keys(selecthash)
                                 .length}
                         </span>
                     </div>
@@ -384,7 +412,7 @@
                         <button
                             onclick={limpiarFiltros}
                             class={`
-                            rounded-full px-0 md:px-3 py-1 text-md flex items-center gap-1
+                            rounded-full px-2 md:px-3 py-1 text-md flex items-center gap-1
                             bg-white  hover:bg-gray-300 dark:bg-transparent
                             dark:hover:bg-gray-600 dark:text-white
                         `}

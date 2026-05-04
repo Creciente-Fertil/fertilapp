@@ -198,7 +198,7 @@
     }
     async function getRodeos() {
         if (versionjava) {
-            let records = await RodeoService.getAll();
+            let records = await RodeoService.getAll(cab.id);
             rodeos = records;
         } else {
             const records = await pb.collection("rodeos").getFullList({
@@ -212,7 +212,7 @@
     }
     async function getLotes() {
         if (versionjava) {
-            let records = await LoteService.getAll();
+            let records = await LoteService.getAll(cab.id);
             lotes = records;
         } else {
             const records = await pb.collection("lotes").getFullList({
@@ -239,7 +239,7 @@
             animales = data_animales;
         }
         animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
-
+        
         animalesrows = animales;
         madres = animales.filter((a) => a.sexo == "H");
         padres = animales.filter((a) => a.sexo == "M");
@@ -829,7 +829,7 @@
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
-    {#if esdev}
+    {#if esdev && false}
         premisos {JSON.stringify(userpermisos, null, 2)}
     {/if}
     <Buscador
@@ -965,7 +965,7 @@
         class={`
             md:hidden
             w-full grid grid-cols-1
-            mx-auto py-6 px-4 max-w-7xl
+            mx-auto py-3 px-4 max-w-7xl
         `}
     >
         <ListaAnimales

@@ -2,7 +2,7 @@
     import estilos from "$lib/stores/estilos";
     import Navbar2 from "$lib/components/Navbar2.svelte";
     import Swal from "sweetalert2";
-    import PocketBase, { getTokenPayload } from "pocketbase";
+    import PocketBase from "pocketbase";
     import { onMount } from "svelte";
     import { createCaber } from "$lib/stores/cab.svelte";
     import { createUserer } from "$lib/stores/user.svelte";
@@ -20,12 +20,17 @@
     } from "$lib/java/tratamientos/tratamientosback";
     import Success from "$lib/components/botones/Success.svelte";
     import { getUser } from "$lib/userstorage/usersotrage";
-    
-    
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
-    
+
     function toggleJava() {
         versionjava = !versionjava;
+        if (versionjava) {
+            cab = loadStorageEstablecimiento();
+        } else {
+            cab = caber.cab;
+        }
     }
 
     let innerWidth = $state(0);
@@ -152,6 +157,7 @@
             if (versionjava) {
                 let data_java = {
                     name: nombretipo,
+                    establishmentId:cab.id
                 };
                 await editTipo(idtipo, data_java);
             } else {
@@ -224,35 +230,33 @@
     function loadTipos() {
         detallestipos = proxy.load();
         tipotratamientos = detallestipos.tipos;
-        
     }
     function saveTipos() {
         detallestipos.tipos = tipotratamientos;
         proxy.save(detallestipos);
     }
-    async function getData(){
-        
-        if(versionjava){
-            let user_data = getUser()
-            usuarioid = user_data.id
-            userpermisos = []
-        }
-        else{
-let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            userpermisos = [];
+            cab = loadStorageEstablecimiento()
+        } else {
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
 
-        per.setPer(respermisos.permisos, usuarioid);
-        userpermisos = getPermisosList(per.per.permisos);
+            per.setPer(respermisos.permisos, usuarioid);
+            userpermisos = getPermisosList(per.per.permisos);
+            cab = caber.cab
         }
 
         loadTipos();
         filterUpdate();
     }
     onMount(async () => {
-        
-        await getData()
-        
+        await getData();
+
         if (esCelu) {
             pageSize = 5;
         }
@@ -308,7 +312,7 @@ let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
     />
     {#if esdev}
         <span>java: {versionjava}</span>
-        
+
         <Success
             texto={versionjava ? "Cerrsar java" : "ver java"}
             onclick={toggleJava}

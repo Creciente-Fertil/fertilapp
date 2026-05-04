@@ -1,4 +1,5 @@
 import { getUser } from "$lib/userstorage/usersotrage"
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_NACIMIENTOS = "births"
 function processNacimiento(birth){
@@ -48,7 +49,7 @@ export async function getAll(cabid=null) {
             "Authorization":`Bearer ${token}`
         }
     }
-    let res_all = await fetch(url.toString(),options)
+    let res_all = await handleAuthenticatedRequest(url.toString(),options)
 
     let data_all = await res_all.json()
 
@@ -79,7 +80,7 @@ function postData(data,establishmentId=1){
           motherId: data.madre,
           fatherId: data.padre,
           notes: data.observacion,
-          establishmentId
+          establishmentId:data.cab
     }
     
     return data_nacimiento

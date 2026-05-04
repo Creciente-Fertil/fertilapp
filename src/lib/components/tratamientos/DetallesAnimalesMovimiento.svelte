@@ -50,14 +50,14 @@
 <svelte:window bind:innerWidth bind:innerHeight />
 <div
     class="
-    pt-1 md:pt-2 lg:pt-5
-        container mx-auto  px-4 max-w-7xl
-        max-h-[500px] overflow-y-auto custom-scrollbar  
+        pt-1 md:pt-2 lg:pt-5
+        container px-1 md:px-4 max-w-7xl
+        md:max-h-[500px] overflow-y-auto custom-scrollbar   
         "
 >
     <div
         class={`
-            rounded-2xl p-1 md:p-3  mb-1
+            rounded-2xl p-2 md:p-3  mb-1
             dark:bg-slate-900 bg-white
             shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
             dark:shadow-none
@@ -71,7 +71,7 @@
                     py-1 
                 `}
             >
-                <div class="flex items-center justify-between gap-4">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <!-- Lado izquierdo: Icono + Título + Badge -->
                     <div class="flex items-center gap-3">
                         <h1
@@ -91,11 +91,13 @@
                             dark:bg-gray-700 dark:text-gray-200
                         `}
                         >
-                            {rows.length} animales
+                            {rows.length} 
                         </span>
                     </div>
-                    <!-- Lado derecho: Buscador + Botón toggle -->
-                    <div class="flex items-center gap-3">
+                    
+                </div>
+                <!-- Lado derecho: Buscador + Botón toggle -->
+                    <div class="flex items-start md:items-center gap-3">
                         <!--Buscador-->
                         <div class="relative">
                             <div
@@ -130,7 +132,6 @@
                             />
                         </div>
                     </div>
-                </div>
             </div>
             <!-- Encabezados de columnas -->
             <div

@@ -749,7 +749,7 @@
     }
     //Seleccionados
     function seleccionarTodos(){
-        console.log("sele")
+        
         selecthashmap = {}
         ninguno = true
         todos = false

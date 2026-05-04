@@ -22,10 +22,12 @@
     import DetalleTratamiento from "$lib/components/tratamientos/DetalleTratamiento.svelte";
     import Success from "$lib/components/botones/Success.svelte";
     import {
-    editTratamiento,
+        editTratamiento,
         eliminarTipo,
         eliminarTratamiento,
     } from "$lib/java/tratamientos/tratamientosback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -34,8 +36,9 @@
     const HOY = new Date().toISOString().split("T")[0];
     const today = new Date();
 
-    function toggleJava() {
+    async function toggleJava() {
         versionjava = !versionjava;
+        await getData();
     }
 
     let caber = createCaber();
@@ -71,7 +74,7 @@
         observacion: "",
         tipos: [],
         versionjava: false,
-        edit:false
+        edit: false,
     };
     let detalletratamiento = $state({ ...vaciotratamiento });
     let proxytratamiento = createStorageProxy(
@@ -145,12 +148,12 @@
             if (versionjava) {
                 let data_java = {
                     animalId: animal,
-                    establishmentId: 1,
+                    establishmentId: cab.id,
                     treatmentTypeId: tipo,
                     treatmentDate: fecha,
                     notes: observacion,
                 };
-                await editTratamiento(idtratamiento,data_java)
+                await editTratamiento(idtratamiento, data_java);
             } else {
                 const record = await pb
                     .collection("tratamientos")
@@ -211,13 +214,24 @@
             }
         });
     }
-    onMount(async () => {
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            userpermisos = [];
+            cab = loadStorageEstablecimiento();
+        } else {
+            cab = caber.cab;
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
 
-        per.setPer(respermisos.permisos, usuarioid);
-        userpermisos = getPermisosList(per.per.permisos);
+            per.setPer(respermisos.permisos, usuarioid);
+            userpermisos = getPermisosList(per.per.permisos);
+        }
+    }
+    onMount(async () => {
+        await getData();
         loadDetalle();
     });
 </script>

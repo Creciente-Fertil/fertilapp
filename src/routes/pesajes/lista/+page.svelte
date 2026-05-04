@@ -369,6 +369,7 @@
         historial={() => goto(pre + "/pesajes/historial")}
         {filterUpdate}
         {clickFilter}
+        
     />
     {#if esdev}
         <Success

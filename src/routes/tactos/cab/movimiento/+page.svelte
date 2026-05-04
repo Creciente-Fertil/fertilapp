@@ -31,7 +31,11 @@
     import NuevoTacto from "$lib/components/tactos/NuevoTacto.svelte";
     import AnimalesSeleccionados from "$lib/components/tactos/AnimalesSeleccionados.svelte";
     import TablaMovimiento from "$lib/components/TablaMovimiento.svelte";
+    import ListaMovimiento from "$lib/components/ListaMovimiento.svelte";
     import { getAll } from "$lib/java/animales/animalesback";
+    import * as RodeoService from "$lib/java/rodeos/rodeosback";
+    import * as LoteService from "$lib/java/lotes/lotesback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
@@ -283,12 +287,12 @@
         }
         setDetalle();
     }
-    function seleccionarTodos(){
-        selecthashmap = {}
-        ninguno = true
-        todos = false
-        algunos = false
-        clickTodos()
+    function seleccionarTodos() {
+        selecthashmap = {};
+        ninguno = true;
+        todos = false;
+        algunos = false;
+        clickTodos();
     }
     function clickTodos() {
         if (todos) {
@@ -317,18 +321,30 @@
         setDetalle();
     }
     async function getLotes() {
-        const records = await pb.collection("lotes").getFullList({
-            filter: `active = true && cab ~ '${cab.id}'`,
-            sort: "nombre",
-        });
+        let records = [];
+        if (versionjava) {
+            records = await LoteService.getAll(cab.id);
+        } else {
+            records = await pb.collection("lotes").getFullList({
+                filter: `active = true && cab ~ '${cab.id}'`,
+                sort: "nombre",
+            });
+        }
+
         lotes = records;
         ordenarNombre(lotes);
     }
     async function getRodeos() {
-        const records = await pb.collection("rodeos").getFullList({
-            filter: `active = true && cab ~ '${cab.id}'`,
-            sort: "nombre",
-        });
+        let records = [];
+        if (versionjava) {
+            records = await RodeoService.getAll(cab.id);
+        } else {
+            records = await pb.collection("rodeos").getFullList({
+                filter: `active = true && cab ~ '${cab.id}'`,
+                sort: "nombre",
+            });
+        }
+
         rodeos = records;
         //ordenarNombre(rodeos)
     }
@@ -340,7 +356,7 @@
                 expand: "rodeo,lote",
             });
         } else {
-            recordsa = await getAll();
+            recordsa = await getAll(cab.id);
         }
 
         animales = recordsa;
@@ -614,6 +630,11 @@
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
+        if (versionjava) {
+            cab = loadStorageEstablecimiento();
+        } else {
+            cab = caber.cab;
+        }
         await getAnimales();
         await getRodeos();
         await getLotes();
@@ -756,371 +777,31 @@
                         />
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <div class="hidden">
-        <div
-            class={`
-            hidden w-full md:grid
-            mx-auto py-6 px-4 max-w-7xl
-        `}
-        >
-            <div
-                class={`
-                    overflow-hidden rounded-xl
-                `}
-            >
-                <table class="table table-lg w-full">
-                    <thead
-                        class="bg-emerald-600 text-white dark:bg-emerald-700"
-                    >
-                        <tr>
-                            <th
-                                class="px-1 p-0 m-0 border-b border-emerald-700"
-                            >
-                                <button
-                                    aria-label="Todos"
-                                    onclick={clickTodos}
-                                    class={`
-                                    text-white bg-transparent rounded-lg
-                                    px-3 py-3
-                                    ${estilos.secundario}
-                                `}
-                                >
-                                    {#if todos}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-6"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                            />
-                                        </svg>
-                                    {/if}
-                                    {#if ninguno}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-6"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                            />
-                                        </svg>
-                                    {/if}
-                                    {#if algunos}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-6"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                            />
-                                        </svg>
-                                    {/if}
-                                </button>
-                            </th>
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >
-                                Caravana</th
-                            >
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >
-                                Estado</th
-                            >
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >
-                                Categoria</th
-                            >
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >
-                                Peso</th
-                            >
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >
-                                Rodeo</th
-                            >
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >
-                                Lote</th
-                            >
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >
-                                Raza</th
-                            >
-                            <th
-                                class="text-base mx-1 px-1 border-b border-emerald-700"
-                            >
-                                Color</th
-                            >
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each animalesrows as a}
-                            <tr>
-                                <td class="px-1 py-0 m-0">
-                                    <button
-                                        aria-label="fila"
-                                        onclick={() => clickAnimal(a.id)}
-                                        class={`
-                                font-medium bg-transparent rounded-lg
-                                px-3 py-3 text-base
-                                ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
-                            `}
-                                    >
-                                        {#if selecthashmap[a.id]}
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke-width="1.5"
-                                                stroke="currentColor"
-                                                class="size-6"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                                />
-                                            </svg>
-                                        {:else}
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke-width="1.5"
-                                                stroke="currentColor"
-                                                class="size-6"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                                />
-                                            </svg>
-                                        {/if}
-                                    </button>
-                                </td>
-                                <td class="text-base mx-1 px-1"
-                                    >{shorterWord(a.caravana)}</td
-                                >
-                                <td class="text-base mx-1 px-1"
-                                    >{getEstadoNombre(a.prenada)}</td
-                                >
-                                <td class="text-base mx-1 px-1"
-                                    >{capitalize(a.categoria)}</td
-                                >
-                                <td class="text-base mx-1 px-1">{a.peso}</td>
-                                <td class="text-base mx-1 px-1"
-                                    >{a.expand?.rodeo?.nombre || ""}</td
-                                >
-                                <td class="text-base mx-1 px-1"
-                                    >{a.expand?.lote?.nombre || ""}</td
-                                >
-                                <td class="text-base mx-1 px-1">{a.raza}</td>
-                                <td class="text-base mx-1 px-1">{a.color}</td>
-                            </tr>
-                        {/each}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="block md:hidden justify-items-center mx-1">
-            <div class="w-full flex justify-start">
-                <button
-                    aria-label="Todos"
-                    onclick={clickTodos}
-                    class={`
-                    text-base bg-transparent rounded-lg
-                    p-1 text-base flex flex-row
-                    ${estilos.secundario}
-                `}
-                >
-                    {#if todos}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            class="size-6"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                            />
-                        </svg>
-                    {/if}
-                    {#if ninguno}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            class="size-6"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                            />
-                        </svg>
-                    {/if}
-                    {#if algunos}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke-width="1.5"
-                            stroke="currentColor"
-                            class="size-6"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                            />
-                        </svg>
-                    {/if}
-
-                    <span class="mt-1"> Seleccionar todos </span>
-                </button>
-            </div>
-
-            {#each animalesrows as a}
                 <div
-                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                    class={`
+                        pt-0 my-0
+                        w-full md:hidden
+                        mx-auto px-2 md:px-1 max-w-7xl
+                    `}
                 >
-                    <div class="block p-4">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-medium">
-                                <button
-                                    aria-label="fila"
-                                    onclick={() => clickAnimal(a.id)}
-                                    class={`
-                                font-medium bg-transparent rounded-lg
-                                px-3 py-3 text-base
-                                ${selecthashmap[a.id] ? estilos.danger : estilos.primario}
-                            `}
-                                >
-                                    {#if selecthashmap[a.id]}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-6"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                            />
-                                        </svg>
-                                    {:else}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="size-6"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                            />
-                                        </svg>
-                                    {/if}
-                                </button>
-                                {shorterWord(a.caravana)}
-                            </h3>
-                            {#if a.sexo == "H" && a.prenada != 1}
-                                <div
-                                    class={`badge badge-outline badge-${getEstadoColor(a.prenada)}`}
-                                >
-                                    {getEstadoNombre(a.prenada)}
-                                </div>
-                            {/if}
-                        </div>
-                        <div class="grid grid-cols-2 gap-y-2">
-                            <div class="flex items-start">
-                                <span class="font-semibold"
-                                    >{getSexoNombre(a.sexo)}</span
-                                >
-                            </div>
-                            <div class="flex items-start">
-                                <span>Categoría:</span>
-                                <span class="font-semibold">
-                                    {a.categoria}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Lote:</span>
-                                <span class="font-semibold">
-                                    {a.expand
-                                        ? a.expand.lote
-                                            ? a.expand.lote.nombre
-                                            : ""
-                                        : ""}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Rodeo:</span>
-                                <span class="font-semibold">
-                                    {a.expand
-                                        ? a.expand.rodeo
-                                            ? a.expand.rodeo.nombre
-                                            : ""
-                                        : ""}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Raza:</span>
-                                <span class="font-semibold">
-                                    {a.raza}
-                                </span>
-                            </div>
-                            <div class="flex items-start">
-                                <span>Color:</span>
-                                <span class="font-semibold">
-                                    {a.color}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                    <ListaMovimiento
+                        bind:paginaActual
+                        bind:pageSize
+                        selecthash={selecthashmap}
+                        {animalesrows}
+                        clickFila={clickAnimal}
+                        {clickTodos}
+                        {seleccionarTodos}
+                        {todos}
+                        {ninguno}
+                        {algunos}
+                        verFila={verAnimal}
+                        conEstado={true}
+                        {cancelar}
+                        {siguiente}
+                    />
                 </div>
-            {/each}
+            </div>
         </div>
     </div>
 </Navbar2>

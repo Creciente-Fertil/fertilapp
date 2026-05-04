@@ -2,8 +2,8 @@
     import { onMount, onDestroy } from "svelte";
     let {
         total = 0,
-        longdescripcion = "Total de observciones seleccionados",
-        shortdescripcion = "Observaciones seleccionados",
+        longdescripcion = "",
+        shortdescripcion = "",
     } = $props();
 
     let isVisible = $state(false);
@@ -20,14 +20,13 @@
             isFixed = false;
         }
     };
-    // Función para llevar al usuario al inicio de la página suavemente
+// Función para llevar al usuario al inicio de la página suavemente
     const scrollToTop = () => {
         window.scrollTo({
             top: 0,
             behavior: "smooth",
         });
     };
-
     onMount(() => {
         window.addEventListener("scroll", handleScroll);
         // Ejecutar una vez al montar para verificar posición inicial
@@ -43,9 +42,9 @@
     <div
         class={`
             ${
-                isFixed
-                    ? "fixed top-20 left-1/2 transform -translate-x-1/2 z-50"
-                    : ""
+                isFixed ? 
+                "fixed top-20 left-1/2 transform -translate-x-1/2 z-50" 
+                : ""
             }
             container mx-auto py-1 px-4
             max-w-7xl w-full xl:w-1/2
@@ -55,7 +54,7 @@
         <div
             class={`
             rounded-xl p-1 mb-1
-            
+                
             px-6
         `}
         >

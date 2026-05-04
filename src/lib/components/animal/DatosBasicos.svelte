@@ -23,6 +23,7 @@
     import { getAll, saveAnimal } from "$lib/java/animales/animalesback";
     import * as LoteService from "$lib/java/lotes/lotesback";
     import * as RodeoService from "$lib/java/rodeos/rodeosback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let {
         caravana = $bindable(""),
         rodeo = $bindable(""),
@@ -104,7 +105,7 @@
     //rodeos
     async function getRodeos() {
         if (versionjava) {
-            const records = await RodeoService.getAll();
+            const records = await RodeoService.getAll(cab.id);
             rodeos = records;
         } else {
             const records = await pb.collection("rodeos").getFullList({
@@ -123,7 +124,7 @@
     //Lotes
     async function getLotes() {
         if (versionjava) {
-            const records = await LoteService.getAll();
+            const records = await LoteService.getAll(cab.id);
             lotes = records;
         } else {
             const records = await pb.collection("lotes").getFullList({
@@ -143,7 +144,7 @@
     async function getAnimales() {
         let recordsa = [];
         if (versionjava) {
-            recordsa = await getAll();
+            recordsa = await getAll(cab.id);
         } else {
             recordsa = await pb.collection("animales").getFullList({
                 filter: `active=true && cab='${cab.id}' `,
@@ -191,22 +192,22 @@
 
     function openEditar() {
         modoedicion = true;
-            pesoviejo = peso;
-            sexoviejo = sexo;
-            loteviejo = lote;
-            rodeovieja = rodeo;
-            caravanavieja = caravana;
-            categoriavieja = categoria;
-            prenadaviejo = prenada;
-            rpviejo = rp;
-            fechaviejo = fecha;
-            if (connacimiento) {
-                nombremadreviejo = nombremadre;
-                nombrepadreviejo = nombrepadre;
-                madreviejo = madre;
-                padreviejo = padre;
-                observacionviejo = observacion;
-            }
+        pesoviejo = peso;
+        sexoviejo = sexo;
+        loteviejo = lote;
+        rodeovieja = rodeo;
+        caravanavieja = caravana;
+        categoriavieja = categoria;
+        prenadaviejo = prenada;
+        rpviejo = rp;
+        fechaviejo = fecha;
+        if (connacimiento) {
+            nombremadreviejo = nombremadre;
+            nombrepadreviejo = nombrepadre;
+            madreviejo = madre;
+            padreviejo = padre;
+            observacionviejo = observacion;
+        }
         //if (userpermisos[5]) {
         //    modoedicion = true;
         //    pesoviejo = peso;
@@ -680,10 +681,15 @@
 
     onMount(async () => {
         id = $page.params.slug;
-
+        if (versionjava) {
+            cab = loadStorageEstablecimiento();
+        } else {
+            cab = caber.cab;
+        }
         await getAnimales();
         await getRodeos();
         await getLotes();
+
         if (connacimiento) {
             idnacimiento = nacimiento.id;
             fecha = nacimiento.fecha.split(" ")[0];

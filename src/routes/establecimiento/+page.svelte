@@ -55,7 +55,7 @@
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
-        await getData ()
+        await getData()
     }
     let usuarioid = $state("");
     let cab = $state({

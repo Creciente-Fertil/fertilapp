@@ -389,6 +389,7 @@
     }
     function openTiposModal() {
         detallestipos.tipos = tipotratamientos;
+        
         proxytipos.save(detallestipos);
         goto(pre + "/tratamientos/tipos");
         //tiposmodal.showModal();
@@ -775,6 +776,7 @@
         {clickFilter}
         {versionjava}
         {toggleJava}
+        {selecthash}
     />
     {#if esdev}
         <Success

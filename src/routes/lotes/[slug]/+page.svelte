@@ -19,6 +19,9 @@
     import Secondary from "$lib/components/botones/Secondary.svelte";
     import Success from "$lib/components/botones/Success.svelte";
     import { editLote, eliminarLote, saveLot } from "$lib/java/lotes/lotesback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import permisos from "$lib/stores/permisos";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -40,8 +43,9 @@
     //ver java
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
 
-    function toggleJava() {
+    async function toggleJava() {
         versionjava = !versionjava;
+        await getData()
     }
     let defaultLote = {
         id: "",
@@ -59,15 +63,27 @@
         edit = detalleLote.edit;
         versionjava = detalleLote.versionjava;
     }
-    onMount(async () => {
-        slug = $page.params.slug;
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+    async function getData() {
+        if(versionjava){
+            let user_data = getUser()
+            cab = loadStorageEstablecimiento()
+            usuarioid = user_data.id
+            userpermisos =[]
+        }
+        else{
+            cab =  caber.cab
+let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
 
         let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
         per.setPer(respermisos.permisos, usuarioid);
 
         userpermisos = getPermisosList(per.per.permisos);
+        }
+    }
+    onMount(async () => {
+        slug = $page.params.slug;
+        await getData()
         if (slug == "0") {
             add = true;
             nombre = "";
@@ -113,7 +129,7 @@
             if (versionjava) {
                 let data_java = {
                     name: nombre,
-                    establishmentId: 1,
+                    establishmentId: cab.id,
                     latitude: -34.6037,
                     longitude: -58.3816
                 };
@@ -134,7 +150,7 @@
             let data = {
                 nombre,
                 active: true,
-                cab: 1,
+                cab: cab.id,
             };
             let res = await saveLot(data);
             Swal.fire("Éxito guardar", "Se pudo guardar el lote", "success");

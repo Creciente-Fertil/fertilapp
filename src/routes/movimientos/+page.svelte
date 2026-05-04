@@ -270,7 +270,7 @@
     }
     async function getLotes() {
         if (versionjava) {
-            const records = await LotesService.getAll();
+            const records = await LotesService.getAll(cab.id);
             lotes = records;
             ordenarNombre(lotes);
         } else {
@@ -284,7 +284,7 @@
     }
     async function getRodeos() {
         if (versionjava) {
-            const records = await RodeosService.getAll();
+            const records = await RodeosService.getAll(cab.id);
             rodeos = records;
             ordenarNombre(rodeos);
         } else {
@@ -306,7 +306,7 @@
     }
     async function getAnimales() {
         if (versionjava) {
-            const recordsa = await AnimalService.getAll();
+            const recordsa = await AnimalService.getAll(cab.id);
 
             animales = recordsa;
         } else {
@@ -808,15 +808,16 @@
         }
     }
     async function getData() {
-        await getAnimales();
-        await getRodeos();
-        await getLotes();
         if(versionjava){
             cab = loadStorageEstablecimiento()
         }
         else{
             cab = caber.cab
         }
+        await getAnimales();
+        await getRodeos();
+        await getLotes();
+        
         //await getTipos();
     }
     onMount(async () => {

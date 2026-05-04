@@ -260,8 +260,9 @@
     }
     async function getAnimales() {
         if (versionjava) {
-            const recordsa = await AnimalService.getAll();
+            const recordsa = await AnimalService.getAll(cab.id);
             animales = recordsa;
+            
         } else {
             const recordsa = await pb.collection("animales").getFullList({
                 filter: `active=true && cab='${cab.id}' && delete = false`,
@@ -301,7 +302,7 @@
     }
     async function getTiposTratamientos() {
         if (versionjava) {
-            const records = await TratamientoService.getAllTipos();
+            const records = await TratamientoService.getAllTipos(cab.id);
             tipotratamientos = records;
         } else {
             const records = await pb
@@ -1080,10 +1081,10 @@
     async function getTotales() {
         if (versionjava) {
 
-            let recordtactos = await TactoService.getAll();
-            let recordnacimientos = await NacimientoService.getAll();
-            let recordtratamientos = await TratamientoService.getAll();
-            let servicios = await ServicioService.getAllServices();
+            let recordtactos = await TactoService.getAll(cab.id);
+            let recordnacimientos = await NacimientoService.getAll(cab.id);
+            let recordtratamientos = await TratamientoService.getAll(cab.id);
+            let servicios = await ServicioService.getAllServices(cab.id);
             let recordservicios = servicios.filter(
                 (s) => s.tipo == "NATURAL_SERVICE",
             );
@@ -1091,12 +1092,12 @@
             let recordinseminaciones = servicios.filter(
                 (s) => s.tipo == "INSEMINATION",
             );
-            let recordobservaciones = await ObservacionService.getAll();
-            let recordpesajes = await PesajeService.getAll();
+            let recordobservaciones = await ObservacionService.getAll(cab.id);
+            let recordpesajes = await PesajeService.getAll(cab.id);
 
-            const recordslotes = await LoteService.getAll();
+            const recordslotes = await LoteService.getAll(cab.id);
 
-            const recordsrodeos = await RodeoService.getAll();
+            const recordsrodeos = await RodeoService.getAll(cab.id);
             totaleventos.tactos = recordtactos.length;
             totaleventos.inseminaciones = recordinseminaciones.length;
             totaleventos.nacimientos = recordnacimientos.length;

@@ -1,4 +1,5 @@
 import { getUser } from "$lib/userstorage/usersotrage"
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_PESOS = "weights"
 function processPeso(peso) {
@@ -8,24 +9,32 @@ function processPeso(peso) {
         pesoanterior: 0,
         pesonuevo: peso.weight,
         animal: peso.animalId,
-        expand:{
-            animal:{
-                id:peso.animalId,
-                caravana:peso.animalTagNumber
+        expand: {
+            animal: {
+                id: peso.animalId,
+                caravana: peso.animalTagNumber
             }
         }
     }
     return data_peso
 }
-function processPesos(data) {
+function processPesos(data, cabid = null) {
     let data_pesos = []
     for (let i = 0; i < data.length; i++) {
         let fila = data[i]
-        data_pesos.push(processPeso(fila))
+        if (cabid) {
+            if (fila.establishmentId == cabid) {
+                data_pesos.push(processPeso(fila))
+            }
+        }
+        else {
+            data_pesos.push(processPeso(fila))
+        }
+
     }
     return data_pesos
 }
-export async function getAll(cabid=null) {
+export async function getAll(cabid = null) {
     let user = getUser();
     let token = user.token;
     let ruta = `${RUTA_JAVA}${RUTA_PESOS}/all`
@@ -39,9 +48,9 @@ export async function getAll(cabid=null) {
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(url.toString(), options)
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
     let data_all = await res_all.json()
-    let procesada = processPesos(data_all)
+    let procesada = processPesos(data_all,cabid)
     return procesada
 }
 function postData(data) {
@@ -55,9 +64,9 @@ function postData(data) {
 }
 export async function savePeso(data) {
     let ruta = `${RUTA_JAVA}${RUTA_PESOS}`
-    
+
     let data_peso = postData(data)
-    
+
     let user = getUser();
     let token = user.token;
     let res_save = await fetch(ruta, {

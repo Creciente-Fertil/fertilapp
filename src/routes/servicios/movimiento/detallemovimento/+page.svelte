@@ -28,11 +28,13 @@
     import { saveServicio } from "$lib/java/servicios/serviciosback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { getAll } from "$lib/java/animales/animalesback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
 
     //java
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
-    function toggleJava() {
+    async function toggleJava() {
         versionjava = !versionjava;
+        await getData();
     }
 
     let innerWidth = $state(0);
@@ -421,13 +423,14 @@
                 let servicio = listaanimales[i];
                 let data_java = {
                     animalId: servicio.id,
-                    establishmentId: 1,
+                    establishmentId: cab.id,
                     serviceType: esNatural ? "NATURAL_SERVICE" : "INSEMINATION",
                     startDate: esNatural ? fechadesdeserv : fechainseminacion,
                     expectedBirthDate: fechaparto,
                     notes: servicio.observacion,
                     isActive: true,
-                    fatherIds:padreslist
+                    fatherIds: padreslist,
+                    
                 };
                 if (esNatural && fechahastaserv != "") {
                     data_java.endDate = fechahastaserv;
@@ -448,7 +451,7 @@
     async function getAnimales() {
         let recordsa = [];
         if (versionjava) {
-            recordsa = await getAll();
+            recordsa = await getAll(cab.id);
         } else {
             recordsa = await pb.collection("Animalestacto").getFullList({
                 filter: `active=true && cab='${cab.id}'`,
@@ -479,6 +482,7 @@
             usuarioid = user_data.id;
 
             userpermisos = [];
+            cab = loadStorageEstablecimiento();
         } else {
             let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
             usuarioid = pb_json.record.id;
@@ -486,6 +490,7 @@
 
             per.setPer(respermisos.permisos, usuarioid);
             userpermisos = getPermisosList(per.per.permisos);
+            cab = caber.cab;
         }
 
         await getAnimales();
@@ -509,6 +514,30 @@
                 onclick={toggleJava}
             />
         {/if}
+        <div class="md:hidden">
+            <a
+                href={`${pre + "/servicios/movimiento"}`}
+                class="
+                inline-flex items-center text-sm
+                text-gray-700 hover:text-gray-900 dark:text-gray-400
+                dark:hover:text-gray-200 mb-4"
+            >
+                <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                </svg>
+                Volver a movimiento
+            </a>
+        </div>
         <DetalleMovimiento
             {esNatural}
             {observaciongeneral}
@@ -546,7 +575,7 @@
         />
 
         <div
-            class="mt-6 flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
+            class="mt-6 hidden md:flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
         >
             <!-- Botón Cancelar -->
             <button

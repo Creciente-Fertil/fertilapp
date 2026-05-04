@@ -21,10 +21,12 @@
     import { saveTacto } from "$lib/java/tactos/tactosback";
     import Secondary from "$lib/components/botones/Secondary.svelte";
     import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     //java
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
-    function toggleJava() {
+    async function toggleJava() {
         versionjava = !versionjava;
+        await getData()
     }
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -90,7 +92,7 @@
 
         proxy.save(detallemovimiento);
     }
-    function setDefault(){
+    function setDefault() {
         proxy.save(defaultmovimiento);
     }
     function loadDetalle() {
@@ -250,38 +252,35 @@
                     nombreveterinario: "",
                     cab: cab.id,
                     active: true,
+                    
                 };
-                await saveTacto(datatacto)
-                
+                await saveTacto(datatacto);
             }
-            
-
         }
-        setDefault()
-        volver()
+        setDefault();
+        volver();
     }
-    async function getData(){
-        if(versionjava){
-            let user_data = getUser()
-        usuarioid = user_data.id;
-        
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
 
-        
-        userpermisos = [];
-        loadDetalle();
-        }
-        else{
-let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+            userpermisos = [];
+            cab = loadStorageEstablecimiento()
+            loadDetalle();
+        } else {
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
 
-        per.setPer(respermisos.permisos, usuarioid);
-        userpermisos = getPermisosList(per.per.permisos);
-        loadDetalle();
+            per.setPer(respermisos.permisos, usuarioid);
+            userpermisos = getPermisosList(per.per.permisos);
+            cab = caber.cab
+            loadDetalle();
         }
     }
     onMount(async () => {
-        await getData()
+        await getData();
     });
     function verAnimal(id) {
         let a_idx = listaanimales.findIndex((a) => a.id == id);
@@ -298,17 +297,43 @@ let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <div class={classmove}>
-    {#if esdev}
-        <Secondary
-            texto={versionjava?"Cerrar java":"Ver java"}
-            onclick={toggleJava}
-        />
-        { /if}
+        {#if esdev}
+            <Secondary
+                texto={versionjava ? "Cerrar java" : "Ver java"}
+                onclick={toggleJava}
+            />
+        {/if}
+        <div class="md:hidden">
+            <a
+                href={`${pre + "/tactos/cab/movimiento"}`}
+                class="
+                inline-flex items-center text-sm
+                text-gray-700 hover:text-gray-900 dark:text-gray-400
+                dark:hover:text-gray-200 mb-4"
+            >
+                <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                </svg>
+                Volver a movimento
+            </a>
+        </div>
         <DetalleMovimiento
             {fecha}
             tipo={tipotactoselect}
             {prenada}
             {observaciongeneral}
+            {listaanimales}
+            {mover}
         />
         <DetallesAnimalesMovimiento
             bind:selectanimales={listaanimales}
@@ -318,7 +343,7 @@ let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
             abierta={false}
         />
         <div
-            class="mt-6 flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
+            class="mt-6 hidden md:flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
         >
             <!-- Botón Cancelar -->
             <button

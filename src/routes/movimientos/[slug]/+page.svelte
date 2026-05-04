@@ -9,6 +9,7 @@
     import Swal from "sweetalert2";
     import { createStorageProxy } from "$lib/filtros/filtros";
     import { eliminarMove } from "$lib/java/movimientos/movimientosback";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -95,6 +96,8 @@
         fromEstablishmentId = detallemovimento.fromEstablishmentId;
         toEstablishmentId = detallemovimento.toEstablishmentId;
         observaciones = detallemovimento.observaciones;
+        cab =loadStorageEstablecimiento()
+        
     }
     onMount(() => {
         getData();

@@ -1,5 +1,6 @@
 import { processEstablishment, processEstablishments } from "../establecimientos/establecimientosback"
 import { getUser } from "$lib/userstorage/usersotrage"
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_USERS = "users"
 const RUTA_AUTH = "auth"
@@ -57,7 +58,7 @@ export async function establecimientosUser(iduser) {
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(ruta, options)
+    let res_all = await handleAuthenticatedRequest(ruta, options)
 
     let data_all = await res_all.json()
     let procesada = processEstablishments(data_all)
@@ -74,7 +75,7 @@ export async function getUserId(id) {
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(ruta, options)
+    let res_all = await handleAuthenticatedRequest(ruta, options)
 
     let data_all = await res_all.json()
     //let procesada = processUser(data_all)

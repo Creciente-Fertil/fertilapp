@@ -329,7 +329,7 @@
         }
 
         lotes = records;
-        ordenarNombre(lotes);
+        //ordenarNombre(lotes);
     }
     async function getRodeos() {
         let records = [];

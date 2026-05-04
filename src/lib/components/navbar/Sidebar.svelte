@@ -128,7 +128,7 @@
         <li
             transition:slide
             class={`
-                    
+                    hidden
                     ${cab.exist ? "" : "disabled"}
                 `}
         >

@@ -66,17 +66,8 @@
                     Seleccion animales
                 </h1>
             </div>
-            <button
-                class={`hidden btn btn-primary rounded-lg ${estilos.btntext2}`}
-                data-theme="forest"
-                onclick={nuevo}
-            >
-                {#if esCelu}
-                    <span class="text-lg">Nuevos</span>
-                {:else}
-                    <span class="text-lg">+ Nuevos movimientos</span>
-                {/if}
-            </button>
+            
+            
         </div>
         <!--Filtros-->
         <div

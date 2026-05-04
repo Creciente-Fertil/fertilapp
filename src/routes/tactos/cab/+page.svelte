@@ -675,6 +675,7 @@ await getData()
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador
+        {selecthash}
         {tactosrow}
         cabnombre={cab.nombre}
         {estados}

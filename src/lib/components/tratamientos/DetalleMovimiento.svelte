@@ -10,13 +10,22 @@
         observaciongeneral = $bindable(""),
         tipo = $bindable(""),
         tipos = [],
+        mover=()=>{},
+        listaanimales=[]
     } = $props();
+    function getTipoNombre(tipoid){
+        let t_idx = tipos.findIndex(t=>t.id==tipoid)
+        if(t_idx != -1){
+            return tipos[t_idx].nombre
+        }
+        return ""
+    }
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <div
     class="
-        container py-3 px-4 max-w-7xl
+        container py-1 px-1 md:py-3 md:px-4 max-w-7xl
         "
 >
     <!--Header-->
@@ -62,7 +71,12 @@
                             Tipo tratamiento</span
                         >
                     </label>
-                    <label class="input-group">
+                    <span
+                        class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3 `}
+                    >
+                        {getTipoNombre(tipo)}</span
+                    >
+                    <label class="hidden input-group">
                         <select
                             class={`
                                 select select-bordered
@@ -124,6 +138,23 @@
                     {observaciongeneral}
                 </p>
             </div>
+        </div>
+        <div
+            class="mt-6 flex md:hidden space-x-3 justify-end border-t dark:border-gray-800"
+        >
+            
+            <!-- Botón Guardar -->
+            <button
+                class="
+                    mt-1 px-5 py-1 bg-[#115642] text-white
+                    font-medium rounded-full
+                    shadow-sm hover:bg-green-700
+                    transition-colors text-base
+                    "
+                onclick={mover}
+            >
+                Crear {listaanimales.length > 1 ? "tratamientos" : "tratamiento"}
+            </button>
         </div>
     </div>
 </div>

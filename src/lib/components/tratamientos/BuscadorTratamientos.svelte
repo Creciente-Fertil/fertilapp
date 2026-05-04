@@ -1,14 +1,14 @@
 <script>
     import estilos from "$lib/stores/estilos";
     import { slide } from "svelte/transition";
-
+    import Success from "../botones/Success.svelte";
     import MultiSelect from "../MultiSelect.svelte";
     import { goto } from "$app/navigation";
     import { shorterWord } from "$lib/stringutil/lib";
     import Filter from "$lib/svgs/filter.svelte";
     import Sparkies from "$lib/svgs/sparkies.svelte";
     import Arrowback from "$lib/svgs/arrowback.svelte";
-    import Sticky from "./Sticky.svelte";
+    import StickyMovimiento from "../StickyMovimiento.svelte";
     import Rubber from "$lib/svgs/rubber.svelte";
     import estados from "$lib/stores/estados";
     let pre = import.meta.env.VITE_PRE;
@@ -41,7 +41,7 @@
         limpiarFiltros = () => {},
     } = $props();
     function volver() {
-        goto(pre + "/tratamientos/movimiento/detallemovimento");
+        goto(pre + "/tratamientos");
     }
 </script>
 
@@ -123,12 +123,13 @@
                 </svg>
             </div>
             <!-- Derecha: botones -->
-            <div class="flex flex-wrap gap-2">
+            <div class="flex justify-between">
                 <button
                     onclick={clickFilter}
                     class={`
+                        
                         border rounded-full px-3 py-1 text-md flex 
-                        items-center gap-1
+                        items-center
                         
                         ${
                             isOpenFilter
@@ -140,6 +141,14 @@
                     <Filter size="size-4" />
                     Filtros
                 </button>
+                <div
+                    class="md:hidden"
+                >
+                    <Success
+                        onclick={nuevoTratamiento}
+                        texto="Siguiente"
+                    />
+                </div>
             </div>
         </div>
 
@@ -258,4 +267,7 @@
         {/if}
     </div>
 </div>
-<Sticky total={Object.keys(selecthashmap).length} />
+<StickyMovimiento 
+    longdescripcion="Total animales seleccionados"
+    shortdescripcion="Animales seleccionados"
+total={Object.keys(selecthashmap).length} />

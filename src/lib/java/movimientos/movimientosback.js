@@ -1,5 +1,5 @@
 import { getUser } from "$lib/userstorage/usersotrage";
-
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/";
 const RUTA_MOVEMENTS = "movements";
 export function getMovementType() {
@@ -68,7 +68,7 @@ export async function getAll(cabid=null) {
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(url.toString(), options)
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
 
@@ -96,7 +96,7 @@ export async function getMoveId(id) {
 function postData(data, establishmentId = 1) {
     let data_move = {
         animalIds: data.animales,
-        establishmentId,
+        establishmentId:data.cab,
         movementDate: data.fecha,
         movementType: data.tipo,
         fromLotId:data.fromLotId,

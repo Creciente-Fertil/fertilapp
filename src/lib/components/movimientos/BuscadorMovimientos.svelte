@@ -48,7 +48,7 @@
         `}
     >
         <div
-            class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 mb-2 border-b dark:border-gray-800"
+            class="flex flex-row md:items-center justify-between gap-4 pb-1 mb-2 border-b dark:border-gray-800"
         >
             <div
                 class={`
@@ -67,12 +67,27 @@
             </div>
             <button
                 class={`
+                    hidden md:flex
                     ${estilos.btnbuscador}
                     ${estilos.btntextbuscador}
                 `}
                 onclick={nuevo}
             >
                 + Nuevo movimiento
+            </button>
+            <button
+                onclick={nuevo}
+                class={`
+                bg-[#115642] hover:bg-[#0f4537] 
+                text-white 
+                w-10 h-10 rounded-full 
+                flex items-center justify-center 
+                shadow-md transition-all duration-200
+                md:hidden mt-2
+            `}
+                aria-label="Nuevo lote"
+            >
+                <span class="text-2xl leading-none">+</span>
             </button>
         </div>
         <!--Filtros-->
@@ -125,7 +140,7 @@
             <div class="flex flex-wrap gap-2">
                 <button
                     class={`
-                        
+                        hidden md:flex
                         border rounded-full px-3 py-1 text-md flex items-center gap-1
                         bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
                         dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white

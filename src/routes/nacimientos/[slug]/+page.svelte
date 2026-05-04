@@ -25,11 +25,14 @@
         saveBirth,
     } from "$lib/java/nacimientos/nacimientosback";
     import { getAll } from "$lib/java/animales/animalesback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
 
     async function toggleJava() {
         versionjava = !versionjava;
-        await getAnimales();
+        await getData();
     }
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
@@ -133,7 +136,7 @@
                 expand: "nacimiento",
             });
         } else {
-            let data_animales = await getAll();
+            let data_animales = await getAll(cab.id);
             recordsa = data_animales;
         }
         recordsa = recordsa.sort((a, b) =>
@@ -182,15 +185,25 @@
         fecha = detalleNacimiento.fecha;
         setViejo();
     }
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            cab = loadStorageEstablecimiento();
+            userpermisos = [];
+        } else {
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+            per.setPer(respermisos.permisos, usuarioid);
+
+            userpermisos = getPermisosList(per.per.permisos);
+        }
+    }
     onMount(async () => {
         slug = $page.params.slug;
         idnacimiento = slug;
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-        per.setPer(respermisos.permisos, usuarioid);
-
-        userpermisos = getPermisosList(per.per.permisos);
+        await getData();
         if (slug == "0") {
             add = true;
             edit = true;
@@ -345,7 +358,7 @@
                         date: fecha,
                         motherId: m.id,
                         notes: observacion,
-                        establishmentId:1
+                        establishmentId:cab.id,
                     };
                     await editNacimiento(idnacimiento, dataparicion);
                 } else {

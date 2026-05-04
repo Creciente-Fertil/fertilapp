@@ -53,13 +53,13 @@
 <div
     class="
     pt-1 md:pt-2 lg:pt-5
-        container mx-auto  px-4 max-w-7xl
-        max-h-[500px] overflow-y-auto custom-scrollbar  
+        container px-1 md:px-4 max-w-7xl
+        md:max-h-[500px] overflow-y-auto custom-scrollbar  
         "
 >
     <div
         class={`
-            rounded-2xl p-1 md:p-3  mb-1
+            rounded-2xl p-2 md:p-3  mb-1
             dark:bg-slate-900 bg-white
             shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
             dark:shadow-none
@@ -73,7 +73,7 @@
                     py-1 
                 `}
             >
-                <div class="flex items-center justify-between gap-4">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <!-- Lado izquierdo: Icono + Título + Badge -->
                     <div class="flex items-center gap-3">
                         <h1
@@ -93,11 +93,11 @@
                             dark:bg-gray-700 dark:text-gray-200
                         `}
                         >
-                            {rows.length} animales
+                            {rows.length}
                         </span>
                     </div>
                     <!-- Lado derecho: Buscador + Botón toggle -->
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-start md:items-center gap-3">
                         <!--Buscador-->
                         <div class="relative">
                             <div
@@ -166,160 +166,6 @@
                         />
                     {/each}
                     
-                {/if}
-            </div>
-            <div class="hidden" transition:slide>
-                {#if esNatural}
-                    <div class="block justify-items-center mx-1">
-                        {#each rows as a, i}
-                            <div class="card w-full shadow-xl p-2">
-                                <button
-                                    onclick={() => quitarAnimal(a.id)}
-                                    class="absolute top-2 right-2 text-xl text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                                    aria-label="Quitar de la lista"
-                                >
-                                    ✕
-                                </button>
-                                <div class="block p-4">
-                                    <div class="grid grid-cols-1 gap-y-2">
-                                        <div
-                                            class="flex items-start justify-between px-1 md:px-4"
-                                        >
-                                            <div>
-                                                <span>Caravana:</span>
-                                                <br />
-                                                <span class="font-semibold"
-                                                    >{shorterWord(
-                                                        a.caravana,
-                                                    )}</span
-                                                >
-                                            </div>
-                                            <button
-                                                class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
-                                                onclick={() => verAnimal(a.id)}
-                                            >
-                                                Ver
-                                            </button>
-                                        </div>
-
-                                        <div>
-                                            {#if cargadoanimales}
-                                                <SelectToros
-                                                    opciones={padres}
-                                                    bind:valores={
-                                                        selectanimales[i].padres
-                                                    }
-                                                    agregarElemento={cambiar}
-                                                    quitarElemento={cambiar}
-                                                    margintop=""
-                                                    py="py-2"
-                                                    px="px-1"
-                                                    campo="caravana"
-                                                />
-                                            {/if}
-                                        </div>
-                                        <div class="flex items-start">
-                                            <input
-                                                bind:value={
-                                                    selectanimales[i]
-                                                        .observacion
-                                                }
-                                                placeholder="Observación"
-                                                class={`
-                                                    h-12 border border-gray-300
-                                                    px-2 
-                                                    w-full
-                                                    rounded-md
-                                                    focus:outline-none focus:ring-2 
-                                                    focus:ring-green-500 
-                                                    focus:border-green-500
-                                                    ${estilos.bgdark2}
-                                                `}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {/each}
-                    </div>
-                {:else}
-                    <div class="block justify-items-center mx-1">
-                        {#each rows as a, i}
-                            <div class="card w-full shadow-xl p-2">
-                                <button
-                                    onclick={() => quitarAnimal(a.id)}
-                                    class="absolute top-2 right-2 text-xl text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-                                    aria-label="Quitar de la lista"
-                                >
-                                    ✕
-                                </button>
-                                <div class="block p-4">
-                                    <div class="grid grid-cols-1 gap-y-2">
-                                        <div
-                                            class="flex items-start justify-between px-1 md:px-4"
-                                        >
-                                            <div>
-                                                <span>Caravana:</span>
-                                                <br />
-                                                <span class="font-semibold"
-                                                    >{shorterWord(
-                                                        a.caravana,
-                                                    )}</span
-                                                >
-                                            </div>
-                                            <button
-                                                class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
-                                                onclick={() => verAnimal(a.id)}
-                                            >
-                                                Ver
-                                            </button>
-                                        </div>
-
-                                        <div
-                                            class="flex items-start col-span-2"
-                                        >
-                                            {#if cargadoanimales}
-                                                <PredictSelect
-                                                    {cambiar}
-                                                    bind:valor={
-                                                        selectanimales[i].padre
-                                                    }
-                                                    etiqueta={"Padre"}
-                                                    bind:cadena={
-                                                        selectanimales[i]
-                                                            .pajuela
-                                                    }
-                                                    lista={listapadres}
-                                                />
-                                            {/if}
-                                        </div>
-
-                                        <div
-                                            class="flex items-start col-span-2"
-                                        >
-                                            <input
-                                                bind:value={
-                                                    selectanimales[i]
-                                                        .observacion
-                                                }
-                                                placeholder="Observación"
-                                                class={`
-                                                    h-12 border border-gray-300
-                                                    px-2 
-                                                    w-full
-                                                    rounded-md
-                                                    focus:outline-none focus:ring-2 
-                                                    focus:ring-green-500 
-                                                    focus:border-green-500
-                                                    ${estilos.bgdark2}
-                                                `}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {/each}
-                    </div>
                 {/if}
             </div>
         </div>

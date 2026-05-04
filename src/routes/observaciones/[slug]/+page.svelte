@@ -38,7 +38,7 @@
     async function toggleJava() {
         versionjava = !versionjava;
 
-        await getAnimales();
+        await getData();
     }
     let caber = createCaber();
     let cab = caber.cab;
@@ -79,7 +79,7 @@
 
     async function getAnimales() {
         if (versionjava) {
-            let recordsa = await getAll();
+            let recordsa = await getAll(cab.id);
             animales = recordsa;
             animales.sort((a1, a2) =>
                 a1.caravana.toLocaleLowerCase() >
@@ -177,7 +177,8 @@
                 let data_java = {
                     animalId: animal,
                     observationDate: fecha,
-                    notes: observacion
+                    notes: observacion,
+                    establishmentId:cab.id
                 };
                 await editComment(idobservacion, data_java);
             } else {

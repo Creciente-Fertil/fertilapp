@@ -129,7 +129,7 @@
     async function getRodeos() {
         let records = [];
         if (versionjava) {
-            records = await RodeoService.getAll();
+            records = await RodeoService.getAll(cab.id);
         } else {
             records = await pb.collection("rodeos").getFullList({
                 filter: `active = true && cab = '${cab.id}'`,
@@ -143,7 +143,7 @@
     async function getLotes() {
         let records = [];
         if (versionjava) {
-            records = await LoteService.getAll();
+            records = await LoteService.getAll(cab.id);
         } else {
             records = await pb.collection("lotes").getFullList({
                 filter: `active = true && cab = '${cab.id}'`,
@@ -302,13 +302,8 @@
             await saveMove(data_move, cab.id);
         }
         if (selectrodeo) {
-            for (let i = 0; i < lista.length; i++) {
-                let fila = lista[i];
-                let id = fila.id;
-                let animal = { ...fila };
-
-                let data_move = {
-                    animalId: id,
+             let data_move = {
+                    animalIds: lista.map((a) => a.id),
                     establishmentId: cab.id,
                     movementDate: fecha,
                     movementType: "HERD",
@@ -321,9 +316,6 @@
                     notes: "",
                 };
                 await saveMove(data_move, cab.id);
-                animal.rodeo = rodeo;
-                await editAnimal(id, animal);
-            }
         }
 
         //if (selectbaja) {

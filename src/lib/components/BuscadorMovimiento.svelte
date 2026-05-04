@@ -1,18 +1,16 @@
 <script>
     import estilos from "$lib/stores/estilos";
-
     import { slide } from "svelte/transition";
-
-    import MultiSelect from "../MultiSelect.svelte";
+    import MultiSelect from "./MultiSelect.svelte";
     import { goto } from "$app/navigation";
     import { shorterWord } from "$lib/stringutil/lib";
     import Filter from "$lib/svgs/filter.svelte";
-    import Success from "../botones/Success.svelte";
     import Sparkies from "$lib/svgs/sparkies.svelte";
     import Arrowback from "$lib/svgs/arrowback.svelte";
-    import StickyMovimiento from "../StickyMovimiento.svelte";
+    
     import Rubber from "$lib/svgs/rubber.svelte";
     import estados from "$lib/stores/estados";
+    import StickyMovimiento from "./StickyMovimiento.svelte";
     let pre = import.meta.env.VITE_PRE;
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -36,12 +34,19 @@
         isOpenFilter = $bindable(false),
         //funciones
 
-        nuevoTacto = () => {},
+        nuevo = () => {},
 
         filterUpdate = () => {},
         clickFilter = () => {},
         limpiarFiltros = () => {},
+        
+        longdescripcion = "",
+        shortdescripcion = "",
+        siguiente=()=>{}
     } = $props();
+    function volver() {
+        goto(pre + "/tratamientos/movimiento/detallemovimento");
+    }
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
@@ -61,28 +66,18 @@
             <div
                 class={`
                     bg-transparent
-                    px-2 py-0 
+                    px-2 py-0  
                 `}
             >
-                <button onclick={() => goto(pre + "/tactos/cab")}>
+                <button onclick={volver}>
                     <h1
                         class={`
                             text-xl font-semibold
                             dark:text-gray-300 text-gray-700
-                            flex                    
+                            flex                   
                         `}
                     >
-                        Selección de madres
-                        <!-- Badge -->
-                        <span
-                            class={`
-                            inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                            bg-gray-100 text-gray-800
-                            dark:bg-gray-700 dark:text-gray-200
-                        `}
-                        >
-                            {Object.keys(selecthashmap).length} animales
-                        </span>
+                        Seleccción de animales
                     </h1>
                 </button>
             </div>
@@ -96,7 +91,7 @@
                 class={`
                   flex items-center flex-1 
                   shadow-2xl
-                  rounded-full p-3
+                  rounded-t-full p-3
                    bg-white dark:bg-gray-900
                   shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
                   dark:shadow-[0_4px_8px_-2px_rgba(255,255,255,0.1)]
@@ -132,7 +127,7 @@
                 </svg>
             </div>
             <!-- Derecha: botones -->
-            <div class="flex justify-between">
+            <div class="flex flex-wrap gap-2">
                 <button
                     onclick={clickFilter}
                     class={`
@@ -149,17 +144,9 @@
                     <Filter size="size-4" />
                     Filtros
                 </button>
-                <div
-                    class="md:hidden"
-                >
-                    <Success
-                        onclick={nuevoTacto}
-                        texto="Siguiente"
-                        
-                    />
-                </div>
             </div>
         </div>
+
         {#if isOpenFilter}
             <div transition:slide>
                 <div
@@ -275,7 +262,4 @@
         {/if}
     </div>
 </div>
-<StickyMovimiento
-    longdescripcion="Total animales seleccionados"
-    shortdescripcion ="Animales seleccionados"
- total={Object.keys(selecthashmap).length} />
+<StickyMovimiento total={Object.keys(selecthashmap).length} {longdescripcion}  {shortdescripcion}/>

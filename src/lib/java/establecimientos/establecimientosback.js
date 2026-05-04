@@ -1,4 +1,5 @@
 import { getUser } from "$lib/userstorage/usersotrage"
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_ESTABLECIMIENTOS = "establishments"
@@ -62,7 +63,7 @@ export async function getAll() {
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(ruta, options)
+    let res_all = await handleAuthenticatedRequest(ruta, options)
     let data_all = await res_all.json()
 
     let procesada = processEstablishments(data_all)
@@ -82,7 +83,7 @@ export async function getAllColabs(){
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(ruta, options)
+    let res_all = await handleAuthenticatedRequest(ruta, options)
     let data_all = await res_all.json()
     
     let procesada = processEstablishments(data_all)

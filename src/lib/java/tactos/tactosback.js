@@ -1,4 +1,5 @@
 import { getUser } from "$lib/userstorage/usersotrage";
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_TACTOS = "pregnancy-checks"
 function processTacto(tacto) {
@@ -43,7 +44,7 @@ export async function getAll(cabid=null) {
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(url.toString(), options)
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
 
@@ -76,7 +77,7 @@ function postData(data,establishmentId=1) {
 
         isPregnant: data.prenada==2,
         notes: data.observacion,
-        establishmentId
+        establishmentId:data.cab
     }
     return data_tacto
 }

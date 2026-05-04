@@ -165,7 +165,7 @@
     }
     async function getObservaciones() {
         if (versionjava) {
-            let records = await ObservacionService.getAll(cab.id);
+            let records = await ObservacionService.getAll();
             observaciones = records;
             observacionesrow = observaciones;
             cargadosobservaciones = true;
@@ -393,7 +393,7 @@
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
-        
+        await getData()
         if (esCelu) {
             pageSize = 5;
         }
@@ -685,9 +685,11 @@
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
+
     <Buscador
         {observacionesrow}
         cabnombre={cab.nombre}
+        {selecthash}
         {categorias}
         bind:isOpenFilter
         bind:buscar
@@ -700,7 +702,7 @@
         {filterUpdate}
         {clickFilter}
     />
-    {#if esdev}
+    {#if esdev &&false}
         <Success
             texto={versionjava ? "Cerrar java" : "ver java"}
             onclick={toggleJava}
@@ -856,7 +858,7 @@
     </div>
     <!--Ordenar-->
     <div
-        class="block md:hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
+        class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
     >
         <button aria-label="Ordenar" class="w-full" onclick={clickOrdenar}>
             <div class="flex justify-between items-center px-1">

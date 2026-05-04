@@ -1,31 +1,44 @@
 import { getUser } from "$lib/userstorage/usersotrage"
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_OBSERVACIONES = "comments"
-function processComment(comment){
+function processComment(comment) {
     let data_comm = {
-        id:comment.commentId,
-        fecha:comment.observationDate,
-        animal:comment.animalId,
-        observacion :comment.notes,
-        active:comment.isActive,
-        expand:{
-            animal:{
-                id:comment.animalId,
-                caravana:comment.animalTagNumber
+        id: comment.commentId,
+        fecha: comment.observationDate,
+        animal: comment.animalId,
+        observacion: comment.notes,
+        active: comment.isActive,
+        cab: comment.establishmentId,
+        expand: {
+            animal: {
+                id: comment.animalId,
+                caravana: comment.animalTagNumber
             }
         }
     }
     return data_comm
 }
-function processComments(data){
+function processComments(data, cabid = null) {
     let data_comments = []
-    for(let i = 0;i<data.length;i++){
+    for (let i = 0; i < data.length; i++) {
         let fila = data[i]
-        data_comments.push(processComment(fila))
+        if (fila.isActive) {
+            if (cabid) {
+                if (fila.establishmentId == cabid) {
+                    data_comments.push(processComment(fila))
+                }
+            }
+            else {
+                data_comments.push(processComment(fila))
+            }
+
+        }
+
     }
     return data_comments
 }
-export async function getAll(cabid=null) {
+export async function getAll(cabid = null) {
     let user = getUser();
     let token = user.token;
 
@@ -35,28 +48,28 @@ export async function getAll(cabid=null) {
         url.searchParams.append('establishmentId', cabid);
     }
     let options = {
-        headers:{
+        headers: {
             "Content-Type": "application/json",
-            "Authorization":`Bearer ${token}`
+            "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(url.toString(),options)
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
 
 
-    let procesada = processComments(data_all)
-    procesada = procesada.filter(c => c.active)
+    let procesada = processComments(data_all,cabid)
+    
     return procesada
 }
-export async function getCommentId(id){
+export async function getCommentId(id) {
     let ruta = `${RUTA_JAVA}${RUTA_OBSERVACIONES}/${id}`
     let user = getUser();
     let token = user.token;
     let options = {
-        headers:{
+        headers: {
             "Content-Type": "application/json",
-            "Authorization":`Bearer ${token}`
+            "Authorization": `Bearer ${token}`
         }
     }
     let res_all = await fetch(ruta)
@@ -64,12 +77,12 @@ export async function getCommentId(id){
     let procesada = processComment(data_all)
     return procesada
 }
-function postData(data){
+function postData(data) {
     let data_comment = {
-          observationDate: data.fecha.split(" ")[0],
-          animalId: data.animal,
-          notes: data.observacion,
-          establishmentId: 1
+        observationDate: data.fecha.split(" ")[0],
+        animalId: data.animal,
+        notes: data.observacion,
+        establishmentId:data.cab
     }
     return data_comment
 }
@@ -82,8 +95,8 @@ export async function saveComment(data) {
         method: "POST",
         body: JSON.stringify(data_birth), // data can be `string` or {object}!
         headers: {
-            "Content-Type":"application/json",
-            "Authorization":`Bearer ${token}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
         },
     })
     let data_save = await res_save.json()

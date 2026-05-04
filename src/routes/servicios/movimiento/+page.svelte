@@ -58,7 +58,18 @@
         versionjava = !versionjava;
         await getData();
     }
-
+    //tabs
+    let selectedTab = "datos"
+    let pestaña = [
+        {id:"datos",nombre:"Detalles servicio"},
+        {id:"madres",nombre:"Selección de madres"},
+    ]
+    function irDatos(){
+        selectedTab = "datos"
+    }
+    function irMadres(){
+        selectedTab="madres"
+    }
     let caber = createCaber();
     let cab = $state(caber.cab);
     let cargado = $state(false);
@@ -506,7 +517,7 @@
             });
             animales = recordsa;
         } else {
-            let recordsa = await getAll();
+            let recordsa = await getAll(cab.id);
             animales = recordsa;
         }
 
@@ -1153,6 +1164,7 @@
                     {onelegir}
                     {propuesta1}
                     {togglePropuesta}
+                    {irMadres}
                 />
                 <div class="hidden">
                     <AnimalesSeleccionados
@@ -1183,6 +1195,7 @@
                     nuevoServicio={() => irServicio(true)}
                     nuevoInseminacion={() => irServicio(false)}
                     {limpiarFiltros}
+                    {siguiente}
                 />
 
                 <div
@@ -1205,6 +1218,7 @@
                             {animalesrows}
                             clickFila={clickAnimal}
                             {clickTodos}
+                            {seleccionarTodos}
                             {todos}
                             {ninguno}
                             {algunos}

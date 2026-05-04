@@ -63,7 +63,7 @@
             rounded-md 
             shadow-sm 
             focus:outline-none focus:ring-2 
-            focus:ring-green-500 focus:border-green-500
+            focus:ring-emerald-700 focus:border-emerald-700
 
         `}
         onclick={() => (isOpen = !isOpen)}
@@ -78,9 +78,9 @@
                         truncate
                         inline-flex items-center rounded-md
                         px-2 py-1 text-base font-medium ring-1 ring-inset
-                        bg-green-50 dark:bg-green-700
-                        text-green-700 dark:text-green-50
-                        ring-green-600/20 dark:ring-green-50/20
+                        bg-[#115642] 
+                        text-white
+                        ring-green-600/20 dar   k:ring-green-50/20
                         "
                     >
                         {getNombre(v)}

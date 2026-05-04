@@ -1,11 +1,31 @@
 import { getUser } from "$lib/userstorage/usersotrage"
+import categorias from "$lib/stores/categorias"
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_ANIMALES = "animals"
 function null2string(param) {
     return param ? param : ""
 }
 function string2null(param) {
-    return param && param.length>0 ? param : null
+    return param && param.length > 0 ? param : null
+}
+function getCategoriaId(categoryId) {
+    let c_idx = categorias.findIndex(c => c.cod == categoryId)
+    if (c_idx != -1) {
+        return categorias[c_idx].id
+    }
+    else {
+        return ""
+    }
+}
+function getCategoriaCod(categoria) {
+    let c_idx = categorias.findIndex(c => c.id == categoria)
+    if (c_idx != -1) {
+        return categorias[c_idx].cod
+    }
+    else {
+        return null
+    }
 }
 function processAnimal(animal) {
     let data_animal = {
@@ -22,8 +42,9 @@ function processAnimal(animal) {
         rodeo: null2string(animal.herdId),
         fechafallecimiento: animal.deathDate,
         lote: null2string(animal.lotId),
-        categoria: null2string(animal.categoryId),
-        prenada: animal.reproductiveStatus=="PRENADA"?2:animal.reproductiveStatus=="EN_SERVICIO"?3:0,
+        categoria: getCategoriaId(animal.categoryId),
+        nombrecategoria: null2string(animal.categoryName),
+        prenada: animal.reproductiveStatus == "PRENADA" ? 2 : animal.reproductiveStatus == "EN_SERVICIO" ? 3 : 0,
         motivobaja: "",
         raza: animal.breed,
         color: animal.color,
@@ -57,7 +78,8 @@ function processAnimales(data) {
     }
     return data_animales
 }
-export async function getAll(cabid=null,lotid=null) {
+
+export async function getAll(cabid = null, lotid = null) {
 
     let user = getUser();
     let token = user.token;
@@ -80,15 +102,15 @@ export async function getAll(cabid=null,lotid=null) {
             "Authorization": `Bearer ${token}`
         }
     }
-    //console.log(url.toString())
-    let res_all = await fetch(url.toString(), options)
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
 
 
     let procesada = processAnimales(data_all)
-
     return procesada
+
+
 }
 export async function getAnimalId(id) {
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/${id}`
@@ -110,20 +132,21 @@ function postData(data, establishmentId = 1) {
         tagNumber: data.caravana,
         sex: data.sexo == "H" ? "F" : "M",
         rpCode: data.rp,
-        establishmentId,
-        birthDate: data.fechanacimiento ? data.fechanacimiento.split(" ")[0] : ""
+        establishmentId: data.cab,
+        birthDate: data.fechanacimiento ? data.fechanacimiento.split(" ")[0] : "",
+
     }
     return data_animal
 }
 function updateData(animal) {
     let data_animal = {
-        
+
         tagNumber: animal.caravana,
         birthDate: string2null(animal.fechanacimiento),
-        sex:animal.sexo == "H" ? "F" : "M",
-        isPregnan:animal.prenada==2,
+        sex: animal.sexo == "H" ? "F" : "M",
+        isPregnan: animal.prenada == 2,
         deathDate: string2null(animal.fechafallecimiento),
-        
+
         breed: string2null(animal.raza),
         color: string2null(animal.color),
         rpCode: animal.rp,
@@ -131,10 +154,11 @@ function updateData(animal) {
 
         birthId: string2null(animal.nacimiento),
         herdId: string2null(animal.rodeo),
-        reproductiveStatus: animal.prenada==2?"PRENADA":animal.prenada==1?"EN_SERVICIO":"VACIA",
+        reproductiveStatus: animal.prenada == 2 ? "PRENADA" : animal.prenada == 1 ? "EN_SERVICIO" : "VACIA",
         lotId: string2null(animal.lote),
+        categoryId: getCategoriaCod(animal.categoria)
 
-        
+
     }
     return data_animal
 }
@@ -162,7 +186,6 @@ export async function editAnimal(id, data) {
     let user = getUser();
     let token = user.token;
     let data_animal = updateData(data)
-    console.log(data_animal)
     let res_post = await fetch(ruta,
         {
             method: "PUT",

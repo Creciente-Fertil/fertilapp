@@ -3,6 +3,7 @@
     import Navbarr from "$lib/components/Navbarr.svelte";
     import Navbar2 from "$lib/components/Navbar2.svelte";
     import BuscadorTratamientos from "$lib/components/tratamientos/BuscadorTratamientos.svelte";
+    import BuscadorMovimiento from "$lib/components/BuscadorMovimiento.svelte";
     import PocketBase from "pocketbase";
     import Swal from "sweetalert2";
     import { onMount } from "svelte";
@@ -614,7 +615,7 @@
             >
                 <h1
                     class={`
-                            text-4xl font-semibold 
+                            text-3xl font-semibold 
                             dark:text-[#24a579] text-[#115642]
                             
                         `}
@@ -666,6 +667,7 @@
                     {filterUpdate}
                     nuevoTratamiento={() => irDetalle()}
                     {limpiarFiltros}
+                    
                 />
                 {#if cargado}
                     <div

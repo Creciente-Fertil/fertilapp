@@ -1,4 +1,5 @@
- import { getUser } from "$lib/userstorage/usersotrage"
+import { getUser } from "$lib/userstorage/usersotrage"
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_SERVICIOS = "services"
 export function tipoServicios() {
@@ -8,7 +9,13 @@ export function tipoServicios() {
     ]
 }
 function processServicio(fila) {
-
+    let padres = []
+    let pajuelas = []
+    for (let i = 0; i < fila.fathers.length; i++) {
+        let padre = fila.fathers[i]
+        padres.push(padre.fatherId)
+        pajuelas.push(padre.fatherTagNumber)
+    }
     let data_ser = {
 
         id: fila.serviceId,
@@ -16,10 +23,10 @@ function processServicio(fila) {
         fechainseminacion: fila.startDate,
         fechahasta: fila.endDate,
         madre: fila.animalId,
-        pajuelas: fila.fatherTagNumbers.join(),
-        padres: fila.fatherIds.join(),
-        
-        padre: fila.fatherIds.join(),
+        pajuelas: pajuelas.join(),
+        padres: padres.join(),
+
+        padre: padres.join(),
         observacion: fila.notes,
         fechaparto: fila.expectedBirthDate,
         active: fila.isActive,
@@ -48,7 +55,7 @@ function processServicios(data) {
     }
     return servicios
 }
-export async function getAllServices(cabid=null) {
+export async function getAllServices(cabid = null) {
     let user = getUser();
     let token = user.token;
     let ruta_all = `${RUTA_JAVA}${RUTA_SERVICIOS}/all`
@@ -62,7 +69,7 @@ export async function getAllServices(cabid=null) {
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(url.toString(), options)
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
 
@@ -82,11 +89,11 @@ export function postServicio(data) {
         expectedBirthDate: data.fechaparto.split(" ")[0],
         notes: data.observacion
     }
-    
+
     return data_java;
-    
+
 }
-export function postInseminacion(data){
+export function postInseminacion(data) {
     let data_java = {
         animalId: data.animal,
         establishmentId: data.cab,
@@ -98,7 +105,7 @@ export function postInseminacion(data){
         expectedBirthDate: data.fechaparto.split(" ")[0],
         notes: data.observacion
     }
-    
+
     return data_java;
 }
 export async function saveServicio(data) {

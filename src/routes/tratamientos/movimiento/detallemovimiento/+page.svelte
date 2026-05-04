@@ -19,9 +19,12 @@
     import DetallesAnimalesMovimiento from "$lib/components/tratamientos/DetallesAnimalesMovimiento.svelte";
     import Success from "$lib/components/botones/Success.svelte";
     import { saveTrata } from "$lib/java/tratamientos/tratamientosback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
-    function toggleJava() {
+    async function toggleJava() {
         versionjava = !versionjava;
+        await getData()
     }
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -149,9 +152,8 @@
                     "error",
                 );
             }
-            volver()
+            volver();
         } else {
-
             let errores = false;
             let bulkdata = [];
             let errorestrata = [];
@@ -201,16 +203,27 @@
                 );
             }
             selectanimales = [];
-            volver()
+            volver();
+        }
+    }
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            userpermisos = [];
+            cab = loadStorageEstablecimiento();
+        } else {
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+
+            per.setPer(respermisos.permisos, usuarioid);
+            userpermisos = getPermisosList(per.per.permisos);
+            cab = caber.cab;
         }
     }
     onMount(async () => {
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-
-        per.setPer(respermisos.permisos, usuarioid);
-        userpermisos = getPermisosList(per.per.permisos);
+        await getData();
         loadDetalle();
     });
     function verAnimal(id) {
@@ -234,11 +247,37 @@
                 onclick={toggleJava}
             />
         {/if}
+        <div class="md:hidden">
+            <a
+                href={`${pre + "/tratamientos/movimiento"}`}
+                class="
+                inline-flex items-center text-sm
+                text-gray-700 hover:text-gray-900 dark:text-gray-400
+                dark:hover:text-gray-200 mb-4"
+            >
+                <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                </svg>
+                Volver a movimiento
+            </a>
+        </div>
         <DetalleMovimiento
             {fecha}
             tipo={tipotratamientoselect}
             {observaciongeneral}
             tipos={tipotratamientos}
+            {mover}
+            listaanimales={selectanimales}
         />
         <DetallesAnimalesMovimiento
             bind:selectanimales
@@ -250,7 +289,7 @@
         />
 
         <div
-            class="mt-6 flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
+            class="mt-6 hidden md:flex space-x-3 justify-start md:justify-end border-t dark:border-gray-800"
         >
             <!-- Botón Cancelar -->
             <button
@@ -286,188 +325,6 @@
                     ? "tratamientos"
                     : "tratamiento"}
             </button>
-        </div>
-    </div>
-    <div class="hidden container mx-auto py-1 px-4 max-w-7xl">
-        <!--Header-->
-        <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
-        >
-            <div
-                class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
-            >
-                <div
-                    class={`
-                        bg-transparent        
-                        px-4 py-4 
-                    `}
-                >
-                    <button onclick={volver}>
-                        <h1
-                            class={`
-                                flex text-left
-                                text-2xl font-bold 
-                                dark:text-white text-gray-900
-                            `}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="size-5 mt-1"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M15.75 19.5 8.25 12l7.5-7.5"
-                                />
-                            </svg>
-                            Tratamientos
-                        </h1>
-                    </button>
-                </div>
-                <button
-                    class={`btn btn-primary rounded-lg ${estilos.btntext2}`}
-                    data-theme="forest"
-                    disabled={!botonhabilitado}
-                    onclick={mover}
-                >
-                    {#if esCelu}
-                        <span class="text-lg">Movimientos</span>
-                    {:else}
-                        <span class="text-lg">+ Crear movimientos</span>
-                    {/if}
-                </button>
-            </div>
-        </div>
-    </div>
-    <div class="hidden container mx-auto py-1 px-4 max-w-7xl">
-        <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
-        >
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-1">
-                <div>
-                    <label for="fechatrata" class="label">
-                        <span class="label-text text-base">Fecha </span>
-                    </label>
-                    <label class="input-group">
-                        <input
-                            id="fechtrata"
-                            type="date"
-                            max={HOY}
-                            class={`
-                            input input-bordered w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2} 
-                        `}
-                            bind:value={fecha}
-                            onchange={() => {
-                                if (fecha == "") {
-                                    malfecha = true;
-                                    botonhabilitado = false;
-                                } else {
-                                    malfecha = false;
-                                    if (
-                                        !maltipo &&
-                                        tipotratamientoselect != ""
-                                    ) {
-                                        botonhabilitado = true;
-                                    }
-                                }
-                            }}
-                        />
-                        {#if malfecha}
-                            <div class="label">
-                                <span class="label-text-alt text-red-500"
-                                    >Debe seleccionar la fecha del tratamiento</span
-                                >
-                            </div>
-                        {/if}
-                    </label>
-                </div>
-                <div>
-                    <label for="tipo" class="label">
-                        <span class="label-text text-base"
-                            >Tipo tratamiento</span
-                        >
-                    </label>
-                    <label class="input-group">
-                        <select
-                            class={`
-                            select select-bordered w-full
-                            border border-gray-300 rounded-md
-                            focus:outline-none focus:ring-2 
-                            focus:ring-green-500 
-                            focus:border-green-500
-                            ${estilos.bgdark2} 
-                        `}
-                            bind:value={tipotratamientoselect}
-                            onchange={() => {
-                                if (tipotratamientoselect == "") {
-                                    maltipo = true;
-
-                                    botonhabilitado = false;
-                                } else {
-                                    maltipo = false;
-                                    if (!malfecha && fecha != "") {
-                                        botonhabilitado = true;
-                                    }
-                                }
-                            }}
-                        >
-                            {#each tipotratamientos as t}
-                                <option value={t.id}>{t.nombre}</option>
-                            {/each}
-                        </select>
-                        <div class={`label ${maltipo ? "" : "hidden"}`}>
-                            <span class="label-text-alt text-red-400"
-                                >Debe seleccionar un tipo</span
-                            >
-                        </div>
-                    </label>
-                </div>
-                <div>
-                    <label for="obs" class="label">
-                        <span class="label-text text-base">Observación </span>
-                    </label>
-                    <input
-                        id="obs"
-                        type="text"
-                        class={`
-                        input 
-                        input-bordered 
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                        w-full
-                        ${estilos.bgdark2}
-                    `}
-                        bind:value={observaciongeneral}
-                        oninput={inputObsGeneral}
-                    />
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="hidden container mx-auto py-1 px-4 max-w-7xl">
-        <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
-        >
-            <ListadoAnimales bind:selectanimales />
         </div>
     </div>
 </Navbar2>

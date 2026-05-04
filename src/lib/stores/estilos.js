@@ -21,7 +21,7 @@ export default {
     btntext: "text-white",
     btntext2: "text-white dark:text-gray-900 disabled:text-gray-900 dark:disabled:text-white",
     btntextbuscador:"text-white justify-center text-md",
-    btnbuscador: `bg-[#115642]  hover:bg-[#0f4537] disabled:bg-[#24a579] disabled:cursor-not-allowed font-medium py-1.5 px-5 rounded-full shadow-md flex items-center gap-2 transition-all duration-200 `,
+    btnbuscador: `bg-[#115642]  hover:bg-[#0f4537] disabled:bg-[#24a579] disabled:cursor-not-allowed font-medium py-0 px-0 md:py-1.5 md:px-5 rounded-full shadow-md flex items-center gap-2 transition-all duration-200`,
     btnbuscadorunrounded: `bg-[#115642]  hover:bg-[#0f4537] disabled:bg-[#24a579] disabled:cursor-not-allowed font-medium py-1.5 px-5 shadow-md flex items-center gap-2 transition-all duration-200 `,
 
     tableheader: "bg-[#115642] text-white",

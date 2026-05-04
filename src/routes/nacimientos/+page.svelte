@@ -763,6 +763,7 @@
 <Navbar2>
     <Buscador
         {nacimientosrow}
+        {selecthash}
         cabnombre={cab.nombre}
         bind:isOpenFilter
         bind:fechadesde

@@ -53,6 +53,8 @@
     let selecthash = $state({});
     let pageSize = $state(15);
     let todos = $state(false);
+    let algunos = $state(false);
+    let ninguno = $state(true);
     let buscarcaravana = $state("");
     let fechadesde = $state("");
     let fechahasta = $state("");
@@ -228,8 +230,53 @@
     function ultimos() {
         goto(pre + "/pesajes/lista");
     }
-    function clickTodos() {}
-    function clickFila(id) {}
+    function clickTodos() {
+        if (todos) {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        } else if (ninguno) {
+            ninguno = false;
+            todos = true;
+
+            for (let i = 0; i < pesajesrows.length; i++) {
+                let s = pesajesrows[i];
+                selecthash[s.id] = { ...s };
+            }
+        } else {
+            todos = false;
+            ninguno = true;
+            algunos = false;
+            selecthash = {};
+        }
+    }
+    function clickFila(id) {
+        if (selecthash[id]) {
+            if (todos) {
+                todos = false;
+                algunos = true;
+            }
+            delete selecthash[id];
+            if (Object.keys(selecthash).length == 0) {
+                todos = false;
+                algunos = false;
+                ninguno = true;
+            }
+        } else {
+            if (ninguno) {
+                algunos = true;
+                ninguno = false;
+            }
+            let s_idx = pesajesrows.findIndex((s) => s.id == id);
+            if (s_idx != -1) {
+                let s = pesajesrows[s_idx];
+                selecthash[s.id] = {
+                    ...s,
+                };
+            }
+        }
+    }
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
@@ -258,6 +305,7 @@
             onclick={toggleJava}
         />
     {/if}
+    
     {#if cargados}
         <!--Tabla-->
         <div
@@ -282,7 +330,7 @@
                     openDelModal={confirmDelete}
                     {clickTodos}
                     {clickFila}
-                    bind:todos
+                    {todos}
                 />
             </div>
         </div>
@@ -302,7 +350,7 @@
                 openDelModal={confirmDelete}
                 {clickTodos}
                 {clickFila}
-                bind:todos
+                {todos}
             />
         </div>
     {/if}

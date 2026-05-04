@@ -8,7 +8,7 @@
     let pre = import.meta.env.VITE_PRE;
     let {
         pageSize = $bindable(15),
-        selecthash={},
+        selecthash = {},
         tratamientosrows,
         ordenarTratamientos = (campo, mantener) => {},
         openViewModal = (_p) => {},
@@ -43,13 +43,12 @@
     let pyfila = "py-1";
 </script>
 
-<div class="max-h-[600px] overflow-y-auto custom-scrollbar">
-    <!-- Select all -->
-    <div class="flex items-center gap-3 px-1 mb-2">
-        <button
-            type="button"
-            onclick={clickTodos}
-            class={`
+<!-- Select all -->
+<div class="flex items-center gap-3 px-1 mb-2">
+    <button
+        type="button"
+        onclick={clickTodos}
+        class={`
                                 w-5 h-5
                                 flex items-center justify-center
                                 rounded-full
@@ -62,28 +61,26 @@
                                         : "bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-500 hover:border-emerald-500 dark:hover:border-emerald-400"
                                 }
                             `}
-            aria-label={todos ? "Deseleccionar todos" : "Seleccionar todos"}
-        >
-            <!-- El icono de check (solo visible cuando todos es true) -->
-        </button>
-        <span class="text-sm text-gray-500 cursor-pointer"
-            >Seleccionar todos</span
-        >
-        {#if Object.keys(selecthash).length > 0}
-            <span
-                class={`
+        aria-label={todos ? "Deseleccionar todos" : "Seleccionar todos"}
+    >
+        <!-- El icono de check (solo visible cuando todos es true) -->
+    </button>
+    <span class="text-sm text-gray-500 cursor-pointer">Seleccionar todos</span>
+    {#if Object.keys(selecthash).length > 0}
+        <span
+            class={`
                 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                 bg-gray-100 text-gray-800
                 dark:bg-gray-700 dark:text-gray-200
             `}
-            >
-                {Object.keys(selecthash).length} seleccionados
-            </span>
-        {/if}
-    </div>
-    <!-- Cards -->
+        >
+            {Object.keys(selecthash).length} seleccionados
+        </span>
+    {/if}
+</div>
+<!-- Cards -->
 <div class="flex flex-col gap-3">
-    {#each rows as t}
+    {#each tratamientosrows as t}
         <div
             class={`
                 rounded-xl border p-4 transition-all
@@ -97,7 +94,9 @@
             <!-- Cabecera con checkbox y animal -->
             <div class="flex items-start justify-between gap-3 mb-3">
                 <div class="flex items-center gap-3 flex-1 min-w-0">
-                    <label class="flex items-center justify-center cursor-pointer shrink-0">
+                    <label
+                        class="flex items-center justify-center cursor-pointer shrink-0"
+                    >
                         <input
                             type="checkbox"
                             checked={selecthash[t.id] ? true : false}
@@ -133,9 +132,11 @@
                             </svg>
                         </span>
                     </label>
-                    
+
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                        <p
+                            class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate"
+                        >
                             {shorterWord(t.expand.animal.caravana)}
                         </p>
                     </div>
@@ -143,13 +144,22 @@
 
                 <!-- Acciones -->
                 <div class="flex items-center gap-2 shrink-0">
-                    <button onclick={() => openViewModal(t.id)} class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <button
+                        onclick={() => openViewModal(t.id)}
+                        class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    >
                         <Eye size="size-5" />
                     </button>
-                    <button onclick={() => openEditModal(t.id)} class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <button
+                        onclick={() => openEditModal(t.id)}
+                        class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    >
                         <Pencil size="size-5" />
                     </button>
-                    <button onclick={() => openDelModal(t.id)} class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <button
+                        onclick={() => openDelModal(t.id)}
+                        class="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    >
                         <Trash size="size-5" />
                     </button>
                 </div>
@@ -158,23 +168,24 @@
             <!-- Grid de datos (2 columnas) -->
             <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                 <div>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Fecha</span>
-                    <p class="text-gray-900 dark:text-gray-100 font-medium">{new Date(t.fecha).toLocaleDateString()}</p>
+                    <span class="text-xs text-gray-500 dark:text-gray-400"
+                        >Fecha</span
+                    >
+                    <p class="text-gray-900 dark:text-gray-100 font-medium">
+                        {new Date(t.fecha).toLocaleDateString()}
+                    </p>
                 </div>
                 <div>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Tipo</span>
-                    <p class="text-gray-900 dark:text-gray-100 font-medium truncate">{t.expand.tipo.nombre}</p>
+                    <span class="text-xs text-gray-500 dark:text-gray-400"
+                        >Tipo</span
+                    >
+                    <p
+                        class="text-gray-900 dark:text-gray-100 font-medium truncate"
+                    >
+                        {t.expand.tipo.nombre}
+                    </p>
                 </div>
             </div>
         </div>
     {/each}
 </div>
-</div>
-<Paginacion
-    rows={tratamientosrows}
-    bind:paginaActual
-    bind:pageSize
-    {totalPaginas}
-    {onChangePageSize}
-    esCelu={true}
-/>

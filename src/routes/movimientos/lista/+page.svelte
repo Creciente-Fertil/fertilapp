@@ -194,6 +194,7 @@
     async function getData() {
         let est = loadStorageEstablecimiento();
         cabnombre = est.nombre;
+        
         movimientos = await getAll(est.id);
         cargados = true;
         filterUpdate();

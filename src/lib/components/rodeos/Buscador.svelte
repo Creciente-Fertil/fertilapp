@@ -42,7 +42,7 @@
         `}
     >
         <div
-            class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 mb-2 border-b dark:border-gray-800"
+            class="flex flex-row md:items-center justify-between gap-4 pb-1 mb-2 border-b dark:border-gray-800"
         >
             <div
                 class={`
@@ -60,7 +60,22 @@
                 </h1>
             </div>
             <button
+                onclick={nuevo}
                 class={`
+                bg-[#115642] hover:bg-[#0f4537] 
+                text-white 
+                w-10 h-10 rounded-full 
+                flex items-center justify-center 
+                shadow-md transition-all duration-200
+                md:hidden mt-2
+            `}
+                aria-label="Nuevo rodeo"
+            >
+                <span class="text-2xl leading-none">+</span>
+            </button>
+            <button
+                class={`
+                    hidden md:block
                     ${estilos.btnbuscador}
                     ${estilos.btntextbuscador}
                 `}
@@ -70,6 +85,7 @@
             </button>
             <button
                 class={`
+                    hidden
                     ${estilos.btnbuscador}
                     ${estilos.btntextbuscador}
                 `}

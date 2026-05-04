@@ -47,7 +47,7 @@
     let pyfila = "py-1";
 </script>
 
-<div class="max-h-[600px] overflow-y-auto custom-scrollbar">
+
     <!-- Select all -->
     <div class="flex items-center gap-3 px-1 mb-2">
         <button
@@ -87,7 +87,7 @@
     </div>
     <!-- Cards -->
     <div class="flex flex-col gap-3">
-        {#each rows as n}
+        {#each nacimientosrow as n}
             <div
                 class={`
                 rounded-xl border p-4 transition-all
@@ -176,8 +176,8 @@
                     </div>
                 </div>
 
-                <!-- Grid de datos (2 columnas) -->
-                <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <!-- Grid de datos (3 columnas) -->
+                <div class="grid grid-cols-3 gap-x-4 gap-y-2 text-sm">
                     <div>
                         <span class="text-xs text-gray-500 dark:text-gray-400"
                             >Fecha</span
@@ -210,12 +210,3 @@
             </div>
         {/each}
     </div>
-</div>
-<Paginacion
-    rows={nacimientosrow}
-    bind:paginaActual
-    bind:pageSize
-    {totalPaginas}
-    {onChangePageSize}
-    esCelu={false}
-/>

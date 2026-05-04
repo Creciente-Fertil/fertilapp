@@ -1,24 +1,39 @@
 import { getUser } from "$lib/userstorage/usersotrage"
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_LOTES = "lots"
-function processLot(lot){
+function processLot(lot) {
     let data_lote = {
-        id:lot.lotId,
-        nombre:lot.name,
-        active:lot.isActive
+        id: lot.lotId,
+        nombre: lot.name,
+        active: lot.isActive,
+        cab: lot.establishmentId
 
     }
-    return data_lote 
-} 
-function processLots(data){
+    return data_lote
+}
+function processLots(data, cabid = null) {
     let data_lotes = []
-    for(let i = 0;i<data.length;i++){
+    for (let i = 0; i < data.length; i++) {
         let fila = data[i]
-        data_lotes.push(processLot(fila))
+        if (fila.isActive) {
+            if (cabid) {
+                if (fila.establishmentId == cabid) {
+                    
+                    data_lotes.push(processLot(fila))
+                }
+
+            }
+            else {
+                data_lotes.push(processLot(fila))
+            }
+
+        }
+
     }
     return data_lotes
 }
-export async function getAll(cabid=null) {
+export async function getAll(cabid = null) {
     let ruta = `${RUTA_JAVA}${RUTA_LOTES}/all`
     let url = new URL(ruta);
     if (cabid) {
@@ -27,18 +42,18 @@ export async function getAll(cabid=null) {
     let user = getUser();
     let token = user.token;
     let options = {
-        headers:{
+        headers: {
             "Content-Type": "application/json",
-            "Authorization":`Bearer ${token}`
+            "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(url.toString(),options)
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
 
 
-    let procesada = processLots(data_all)
-    procesada = procesada.filter(l=>l.active)
+    let procesada = processLots(data_all,cabid)
+    procesada = procesada.filter(l => l.active)
     return procesada
 }
 export async function getLotlId(id) {
@@ -47,11 +62,11 @@ export async function getLotlId(id) {
     let token = user.token;
     let options = {
         headers: {
-            
+
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(ruta,options)
+    let res_all = await fetch(ruta, options)
     let data_all = await res_all.json()
     let procesada = processLot(data_all)
     return procesada
@@ -59,10 +74,10 @@ export async function getLotlId(id) {
 function postData(data) {
     let data_lot = {
         name: data.nombre,
-        
-        establishmentId: 1
+
+        establishmentId:data.cab
     }
-    
+
     return data_lot
 }
 export async function saveLot(data) {
@@ -70,13 +85,13 @@ export async function saveLot(data) {
     let data_lot = postData(data)
     let user = getUser();
     let token = user.token;
-    
+
     let res_save = await fetch(ruta, {
         method: "POST",
         body: JSON.stringify(data_lot), // data can be `string` or {object}!
         headers: {
             "Content-Type": "application/json",
-            "Authorization":`Bearer ${token}`
+            "Authorization": `Bearer ${token}`
         },
     })
     let data_save = await res_save.json()

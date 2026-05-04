@@ -20,6 +20,7 @@
         shorterWord = (s) => {},
         getNombrePadres = (p) => {},
         clickTodos = () => {},
+        seleccionarTodos = () => {},
         clickFila = (id) => {},
         todos = $bindable(false),
         ascendente,

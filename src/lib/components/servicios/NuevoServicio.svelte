@@ -5,6 +5,7 @@
     import PredictSelect from "../PredictSelect.svelte";
     import SelectToros from "../SelectToros.svelte";
     import { tipoServicios } from "$lib/java/servicios/serviciosback";
+    import Success from "../botones/Success.svelte";
     let {
         //natural
         esNatural = $bindable(true),
@@ -34,9 +35,10 @@
         inputObsGeneral = () => {},
         onwrite = () => {},
         onelegir = () => {},
-        propuesta1=true,
-        togglePropuesta=()=>{},
-        versionjava=false
+        propuesta1 = true,
+        togglePropuesta = () => {},
+        versionjava = false,
+        irMadres = () => {},
     } = $props();
     const HOY = new Date().toISOString().split("T")[0];
 </script>
@@ -65,11 +67,12 @@
             >
                 Detalles servicio
             </h1>
-            
         </div>
     </div>
     {#if esNatural}
-        <div class={ `grid grid-cols-1 ${propuesta1?"grid-cols-1":"md:grid-cols-3 "}`}>
+        <div
+            class={`grid grid-cols-1 ${propuesta1 ? "grid-cols-1" : "md:grid-cols-3 "}`}
+        >
             <div class="pr-3">
                 <label for="tiposervicio" class="label">
                     <span
@@ -92,10 +95,8 @@
                         bind:value={esNatural}
                         onchange={() => input("TIPO")}
                     >
-                        
                         <option value={true}>Servicio natural</option>
                         <option value={false}>Inseminación artificial</option>
-                        
                     </select>
                 </label>
             </div>
@@ -246,8 +247,17 @@
                 </div>
             </div>
         </div>
+        <div
+            class=" 
+                hidden
+                mt-6 space-x-3 justify-end border-t dark:border-gray-800"
+        >
+            <Success onclick={irMadres} texto="Seleccionar madres" />
+        </div>
     {:else}
-        <div class={ `grid grid-cols-1 ${propuesta1?"grid-cols-1":"md:grid-cols-3 "}`}>
+        <div
+            class={`grid grid-cols-1 ${propuesta1 ? "grid-cols-1" : "md:grid-cols-3 "}`}
+        >
             <div class="pr-3">
                 <label for="tiposervicio" class="label">
                     <span
@@ -270,10 +280,8 @@
                         bind:value={esNatural}
                         onchange={() => input("TIPO")}
                     >
-                        
                         <option value={true}>Servicio natural</option>
                         <option value={false}>Inseminación artificial</option>
-                        
                     </select>
                 </label>
             </div>
@@ -389,6 +397,13 @@
                     </textarea>
                 </div>
             </div>
+        </div>
+        <div
+            class=" 
+                hidden
+                mt-6 space-x-3 justify-end border-t dark:border-gray-800"
+        >
+            <Success onclick={irMadres} texto="Seleccionar madres" />
         </div>
     {/if}
 </div>

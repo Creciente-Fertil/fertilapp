@@ -70,6 +70,7 @@
                     Tratamientos
                 </h1>
             </div>
+            
             <button
                 class={`
                     ${estilos.btnbuscador}
@@ -88,7 +89,7 @@
             >
                 Tipos
             </button>
-            {#if esdev}
+            {#if esdev && false}
                 <button
                     class={`
                         hidden
@@ -104,7 +105,7 @@
                     {/if}
                 </button>
             {/if}
-        </div>
+        </div>  
         <!--Filtros-->
         <div
             class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-1 md:p-2 bg-transparent rounded-lg"
@@ -155,7 +156,7 @@
             <div class="flex flex-wrap gap-2">
                 <button
                     class={`
-                        
+                        hidden  md:flex
                         border rounded-full px-3 py-1 text-md flex items-center gap-1
                         bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
                         dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white

@@ -39,6 +39,8 @@
         loadStorageEstablecimiento,
         saveStorageEstablecimientoDefault,
     } from "$lib/java/establecimientos/establecimientostorage";
+    //Eventos 
+    let sessionExpiredHandler;
     //tamaño
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -79,7 +81,13 @@
     onDestroy(() => {
         //document.removeEventListener("click", handleClickOutsideMenu);
         //document.removeEventListener("click", handleClickOutsideNoti);
+        if (sessionExpiredHandler) {
+      window.removeEventListener('auth:session-expired', sessionExpiredHandler);
+    }
     });
+    async function getNotisJava(){
+
+    }
     async function getNavData() {
         if (versionjava) {
             let user = getUser();
@@ -118,10 +126,22 @@
             await getNotis();
         }
     }
+    function addEvents(){
+        
+        
+        sessionExpiredHandler = (event) => {
+            
+            salir()
+            
+        }
+        window.addEventListener('session-expired', sessionExpiredHandler);
+        
+    }
     onMount(async () => {
         //document.addEventListener("click", handleClickOutsideMenu);
         //document.addEventListener("click", handleClickOutsideNoti);
         await getNavData();
+        addEvents()
     });
     //menu
     let containerMenu = $state(null); // referencia al div principal

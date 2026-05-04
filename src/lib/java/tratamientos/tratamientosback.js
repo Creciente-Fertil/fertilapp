@@ -1,4 +1,5 @@
 import { getUser } from "$lib/userstorage/usersotrage"
+import { handleAuthenticatedRequest } from "../errores/erroresback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_TRATAMIENTOS = "treatments"
 const RUTA_TIPO_TRATAMIENTOS = "treatment-types"
@@ -9,13 +10,14 @@ function processTipo(type) {
         id: type.treatmentTypeId,
         nombre: type.name,
         generico: type.isGeneric,
-        active:type.isActive
+        active: type.isActive,
+        cab: type.establishmentId
     }
     return data_tipo
 }
 function processTratamiento(treatment) {
     let data_tratamiento = {
-        id:treatment.treatmentId,
+        id: treatment.treatmentId,
         fecha: treatment.treatmentDate,
         animal: treatment.animalId,
         tipo: treatment.treatmentTypeId,
@@ -34,11 +36,22 @@ function processTratamiento(treatment) {
     }
     return data_tratamiento
 }
-function processTipos(data) {
+function processTipos(data, cabid = null) {
     let data_tipos = []
     for (let i = 0; i < data.length; i++) {
         let fila = data[i]
-        data_tipos.push(processTipo(fila))
+        if (fila.isActive) {
+            if (cabid) {
+                if (fila.establishmentId == cabid) {
+                    data_tipos.push(processTipo(fila))
+                }
+            }
+            else {
+                data_tipos.push(processTipo(fila))
+            }
+
+        }
+
     }
     return data_tipos
 }
@@ -50,7 +63,7 @@ function processTratamientos(data) {
     }
     return data_tratamientos
 }
-export async function getAllTipos(cabid=null) {
+export async function getAllTipos(cabid = null) {
     let user = getUser();
     let token = user.token;
 
@@ -65,17 +78,17 @@ export async function getAllTipos(cabid=null) {
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(url.toString(), options)
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
 
 
 
-    let procesada = processTipos(data_all)
+    let procesada = processTipos(data_all,cabid)
 
     return procesada
 }
-export async function getAll(cabid=null) {
+export async function getAll(cabid = null) {
     let user = getUser();
     let token = user.token;
 
@@ -90,7 +103,7 @@ export async function getAll(cabid=null) {
             "Authorization": `Bearer ${token}`
         }
     }
-    let res_all = await fetch(url.toString(), options)
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
 
@@ -100,22 +113,22 @@ export async function getAll(cabid=null) {
 
     return procesada
 }
-function postDataTrata(data) {
+function postDataTrata(data, establishmentId) {
     let data_trata = {
         animalId: data.animal,
-        establishmentId: 1,
+        establishmentId:data.cab,
         treatmentTypeId: data.tipo,
         treatmentDate: data.fecha.split(" ")[0],
         notes: data.observacion
     }
     return data_trata;
 }
-function postDataTipo(data) {
+function postDataTipo(data, establishmentId) {
     let data_tipo = {
         name: data.nombre,
         isGeneric: false,
         isActive: true,
-        establishmentId: 1
+        establishmentId: data.cab
     }
     return data_tipo
 }
@@ -136,7 +149,7 @@ export async function saveTrata(data) {
     let data_save = await res_save.json()
     let procesada = processTipo(data_save)
 
-    return procesada    
+    return procesada
 }
 export async function saveTipo(data) {
     let ruta = `${RUTA_JAVA}${RUTA_TIPO_TRATAMIENTOS}`
@@ -155,77 +168,77 @@ export async function saveTipo(data) {
     let record_tipo = processTipo(data_save)
     return record_tipo
 }
-export async function editTratamiento(id,data) {
+export async function editTratamiento(id, data) {
     let ruta = `${RUTA_JAVA}${RUTA_TRATAMIENTOS}/${id}`
-    
-        let user = getUser();
-        let token =  user.token;
-        let res_post = await fetch(ruta,
-            {
-                method: "PUT",
-                body: JSON.stringify(data), // data can be `string` or {object}!
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-            }
-        )
-    
-        let data_post = await res_post.json()
-        return data_post
+
+    let user = getUser();
+    let token = user.token;
+    let res_post = await fetch(ruta,
+        {
+            method: "PUT",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        }
+    )
+
+    let data_post = await res_post.json()
+    return data_post
 }
-export async function editTipo(id,data) {
+export async function editTipo(id, data) {
     let ruta = `${RUTA_JAVA}${RUTA_TIPO_TRATAMIENTOS}/${id}`
-    
-        let user = getUser();
-        let token =  user.token;
-        let res_post = await fetch(ruta,
-            {
-                method: "PUT",
-                body: JSON.stringify(data), // data can be `string` or {object}!
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-            }
-        )
-    
-        let data_post = await res_post.json()
-        return data_post
+
+    let user = getUser();
+    let token = user.token;
+    let res_post = await fetch(ruta,
+        {
+            method: "PUT",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        }
+    )
+
+    let data_post = await res_post.json()
+    return data_post
 }
-export async function eliminarTratamiento(id){
+export async function eliminarTratamiento(id) {
     let ruta = `${RUTA_JAVA}${RUTA_TRATAMIENTOS}/delete/${id}`
-        let user = getUser();
-        let token =  user.token;
-        let res_post = await fetch(ruta,
-            {
-                method: "POST",
-                //            body: JSON.stringify({}), // data can be `string` or {object}!
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-            }
-        )
-    
-        //let data_post = await res_post.json()
-        return {}
+    let user = getUser();
+    let token = user.token;
+    let res_post = await fetch(ruta,
+        {
+            method: "POST",
+            //            body: JSON.stringify({}), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        }
+    )
+
+    //let data_post = await res_post.json()
+    return {}
 }
-export async function eliminarTipo(id){
+export async function eliminarTipo(id) {
     let ruta = `${RUTA_JAVA}${RUTA_TIPO_TRATAMIENTOS}/delete/${id}`
-        let user = getUser();
-        let token =  user.token;
-        let res_post = await fetch(ruta,
-            {
-                method: "POST",
-                //            body: JSON.stringify({}), // data can be `string` or {object}!
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-            }
-        )
-    
-        //let data_post = await res_post.json()
-        return {}
+    let user = getUser();
+    let token = user.token;
+    let res_post = await fetch(ruta,
+        {
+            method: "POST",
+            //            body: JSON.stringify({}), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        }
+    )
+
+    //let data_post = await res_post.json()
+    return {}
 }
