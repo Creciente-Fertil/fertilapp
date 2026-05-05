@@ -36,7 +36,7 @@ function processTratamiento(treatment) {
     }
     return data_tratamiento
 }
-function processTipos(data, cabid = null) {
+export function processTipos(data, cabid = null) {
     let data_tipos = []
     for (let i = 0; i < data.length; i++) {
         let fila = data[i]
@@ -55,7 +55,7 @@ function processTipos(data, cabid = null) {
     }
     return data_tipos
 }
-function processTratamientos(data) {
+export function processTratamientos(data) {
     let data_tratamientos = []
     for (let i = 0; i < data.length; i++) {
         let fila = data[i]

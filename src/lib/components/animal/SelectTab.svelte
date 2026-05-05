@@ -39,7 +39,13 @@
 <div class="relative w-64" bind:this={container}>
     <button
       onclick={toggle}
-      class="w-full flex items-center justify-between px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500 transition"
+      class="
+        w-full flex items-center 
+        justify-between px-4 py-2 border border-gray-300 
+        dark:border-gray-600 rounded-xl shadow-sm 
+        bg-white dark:bg-transparent 
+        hover:border-gray-400 
+        dark:hover:border-gray-500 transition"
     >
       <div class="flex items-center gap-2">
         <span class="text-xl text-gray-700 dark:text-gray-200">☰</span>
@@ -58,7 +64,7 @@
     </button>
   
     {#if abierto}
-      <div class="absolute mt-2  w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg z-10">
+      <div class="absolute mt-2  w-full bg-white dark:bg-slate-900 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg z-10">
         <div class="flex flex-col">
             {#each pestañas as option}
                 <button

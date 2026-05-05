@@ -14,9 +14,10 @@
     import CustomCheck from "../CustomCheck.svelte";
     import BuscadorHistorial from "./BuscadorHistorial.svelte";
     import TablaEventos from "./TablaEventos.svelte";
+    import { getAnimalEventos } from "$lib/java/animales/animalesback";
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
-    let { caravana = "" } = $props();
+    let { caravana = "", cab = { id: "" }, versionjava = false } = $props();
 
     let id = $state("");
     let todos = $state([]);
@@ -42,53 +43,78 @@
     let conpari = $state(true);
 
     async function getHistorial() {
-        historial = await pb.collection("historialanimales").getFullList({
-            filter: `animal='${id}'`,
-            sort: "-created",
-        });
+        if (versionjava) {
+            historial = [];
+        } else {
+            historial = await pb.collection("historialanimales").getFullList({
+                filter: `animal='${id}'`,
+                sort: "-created",
+            }).map(h=>({...h,cod:h.id}));
+        }
     }
     async function getServicios() {
-        inseminaciones = await pb.collection("servicios").getFullList({
-            filter: `madre='${id}'`,
-            sort: "-fechadesde",
-        });
+        if (versionjava) {
+        } else {
+            inseminaciones = await pb.collection("servicios").getFullList({
+                filter: `madre='${id}'`,
+                sort: "-fechadesde",
+            }).map(h=>({...h,cod:h.id}));
+        }
     }
     async function getInseminaciones() {
-        inseminaciones = await pb.collection("inseminacion").getFullList({
-            filter: `animal='${id}'`,
-            sort: "-fechainseminacion",
-        });
+        if (versionjava) {
+        } else {
+            inseminaciones = await pb.collection("inseminacion").getFullList({
+                filter: `animal='${id}'`,
+                sort: "-fechainseminacion",
+            }).map(h=>({...h,cod:h.id}));
+        }
     }
     async function getObservaciones() {
-        observaciones = await pb.collection("observaciones").getFullList({
-            filter: `animal='${id}'`,
-            sort: "-created",
-        });
+        if (versionjava) {
+        } else {
+            observaciones = await pb.collection("observaciones").getFullList({
+                filter: `animal='${id}'`,
+                sort: "-created",
+            }).map(h=>({...h,cod:h.id}));
+        }
     }
     async function getPesajes() {
-        pesajes = await pb.collection("pesaje").getFullList({
-            filter: `animal='${id}'`,
-            sort: "-fecha",
-        });
+        if (versionjava) {
+        } else {
+            pesajes = await pb.collection("pesaje").getFullList({
+                filter: `animal='${id}'`,
+                sort: "-fecha",
+            }).map(h=>({...h,cod:h.id}));
+        }
     }
     async function getTratamientos() {
-        tratamientos = await pb.collection("tratamientos").getFullList({
-            filter: `animal='${id}'`,
-            sort: "-fecha",
-            expand: "tipo",
-        });
+        if (versionjava) {
+        } else {
+            tratamientos = await pb.collection("tratamientos").getFullList({
+                filter: `animal='${id}'`,
+                sort: "-fecha",
+                expand: "tipo",
+            }).map(h=>({...h,cod:h.id}));
+        }
     }
     async function getTactos() {
-        tactos = await pb.collection("tactos").getFullList({
-            filter: `animal='${id}'`,
-            sort: "-fecha",
-        });
+        if (versionjava) {
+        } else {
+            tactos = await pb.collection("tactos").getFullList({
+                filter: `animal='${id}'`,
+                sort: "-fecha",
+            }).map(h=>({...h,cod:h.id}));
+        }
     }
     async function getPariciones() {
-        pariciones = await pb.collection("nacimientos").getFullList({
-            filter: `madre='${id}'`,
-            sort: "-fecha",
-        });
+        if (versionjava) {
+        } else {
+            pariciones = await pb.collection("nacimientos").getFullList({
+                filter: `madre='${id}'`,
+                sort: "-fecha",
+            }).map(h=>({...h,cod:h.id}));
+        }
     }
     function filterHistorial(fila) {
         if (!contodos && !coninse && fila.coleccion == "inse") {
@@ -126,6 +152,7 @@
                 inseminaciones.map((i) => {
                     return {
                         id: i.id,
+                        cod:i.cod,
                         fecha: i.fechainseminacion,
                         nombre: "Inseminación",
                         info:
@@ -144,6 +171,7 @@
                 servicios.map((i) => {
                     return {
                         id: i.id,
+                        cod:i.cod,
                         fecha: i.fecha,
                         nombre: "Servicio",
                         info:
@@ -162,6 +190,7 @@
                 pariciones.map((i) => {
                     return {
                         id: i.id,
+                        cod:i.cod,
                         fecha: i.fecha,
                         nombre: "Parición",
                         info:
@@ -180,6 +209,7 @@
                 tactos.map((i) => {
                     return {
                         id: i.id,
+                        cod:i.cod,
                         fecha: i.fecha,
                         nombre: "Tacto",
                         info: `Estado <b>${getEstadoNombre(i.prenada)}</b> ${i.observacion.length > 0 ? " : " + i.observacion : ""}`,
@@ -195,6 +225,7 @@
                     return {
                         id: i.id,
                         fecha: i.fecha,
+                        cod:i.cod,
                         nombre: "Tratamiento",
                         info: `Tratamiento <b>${i.expand.tipo.nombre}</b> ${i.observacion.length > 0 ? " : " + i.observacion : ""} `,
                         //caravana: historial[0].caravana,
@@ -209,6 +240,7 @@
                     return {
                         id: i.id,
                         fecha: i.fecha,
+                        cod:i.cod,
                         nombre: "Observación",
                         info: i.observacion,
                         //caravana: historial[0].caravana,
@@ -264,7 +296,6 @@
         }
     }
     function changeCampo() {
-        
         historialeventos = todos.filter(filterHistorial);
     }
     function filterUpdate() {
@@ -371,16 +402,26 @@
         };
     }
 
-    onMount(async () => {
-        id = $page.params.slug;
+    async function getData() {
+
         //await getHistorial()
-        await getInseminaciones();
-        await getTactos();
-        await getTratamientos();
-        await getObservaciones();
-        //await getPesajes()
-        await getPariciones();
-        await getServicios();
+        if (versionjava) {
+            let relations = await getAnimalEventos(id);
+            inseminaciones = relations.servicios.filter(s=>s.tipo=="INSEMINATION").map(h=>({...h,cod:h.id+""+Math.random()}))
+            servicios = relations.servicios.filter(s=>s.tipo=="NATURAL_SERVICE").map(h=>({...h,cod:h.id+""+Math.random()}))
+            tactos = relations.tactos.map(h=>({...h,cod:h.id+""+Math.random()}))
+            observaciones = relations.observaciones.map(h=>({...h,cod:h.id+""+Math.random()}))
+            pariciones = relations.pariciones.map(h=>({...h,cod:h.id+""+Math.random()}))
+        } else {
+            await getInseminaciones();
+            await getTactos();
+            await getTratamientos();
+            await getObservaciones();
+            //await getPesajes()
+            await getPariciones();
+            await getServicios();
+        }
+
         getHistorialEventos(
             inseminaciones,
             pariciones,
@@ -389,26 +430,13 @@
             observaciones,
             pesajes,
         );
+    }
+    onMount(async () => {
+        id = $page.params.slug;
+        await getData();
     });
 </script>
 
-<div class="hidden">
-    <MultiSelect
-        {opciones}
-        etiqueta={"Tipos"}
-        bind:valores
-        clickOption={clickOpcion}
-    />
-    <Secciones
-        bind:contactos
-        bind:coninse
-        bind:conser
-        bind:conobser
-        bind:contrata
-        bind:conpari
-        {changeCampo}
-    />
-</div>
 <BuscadorHistorial
     bind:fechadesde
     bind:fechahasta
@@ -443,45 +471,7 @@
         <TablaEventos data={historialeventos} />
     </div>
 </div>
-<div class="hidden w-full justify-items-center mx-1 lg:w-3/4 overflow-x-auto">
-    {#if historialeventos.length == 0}
-        <p class="mt-5 text-lg">No se encontraron eventos asociados</p>
-    {:else}
-        <table class="table table-lg">
-            <thead>
-                <tr>
-                    <th class="text-base mx-1 px-1">Fecha</th>
-                    <th class="text-base mx-1 px-1">Evento</th>
-                    <th class="text-base mx-1 px-1">Informacion</th>
-                </tr>
-            </thead>
-            <tbody>
-                {#each historialeventos as h}
-                    <tr>
-                        <td class="text-base">
-                            {new Date(h.fecha).toLocaleDateString()}
-                        </td>
-                        <td class="text-base">
-                            {h.nombre}
-                        </td>
-                        <td class="text-base">
-                            {h.info}
-                        </td>
-                    </tr>
-                {/each}
-            </tbody>
-        </table>
-    {/if}
-    <div class="hidden">
-        <Exportar
-            titulo={"Historia clinica"}
-            filtros={[]}
-            confiltros={false}
-            data={historialeventos}
-            {prepararData}
-        />
-    </div>
-</div>
+
 
 <div class="block md:hidden justify-items-center mx-1">
     {#if historialeventos.length == 0}

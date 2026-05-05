@@ -256,6 +256,7 @@
                 };
                 await saveTacto(datatacto);
             }
+            Swal.fire("Éxito tactos","Se logró guardar los tactos","success")
         }
         setDefault();
         volver();

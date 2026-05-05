@@ -535,6 +535,7 @@
                     <!-- Combo alineado al borde izquierdo de la card -->
                     {#if esCelu}
                         <SelectTab bind:pestañas bind:tab />
+                        
                     {:else}
                         <HorizontalTabs bind:pestañas bind:tab />
                     {/if}
@@ -594,6 +595,8 @@
                         bind:peso
                         {caravana}
                         bind:userpermisos
+                        {versionjava}
+                        {cab}
                     ></Pesajes>
                 </CardAnimal>
             {:else if tab == "tratamientos"}
@@ -642,7 +645,7 @@
             {:else if tab == "clinica"}
                 <!--Pesajes, tactos, servicios, tratamientos, observaciones,pariciones-->
                 <CardAnimal cardsize="max-w-7xl" titulo="">
-                    <HistoriaClinica {caravana} />
+                    <HistoriaClinica {caravana} {cab} {versionjava}/>
                 </CardAnimal>
             {:else if tab == "historial"}
                 <!--Historial del animal-->
@@ -662,7 +665,7 @@
                 </CardAnimal>
             {:else if tab == "movimientos"}
                 <CardAnimal cardsize="max-w-7xl">
-                    <Movimientos {caravana} {animal} />
+                    <Movimientos {caravana} {animal} {cab} {versionjava}/>
                 </CardAnimal>
             {:else if tab == "transfer"}
                 <CardAnimal cardsize="max-w-7xl" titulo="Transferencia">

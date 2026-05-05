@@ -10,6 +10,8 @@
     import { getPermisosMessage, getPermisosList } from "$lib/permisosutil/lib";
     import BuscadorPesajes from "./BuscadorPesajes.svelte";
     import TablaPesajes from "./TablaPesajes.svelte";
+    import { getAll, getAllAnimal } from "$lib/java/pesajes/pesajesback";
+    import ListaPesajes from "./ListaPesajes.svelte";
 
     let ruta = import.meta.env.VITE_RUTA;
     const HOY = new Date().toISOString().split("T")[0];
@@ -19,6 +21,8 @@
         caravana,
         peso = $bindable(""),
         userpermisos = $bindable([]),
+        cab = { id: "" },
+        versionjava = false,
     } = $props();
 
     let id = $state("");
@@ -102,16 +106,23 @@
         });
     }
     async function getPesajes() {
-        pesajes = await pb.collection("pesaje").getFullList({
-            filter: `animal='${id}'`,
-            sort: "-fecha",
-            expand: "animal",
-        });
+        if (versionjava) {
+            pesajes = await getAllAnimal(id, cab.id);
+        } else {
+            pesajes = await pb.collection("pesaje").getFullList({
+                filter: `animal='${id}'`,
+                sort: "-fecha",
+                expand: "animal",
+            });
+        }
+
         if (pesajes.length != 0) {
             xs = [];
             ys = [];
-            xs.push(pesajes[0].expand.animal.created);
-            ys.push(pesajes[0].pesoanterior);
+            if (!versionjava) {
+                xs.push(pesajes[0].expand.animal.created);
+                ys.push(pesajes[0].pesoanterior);
+            }
 
             for (let i = 0; i < pesajes.length; i++) {
                 xs.push(pesajes[i].fecha);
@@ -221,30 +232,6 @@
         nuevo={openNewModal}
         evolucion={() => chartpesaje.showModal()}
     />
-    <div class="hidden">
-        <button
-            aria-label="Nuevo"
-            onclick={openNewModal}
-            class={`
-                ${estilos.sinbordes} ${estilos.chico} ${estilos.primario}
-            `}
-        >
-            Nuevo
-        </button>
-    </div>
-    {#if pesajes.length != 0}
-        <div class="hidden">
-            <button
-                aria-label="Evolucion"
-                onclick={() => chartpesaje.showModal()}
-                class={`
-                ${estilos.sinbordes} ${estilos.chico} ${estilos.primario}
-            `}
-            >
-                Evolucion
-            </button>
-        </div>
-    {/if}
 </div>
 <div
     class={`
@@ -252,97 +239,26 @@
                 mx-auto py-1 px-4 
             `}
 >
-    <div
-        class={`
-                overflow-hidden rounded-xl
-                border dark:border-gray-700
-
-            `}
-    >
-        {#if pesajes.length == 0}
-            <p class="mt-5 text-lg">No hay pesajes</p>
-        {:else}
-            <TablaPesajes pesajesrows={pesajes} {openDetalle} />
-        {/if}
-    </div>
-</div>
-<div
-    class="hidden w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
->
     {#if pesajes.length == 0}
-        <p class="mt-5 text-lg">No hay pesajes</p>
+        <p class="mt-5 text-lg flex text-center">No hay pesajes</p>
     {:else}
         <div
-            class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
+            class={`
+                overflow-hidden rounded-xl
+                md:border md:dark:border-gray-700
+
+            `}
         >
-            <table class="table table-lg">
-                <thead>
-                    <tr>
-                        <th class="text-base ml-3 pl-3 mr-1 pr-1">Fecha</th>
-                        <th class="text-base mx-1 px-1">Peso anterior</th>
-                        <th class="text-base mx-1 px-1">Peso nuevo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {#each pesajes as p}
-                        <tr
-                            onclick={() => openDetalle(p.id)}
-                            class="hover:bg-gray-200 dark:hover:bg-gray-900"
-                        >
-                            <td class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                >{new Date(p.fecha).toLocaleDateString()}</td
-                            >
-                            <td class="text-base mx-1 px-1">
-                                {`${p.pesoanterior}`}
-                            </td>
-                            <td class="text-base mx-1 px-1">
-                                {`${p.pesonuevo}`}
-                            </td>
-                        </tr>
-                    {/each}
-                </tbody>
-            </table>
-        </div>
-        <div class="block w-full md:hidden justify-items-center mx-1">
-            {#each pesajes as p}
-                <div
-                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                >
-                    <button onclick={() => openDetalle(p.id)}>
-                        <div class="block p-4">
-                            <div class="grid grid-cols-2 gap-y-2">
-                                <div class="flex items-start">
-                                    <span>Fecha:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {new Date(p.fecha).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span>Caravana:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {`${p.expand.animal.caravana}`}
-                                    </span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span>Peso anterior:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {`${p.pesoanterior}`}
-                                    </span>
-                                </div>
-                                <div class="flex items-start">
-                                    <span>Peso nuevo:</span>
-                                    <span class="mx-1 font-semibold">
-                                        {`${p.pesonuevo}`}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-                </div>
-            {/each}
+            <div class="hidden md:block">
+                <TablaPesajes pesajesrows={pesajes} {openDetalle} />
+            </div>
+            <div class="md:hidden">
+                <ListaPesajes pesajesrows={pesajes} {openDetalle} />
+            </div>
         </div>
     {/if}
 </div>
+
 <dialog
     id="nuevoPesaje"
     class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"

@@ -47,15 +47,17 @@
                 "fixed top-20 left-1/2 transform -translate-x-1/2 z-50" 
                 : ""
             }
+            
             container mx-auto py-1 px-4
             max-w-7xl w-full xl:w-1/2
             transition-all duration-300 ease-in-out
+            bg-transparent
         `}
     >
         <div
             class={`
                 rounded-xl  mb-1 border border-gray-100 dark:border-gray-800
-                
+                bg-white dark:bg-slate-900
                 flex items-center justify-between px-4 py-2 sm:px-6 sm:py-3
             `}
         >

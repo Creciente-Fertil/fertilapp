@@ -50,9 +50,33 @@ function processMoves(data) {
         }
 
     }
+    
     return data_moves
 }
+export async function getAllAnimal(animalId,cabid=null) {
+    let user = getUser();
+    let token = user.token;
 
+    let ruta = `${RUTA_JAVA}${RUTA_MOVEMENTS}/all`
+    let url = new URL(ruta)
+    if (cabid) {
+        url.searchParams.append('establishmentId', cabid);
+    }
+    let options = {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    }
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
+
+    let data_all = await res_all.json()
+    
+    data_all = data_all.filter(a=>a.animalId==animalId)
+    let procesada = processMoves(data_all)
+
+    return procesada
+}
 export async function getAll(cabid=null) {
     let user = getUser();
     let token = user.token;
@@ -71,7 +95,7 @@ export async function getAll(cabid=null) {
     let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
-
+    
 
     let procesada = processMoves(data_all)
 

@@ -100,7 +100,7 @@
             {selectanimales[i].observacionnuevo || "Sin observaciones"}
         </div>
     </div>
-    <div class="hidden md:col-span-2 flex justify-end items-center gap-2">
+    <div class="hidden md:col-span-2 md:flex justify-end items-center gap-2">
         <button
             onclick={() => toggleEstado(animal.id)}
             class={`

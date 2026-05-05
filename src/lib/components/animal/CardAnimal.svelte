@@ -9,7 +9,7 @@
     <div class="flex items-center justify-center">
         <div 
             class={`
-                bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-2 w-full 
+                bg-white dark:bg-transparent rounded-xl shadow-2xl p-2 w-full 
                 ${cardsize}
             `}
         >

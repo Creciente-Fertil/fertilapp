@@ -196,14 +196,13 @@
         cabnombre = est.nombre;
         
         movimientos = await getAll(est.id);
+        
         cargados = true;
         filterUpdate();
     }
     onMount(async () => {
         await getData();
-        if (esCelu) {
-            pageSize = 5;
-        }
+        
     });
 </script>
 

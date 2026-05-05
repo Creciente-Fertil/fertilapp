@@ -26,7 +26,7 @@ function processNacimiento(birth){
     }
     return data_nacimiento
 }
-function processNacimientos(data){
+export function processNacimientos(data){
     let data_nacimientos = []
     for(let i = 0;i<data.length;i++){
         let fila = data[i]

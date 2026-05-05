@@ -9,6 +9,7 @@ function processPeso(peso) {
         pesoanterior: 0,
         pesonuevo: peso.weight,
         animal: peso.animalId,
+        created:peso.creationDate,
         expand: {
             animal: {
                 id: peso.animalId,
@@ -34,6 +35,27 @@ function processPesos(data, cabid = null) {
     }
     return data_pesos
 }
+export async function getAllAnimal(animalId,cabid = null) {
+ let user = getUser();
+    let token = user.token;
+    let ruta = `${RUTA_JAVA}${RUTA_PESOS}/all`
+    let url = new URL(ruta)
+    if (cabid) {
+        url.searchParams.append('establishmentId', cabid);
+    }
+    
+    let options = {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    }
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
+    let data_all = await res_all.json()
+    data_all = data_all.filter(a=>a.animalId==animalId)
+    let procesada = processPesos(data_all,cabid)
+    return procesada   
+}
 export async function getAll(cabid = null) {
     let user = getUser();
     let token = user.token;
@@ -42,6 +64,7 @@ export async function getAll(cabid = null) {
     if (cabid) {
         url.searchParams.append('establishmentId', cabid);
     }
+    
     let options = {
         headers: {
             "Content-Type": "application/json",

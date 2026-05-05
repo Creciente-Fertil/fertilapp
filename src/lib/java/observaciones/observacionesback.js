@@ -19,7 +19,7 @@ function processComment(comment) {
     }
     return data_comm
 }
-function processComments(data, cabid = null) {
+export function processComments(data, cabid = null) {
     let data_comments = []
     for (let i = 0; i < data.length; i++) {
         let fila = data[i]

@@ -357,9 +357,10 @@
             });
         } else {
             recordsa = await getAll(cab.id);
+
         }
 
-        animales = recordsa;
+        animales = recordsa.filter(a=>a.sexo=="H");
         animales.sort((a1, a2) =>
             a1.caravana.toLocaleLowerCase() > a2.caravana.toLocaleLowerCase()
                 ? 1

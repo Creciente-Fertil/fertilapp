@@ -20,7 +20,7 @@ function processTacto(tacto) {
     }
     return data_tacto;
 }
-function processTactos(data) {
+export function processTactos(data) {
     let data_tactos = []
     for (let i = 0; i < data.length; i++) {
         let fila = data[i]

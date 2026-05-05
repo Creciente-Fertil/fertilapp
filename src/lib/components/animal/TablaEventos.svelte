@@ -60,7 +60,7 @@
         </tr>
     </thead>
     <tbody>
-        {#each rows as h (h.id)}
+        {#each rows as h (h.cod)}
             
             <tr>
                 <td class={`text-base mx-1 px-1 text-center ${pyfila}`}>

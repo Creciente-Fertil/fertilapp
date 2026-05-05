@@ -1,6 +1,11 @@
 import { getUser } from "$lib/userstorage/usersotrage"
 import categorias from "$lib/stores/categorias"
 import { handleAuthenticatedRequest } from "../errores/erroresback"
+import { processComments } from "../observaciones/observacionesback"
+import { processTactos } from "../tactos/tactosback"
+import { processNacimientos } from "../nacimientos/nacimientosback"
+import { processServicios } from "../servicios/serviciosback"
+import { processTratamientos } from "../tratamientos/tratamientosback"
 const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 const RUTA_ANIMALES = "animals"
 function null2string(param) {
@@ -78,7 +83,35 @@ function processAnimales(data) {
     }
     return data_animales
 }
+function processEventos(data){
+    let eventos = {
+        tratamientos:processTratamientos(data.treatments),
+        observaciones:processComments(data.observations),
+        servicios:processServicios(data.services),
+        tactos:processTactos(data.pregnancyChecks),
+        pariciones:processNacimientos(data.births)
+    };
+    return eventos
+}
+export async function getAnimalEventos(animalId){
+    let user = getUser();
+    let token = user.token;
 
+    let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/${animalId}/relations`
+    let url = new URL(ruta);
+    let options = {
+        headers: {
+            //"Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    }
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
+
+    let data_all = await res_all.json()
+    let procesada = processEventos(data_all)
+
+    return procesada
+}
 export async function getAll(cabid = null, lotid = null) {
 
     let user = getUser();
@@ -130,12 +163,18 @@ export async function getAnimalId(id) {
 function postData(data, establishmentId = 1) {
     let data_animal = {
         tagNumber: data.caravana,
+        birthDate: data.fechanacimiento && data.fechanacimiento.length>0 ? data.fechanacimiento.split(" ")[0] : "",
         sex: data.sexo == "H" ? "F" : "M",
         rpCode: data.rp,
         establishmentId: data.cab,
-        birthDate: data.fechanacimiento ? data.fechanacimiento.split(" ")[0] : "",
-
+        breed: string2null(data.raza),
+        color: string2null(data.color),
+        herdId: data.rodeo,
+        lotId: data.lote,
+        categoryId: getCategoriaCod(data.categoria), 
+        reproductiveStatus: data.prenada == 2 ? "PRENADA" : data.prenada == 3 ? "EN_SERVICIO" : "VACIA",
     }
+    
     return data_animal
 }
 function updateData(animal) {
@@ -144,7 +183,7 @@ function updateData(animal) {
         tagNumber: animal.caravana,
         birthDate: string2null(animal.fechanacimiento),
         sex: animal.sexo == "H" ? "F" : "M",
-        isPregnan: animal.prenada == 2,
+        
         deathDate: string2null(animal.fechafallecimiento),
 
         breed: string2null(animal.raza),
@@ -152,10 +191,10 @@ function updateData(animal) {
         rpCode: animal.rp,
         establishmentId: animal.cab,
 
-        birthId: string2null(animal.nacimiento),
-        herdId: string2null(animal.rodeo),
-        reproductiveStatus: animal.prenada == 2 ? "PRENADA" : animal.prenada == 1 ? "EN_SERVICIO" : "VACIA",
-        lotId: string2null(animal.lote),
+        birthId: animal.nacimiento,
+        herdId: animal.rodeo,
+        reproductiveStatus: animal.prenada == 2 ? "PRENADA" : animal.prenada == 3 ? "EN_SERVICIO" : "VACIA",
+        lotId: animal.lote,
         categoryId: getCategoriaCod(animal.categoria)
 
 

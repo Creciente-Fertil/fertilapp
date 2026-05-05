@@ -643,15 +643,18 @@
                 active: true,
                 delete: false,
                 prenada,
-                fechanacimiento: fechanacimiento + " 03:00:00",
+                fechanacimiento:fecha,
                 sexo,
                 peso,
                 lote,
-                rodeo,
+                rodeo, 
                 rp,
-                categoria: categoria ? "" : sexo == "M" ? "ternero" : "ternera",
+                raza ,
+                color,
+                categoria: categoria  &&  categoria.length>0 ? categoria : sexo == "M" ? "ternero" : "ternera",
                 cab: cab.id,
             };
+            
             let res = await saveAnimal(data);
             Swal.fire("Éxito guardar", "Se pudo guardar el animal", "success");
             modoedicion = false;

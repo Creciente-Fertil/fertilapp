@@ -47,7 +47,7 @@ function processServicio(fila) {
     }
     return data_ser
 }
-function processServicios(data) {
+export function processServicios(data) {
     let servicios = []
     for (let i = 0; i < data.length; i++) {
         let fila = data[i]

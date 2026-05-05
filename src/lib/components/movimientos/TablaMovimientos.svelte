@@ -41,6 +41,7 @@
 
     let totalPaginas = $derived(Math.ceil(count / pageSize));
     let pyfila = "py-1";
+    
 </script>
 <div class="max-h-[600px] overflow-y-auto custom-scrollbar">
     <table class="table table-lg w-full bg-white dark:bg-slate-900 rounded-none">
