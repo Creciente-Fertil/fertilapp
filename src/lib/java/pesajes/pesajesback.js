@@ -1,6 +1,6 @@
 import { getUser } from "$lib/userstorage/usersotrage"
 import { handleAuthenticatedRequest } from "../errores/erroresback"
-const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
+const RUTA_JAVA = import.meta.env.VITE_RUTA_JAVA_SERVER
 const RUTA_PESOS = "weights"
 function processPeso(peso) {
     let data_peso = {

@@ -6,7 +6,7 @@ import { processTactos } from "../tactos/tactosback"
 import { processNacimientos } from "../nacimientos/nacimientosback"
 import { processServicios } from "../servicios/serviciosback"
 import { processTratamientos } from "../tratamientos/tratamientosback"
-const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
+const RUTA_JAVA = import.meta.env.VITE_RUTA_JAVA_SERVER
 const RUTA_ANIMALES = "animals"
 function null2string(param) {
     return param ? param : ""

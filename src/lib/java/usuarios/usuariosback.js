@@ -1,7 +1,7 @@
 import { processEstablishment, processEstablishments } from "../establecimientos/establecimientosback"
 import { getUser } from "$lib/userstorage/usersotrage"
 import { handleAuthenticatedRequest } from "../errores/erroresback"
-const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
+const RUTA_JAVA = import.meta.env.VITE_RUTA_JAVA_SERVER
 const RUTA_USERS = "users"
 const RUTA_AUTH = "auth"
 const RUTA_ESTA = "establishments/user/"
