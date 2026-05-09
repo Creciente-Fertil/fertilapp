@@ -1,199 +1,126 @@
 <script>
-    import Navbarr from "$lib/components/Navbarr.svelte";
     import Navbar2 from "$lib/components/Navbar2.svelte";
-    import PocketBase from "pocketbase";
     import Swal from "sweetalert2";
     import { onMount } from "svelte";
-    import estilos from "$lib/stores/estilos";
-    import { createCaber } from "$lib/stores/cab.svelte";
     import { goto } from "$app/navigation";
     import HorizontalTab from "$lib/components/establecimiento/HorizontalTab.svelte";
     import Success from "$lib/components/botones/Success.svelte";
     import Plus from "$lib/svgs/plus.svelte";
-    //Permisos
-    import {
-        getPermisosCabUser,
-        getPermisosEstXColab,
-    } from "$lib/permisosutil/lib";
-    import { createPer } from "$lib/stores/permisos.svelte";
-    import { usuario } from "$lib/stores/usuario";
     import ListaEstablecimientos from "$lib/components/establecimientos/ListaEstablecimientos.svelte";
+    import { deleteEstablishment } from "$lib/java/establecimientos/establecimientosback";
     import {
-        deleteEstablishment,
-        getAll,
-        getAllColabs,
-    } from "$lib/java/establecimientos/establecimientosback";
-    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
-    import { getUser } from "$lib/userstorage/usersotrage";
-    let esdev = import.meta.env.VITE_DEV == "si";
-    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
+        loadStorageEstablecimiento,
+        saveStorageEstablecimiento,
+    } from "$lib/java/establecimientos/establecimientostorage";
+    import { getUser, setUser } from "$lib/userstorage/usersotrage";
+    import { switchEstablishment } from "$lib/java/usuarios/usuariosback";
 
-    let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
-    const pb = new PocketBase(ruta);
-    let establecimientos = $state([]);
-    let establecimientoscolab = $state([]);
+
+    // Lista de establishments del usuario (la guarda el login en
+    // usertoken.establishments) separada por rol en dos arrays para
+    // alimentar las dos tabs.
+    let establecimientos = $state([]);     // ADM → "Tus establecimientos"
+    let establecimientoscolab = $state([]); // ENC/OPE → "Asociados"
+    // Cab actual (scoped en el JWT). Lo usamos para resaltar cual estoy
+    // viendo y decidir si muestro el boton de eliminar.
+    let cab = $state(loadStorageEstablecimiento());
+    // ListaEstablecimientos espera un array `totales` paralelo. Por
+    // ahora todos en 0; cuando haya endpoint Java de "total animales por
+    // establishment" se llena.
     let totales = $state([]);
     let totalescolab = $state([]);
-    let usuarioid = $state("");
-    let caber = createCaber();
-    let cab = $state({});
-    //Pestañas
+
     let pestañas = $state([
         { id: "propios", nombre: "Tus establecimiento" },
         { id: "ajenos", nombre: "Establecimientos asociados" },
     ]);
     let tab = $state("propios");
-    async function toggleJava() {
-        versionjava = !versionjava;
-        await getData();
-    }
-    //Guardar establecimiento
-    async function irEstablecimientoColab(id) {
-        if (versionjava) {
-            let est = establecimientoscolab.filter((e) => e.id == id)[0];
-            let per = createPer();
-            caber.setCab(est.nombre, est.id);
-            //Aca debo poner los permisos correctos
-            per.setPer([], usuarioid);
-        } else {
-            let per = createPer();
-            let est = establecimientoscolab.filter((e) => e.id == id)[0];
-            let permisos = await getPermisosCabUser(
-                pb,
-                usuarioid,
-                est.expand.cab.id,
-            );
-            caber.setCab(est.expand.cab.nombre, est.expand.cab.id);
-            //Aca debo poner los permisos correctos
-            per.setPer(permisos.permisos, usuarioid);
+
+    function reloadLists() {
+        const u = getUser();
+        const list = u.establishments || [];
+        const tus = [];
+        const ajenos = [];
+        for (const e of list) {
+            const item = {
+                id: e.establishmentId,
+                nombre: e.establishmentName,
+                role: e.role,
+                active: true,
+            };
+            if (e.role === "ADM") tus.push(item);
+            else ajenos.push(item);
         }
-
-        goto(pre + "/");
+        establecimientos = tus;
+        establecimientoscolab = ajenos;
+        totales = tus.map(() => 0);
+        totalescolab = ajenos.map(() => 0);
     }
-    function irEstablecimiento(id) {
-        let per = createPer();
 
-        let est = establecimientos.filter((e) => e.id == id)[0];
-
-        caber.setCab(est.nombre, est.id);
-        per.setPer("0,1,2,3,4,5", usuarioid);
-        goto(pre + "/");
+    // Cambia el establishment activo: pide JWT nuevo scoped y actualiza
+    // localStorage (token + establecimiento) antes de navegar.
+    async function switchTo(id) {
+        try {
+            const data = await switchEstablishment(id);
+            const u = getUser();
+            setUser({ ...u, token: data.token });
+            saveStorageEstablecimiento({
+                exist: true,
+                id: data.establishmentId,
+                nombre: data.establishmentName,
+            });
+            goto(pre + "/inicio");
+        } catch (err) {
+            console.error("switchTo", err);
+            Swal.fire(
+                "Error",
+                "No se pudo cambiar de establecimiento",
+                "error",
+            );
+        }
     }
+
     function crearEstablecimiento() {
         goto(pre + "/establecimientos/nuevo");
     }
-    async function getTotalAnimales(cabid) {
-        const record = await pb.collection("animales").getList(1, 2, {
-            filter: `active=True && delete=false && cab='${cabid}'`,
-        });
-        return record.totalItems;
-    }
+
     async function eliminar(id) {
-        Swal.fire({
+        const result = await Swal.fire({
             title: "Eliminar establecimiento",
             text: "¿Seguro que deseas eliminar el establecimiento?",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Si",
+            confirmButtonText: "Sí",
             cancelButtonText: "No",
-        }).then(async (result) => {
-            if (result.value) {
-                let data = { active: false };
-                try {
-                    if (versionjava) {
-                        await deleteEstablishment(id);
-                        await getEstablecimientos();
-                        await getEstablecimientosColab();
-                    } else {
-                        await pb.collection("cabs").update(id, data);
-                        await getEstablecimientos();
-                        await getEstablecimientosColab();
-                    }
-
-                    Swal.fire(
-                        "Éxito",
-                        "Se pudo eliminar el establecimiento",
-                        "success",
-                    );
-                } catch (err) {
-                    console.error(err);
-                    Swal.fire(
-                        "Error eliminar",
-                        "No se pudo eliminar el establecimiento",
-                        "error",
-                    );
-                }
-            }
         });
+        if (!result.value) return;
+        try {
+            await deleteEstablishment(id);
+            // Saco el item del array local. La lista canonica vive en
+            // usertoken.establishments, que recien se refresca al
+            // re-loguear o al hacer un switch (que emite establishments
+            // actualizados? — no, el switch solo trae el nuevo cab). Si
+            // el usuario re-loguea queda limpio.
+            establecimientos = establecimientos.filter((e) => e.id !== id);
+            totales = establecimientos.map(() => 0);
+            Swal.fire(
+                "Éxito",
+                "Se pudo eliminar el establecimiento",
+                "success",
+            );
+        } catch (err) {
+            console.error(err);
+            Swal.fire(
+                "Error eliminar",
+                "No se pudo eliminar el establecimiento",
+                "error",
+            );
+        }
     }
-    async function getEstablecimientosColab() {
-        if (versionjava) {
-            totalescolab = [];
-            establecimientoscolab = await getAllColabs();
 
-            for (let i = 0; i < establecimientoscolab.length; i++) {
-                totalescolab.push(0);
-            }
-        } else {
-            const restxcolab = await pb.collection("estxcolabs").getFullList({
-                filter: `colab.user = '${usuarioid}' && cab.active = true`,
-                expand: "colab,cab",
-            });
-            establecimientoscolab = restxcolab;
-            totalescolab = [];
-            for (let i = 0; i < establecimientoscolab.length; i++) {
-                totalescolab.push(
-                    await getTotalAnimales(
-                        establecimientoscolab[i].expand.cab.id,
-                    ),
-                );
-            }
-        }
-    }
-    async function getEstablecimientos() {
-        if (!versionjava) {
-            const records = await pb.collection("cabs").getFullList({
-                filter: `active = True && user = '${usuarioid}'`,
-            });
-            establecimientos = records;
-            totales = [];
-            for (let i = 0; i < establecimientos.length; i++) {
-                totales.push(await getTotalAnimales(establecimientos[i].id));
-            }
-        } else {
-            let records = await getAll();
-            establecimientos = records;
-            totales = [];
-            for (let i = 0; i < establecimientos.length; i++) {
-                totales.push(0);
-            }
-        }
-    }
-    async function getData() {
-        if (versionjava) {
-            let user_data = getUser();
-            usuarioid = user_data.id;
-            cab = loadStorageEstablecimiento();
-            pestañas = [{ id: "ajenos", nombre: "Establecimientos asociados" }];
-            tab = "ajenos";
-
-            await getEstablecimientosColab();
-        } else {
-            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-            usuarioid = pb_json.record.id;
-            cab = caber.cab;
-            pestañas = [
-                { id: "propios", nombre: "Tus establecimiento" },
-                { id: "ajenos", nombre: "Establecimientos asociados" },
-            ];
-            tab = "propios";
-            await getEstablecimientos();
-            await getEstablecimientosColab();
-        }
-    }
-    onMount(async () => {
-        await getData();
+    onMount(() => {
+        reloadLists();
     });
 </script>
 
@@ -235,17 +162,6 @@
                             Nuevo
                         </Success>
                     </div>
-                    {#if esdev}
-                        <div class="flex flex-wrap gap-2">
-                            <Success onclick={toggleJava} conhijo={true}>
-                                {#if versionjava}
-                                    cerrar java
-                                {:else}
-                                    ver java
-                                {/if}
-                            </Success>
-                        </div>
-                    {/if}
                 </div>
             </div>
             <div
@@ -257,7 +173,7 @@
                 <ListaEstablecimientos
                     {establecimientos}
                     {eliminar}
-                    {irEstablecimiento}
+                    irEstablecimiento={switchTo}
                     {cab}
                     {totales}
                 />
@@ -301,11 +217,11 @@
                 `}
             >
                 <ListaEstablecimientos
-                    esColab={versionjava ? false : true}
+                    esColab={false}
                     establecimientos={establecimientoscolab}
-                    irEstablecimiento={irEstablecimientoColab}
+                    irEstablecimiento={switchTo}
                     {cab}
-                    {totales}
+                    totales={totalescolab}
                 />
             </div>
         {/if}
