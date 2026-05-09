@@ -64,6 +64,12 @@
                 useremail: usuarioname,
                 token: data_login.token,
                 id: data_login.userId,
+                // Nivel del plan del usuario (lo manda el back en el
+                // response de login). Util para gating de features
+                // por plan.
+                level: data_login.level ?? null,
+                // Plan name si tiene suscripcion activa, sino null.
+                planName: data_login.planName ?? null,
                 // Lista de establishments del usuario para el switcher
                 // (cada item: {establishmentId, establishmentName, role}).
                 establishments: data_login.establishments || [],
