@@ -17,7 +17,8 @@
     import Plus from "$lib/svgs/plus.svelte";
     import Arrowdown from "$lib/svgs/arrowdown.svelte";
     import Userplus from "$lib/svgs/userplus.svelte";
-
+    import { addColabEstablishment } from "$lib/java/establecimientos/establecimientosback";
+    import Guardando from "../Guardando.svelte";
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
     let pre = import.meta.env.VITE_PRE;
@@ -30,6 +31,7 @@
         asociado,
         cabid,
         cab,
+        versionjava=false
     } = $props();
     let titulo = $state("Colaboradores");
 
@@ -53,8 +55,34 @@
     let correoasociar = $state("");
     let malcorreo = $state(false);
     let codigoasociar = $state("");
-
-    async function asociar() {
+    let guardando = $state(false)
+    async function asociar(){
+        
+        if(versionjava){
+            guardando = true
+            await asociarJava()
+            guardando = false
+            
+        }
+        else{
+            await asociarPB()
+        }
+    }
+    async function asociarJava(){
+        let data = {
+            email:correoasociar
+        }
+        try{
+            await addColabEstablishment(data,cab.id)
+            Swal.fire("Éxito colaborador","Se logró asociar el colaborador","success")
+        }
+        catch(err){
+            console.warn(err)
+            Swal.fire("Error colaborador","No se pudo asociar el usuario","error")
+        }
+    }
+    async function asociarPB() {
+        
         let listapermisos = getPermisosList(permisos.permisos);
         if (!listapermisos[0]) {
             Swal.fire("Error permisos", getPermisosMessage(0), "error");
@@ -403,7 +431,7 @@
         <div class="flex justify-between items-center w-full mb-1">
             <label for="correo" class="label p-0 min-h-fit">
                 <span class="label-text text-base font-medium"
-                    >Código usuario</span
+                    >Correo usuario</span
                 >
             </label>
 
@@ -452,7 +480,7 @@
             </label>
 
             <Success
-                disabled={!botonhabilitadocolab}
+                    
                 onclick={guardarColaborador}
                 texto="Guardar"
             />
@@ -589,4 +617,7 @@
             </label>
         </div>
     </div>
+{/if}
+{#if guardando}
+    <Guardando texto="Asociando usuario"/>
 {/if}

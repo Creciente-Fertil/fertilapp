@@ -79,7 +79,7 @@
             </label>
             <label for="caravana" class="label py-0 my-0">
                 <span class={`text-lg ${estilos.labelcolor} py-0 my-0`}
-                    >{caravananimal.length > 0
+                    >{caravananimal && caravananimal.length > 0
                         ? caravananimal
                         : "Sin animal"}</span
                 >

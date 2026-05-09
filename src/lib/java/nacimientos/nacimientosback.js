@@ -11,7 +11,7 @@ function processNacimiento(birth){
         padre:birth.fatherId,
         nombremadre:birth.motherTagNumber,
         nombrepadre:birth.fatherTagNumber,
-        observacion :birth.notes,
+        observacion :birth.notes?birth.notes:"",
         cab:birth.establishmentId,
         expadnd:{
             madre:{
@@ -74,15 +74,16 @@ export async function getBirthId(id){
     return procesada
 }
 function postData(data,establishmentId=1){
-    
+
     let data_nacimiento = {
           date: data.fecha.split(" ")[0],
           motherId: data.madre,
           fatherId: data.padre,
           notes: data.observacion,
-          establishmentId:data.cab
+          establishmentId:data.cab,
+          animalId:data.animal
     }
-    
+
     return data_nacimiento
 
 }

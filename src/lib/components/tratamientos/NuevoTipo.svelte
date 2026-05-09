@@ -1,7 +1,7 @@
 <script>
     import estilos from "$lib/stores/estilos";
     import { slide } from "svelte/transition";
-    import Filter from "$lib/svgs/filter.svelte";
+    
     import Plus from "$lib/svgs/plus.svelte";
     import Pencil from "$lib/svgs/pencil.svelte";
 
@@ -16,7 +16,7 @@
         editar = (id) => {},
 
         validarBotonTipo = () => {},
-        edit = false
+        edit = false 
     } = $props();
 </script>
 

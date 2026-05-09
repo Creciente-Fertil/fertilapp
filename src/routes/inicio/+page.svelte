@@ -629,7 +629,7 @@
                     //Laburar esta parte
                     let a = await guardarAnimalParicion(
                         nacimiento.madrenac,
-                        recordparicion.id,
+                        recordparicion.birthId,
                         nacimiento.fechanac,
                     );
 

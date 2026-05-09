@@ -23,6 +23,7 @@
 
         openModal = () => {},
         transfer = () => {},
+        versionjava=false
     } = $props();
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
@@ -44,6 +45,7 @@
             }).then((result) => {
                 if (result.value) {
                     bajar(fechafallecimiento, motivo);
+                    
                 }
             });
         }
@@ -124,7 +126,7 @@
                             {#each motivos as m}
                                 <option value={m.id}>{m.nombre}</option>
                             {/each}
-                            {#if !incluyeMotivo(motivo)}
+                            {#if motivo.length>0 && !incluyeMotivo(motivo)}
                                 <option value={motivo}>{motivo}</option>
                             {/if}
                         </select>

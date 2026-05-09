@@ -25,7 +25,7 @@
     import estilos from "$lib/stores/estilos";
     import ListaAnimales from "$lib/components/servicios/ListaAnimales.svelte";
     import Secondary from "$lib/components/botones/Secondary.svelte";
-    import { saveServicio } from "$lib/java/servicios/serviciosback";
+    import { saveServicio, saveServicioBulk } from "$lib/java/servicios/serviciosback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { getAll } from "$lib/java/animales/animalesback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
@@ -153,6 +153,7 @@
         fechainseminacion = proxymovimiento.fechainseminacion;
         observaciongeneral = proxymovimiento.observacion;
         listaanimales = [];
+        
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
                 let fila = value;
@@ -419,8 +420,13 @@
         } else {
             let errores = false;
             let serverrores = [];
+            let data_javas = []
+            
             for (let i = 0; i < listaanimales.length; i++) {
                 let servicio = listaanimales[i];
+                let fathers = servicio.padres.map(p=>({
+                    fatherId:p
+                }))
                 let data_java = {
                     animalId: servicio.id,
                     establishmentId: cab.id,
@@ -429,16 +435,31 @@
                     expectedBirthDate: fechaparto,
                     notes: servicio.observacion,
                     isActive: true,
-                    fatherIds: padreslist,
+                    fathers: fathers,
                     
                 };
+                //let data_java_simple={
+                //    animalId: servicio.id,
+                //    establishmentId: cab.id,
+                //    serviceType: esNatural ? "NATURAL_SERVICE" : "INSEMINATION",
+                //    startDate: esNatural ? fechadesdeserv : fechainseminacion,
+                //    expectedBirthDate: fechaparto,
+                //    notes: servicio.observacion,
+                //    isActive: true,
+                //    fathers: fathers
+                //}
                 if (esNatural && fechahastaserv != "") {
                     data_java.endDate = fechahastaserv;
+                    //data_java_simple.endDate = fechahastaserv;
                 }
-                await saveServicio(data_java);
+                data_javas.push(data_java)
+                
+                //await saveServicio(data_java);
             }
+            //console.log(data_javas)
+            await saveServicioBulk(data_javas)
         }
-
+        
         setDetalleDefault();
         goto(pre + "/servicios");
     }

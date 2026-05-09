@@ -39,6 +39,9 @@
         saveStorageEstablecimiento,
     } from "$lib/java/establecimientos/establecimientostorage";
     import { getUser } from "$lib/userstorage/usersotrage";
+    import { randomString } from "$lib/stringutil/lib";
+    import { saveUser } from "$lib/java/usuarios/usuariosback";
+    import Guardando from "$lib/components/Guardando.svelte";
     //Size
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -96,6 +99,7 @@
     //validar dato cabaña
     let malnombre = $state(false);
     let botonhabilitado = $state(false);
+    let guardando = $state(false)
     function validarBotonNuevo() {
         if (nombre.trim().length > 0) {
             botonhabilitado = true;
@@ -209,8 +213,44 @@
             colabs = records;
         }
     }
-
     async function guardarColab(data) {
+        if(versionjava){
+            await guardarColabJava(data)
+        }
+        else{
+            await guardarColabPB(data)
+        }
+    }
+    async function guardarColabJava(data) {
+        guardando = true
+        let nombredata = data.nombre
+            .trim()
+            .split(" ")
+            .filter((w) => w !== "")
+            .join(".");
+        let apellidodata = data.apellido
+            .trim()
+            .split(" ")
+            .filter((w) => w !== "")
+            .join(".");
+        let randomnumber = randomString(5, "n");
+        let data_user = {
+            username: nombredata + "." + apellidodata + randomnumber,
+            password: data.contra,
+            email: data.email.trim(),
+            firstName: nombredata,
+            lastName: apellidodata,
+            level: 0,
+            couponCode: null,
+            avatar: null,
+            roleId: 1,
+        };
+        let data_signup = await saveUser(data_user);
+        await setDueñoEstablecimiento(cab.id,data_signup.userId)
+        guardando = false
+
+    }
+    async function guardarColabPB(data) {
         let listapermisos = getPermisosList(permisos.permisos);
         if (!listapermisos[0]) {
             Swal.fire("Error permisos", getPermisosMessage(0), "error");
@@ -422,7 +462,7 @@
         goto(pre + "/");
     }
     function mostrarcolab(data) {
-        console.log("padre: " + data);
+        console.warn("padre: " + data);
     }
     function getNombreProvincia(id) {
         let p = provincias.filter((pro) => pro.id == id)[0];
@@ -882,6 +922,7 @@
                     {asociado}
                     cabid={cab.id}
                     {cab}
+                    {versionjava}
                     bind:permisos
                 />
                 <ListaColabs bind:colabs {versionjava} />
@@ -957,3 +998,9 @@
         {/if}
     </DetalleEstablecimiento>
 </Navbar2>
+
+{#if guardando}
+    <Guardando
+        texto="Creando nuevo usuario"
+    />
+{/if}

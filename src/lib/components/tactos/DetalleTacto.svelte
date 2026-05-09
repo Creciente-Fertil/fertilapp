@@ -39,7 +39,7 @@
             >
         </label>
     </div>
-    <div>
+    <div class="hidden">
         <label for="tipo" class="label pb-0 mb-0">
             <span class="label-text text-base">Categoria</span>
         </label>
@@ -88,7 +88,7 @@
                     `}
                     bind:value={prenada}
                 >
-                    {#each estados as s}
+                    {#each estados.filter(e=>e.cod==1) as s}
                         <option value={s.id}>{s.nombre}</option>
                     {/each}
                 </select>

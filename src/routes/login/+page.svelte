@@ -57,12 +57,15 @@
         }
         try {
             let data_login = await loginJava(usuarioname, contra);
-            
+            if(data_login.status==401){
+                throw new Error("Erro de credenciales")
+            }
             let storage_data = {
                 useremail: usuarioname,
                 token: data_login.token,
                 id: data_login.userId,
             };
+            
             setUser(storage_data);
             enabled.set("si");
             let establecimientoid = data_login.establishmentId

@@ -24,6 +24,8 @@
     import * as LoteService from "$lib/java/lotes/lotesback";
     import * as RodeoService from "$lib/java/rodeos/rodeosback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import { savePeso } from "$lib/java/pesajes/pesajesback";
+    import { saveBirth } from "$lib/java/nacimientos/nacimientosback";
     let {
         caravana = $bindable(""),
         rodeo = $bindable(""),
@@ -638,6 +640,21 @@
                 );
             }
         } else {
+            let birth={birthId:null}
+            if(fecha && fecha.length>0){
+
+                if (madre || padre) {
+                    let data_nacimiento = {
+                        fecha,
+                        madre,
+                        padre,
+                        cab:cab.id
+                    }
+                    
+                    birth = await saveBirth(data_nacimiento)
+                }
+            }
+
             let data = {
                 caravana,
                 active: true,
@@ -655,7 +672,22 @@
                 cab: cab.id,
             };
             
+            if(birth.birthId){
+                data.nacimiento = birth.birthId
+            }
+
             let res = await saveAnimal(data);
+
+            if(peso){
+
+                let data_peso = {
+                    animal:res.id,
+                    fecha:new Date().toISOString().split("T")[0],
+                    pesonuevo:peso
+                }
+                await savePeso(data_peso)
+            }
+            
             Swal.fire("Éxito guardar", "Se pudo guardar el animal", "success");
             modoedicion = false;
 
@@ -1310,3 +1342,4 @@
         Editar
     </button>
 </div>
+

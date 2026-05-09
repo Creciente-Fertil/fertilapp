@@ -143,7 +143,19 @@ export async function saveEstablishment(data) {
     })
     let data_save = await res_save.json()
     return data_save
-
+}
+export async function addColabEstablishment(data,cabid) {
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${cabid}/collaborators`
+    let user = getUser();
+    let token = user.token;
+    let res_save = await fetch(ruta, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    })
 }
 export async function updateEstablishment(data, id) {
     let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${id}`
@@ -179,8 +191,6 @@ export async function getColaboradores(id){
 
 }
 export async function setDueñoEstablecimiento(establecimientoid){
-    
-
     let user = getUser();
     let token = user.token;
     let usuarioid = user.id

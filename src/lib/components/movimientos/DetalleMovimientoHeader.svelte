@@ -46,6 +46,8 @@
                 s = motivos[idx_c].nombre;
             }
         }
+        
+
         return s;
     }
 </script>
@@ -237,9 +239,16 @@
                             </select>
                         </label>
                     </div>
-                    <div class="hidden">
+                    <div class="">
                         <label for="fecha" class="label">
-                            <span class="label-text text-base">Fecha</span>
+                            <span
+                                class="
+                                    label-text tracking-wide
+                                    text-md uppercase
+                                    font-semibold dark:text-gray-400
+                                    text-gray-500
+                                ">Fecha baja</span
+                            >
                         </label>
                         <label class="input-group">
                             <input
@@ -273,51 +282,25 @@
                     </div>
                 {/if}
             </div>
-            {#if seccionAbierta == "BAJA"}
-                <div class="grid grid-cols-1">
-                    <div>
-                        <label for="fecha" class="label">
-                            <span
-                                class="
+            <div class="grid grid-cols-1">
+                <div>
+                    <label for="fecha" class="label">
+                        <span
+                            class="
                                     label-text tracking-wide
                                     text-md uppercase
                                     font-semibold dark:text-gray-400
                                     text-gray-500
                                 "
-                            >
-                                Fecha baja
-                            </span>
-                        </label>
-                        {#if fechabaja.length > 0}
-                            <span
-                                class={`text-lg font-semibold tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-                                >{new Date(
-                                    fechabaja,
-                                ).toLocaleDateString()}</span
-                            >
-                        {/if}
-                    </div>
-                </div>
-            {:else}
-                <div class="grid grid-cols-1">
-                    <div>
-                        <label for="fecha" class="label">
-                            <span
-                                class="
-                                    label-text tracking-wide
-                                    text-md uppercase
-                                    font-semibold dark:text-gray-400
-                                    text-gray-500
-                                "
-                            >
-                                Fecha
-                            </span>
-                        </label>
-                        <label class="input-group">
-                            <input
-                                id="fecha"
-                                type="date"
-                                class={`
+                        >
+                            Fecha movimiento
+                        </span>
+                    </label>
+                    <label class="input-group">
+                        <input
+                            id="fecha"
+                            type="date"
+                            class={`
                                         input input-bordered w-full
                                         border border-gray-300 rounded-md
                                         focus:outline-none focus:ring-2 
@@ -325,12 +308,11 @@
                                         focus:border-green-500
                                         ${estilos.bgdark2} 
                                     `}
-                                bind:value={fecha}
-                            />
-                        </label>
-                    </div>
+                            bind:value={fecha}
+                        />
+                    </label>
                 </div>
-            {/if}
+            </div>
         </div>
     </div>
 </div>

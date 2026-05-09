@@ -25,6 +25,8 @@
     import estados from "$lib/stores/estados";
     import Success from "$lib/components/botones/Success.svelte";
     import { editTacto, eliminarTacto } from "$lib/java/tactos/tactosback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
 
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     let esdev = import.meta.env.VITE_DEV == "si";
@@ -34,7 +36,7 @@
     const HOY = new Date().toISOString().split("T")[0];
     const today = new Date();
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let cargado = $state(false);
     let per = createPer();
     let userpermisos = $state([]);
@@ -132,10 +134,10 @@
                 let data_java = {
                     animalId: animal,
                     date: fecha,
-                    checkType: "ECOGRAFIA",
-                    isPregnant: true,
+                    checkType:  data.tipo,
+                    isPregnant: data.prenada==2,
                     notes: observacion,
-                    establishmentId: 1,
+                    establishmentId: cab.id,
                 };
                 await editTacto(idtacto, data_java);
             } else {
@@ -201,13 +203,25 @@
             }
         });
     }
-    onMount(async () => {
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+    async function getData(){
+        if(versionjava){
+            let user_data = getUser()
+            usuarioid = user_data.id
+            cab = loadStorageEstablecimiento()
+        }
+        else{
+let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         usuarioid = pb_json.record.id;
         let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
 
         per.setPer(respermisos.permisos, usuarioid);
+
         userpermisos = getPermisosList(per.per.permisos);
+        cab = caber.cab
+        }
+    }
+    onMount(async () => {
+        await getData()
         loadTacto();
     });
 </script>
@@ -230,7 +244,7 @@
             {categoria}
             {malfecha}
             {oninput}
-            {prenada}
+            bind:prenada
         />
         <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
 
@@ -287,137 +301,6 @@
                 </button>
             </div>
         {/if}
-        <!--Formulario-->
-        <div class="form-control hidden">
-            <label for="animal" class="label">
-                <span class="label-text text-base">Animal: {caravana}</span>
-            </label>
-
-            <label for="tipo" class="label">
-                <span class="label-text text-base">Categoria</span>
-            </label>
-            <label class="input-group">
-                <select
-                    class={`
-                        select select-bordered w-full
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 
-                        focus:border-green-500
-                        ${estilos.bgdark2}
-                    `}
-                    bind:value={categoria}
-                >
-                    {#each categorias.filter((c) => c.sexo == "H") as t}
-                        <option value={t.id}>{t.nombre}</option>
-                    {/each}
-                </select>
-            </label>
-            <div class="form-group">
-                <label for="prenada" class="label">
-                    <span class="label-text text-base">Estado</span>
-                </label>
-
-                <RadioButton
-                    class="m-1 my-3"
-                    bind:option={prenada}
-                    deshabilitado={false}
-                />
-            </div>
-
-            <label for="fecha" class="label">
-                <span class="label-text text-base">Fecha </span>
-            </label>
-            <label class="input-group">
-                <input
-                    id="fecha"
-                    type="date"
-                    max={HOY}
-                    class={`
-                        input input-bordered 
-                        w-full
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 
-                        focus:border-green-500
-                        ${estilos.bgdark2}
-                    `}
-                    bind:value={fecha}
-                    onchange={() => oninput("FECHA")}
-                />
-                {#if malfecha}
-                    <div class="label">
-                        <span class="label-text-alt text-red-500"
-                            >Debe seleccionar la fecha del tacto</span
-                        >
-                    </div>
-                {/if}
-            </label>
-            <label for="tipo" class="label">
-                <span class="label-text text-base">Tacto/Ecografia</span>
-            </label>
-            <label class="input-group">
-                <select
-                    class={`
-                        select select-bordered w-full
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 
-                        focus:border-green-500
-                        ${estilos.bgdark2}
-                    `}
-                    bind:value={tipo}
-                >
-                    {#each tipostacto as t}
-                        <option value={t.id}>{t.nombre}</option>
-                    {/each}
-                </select>
-            </label>
-
-            <label class="form-control">
-                <div class="label">
-                    <span class="label-text">Observacion</span>
-                </div>
-                <input
-                    id="observacion"
-                    type="text"
-                    class={`
-                        input 
-                        input-bordered 
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                        w-full
-                        ${estilos.bgdark2}
-                    `}
-                    bind:value={observacion}
-                />
-            </label>
-        </div>
-        <!--fin Formulario-->
-        <div class="mt-6 flex space-x-3 hidden">
-            <!-- Botón Eliminar -->
-            <button
-                class="px-4 py-1.5 bg-red-700 text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-sm"
-                onclick={eliminar}
-            >
-                Eliminar
-            </button>
-
-            <!-- Botón Cancelar -->
-            <button
-                class="px-4 py-1.5 bg-white text-gray-800 font-medium rounded-full shadow-sm border border-gray-300 hover:bg-gray-50 transition-colors text-sm"
-                onclick={volver}
-            >
-                Cancelar
-            </button>
-
-            <!-- Botón Editar -->
-            <button
-                class="px-4 py-1.5 bg-green-800 text-white font-medium rounded-full shadow-sm hover:bg-green-900 transition-colors text-sm"
-                onclick={editar}
-            >
-                Editar
-            </button>
-        </div>
+        
     </CardTacto>
 </Navbar2>

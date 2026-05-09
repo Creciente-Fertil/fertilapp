@@ -11,6 +11,7 @@ export function tipoServicios() {
 function processServicio(fila) {
     let padres = []
     let pajuelas = []
+    
     for (let i = 0; i < fila.fathers.length; i++) {
         let padre = fila.fathers[i]
         padres.push(padre.fatherId)
@@ -23,10 +24,10 @@ function processServicio(fila) {
         fechainseminacion: fila.startDate,
         fechahasta: fila.endDate,
         madre: fila.animalId,
-        pajuelas: pajuelas.join(),
-        padres: padres.join(),
+        pajuelas: padres.length>0?pajuelas.join():"",
+        padres: padres.length>0?padres.join():"",
 
-        padre: padres.join(),
+        padre: padres.length>0?padres.join():"",
         observacion: fila.notes,
         fechaparto: fila.expectedBirthDate,
         active: fila.isActive,
@@ -127,7 +128,25 @@ export async function saveServicio(data) {
     let data_post = await res_post.json()
     return data_post
 }
+export async function saveServicioBulk(data) {
+    let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}/bulk`
+    let user = getUser();
+    let token = user.token;
+    //let data_java = postServicio(data)
+    let res_post = await fetch(ruta,
+        {
+            method: "POST",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        }
+    )
 
+    let data_post = await res_post.json()
+    return data_post
+}
 export async function editServicio(id, data) {
     let ruta = `${RUTA_JAVA}${RUTA_SERVICIOS}/${id}`
     let user = getUser();

@@ -23,7 +23,11 @@
     import motivos from "$lib/stores/motivos";
     import * as RodeoService from "$lib/java/rodeos/rodeosback";
     import * as LoteService from "$lib/java/lotes/lotesback";
-    import { editAnimal } from "$lib/java/animales/animalesback";
+    import {
+        darBajaAnimal,
+        editAnimal,
+        transferirAnimal,
+    } from "$lib/java/animales/animalesback";
     import { saveMove } from "$lib/java/movimientos/movimientosback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
@@ -155,7 +159,7 @@
         ordenarNombre(lotes);
     }
     function volver() {
-        goto(pre + "/movimientos/lista");
+        goto(pre + "/movimientos");
     }
     function saveDefault() {
         proxy.save(defaultmovimiento);
@@ -302,35 +306,62 @@
             await saveMove(data_move, cab.id);
         }
         if (selectrodeo) {
-             let data_move = {
-                    animalIds: lista.map((a) => a.id),
-                    establishmentId: cab.id,
-                    movementDate: fecha,
-                    movementType: "HERD",
-                    fromLotId: null,
-                    toLotId: null,
-                    fromHerdId: animal.rodeo,
-                    toHerdId: rodeo,
-                    fromEstablishmentId: null,
-                    toEstablishmentId: null,
-                    notes: "",
-                };
-                await saveMove(data_move, cab.id);
+            let data_move = {
+                animalIds: lista.map((a) => a.id),
+                establishmentId: cab.id,
+                movementDate: fecha,
+                movementType: "HERD",
+                fromLotId: null,
+                toLotId: null,
+                fromHerdId: animal.rodeo,
+                toHerdId: rodeo,
+                fromEstablishmentId: null,
+                toEstablishmentId: null,
+                notes: "",
+            };
+            await saveMove(data_move, cab.id);
         }
 
-        //if (selectbaja) {
-        //    for (let i = 0; i < lista.length; i++) {
-        //        let fila = lista[i];
-        //    }
-        //    data.active = false;
-        //    data.motivobaja = motivo;
-        //    data.fechafallecimiento = fechabaja + " 03:00:00";
-        //}
-        //if (selecttransfer) {
-        //    for (let i = 0; i < lista.length; i++) {
-        //        let fila = lista[i];
-        //    }
-        //}
+        if (selectbaja) {
+            for (let i = 0; i < lista.length; i++) {
+                let fila = lista[i];
+                let id = fila.id;
+                let data_falle = {
+                    date: fechabaja,
+                    animalId: id,
+                };
+                if (motivo == "fallecimiento") {
+                    await darBajaAnimal(data_falle, motivo);
+                } else if (motivo == "venta") {
+                    let data_venta = {
+                        saleDate: fechafallecimiento,
+                        price: "0",
+                        animalId: id,
+                    };
+                    await darBajaAnimal(data_venta, motivo);
+                }
+            }
+            Swal.fire(
+                "Éxito dar baja",
+                "Se logró dar baja el animal",
+                "success",
+            );
+        }
+        if (selecttransfer) {
+            for (let i = 0; i < lista.length; i++) {
+                let fila = lista[i];
+                let data_transfer = {
+                    renspaCode: codigo,
+                    animalId: fila.id,
+                };
+                try {
+                    await transferirAnimal(data_transfer);
+                } catch (err) {
+                    console.warn(err);
+                    
+                }
+            }
+        }
     }
     async function moverDetalle() {
         if (selectcategoria) {
@@ -693,7 +724,7 @@
             nuevolote={lote}
             nuevorodeo={rodeo}
             bind:fecha
-            {fechabaja}
+            bind:fechabaja
             {motivo}
             {codigo}
         />
@@ -738,107 +769,6 @@
             >
                 Crear {listaanimales.length > 1 ? "movimientos" : "movimiento"}
             </button>
-        </div>
-    </div>
-    <div class="hidden container mx-auto py-6 px-4 max-w-7xl">
-        <!--Header-->
-        <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
-        >
-            <div
-                class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
-            >
-                <div
-                    class={`
-                        bg-transparent        
-                        px-4 py-4 
-                    `}
-                >
-                    <button onclick={volver}>
-                        <h1
-                            class={`
-                                flex text-left
-                                text-2xl font-bold 
-                                dark:text-white text-gray-900
-                            `}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="size-5 mt-1"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M15.75 19.5 8.25 12l7.5-7.5"
-                                />
-                            </svg>
-                            Movimientos
-                        </h1>
-                    </button>
-                </div>
-                <button
-                    class={`btn btn-primary rounded-lg ${estilos.btntext2}`}
-                    data-theme="forest"
-                    disabled={!habilitarboton}
-                    onclick={moverDetalle}
-                >
-                    {#if esCelu}
-                        <span class="text-lg">Movimientos</span>
-                    {:else}
-                        <span class="text-lg">+ Crear movimientos</span>
-                    {/if}
-                </button>
-            </div>
-        </div>
-    </div>
-    <div class="hidden container mx-auto py-6 px-4 max-w-7xl">
-        <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
-        >
-            <CustomModalMove
-                bind:nuevacategoria={categoria}
-                bind:nuevolote={lote}
-                bind:nuevorodeo={rodeo}
-                bind:fecha
-                bind:fechabaja
-                bind:codigo
-                bind:malcodigo
-                bind:motivo
-                {categorias}
-                {listaanimales}
-                {lotes}
-                {rodeos}
-                {HOY}
-                {oninput}
-                {onChangeCollapse}
-            />
-        </div>
-    </div>
-    <div class="hidden container mx-auto py-6 px-4 max-w-7xl">
-        <div
-            class={`
-                rounded-md p-4 shadow-xl mb-4
-                dark:bg-slate-900 bg-white
-            `}
-        >
-            <details class="collapse collapse-arrow">
-                <summary class="collapse-title font-semibold text-xl"
-                    >Ver animales</summary
-                >
-                <div class="collapse-content">
-                    <Animalesmodal {listaanimales} {quitarAnimal} />
-                </div>
-            </details>
         </div>
     </div>
 </Navbar2>

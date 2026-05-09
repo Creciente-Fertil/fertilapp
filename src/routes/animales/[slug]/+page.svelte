@@ -40,7 +40,12 @@
     import HorizontalTabs from "$lib/components/animal/HorizontalTabs.svelte";
     import AccionesTab from "$lib/components/animal/AccionesTab.svelte";
     import Transferir from "$lib/components/animal/Transferir.svelte";
-    import { getAnimalId } from "$lib/java/animales/animalesback";
+    import {
+        darBajaAnimal,
+        eliminarAnimalJava,
+        getAnimalId,
+        transferirAnimal,
+    } from "$lib/java/animales/animalesback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
 
@@ -142,28 +147,75 @@
         //if (!userpermisos[5]) {
         //    Swal.fire("Error permisos", getPermisosMessage(5), "error");
         //}
-        try {
-            const data = {
-                active: false,
-                lote: "",
-                rodeo: "",
-                fechafallecimiento: fechafallecimiento + " 03:00:00",
-                motivobaja: motivo,
-            };
-            await guardarHistorial(pb, slug);
-            const record = await pb.collection("animales").update(slug, data);
-            Swal.fire(
-                "Éxito dar de baja",
-                "Se pudo dar de baja al animal",
-                "success",
-            );
-            goto(pre + "/animales");
-        } catch (err) {
-            Swal.fire(
-                "Error dar de baja",
-                "No se pudo dar de baja al animal",
-                "error",
-            );
+        if (versionjava) {
+            if (motivo == "fallecimiento") {
+                let data_falle = {
+                    date: fechafallecimiento,
+                    animalId: slug,
+                };
+                try {
+                    await darBajaAnimal(data_falle, motivo);
+                    Swal.fire(
+                        "Éxito dar baja",
+                        "Se logró dar baja el animal",
+                        "success",
+                    );
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire(
+                        "Error dar baja",
+                        "No se logró dar baja el animal",
+                        "error",
+                    );
+                }
+            } else if (motivo == "venta") {
+                let data_venta = {
+                    saleDate: fechafallecimiento,
+                    price: "0",
+                    animalId: slug,
+                };
+                try {
+                    await darBajaAnimal(data_venta, motivo);
+                    Swal.fire(
+                        "Éxito dar baja",
+                        "Se logró dar baja el animal",
+                        "success",
+                    );
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire(
+                        "Error dar baja",
+                        "No se logró dar baja el animal",
+                        "error",
+                    );
+                }
+            }
+        } else {
+            try {
+                const data = {
+                    active: false,
+                    lote: "",
+                    rodeo: "",
+                    fechafallecimiento: fechafallecimiento + " 03:00:00",
+                    motivobaja: motivo,
+                };
+                await guardarHistorial(pb, slug);
+                const record = await pb
+                    .collection("animales")
+                    .update(slug, data);
+                Swal.fire(
+                    "Éxito dar de baja",
+                    "Se pudo dar de baja al animal",
+                    "success",
+                );
+                goto(pre + "/animales");
+            } catch (err) {
+                Swal.fire(
+                    "Error dar de baja",
+                    "No se pudo dar de baja al animal",
+                    "error",
+                );
+            }
         }
     }
     function openEliminarModal() {
@@ -183,24 +235,47 @@
         //    Swal.fire("Error permisos", getPermisosMessage(5), "error");
         //      return;
         //}
+        if (versionjava) {
+            try {
+                await eliminarAnimalJava(slug);
+                Swal.fire(
+                    "Éxito eliminar",
+                    "Se pudo eliminar al animal",
+                    "success",
+                );
+                goto(pre + "/animales");
+            } catch (err) {
+                Swal.fire(
+                    "Error eliminar",
+                    "No se eliminar al animal",
+                    "error",
+                );
+            }
+        } else {
+            try {
+                const data = {
+                    delete: true,
+                    active: false,
+                    lote: "",
+                    rodeo: "",
+                };
 
-        try {
-            const data = {
-                delete: true,
-                active: false,
-                lote: "",
-                rodeo: "",
-            };
-
-            const record = await pb.collection("animales").update(slug, data);
-            Swal.fire(
-                "Éxito eliminar",
-                "Se pudo eliminar al animal",
-                "success",
-            );
-            goto(pre + "/animales");
-        } catch (err) {
-            Swal.fire("Error eliminar", "No se eliminar al animal", "error");
+                const record = await pb
+                    .collection("animales")
+                    .update(slug, data);
+                Swal.fire(
+                    "Éxito eliminar",
+                    "Se pudo eliminar al animal",
+                    "success",
+                );
+                goto(pre + "/animales");
+            } catch (err) {
+                Swal.fire(
+                    "Error eliminar",
+                    "No se eliminar al animal",
+                    "error",
+                );
+            }
         }
     }
     async function transferir(codigo) {
@@ -208,45 +283,83 @@
         //    Swal.fire("Error permisos", getPermisosMessage(5), "error");
         //    return
         //}
-        const resultcab = await pb.collection("cabs").getList(1, 1, {
-            filter: `active = true && renspa = '${codigo}'`,
-        });
-
-        try {
-            let data = {
-                cab: resultcab.items[0].id,
-                lote: "",
-                rodeo: "",
+        if (versionjava) {
+            let data_transfer = {
+                renspaCode: codigo,
+                animalId: slug,
             };
+            try {
+                let res = await transferirAnimal(data_transfer);
 
-            const record = await pb.collection("animales").update(slug, data);
+                goto(pre + "/animales");
+                Swal.fire(
+                    "Éxito transferencia",
+                    "Se pudo transferir al animal",
+                    "success",
+                );
+            } catch (err) {
+                
 
-            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+                if (err.message == "transfer") {
+                    Swal.fire(
+                        "Error transferencia",
+                        "El animal ya fue transferido",
+                        "error",
+                    );
+                }
+                if (err.message == "renspa") {
+                    Swal.fire(
+                        "Error transferencia",
+                        "No hay un establecimiento con ese renspa",
+                        "error",
+                    );
+                }
+            }
+        } else {
+            const resultcab = await pb.collection("cabs").getList(1, 1, {
+                filter: `active = true && renspa = '${codigo}'`,
+            });
 
-            let origenusuarioid = pb_json.record.id;
-            let datatrans = {
-                texto: "Se transfirió a " + codigo,
-                titulo: "Transferencia de 1 animal",
-                tipo: tiponoti[1].id,
-                origen: origenusuarioid,
-                destino: resultcab.items[0].user,
-                leido: false,
-            };
-            await pb.collection("notificaciones").create(datatrans);
+            try {
+                let data = {
+                    cab: resultcab.items[0].id,
+                    lote: "",
+                    rodeo: "",
+                };
 
-            goto(pre + "/animales");
-            Swal.fire(
-                "Éxito transferencia",
-                "Se pudo transferir al animal",
-                "success",
-            );
-        } catch (err) {
-            console.error(err);
-            Swal.fire(
-                "Error transferencia",
-                "No se pudo transferir al animal",
-                "error",
-            );
+                const record = await pb
+                    .collection("animales")
+                    .update(slug, data);
+
+                let pb_json = JSON.parse(
+                    localStorage.getItem("pocketbase_auth"),
+                );
+
+                let origenusuarioid = pb_json.record.id;
+                let datatrans = {
+                    texto: "Se transfirió a " + codigo,
+                    titulo: "Transferencia de 1 animal",
+                    tipo: tiponoti[1].id,
+                    origen: origenusuarioid,
+                    destino: resultcab.items[0].user,
+                    leido: false,
+                };
+                await pb.collection("notificaciones").create(datatrans);
+
+                goto(pre + "/animales");
+                Swal.fire(
+                    "Éxito transferencia",
+                    "Se pudo transferir al animal",
+                    "success",
+                );
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error transferencia",
+                    "No se pudo transferir al animal",
+                    "error",
+                );
+            }
         }
     }
 
@@ -259,37 +372,52 @@
         transferModal2.showModal();
     }
     async function transfer() {
-        const resultList = await pb.collection("cabs").getList(1, 1, {
-            filter: `active = true && renspa = '${codigo}'`,
-        });
-        if (resultList.items.length == 0) {
-            malcodigo = true;
+        if (versionjava) {
+            Swal.fire({
+                title: "Transferir animal",
+                text: `¿Seguro que deseas transferir el animal ${caravana} a ${codigo}?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Si",
+                cancelButtonText: "No",
+            }).then(async (result) => {
+                if (result.value) {
+                    await transferir(codigo);
+                }
+            });
+        } else {
+            const resultList = await pb.collection("cabs").getList(1, 1, {
+                filter: `active = true && renspa = '${codigo}'`,
+            });
+            if (resultList.items.length == 0) {
+                malcodigo = true;
 
-            return;
-        }
-        if (resultList.totalItems > 1) {
-            Swal.fire(
-                "Error transferencia",
-                "Hay varios establecimientos con ese RENSPA",
-                "error",
-            );
-            muchosrenspa = true;
-            return;
-        }
-        transferModal2.close();
-
-        Swal.fire({
-            title: "Transferir animal",
-            text: `¿Seguro que deseas transferir el animal ${caravana} a ${codigo}?`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Si",
-            cancelButtonText: "No",
-        }).then(async (result) => {
-            if (result.value) {
-                await transferir(codigo);
+                return;
             }
-        });
+            if (resultList.totalItems > 1) {
+                Swal.fire(
+                    "Error transferencia",
+                    "Hay varios establecimientos con ese RENSPA",
+                    "error",
+                );
+                muchosrenspa = true;
+                return;
+            }
+            transferModal2.close();
+
+            Swal.fire({
+                title: "Transferir animal",
+                text: `¿Seguro que deseas transferir el animal ${caravana} a ${codigo}?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Si",
+                cancelButtonText: "No",
+            }).then(async (result) => {
+                if (result.value) {
+                    await transferir(codigo);
+                }
+            });
+        }
     }
 
     async function irPadre(_id) {
@@ -398,7 +526,11 @@
                 color = recorda.raza;
                 raza = recorda.color;
                 active = recorda.active;
-                fechanacimiento = recorda.fechanacimiento && recorda.fechanacimiento.length>0?recorda.fechanacimiento.split(" ")[0]:"";
+                fechanacimiento =
+                    recorda.fechanacimiento &&
+                    recorda.fechanacimiento.length > 0
+                        ? recorda.fechanacimiento.split(" ")[0]
+                        : "";
 
                 nacimiento = "";
                 nacimientoobj = {};
@@ -471,10 +603,10 @@
     async function getData() {
         if (versionjava) {
             let _id = $page.params.slug;
-            let user_data = getUser();
+            let user_data = getUser()
             usuarioid = user_data.id;
-            
-            cab = loadStorageEstablecimiento()
+
+            cab = loadStorageEstablecimiento();
             if (_id == "0") {
                 add = true;
                 perfilNuevoAnimal();
@@ -482,10 +614,9 @@
                 await perfilAnimal(_id);
             }
 
-            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-            per.setPer(respermisos.permisos, usuarioid);
+            
 
-            userpermisos = getPermisosList(per.per.permisos);
+            userpermisos =[];
         } else {
             let _id = $page.params.slug;
             let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
@@ -505,7 +636,7 @@
     }
     //Necesito una funcion que traiga toda la informacion del animal
     onMount(async () => {
-        await getData()
+        await getData();
     });
 </script>
 
@@ -535,7 +666,6 @@
                     <!-- Combo alineado al borde izquierdo de la card -->
                     {#if esCelu}
                         <SelectTab bind:pestañas bind:tab />
-                        
                     {:else}
                         <HorizontalTabs bind:pestañas bind:tab />
                     {/if}
@@ -645,7 +775,7 @@
             {:else if tab == "clinica"}
                 <!--Pesajes, tactos, servicios, tratamientos, observaciones,pariciones-->
                 <CardAnimal cardsize="max-w-7xl" titulo="">
-                    <HistoriaClinica {caravana} {cab} {versionjava}/>
+                    <HistoriaClinica {caravana} {cab} {versionjava} />
                 </CardAnimal>
             {:else if tab == "historial"}
                 <!--Historial del animal-->
@@ -665,7 +795,7 @@
                 </CardAnimal>
             {:else if tab == "movimientos"}
                 <CardAnimal cardsize="max-w-7xl">
-                    <Movimientos {caravana} {animal} {cab} {versionjava}/>
+                    <Movimientos {caravana} {animal} {cab} {versionjava} />
                 </CardAnimal>
             {:else if tab == "transfer"}
                 <CardAnimal cardsize="max-w-7xl" titulo="Transferencia">
@@ -692,6 +822,7 @@
                         bind:codigo
                         {muchosrenspa}
                         {malcodigo}
+                        {versionjava}
                     />
                 </CardAnimal>
             {/if}

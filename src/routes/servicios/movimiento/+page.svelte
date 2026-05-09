@@ -35,6 +35,8 @@
     import AnimalesSeleccionados from "$lib/components/servicios/AnimalesSeleccionados.svelte";
     import SelectToros from "$lib/components/SelectToros.svelte";
     import { getAll } from "$lib/java/animales/animalesback";
+    import * as RodeoService from "$lib/java/rodeos/rodeosback";
+    import * as LoteService from "$lib/java/lotes/lotesback";
     import ListaMovimiento from "$lib/components/ListaMovimiento.svelte";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let innerWidth = $state(0);
@@ -59,16 +61,16 @@
         await getData();
     }
     //tabs
-    let selectedTab = "datos"
+    let selectedTab = "datos";
     let pestaña = [
-        {id:"datos",nombre:"Detalles servicio"},
-        {id:"madres",nombre:"Selección de madres"},
-    ]
-    function irDatos(){
-        selectedTab = "datos"
+        { id: "datos", nombre: "Detalles servicio" },
+        { id: "madres", nombre: "Selección de madres" },
+    ];
+    function irDatos() {
+        selectedTab = "datos";
     }
-    function irMadres(){
-        selectedTab="madres"
+    function irMadres() {
+        selectedTab = "madres";
     }
     let caber = createCaber();
     let cab = $state(caber.cab);
@@ -456,12 +458,12 @@
         }
         setDetalle();
     }
-    function seleccionarTodos(){
-        selecthashmap = {}
-        ninguno = true
-        todos = false
-        algunos = false
-        clickTodos()
+    function seleccionarTodos() {
+        selecthashmap = {};
+        ninguno = true;
+        todos = false;
+        algunos = false;
+        clickTodos();
     }
     function clickTodos() {
         if (todos) {
@@ -494,20 +496,32 @@
         setDetalle();
     }
     async function getLotes() {
-        const records = await pb.collection("lotes").getFullList({
-            filter: `active = true && cab ~ '${cab.id}'`,
-            sort: "nombre",
-        });
+        let records = [];
+        if (versionjava) {
+            records = await LoteService.getAll(cab.id);
+        } else {
+            records = await pb.collection("lotes").getFullList({
+                filter: `active = true && cab ~ '${cab.id}'`,
+                sort: "nombre",
+            });
+        }
+
         lotes = records;
         ordenarNombre(lotes);
     }
     async function getRodeos() {
-        const records = await pb.collection("rodeos").getFullList({
-            filter: `active = true && cab ~ '${cab.id}'`,
-            sort: "nombre",
-        });
+        let records = [];
+        if (versionjava) {
+            records = await RodeoService.getAll(cab.id);
+        } else {
+            records = await pb.collection("rodeos").getFullList({
+                filter: `active = true && cab ~ '${cab.id}'`,
+                sort: "nombre",
+            });
+        }
+
         rodeos = records;
-        //ordenarNombre(rodeos)
+        ordenarNombre(rodeos);
     }
     async function getAnimales() {
         if (!versionjava) {
@@ -1040,11 +1054,10 @@
         onInput("PAJUELA");
     }
     async function getData() {
-        if(versionjava){
-            cab = loadStorageEstablecimiento()
-        }
-        else{
-            cab = caber.cab
+        if (versionjava) {
+            cab = loadStorageEstablecimiento();
+        } else {
+            cab = caber.cab;
         }
         await getAnimales();
         await getRodeos();
@@ -1054,7 +1067,7 @@
         proxyfiltros = proxy.load();
         setFilters();
 
-        await getData()
+        await getData();
 
         cargado = true;
         loadDetalle();

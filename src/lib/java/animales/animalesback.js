@@ -1,6 +1,6 @@
 import { getUser } from "$lib/userstorage/usersotrage"
 import categorias from "$lib/stores/categorias"
-import { handleAuthenticatedRequest } from "../errores/erroresback"
+import { handleAuthenticatedRequest, handleTransferRequest } from "../errores/erroresback"
 import { processComments } from "../observaciones/observacionesback"
 import { processTactos } from "../tactos/tactosback"
 import { processNacimientos } from "../nacimientos/nacimientosback"
@@ -83,17 +83,17 @@ function processAnimales(data) {
     }
     return data_animales
 }
-function processEventos(data){
+function processEventos(data) {
     let eventos = {
-        tratamientos:processTratamientos(data.treatments),
-        observaciones:processComments(data.observations),
-        servicios:processServicios(data.services),
-        tactos:processTactos(data.pregnancyChecks),
-        pariciones:processNacimientos(data.births)
+        tratamientos: processTratamientos(data.treatments),
+        observaciones: processComments(data.observations),
+        servicios: processServicios(data.services),
+        tactos: processTactos(data.pregnancyChecks),
+        pariciones: processNacimientos(data.births)
     };
     return eventos
 }
-export async function getAnimalEventos(animalId){
+export async function getAnimalEventos(animalId) {
     let user = getUser();
     let token = user.token;
 
@@ -141,6 +141,7 @@ export async function getAll(cabid = null, lotid = null) {
 
 
     let procesada = processAnimales(data_all)
+
     return procesada
 
 
@@ -163,18 +164,19 @@ export async function getAnimalId(id) {
 function postData(data, establishmentId = 1) {
     let data_animal = {
         tagNumber: data.caravana,
-        birthDate: data.fechanacimiento && data.fechanacimiento.length>0 ? data.fechanacimiento.split(" ")[0] : "",
+        birthDate: data.fechanacimiento && data.fechanacimiento.length > 0 ? data.fechanacimiento.split(" ")[0] : "",
         sex: data.sexo == "H" ? "F" : "M",
         rpCode: data.rp,
         establishmentId: data.cab,
-        breed: string2null(data.raza),
-        color: string2null(data.color),
+        breed:data.raza,
+        color: data.color,
         herdId: data.rodeo,
         lotId: data.lote,
-        categoryId: getCategoriaCod(data.categoria), 
+        birthId: data.nacimiento,
+        categoryId: getCategoriaCod(data.categoria),
         reproductiveStatus: data.prenada == 2 ? "PRENADA" : data.prenada == 3 ? "EN_SERVICIO" : "VACIA",
     }
-    
+
     return data_animal
 }
 function updateData(animal) {
@@ -183,7 +185,7 @@ function updateData(animal) {
         tagNumber: animal.caravana,
         birthDate: string2null(animal.fechanacimiento),
         sex: animal.sexo == "H" ? "F" : "M",
-        
+
         deathDate: string2null(animal.fechafallecimiento),
 
         breed: string2null(animal.raza),
@@ -218,6 +220,60 @@ export async function saveAnimal(data, establishmentId = 1) {
     let animal = processAnimal(data_save)
     return animal
 
+}
+export async function darBajaAnimal(data, motivo) {
+    let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}`
+
+    let user = getUser();
+    let token = user.token;
+    let headers = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    }
+    if (motivo == "fallecimiento") {
+        let res_save = await fetch(ruta + "/death", {
+            method: "POST",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers
+        })
+    }
+    else if (motivo == "venta") {
+        let res_save = await fetch(ruta + "/sale", {
+            method: "POST",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers
+        })
+    }
+}
+export async function transferirAnimal(data) {
+    let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}`
+
+    let user = getUser();
+    let token = user.token;
+    let headers = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    }
+    let res_save = await handleTransferRequest(ruta + "/transfer", {
+        method: "POST",
+        body: JSON.stringify(data), // data can be `string` or {object}!
+        headers
+    })
+}
+export async function eliminarAnimalJava(id) {
+    let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}`
+
+    let user = getUser();
+    let token = user.token;
+    let headers = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    }
+    let res_save = await fetch(ruta + "/delete/" + id, {
+        method: "POST",
+
+        headers
+    })
 }
 export async function editAnimal(id, data) {
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/${id}`

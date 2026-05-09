@@ -18,3 +18,23 @@ export async function handleAuthenticatedRequest(url, options) {
         throw error;
     }
 }
+export async function handleTransferRequest(url, options) {
+    try {
+        const response = await fetch(url, options);
+        
+        if (response.status === 400 ) {
+            
+            
+            throw new Error('transfer');
+        }
+        if ( response.status === 404) {
+            
+            
+            throw new Error('renspa');
+        }
+        
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}

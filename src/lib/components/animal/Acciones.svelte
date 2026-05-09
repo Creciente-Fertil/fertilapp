@@ -187,10 +187,10 @@
                             bind:value={motivo}
                         >
                             {#each motivos as m}
-                                <option value={m.id}>{m.nombre}</option>
+                                <option value={m.id}>{m.nombre} 1</option>
                             {/each}
                             {#if !(motivos.includes(motivo))}
-                                <option value={motivo}>{motivo}</option>
+                                <option value={motivo}>{motivo} raro</option>
                             {/if}
                         </select>
                     </div>

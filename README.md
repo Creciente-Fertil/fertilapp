@@ -21,6 +21,6 @@
 * Para hacer  anda el environment
 ```
     Modificas de nombre el archivo .env copy.dev a .env.local
-
+    El archivo .env.local se debe alojar en la raiz del proyecto, donde se encuentra package.json,svelte.config-js,etc
     
 ```

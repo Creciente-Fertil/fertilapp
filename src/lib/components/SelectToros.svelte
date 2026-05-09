@@ -15,7 +15,7 @@
                 valores = valores.filter((v) => v != idopt);
                 quitarElemento(idopt);
             } else {
-                valores = [...valores, idopt]
+                valores = [...valores, idopt];
                 agregarElemento(idopt);
             }
             filterUpdate();
@@ -29,7 +29,7 @@
         py = "py-2",
         wlen = "w-full",
         children,
-        flotante=true
+        flotante = true,
     } = $props();
     //Logica de las opciones
     let isOpen = $state(false);
@@ -38,8 +38,13 @@
     let buscador = $state(""); // Estado para el filtro
 
     function getNombre(idopt) {
-        let op = opciones.filter((o) => o.id == idopt)[0];
-        return op[campo];
+        let op_idx = opciones.findIndex((o) => o.id == idopt);
+        if (op_idx != -1) {
+            let op = opciones[op_idx];
+            return op[campo];
+        }
+        return "";
+        //let op = opciones.filter((o) => o.id == idopt)[0];
     }
     // Opciones filtradas derivadas reactivamente
     let opcionesFiltradas = $derived(
@@ -103,8 +108,9 @@
                     {#each chunkedValores as chunk}
                         <div class="flex flex-wrap gap-2">
                             {#each chunk as v}
-                                <span
-                                    class="
+                                
+                                    <span
+                                        class="
                                         truncate
                                         inline-flex items-center rounded-md
                                         px-2 py-1 text-base font-medium ring-1 ring-inset
@@ -112,9 +118,11 @@
                                         text-gray-700 dark:text-gray-50
                                         ring-gray-600/20 dark:ring-gray-50/20
                                     "
-                                >
-                                    {getNombre(v)}
-                                </span>
+                                    >
+                                        {getNombre(v)}
+                                       
+                                    </span>
+                                
                             {/each}
                         </div>
                     {/each}
@@ -140,7 +148,7 @@
             <div
                 style="width: {buttonWidth}"
                 class={`
-                ${flotante?"absolute":"relative"}
+                ${flotante ? "absolute" : "relative"}
                 ${estilos.bgdark2}
                  z-10 mt-0 bg-white rounded-md shadow-lg   
                 ${px} ${py}

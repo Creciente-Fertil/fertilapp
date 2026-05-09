@@ -172,7 +172,7 @@
         }
         detallePesaje.close();
     }
-    function confirmDelete() {
+    function confirmDelete(p_id) {
         Swal.fire({
             title: "Eliminar pesaje",
             text: "¿Seguro que deseas eliminar el pesaje?",
@@ -182,6 +182,7 @@
             cancelButtonText: "No",
         }).then(async (result) => {
             if (result.value) {
+                idpesaje = p_id
                 eliminar();
             }
         });
@@ -193,9 +194,15 @@
             } else {
                 await pb.collection("pesaje").delete(idpesaje);
             }
-
+            
+            Swal.fire(
+                "Éxito eliminar pesaje",
+                "Se pudo eliminar el pesaje",
+                "success",
+            );
             await getPesajes();
             filterUpdate();
+            
             detallePesaje.close();
         } catch (err) {
             console.error(err);

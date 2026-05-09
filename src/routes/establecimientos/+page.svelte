@@ -24,9 +24,10 @@
         getAllColabs,
     } from "$lib/java/establecimientos/establecimientosback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import { getUser } from "$lib/userstorage/usersotrage";
     let esdev = import.meta.env.VITE_DEV == "si";
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
-    
+
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
@@ -45,27 +46,28 @@
     let tab = $state("propios");
     async function toggleJava() {
         versionjava = !versionjava;
-        if(versionjava){
-            cab = loadStorageEstablecimiento()
-        }
-        else{
-            cab = caber.cab
-        }
-        await getEstablecimientos();
-        await getEstablecimientosColab()
+        await getData();
     }
     //Guardar establecimiento
     async function irEstablecimientoColab(id) {
-        let per = createPer();
-        let est = establecimientoscolab.filter((e) => e.id == id)[0];
-        let permisos = await getPermisosCabUser(
-            pb,
-            usuarioid,
-            est.expand.cab.id,
-        );
-        caber.setCab(est.expand.cab.nombre, est.expand.cab.id);
-        //Aca debo poner los permisos correctos
-        per.setPer(permisos.permisos, usuarioid);
+        if (versionjava) {
+            let est = establecimientoscolab.filter((e) => e.id == id)[0];
+            let per = createPer();
+            caber.setCab(est.nombre, est.id);
+            //Aca debo poner los permisos correctos
+            per.setPer([], usuarioid);
+        } else {
+            let per = createPer();
+            let est = establecimientoscolab.filter((e) => e.id == id)[0];
+            let permisos = await getPermisosCabUser(
+                pb,
+                usuarioid,
+                est.expand.cab.id,
+            );
+            caber.setCab(est.expand.cab.nombre, est.expand.cab.id);
+            //Aca debo poner los permisos correctos
+            per.setPer(permisos.permisos, usuarioid);
+        }
 
         goto(pre + "/");
     }
@@ -127,20 +129,19 @@
     }
     async function getEstablecimientosColab() {
         if (versionjava) {
-            totalescolab = []
+            totalescolab = [];
             establecimientoscolab = await getAllColabs();
-            
+
             for (let i = 0; i < establecimientoscolab.length; i++) {
                 totalescolab.push(0);
             }
-        
         } else {
             const restxcolab = await pb.collection("estxcolabs").getFullList({
                 filter: `colab.user = '${usuarioid}' && cab.active = true`,
                 expand: "colab,cab",
             });
             establecimientoscolab = restxcolab;
-            totalescolab = []
+            totalescolab = [];
             for (let i = 0; i < establecimientoscolab.length; i++) {
                 totalescolab.push(
                     await getTotalAnimales(
@@ -156,25 +157,43 @@
                 filter: `active = True && user = '${usuarioid}'`,
             });
             establecimientos = records;
-            totales = []
+            totales = [];
             for (let i = 0; i < establecimientos.length; i++) {
                 totales.push(await getTotalAnimales(establecimientos[i].id));
             }
         } else {
             let records = await getAll();
             establecimientos = records;
-            totales = []
+            totales = [];
             for (let i = 0; i < establecimientos.length; i++) {
                 totales.push(0);
             }
         }
     }
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            cab = loadStorageEstablecimiento();
+            pestañas = [{ id: "ajenos", nombre: "Establecimientos asociados" }];
+            tab = "ajenos";
+
+            await getEstablecimientosColab();
+        } else {
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            cab = caber.cab;
+            pestañas = [
+                { id: "propios", nombre: "Tus establecimiento" },
+                { id: "ajenos", nombre: "Establecimientos asociados" },
+            ];
+            tab = "propios";
+            await getEstablecimientos();
+            await getEstablecimientosColab();
+        }
+    }
     onMount(async () => {
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        cab = caber.cab;
-        await getEstablecimientos();
-        await getEstablecimientosColab();
+        await getData();
     });
 </script>
 
@@ -282,10 +301,9 @@
                 `}
             >
                 <ListaEstablecimientos
-                    esColab={versionjava?false:true}
+                    esColab={versionjava ? false : true}
                     establecimientos={establecimientoscolab}
-                    irEstablecimiento={async () =>
-                        await irEstablecimientoColab(e.id)}
+                    irEstablecimiento={irEstablecimientoColab}
                     {cab}
                     {totales}
                 />

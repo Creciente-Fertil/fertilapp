@@ -19,6 +19,8 @@
     import estilos from "$lib/stores/estilos";
     import Success from "$lib/components/botones/Success.svelte";
     import { savePeso } from "$lib/java/pesajes/pesajesback";
+    import { getUser } from "$lib/userstorage/usersotrage";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -30,7 +32,7 @@
     let caber = createCaber();
     let userer = createUserer();
     let per = createPer();
-    let cab = caber.cab;
+    let cab = $state({});
     let userpermisos = $state([]);
     let usuarioid = $state("");
     let selectanimales = $state([]);
@@ -107,7 +109,6 @@
                         animal: ps.id,
                     };
                     let res_peso = await savePeso(data);
-
                 } catch (err) {
                     pesajeserror.push(ps.id);
                     console.error(err);
@@ -198,15 +199,24 @@
 
         volver();
     }
+    async function getData() {
+        if (versionjava) {
+            let user_data = getUser();
+            usuarioid = user_data.id;
+            cab = loadStorageEstablecimiento();
+        } else {
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
 
+            per.setPer(respermisos.permisos, usuarioid);
+            userpermisos = getPermisosList(per.per.permisos);
+            cab = caber.cab;
+        }
+    }
     onMount(async () => {
         loadDetalle();
-        let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-
-        per.setPer(respermisos.permisos, usuarioid);
-        userpermisos = getPermisosList(per.per.permisos);
+        await getData();
     });
     function quitarAnimal(id) {}
     function verAnimal(id) {

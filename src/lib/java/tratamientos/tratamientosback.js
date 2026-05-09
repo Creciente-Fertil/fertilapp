@@ -42,7 +42,7 @@ export function processTipos(data, cabid = null) {
         let fila = data[i]
         if (fila.isActive) {
             if (cabid) {
-                if (fila.establishmentId == cabid) {
+                if (fila.isGeneric || fila.establishmentId == cabid) {
                     data_tipos.push(processTipo(fila))
                 }
             }

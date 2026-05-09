@@ -24,8 +24,9 @@
         eliminarNacimiento,
         saveBirth,
     } from "$lib/java/nacimientos/nacimientosback";
-    import { getAll } from "$lib/java/animales/animalesback";
+    import { getAll, saveAnimal } from "$lib/java/animales/animalesback";
     import { getUser } from "$lib/userstorage/usersotrage";
+    import { savePeso } from "$lib/java/pesajes/pesajesback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
 
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
@@ -39,7 +40,7 @@
     let pre = import.meta.env.VITE_PRE;
     const pb = new PocketBase(ruta);
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let cargado = $state(false);
     let per = createPer();
     let userpermisos = $state([]);
@@ -191,6 +192,7 @@
             usuarioid = user_data.id;
             cab = loadStorageEstablecimiento();
             userpermisos = [];
+            
         } else {
             let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
             usuarioid = pb_json.record.id;
@@ -198,6 +200,7 @@
             per.setPer(respermisos.permisos, usuarioid);
 
             userpermisos = getPermisosList(per.per.permisos);
+            cab = caber.cab
         }
     }
     onMount(async () => {
@@ -305,6 +308,27 @@
             };
             try {
                 let res = await saveBirth(dataparicion);
+                if (agregaranimal) {
+                    let data = {
+                        caravana,
+                        fechanacimiento: fecha + " 03:00:00",
+                        sexo,
+                        cab: cab.id,
+                        peso,
+                        lote: m.lote,
+                        rodeo: m.rodeo,
+                        nacimiento: res.birthId,
+                    };
+                    let res_animal = await saveAnimal(data);
+                    if (peso) {
+                        let data_peso = {
+                            animal: res_animal.id,
+                            fecha: new Date().toISOString().split("T")[0],
+                            pesonuevo: peso,
+                        };
+                        await savePeso(data_peso);
+                    }
+                }
                 Swal.fire(
                     "Éxito guardar",
                     "Se pudo guardar el nacimiento con exito",
@@ -357,10 +381,12 @@
                     let data_java = {
                         date: fecha,
                         motherId: m.id,
+                        fatherId:padre,     
                         notes: observacion,
-                        establishmentId:cab.id,
+                        establishmentId: cab.id,
                     };
-                    await editNacimiento(idnacimiento, dataparicion);
+                    
+                    await editNacimiento(idnacimiento, data_java);
                 } else {
                     const record = await pb
                         .collection("nacimientos")

@@ -38,6 +38,7 @@ pnpm-lock.yaml
 # dotenv environment variable files
 .env
 .env.production
+.env.production2
 .env.semilocal
 .env.development.local
 .env.test.local
