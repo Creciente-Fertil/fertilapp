@@ -14,6 +14,7 @@
     import Pesaje from "$lib/svgs/pesaje.svelte";
     import Observacion from "$lib/svgs/observacion.svelte";
     import Importar from "$lib/svgs/importar.svelte";
+    import { getUser } from "$lib/userstorage/usersotrage";
     let pre = import.meta.env.VITE_PRE;
     let {
         nombreestablecimiento,
@@ -28,6 +29,17 @@
         datosOpen
 
     }=$props()
+    // Para gatear "Roles y permisos": el link aparece solo si el
+    // usuario logueado es ADM en el establecimiento actual. Se mira
+    // contra `usertoken.establishments` (la guarda el login).
+    let me = $derived(getUser());
+    let isAdminHere = $derived.by(() => {
+        const list = me.establishments || [];
+        const ue = list.find(
+            (e) => String(e.establishmentId) === String(cab.id),
+        );
+        return ue?.role === "ADM";
+    });
     //estadisticas
     function estadisticas() {
         goto(pre + "/animales/estadisticas");
@@ -140,6 +152,30 @@
                 </span>
             </a>
         </li>
+        <!--Roles y permisos: solo ADMs del establecimiento actual-->
+        {#if cab.exist && isAdminHere}
+            <li transition:slide>
+                <a
+                    class={`px-3 py-0 ${classtext}`}
+                    href={pre + "/colaboradores/" + me.id}
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.6"
+                        stroke="currentColor"
+                        class="pl-3 size-8"
+                    >
+                        <rect x="4" y="11" width="16" height="10" rx="2" />
+                        <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                    </svg>
+                    <span class="flex items-center">
+                        <div>Roles y permisos</div>
+                    </span>
+                </a>
+            </li>
+        {/if}
         <!--Lotes-->
         <li
             transition:slide
