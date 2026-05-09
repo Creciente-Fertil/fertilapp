@@ -1,81 +1,58 @@
 <script>
   import Oscuro from "$lib/components/Oscuro.svelte";
   import CardBase from "$lib/components/CardBase.svelte";
-  import PocketBase from "pocketbase";
   import { enabled } from "$lib/stores/enabled";
   import { onMount } from "svelte";
-  import { usuario } from "$lib/stores/usuario";
   import { goto } from "$app/navigation";
-  import { createRoler } from "$lib/stores/defaultrol.svelte";
   import { createDarker } from "$lib/stores/dark.svelte";
   import { page } from "$app/stores";
-  import { createCaber } from "$lib/stores/cab.svelte";
-  import { randomString } from "$lib/stringutil/lib";
-  import { codigoSinRepetirEstablecimiento } from "$lib/pbutils/lib";
-  import cuentas from "$lib/stores/cuentas";
   import Swal from "sweetalert2";
-  import Logo from "$lib/svgs/logo.svelte";
   import Creciente from "$lib/svgs/creciente.svelte";
   import estilos from "$lib/stores/estilos";
   import Success from "$lib/components/botones/Success.svelte";
-  import Secondary from "$lib/components/botones/Secondary.svelte";
   import Cancel from "$lib/components/botones/Cancel.svelte";
-    import { saveEstablishment, setDueñoEstablecimiento } from "$lib/java/establecimientos/establecimientosback";
-    import { saveStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
-  //tamaño
+  import { saveEstablishment } from "$lib/java/establecimientos/establecimientosback";
+  import {
+    loadStorageEstablecimiento,
+    saveStorageEstablecimiento,
+    saveStorageEstablecimientoDefault,
+  } from "$lib/java/establecimientos/establecimientostorage";
+  import {
+    getUser,
+    setUser,
+    setUserDefault,
+  } from "$lib/userstorage/usersotrage";
+
   let innerWidth = $state(0);
   let innerHeight = $state(0);
   let esCelu = $derived(innerWidth <= 1100);
-  let pageurl = $page.url.pathname;
-  let ruta = import.meta.env.VITE_RUTA;
   let pre = import.meta.env.VITE_PRE;
-  const pb = new PocketBase(ruta);
   let darker = createDarker();
 
-  let cab = $state({
-    exist: false,
-    nombre: "",
-    id: "",
-  });
-  let concab = false;
-  let textColorClass = "";
-
+  let cab = $state(loadStorageEstablecimiento());
   let nombreusuario = $state("");
-  let roler = createRoler();
-
-  let rol =
-    roler.rol == ""
-      ? ""
-      : roler.rol == "vet"
-        ? "Veterinario"
-        : "Establecimiento";
   let nombreestablecimiento = $state("");
-  //valores
+
+  // Form state
   let nombreest = $state("");
   let contactoest = $state("");
   let direccionest = $state("");
-  //usuario id
-  let usuarioid = $state("");
-  //let rol = "cab"
-  onMount(async () => {
-    let caber = createCaber();
-    nombreestablecimiento = caber.cab.nombre;
-    let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-    usuarioid = pb_json.record.id;
-    nombreusuario = pb_json.record.username;
-    let hab = $enabled;
-    if (hab === "no") {
+  let saving = $state(false);
+
+  onMount(() => {
+    if ($enabled === "no") {
       goto(pre + "/");
+      return;
     }
-    let light = !darker.dark;
-    cab = caber.cab;
+    const user = getUser();
+    nombreusuario = user.useremail || "";
+    nombreestablecimiento = cab.nombre || "";
   });
 
   function salir() {
-    pb.authStore.clear();
-    usuario.set("");
+    setUserDefault();
+    saveStorageEstablecimientoDefault();
     enabled.set("no");
-
     goto(pre + "/");
   }
   function editarUser() {
@@ -87,79 +64,64 @@
   function volver() {
     goto(pre + "/establecimientos");
   }
-  async function guardarEstablecimiento() {
-    let user = await pb.collection("users").getOne(usuarioid);
 
-    let nivel = cuentas.filter((c) => c.nivel == user.nivel)[0];
-    let cabs = await pb
-      .collection("cabs")
-      .getList(1, 1, { filter: `user='${usuarioid}' && active = true` });
-
-    //if (
-    //  nivel.establecimientos != -1 &&
-    //  cabs.totalItems >= nivel.establecimientos
-    //) {
-    //  Swal.fire(
-    //    "Error guardar",
-    //    `No tienes el nivel de la cuenta para tener más de ${nivel.establecimientos} establecimientos`,
-    //    "error",
-    //  );
-    //  return;
-    //}
-
-    let codigo = await codigoSinRepetirEstablecimiento(pb);
-    const data = {
-      nombre: nombreest,
-      direccion: direccionest,
-      user: usuarioid,
-      active: true,
-      contacto: contactoest,
-      codigo,
-    };
-
+  // Crea el establishment + reclama ownership. Despues actualiza
+  // `usertoken.establishments` para que aparezca en el switcher sin
+  // re-loguear, y vuelve al listado.
+  async function guardar() {
+    if (!nombreest || !direccionest) {
+      Swal.fire("Faltan datos", "Nombre y dirección son obligatorios", "warning");
+      return;
+    }
+    saving = true;
     try {
-      const record = await pb.collection("cabs").create(data);
+      const data = {
+        nombre: nombreest,
+        direccion: direccionest,
+        contacto: contactoest,
+        active: true,
+      };
+      const created = await saveEstablishment(data);
+      if (!created || !created.establishmentId) {
+        throw new Error("saveEstablishment no devolvio establishmentId");
+      }
+      // El back ya asocio al usuario autenticado como ADM en el create
+      // (claim de ownership automatico cuando no se pasan userIds).
+
+      // Refrescar la lista del switcher: agregamos el nuevo UE con rol
+      // ADM (lo asume el back en `addUserToEstablishment` cuando es
+      // claim de ownership).
+      const u = getUser();
+      const newUe = {
+        establishmentId: created.establishmentId,
+        establishmentName: created.name,
+        role: "ADM",
+      };
+      setUser({
+        ...u,
+        establishments: [...(u.establishments || []), newUe],
+      });
+
       Swal.fire(
-        "Exito guadar",
-        "Se pudo guardar la cabaña con éxito",
+        "Éxito",
+        "Se guardó el establecimiento. Lo encontrás en tus establecimientos.",
         "success",
       );
       volver();
     } catch (err) {
-      console.error(err);
-      Swal.fire("Error guardar", "No se pudo guardar la cabaña", "error");
+      console.error("guardar establecimiento", err);
+      Swal.fire(
+        "Error",
+        "No se pudo guardar el establecimiento. Revisá la consola.",
+        "error",
+      );
+    } finally {
+      saving = false;
     }
   }
 
-  async function guardarJava() {
-   const data = {
-      nombre: nombreest,
-      direccion: direccionest,
-      user: usuarioid,
-      active: true,
-      contacto: contactoest
-    };
-    try{
-      let res_est = await saveEstablishment(data)
-      await setDueñoEstablecimiento(res_est.establishmentId)
-      
-volver();
-      Swal.fire(
-        "Exito guadar",
-        "Se pudo guardar el establecimiento con éxito",
-        "success",
-      );
-      
-    } 
-    catch(err){
-      console.error(err)
-      Swal.fire("Error guardar", "No se pudo guardar el establecimiento", "error");
-    }
-  }
   let bgnav = "dark:bg-gray-900 bg-gray-50";
-  let classtext = `text-lg px-2 font-light ${estilos.sidebartextocolor}`;
   let classnavbarr = `navbar ${bgnav} fixed top-0 left-0 right-0 z-50`;
-  //let classtextnavbar = `text-white font-extrabold dark:text-gray-700`;
   let classtextnavbar = `text-gray-700 font-extrabold dark:text-white`;
 </script>
 
@@ -272,13 +234,13 @@ volver();
             />
           </div>
         </div>
-        <div class="mt-8 flex justify-end">
+        <div class="mt-8 flex justify-end gap-2">
           <Cancel texto="Cancelar" onclick={volver} />
           <Success
-            onclick={guardarEstablecimiento}
-            texto="Guardar establecimiento"
+            onclick={guardar}
+            texto={saving ? "Guardando…" : "Guardar establecimiento"}
+            disabled={saving}
           />
-          <Success onclick={guardarJava} texto="Guardar java" />
         </div>
       </CardBase>
     </main>

@@ -38,7 +38,7 @@
         loadStorageEstablecimiento,
         saveStorageEstablecimiento,
     } from "$lib/java/establecimientos/establecimientostorage";
-    import { getUser } from "$lib/userstorage/usersotrage";
+    import { getUser, setUser } from "$lib/userstorage/usersotrage";
     import { randomString } from "$lib/stringutil/lib";
     import { saveUser } from "$lib/java/usuarios/usuariosback";
     import Guardando from "$lib/components/Guardando.svelte";
@@ -315,7 +315,10 @@
             textodetalle = nombre;
             try {
                 const record = await saveEstablishment(data);
-                await setDueñoEstablecimiento(record.establishmentId);
+                // El back hace claim de ownership automatico en `create`
+                // cuando no se pasan userIds: asocia al usuario
+                // autenticado como ADM con permisos sembrados. No hace
+                // falta llamar a setDueñoEstablecimiento aca.
 
                 Swal.fire(
                     "Exito guadar",
@@ -326,6 +329,18 @@
                     exist: true ,
                     nombre: record.name,
                     id: record.establishmentId,
+                });
+                // Refrescar establishments[] del usertoken para que el
+                // switcher / sidebar reflejen el nuevo establishment
+                // sin re-loguear.
+                const _u = getUser();
+                setUser({
+                    ..._u,
+                    establishments: [...(_u.establishments || []), {
+                        establishmentId: record.establishmentId,
+                        establishmentName: record.name,
+                        role: "ADM",
+                    }],
                 });
                 per.setPer("0,1,2,3,4,5", usuarioid);
                 goto(pre + "/");
