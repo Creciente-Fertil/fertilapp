@@ -18,6 +18,26 @@ export function processUser(data) {
     }
     return data_user
 }
+// Cambia el establecimiento sobre el que opera el usuario. Devuelve
+// {token, userId, establishmentId, establishmentName, role} con un JWT
+// nuevo scoped al establishment solicitado. El caller debe actualizar
+// localStorage (token + cab actual) y refrescar la app.
+export async function switchEstablishment(estId) {
+    let user = getUser();
+    let ruta = `${RUTA_JAVA}${RUTA_AUTH}/switch-establishment/${estId}`
+    let res = await fetch(ruta, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.token}`
+        }
+    })
+    if (!res.ok) {
+        throw new Error(`switch-establishment ${estId} -> ${res.status}`)
+    }
+    return await res.json()
+}
+
 export async function loginJava(email, contra) {
     let ruta = `${RUTA_JAVA}${RUTA_AUTH}/login`
     let data = {

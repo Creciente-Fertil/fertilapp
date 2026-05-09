@@ -64,6 +64,9 @@
                 useremail: usuarioname,
                 token: data_login.token,
                 id: data_login.userId,
+                // Lista de establishments del usuario para el switcher
+                // (cada item: {establishmentId, establishmentName, role}).
+                establishments: data_login.establishments || [],
             };
             
             setUser(storage_data);
@@ -211,7 +214,8 @@
     function keyEvent(e) {
         if (e.code == "Enter") {
             if (usuarioname != "" && contra != "") {
-                ingresar();
+                if (versionjava) ingresarJava();
+                else ingresar();
             }
         }
     }
