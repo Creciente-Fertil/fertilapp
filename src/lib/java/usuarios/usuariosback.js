@@ -22,6 +22,44 @@ export function processUser(data) {
     }
     return data_user
 }
+// Devuelve el perfil del usuario autenticado: { userId, email, level,
+// planName?, establishments[], establishmentId?, establishmentName? }.
+// Lo usamos en el callback de OAuth2 (que solo recibe token via URL)
+// para hidratar el resto del usertoken.
+export async function getMe(token) {
+    let ruta = `${RUTA_JAVA}${RUTA_AUTH}/me`
+    let res = await fetch(ruta, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    })
+    if (!res.ok) {
+        throw new Error(`getMe -> ${res.status}`)
+    }
+    return await res.json()
+}
+
+// Cambia el establecimiento sobre el que opera el usuario. Devuelve
+// {token, userId, establishmentId, establishmentName, role} con un JWT
+// nuevo scoped al establishment solicitado. El caller debe actualizar
+// localStorage (token + cab actual) y refrescar la app.
+export async function switchEstablishment(estId) {
+    let user = getUser();
+    let ruta = `${RUTA_JAVA}${RUTA_AUTH}/switch-establishment/${estId}`
+    let res = await fetch(ruta, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user.token}`
+        }
+    })
+    if (!res.ok) {
+        throw new Error(`switch-establishment ${estId} -> ${res.status}`)
+    }
+    return await res.json()
+}
+
 export async function loginJava(email, contra) {
     let ruta = `${RUTA_JAVA}${RUTA_AUTH}/login`
     let data = {

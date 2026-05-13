@@ -1,6 +1,6 @@
 import { getUser } from "$lib/userstorage/usersotrage"
 
-const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
+const RUTA_JAVA = import.meta.env.VITE_RUTA_JAVA_SERVER
 const RUTA_DASHBOARD = "dashboard"
 export async function getCount() {
     let ruta = `${RUTA_JAVA}${RUTA_DASHBOARD}/count`

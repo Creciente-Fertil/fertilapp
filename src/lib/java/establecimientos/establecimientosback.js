@@ -134,18 +134,18 @@ function updateData(data) {
 export async function saveEstablishment(data) {
     let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}`
     let data_est = postData(data)
-    let user = getUser();
-    let token = user.token;
-    let res_save = await fetch(ruta, {
+    let res_save = await handleAuthenticatedRequest(ruta, {
         method: "POST",
         body: JSON.stringify(data_est),
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${getUser().token}`
         },
     })
-    let data_save = await res_save.json()
-    return data_save
+    if (!res_save.ok) {
+        throw new Error(`saveEstablishment -> ${res_save.status}`)
+    }
+    return await res_save.json()
 }
 export async function addColabEstablishment(data,cabid) {
     let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${cabid}/collaborators`
@@ -194,14 +194,23 @@ export async function getColaboradores(id){
 
 }
 export async function setDueñoEstablecimiento(establecimientoid){
+    if (!establecimientoid) {
+        throw new Error("setDueñoEstablecimiento: establecimientoid vacio")
+    }
     let user = getUser();
     let token = user.token;
     let usuarioid = user.id
+    if (!usuarioid) {
+        throw new Error("setDueñoEstablecimiento: getUser().id vacio")
+    }
     let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/user/${usuarioid}`
-    let res_save = await fetch(ruta, {
+    let res_save = await handleAuthenticatedRequest(ruta, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${token}`
         },
     })
+    if (!res_save.ok) {
+        throw new Error(`setDueñoEstablecimiento -> ${res_save.status}`)
+    }
 }
