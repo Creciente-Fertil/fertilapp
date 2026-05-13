@@ -27,6 +27,7 @@
     } from "$lib/java/servicios/serviciosback";
     import { getAll } from "$lib/java/animales/animalesback";
     import { getUser } from "$lib/userstorage/usersotrage";
+    import Success from "$lib/components/botones/Success.svelte";
 
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
@@ -85,7 +86,9 @@
     let padre = $state("");
     let pajuela = $state("");
     let categoria = $state("");
-    function loadServicio() {
+    let malfecha=$state(false)
+    function loadServicio() { 
+        malfecha = false
         detalleServicio = proxyServicio.load();
         edit = detalleServicio.edit;
         id = detalleServicio.id;
@@ -300,6 +303,24 @@
         }
         goto(pre + "/servicios");
     }
+    function onInput(){
+        if(natural){
+            if(fechadesde.length==0){
+                malfecha=true
+            }
+            else{
+                malfecha = false
+            }
+        }
+        else{
+            if(fechainseminacion.length==0){
+                malfecha=true
+            }
+            else{
+                malfecha = false
+            }
+        }
+    }
 </script>
 
 <Navbar2>
@@ -319,6 +340,9 @@
                 bind:fechaparto
                 {toros}
                 {versionjava}
+                {onInput}
+                {malfecha}
+
             />
         {:else}
             <InseminacionDetalle
@@ -333,6 +357,8 @@
                 {listapadres}
                 {tiposanimal}
                 {versionjava}
+                {onInput}
+                {malfecha}
             />
         {/if}
         <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
@@ -360,10 +386,15 @@
                 >
                     Cancelar
                 </button>
-
+                <Success
+                    disabled={malfecha}
+                    onclick={editar}
+                    texto="Guardar cambios"
+                    mt="mt-2"
+                />
                 <!-- Botón Editar -->
                 <button
-                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    class="hidden mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                     onclick={editar}
                 >
                     Guardar cambios
@@ -381,8 +412,14 @@
                 </button>
 
                 <!-- Botón Editar -->
+                 <Success
+                    disabled={malfecha}
+                    onclick={editar}
+                    texto="Editar"
+                    mt="mt-2"
+                />
                 <button
-                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    class="hidden mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                     onclick={editar}
                 >
                     Editar

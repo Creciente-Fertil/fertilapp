@@ -28,6 +28,7 @@
     import { getUser } from "$lib/userstorage/usersotrage";
     import { savePeso } from "$lib/java/pesajes/pesajesback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import Success from "$lib/components/botones/Success.svelte";
 
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
 
@@ -77,7 +78,6 @@
     let listapadres = $state([]);
     let cadenamadre = $state("");
     let cadenapadre = $state("");
-    let malfecha = $state(false);
 
     //datos animal
     let idanimal = $state("");
@@ -85,6 +85,8 @@
     let sexo = $state("");
     let categoria = $state("");
     let peso = $state("");
+    //validacion
+    let malcaravana = $state(false);
 
     //Datos nacimiento
     let id = $state("");
@@ -97,6 +99,8 @@
     let nombrepadre = $state("");
     let fecha = $state("");
     let observacion = $state("");
+    // validacion
+    let malfecha = $state(false);
 
     let padreviejo = $state("");
     let madreviejo = $state("");
@@ -171,6 +175,20 @@
                 : 1,
         );
     }
+    function onInputAnimal() {
+        if (caravana.trim().length > 0) {
+            malcaravana = false;
+        } else {
+            malcaravana = true;
+        }
+    }
+    function onInputNacimiento() {
+        if (fecha.length > 0) {
+            malfecha = false;
+        } else {
+            malfecha = true;
+        }
+    }
     function loadNacimiento() {
         detalleNacimiento = proxyNacimiento.load();
         edit = detalleNacimiento.edit;
@@ -192,7 +210,6 @@
             usuarioid = user_data.id;
             cab = loadStorageEstablecimiento();
             userpermisos = [];
-            
         } else {
             let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
             usuarioid = pb_json.record.id;
@@ -200,10 +217,11 @@
             per.setPer(respermisos.permisos, usuarioid);
 
             userpermisos = getPermisosList(per.per.permisos);
-            cab = caber.cab
+            cab = caber.cab;
         }
     }
     onMount(async () => {
+        malfecha = false
         slug = $page.params.slug;
         idnacimiento = slug;
         await getData();
@@ -219,6 +237,7 @@
             observacion = "";
             fecha = "";
         } else {
+            agregaranimal = false
             loadNacimiento();
         }
 
@@ -349,6 +368,7 @@
         if (!edit) {
             setViejo();
             edit = true;
+            malfecha = false
         } else {
             let ms = madres.filter((ma) => ma.id == madre);
             let m = {
@@ -381,11 +401,11 @@
                     let data_java = {
                         date: fecha,
                         motherId: m.id,
-                        fatherId:padre,     
+                        fatherId: padre,
                         notes: observacion,
                         establishmentId: cab.id,
                     };
-                    
+
                     await editNacimiento(idnacimiento, data_java);
                 } else {
                     const record = await pb
@@ -447,7 +467,12 @@
             }
         });
     }
-    function onchange() {}
+    function switchAgregarAnimal(){
+        onInputAnimal()
+    }
+    function onchange() {
+        onInputNacimiento();
+    }
     function onelegirMadre() {}
     function onwriteMadre() {}
     function onelegirPadre() {}
@@ -483,6 +508,9 @@
             {onwriteMadre}
             {toggleJava}
             {versionjava}
+            {onInputAnimal}
+            {onInputNacimiento}
+            {switchAgregarAnimal}
         />
         <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
 
@@ -490,13 +518,11 @@
             <div
                 class=" mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
             >
-                <!-- Botón Editar -->
-                <button
-                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                <Success
+                    disabled={fecha.length==0 || malfecha || (agregaranimal && malcaravana)}
                     onclick={guardar}
-                >
-                    Guardar nuevo
-                </button>
+                    texto="Guardar nuevo"
+                />
             </div>
         {:else if edit}
             <div
@@ -524,12 +550,11 @@
                 </button>
 
                 <!-- Botón Editar -->
-                <button
-                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                <Success
+                    disabled={fecha.length==0 || malfecha || (agregaranimal && malcaravana)}
                     onclick={editar}
-                >
-                    Guardar cambios
-                </button>
+                    texto="Guardar cambios"
+                />
             </div>
         {:else}
             <div

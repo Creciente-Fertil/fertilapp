@@ -28,6 +28,7 @@
     } from "$lib/java/observaciones/observacionesback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import { error } from "@sveltejs/kit";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -57,10 +58,15 @@
     let categoria = $state("");
     let fecha = $state("");
     let observacion = $state("");
+    //validacion
+    let malanimal = $state(false);
+    let malfecha = $state(false);
+    let malobservacion = $state(false);
+    let botonhabilitado = $state(false);
 
     let edit = $state(false);
     let add = $state(false);
-    let malfecha = $state(false);
+
     //detalle observacion
     let defaulobservacion = {
         id: "",
@@ -106,7 +112,60 @@
             cargadoanimales = true;
         }
     }
+    function validarCampo(campo) {
+        
+        if (campo == "animal") {
+            if (animal.length == 0) {
+                malanimal = true;
+            } else {
+                malanimal = false;
+            }
+        }
+        if (campo == "fecha") {
+            if (fecha.length == 0) {
+                malfecha = true;
+            } else {
+                malfecha = false;
+            }
+        }
+        if (campo == "observacion") {
+            if (observacion.length == 0) {
+                malobservacion = true;
+            } else {
+                malobservacion = false;
+            }
+        }
+        validarBoton();
+    }
+    function validarBoton() {
+        botonhabilitado = true;
+        if (animal.length == 0) {
+            botonhabilitado = false;
+        }
+        if (fecha.length == 0) {
+            botonhabilitado = false;
+        }
+        if (observacion.length == 0) {
+            botonhabilitado = false;
+        }
+    }
+    function validarObservacion() {
+        validarBoton();
+        if (!botonhabilitado) {
+            Swal.fire(
+                "Error datos",
+                "Debe elegir una fecha, animal y escribir un observación",
+                "error",
+            );
+            return false;
+        }
+        return true;
+    }
     async function guardarNuevo() {
+        let validacion = validarObservacion();
+        if (!validacion) {
+            return;
+        }
         if (versionjava) {
             try {
                 let data = {
@@ -115,7 +174,7 @@
                     categoria,
                     cab: cab.id,
                     observacion,
-                    active: true
+                    active: true,
                 };
                 let res_obs = await saveComment(data);
 
@@ -178,7 +237,7 @@
                     animalId: animal,
                     observationDate: fecha,
                     notes: observacion,
-                    establishmentId:cab.id
+                    establishmentId: cab.id,
                 };
                 await editComment(idobservacion, data_java);
             } else {
@@ -245,11 +304,16 @@
     function volver() {
         if (edit) {
             edit = false;
+            validarCampo("animal")
+            validarCampo("fecha")
+            validarCampo("observacion")
+            
             return;
         }
         goto(pre + "/observaciones");
     }
     function loadObservacion() {
+        botonhabilitado = true
         detalleobservacion = proxydetalleobservacion.load();
         idobservacion = detalleobservacion.id;
         animal = detalleobservacion.animal;
@@ -266,11 +330,12 @@
             slug = $page.params.slug;
             let user_data = getUser();
             usuarioid = user_data.id;
-            cab = loadStorageEstablecimiento()
+            cab = loadStorageEstablecimiento();
             await getAnimales();
             if (slug == "0") {
                 add = true;
             } else {
+                
                 loadObservacion();
             }
         } else {
@@ -290,7 +355,7 @@
         }
     }
     onMount(async () => {
-        await getData()
+        await getData();
     });
 </script>
 
@@ -313,6 +378,9 @@
             bind:categoria
             bind:observacion
             {malfecha}
+            {malanimal}
+            {malobservacion}
+            {validarCampo}
         />
         <!-- Botones alineados a la derecha, más bajos, en la parte inferior -->
         {#if add}
@@ -340,8 +408,13 @@
                     Volver
                 </button>
                 <!-- Botón Editar -->
+                <Success
+                    onclick={guardarNuevo}
+                    texto="Guardar"
+                    disabled={!botonhabilitado}
+                />
                 <button
-                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    class="hidden mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                     onclick={guardarNuevo}
                 >
                     Guardar
@@ -373,8 +446,13 @@
                 </button>
 
                 <!-- Botón Editar -->
+                <Success
+                    onclick={editar}
+                    disabled={!botonhabilitado}
+                    texto="Guardar cambios"
+                />
                 <button
-                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    class="hidden mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                     onclick={editar}
                 >
                     Guardar cambios

@@ -75,7 +75,7 @@
                         class={`
                             text-xl font-semibold
                             dark:text-gray-300 text-gray-700
-                            flex
+                            flex gap-1
                         `}
                     >
                         

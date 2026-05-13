@@ -14,7 +14,9 @@
         padreslist = $bindable([]),
         observacion = $bindable(""),
         toros = [],
-        versionjava=false
+        versionjava=false,
+        malfecha=false,
+        onInput=()=>{}
     } = $props();
     let padresserv = $state("");
 </script>
@@ -64,8 +66,12 @@
                         focus:border-green-500
                         ${estilos.bgdark2}
                     `}
+                    onchange={onInput}
                     bind:value={fechadesde}
                 />
+                {#if malfecha}
+                <span class="text-sm text-red-500">Debe seleccionar una fecha desde</span>
+                {/if}
             {:else}
                 <span class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
                     >{new Date(fechadesde).toLocaleDateString()}</span

@@ -6,24 +6,26 @@
     import motivos from "$lib/stores/motivos";
     import { onMount } from "svelte";
     import tiponoti from "$lib/stores/tiponoti";
+    import Success from "../botones/Success.svelte";
 
     let {
         caravana = "",
 
-        bajar = (fechafallecimiento, motivo)=>{},
-        eliminar= (id)=>{},
+        bajar = (fechafallecimiento, motivo) => {},
+        eliminar = (id) => {},
 
         fechafallecimiento = $bindable(""),
         motivo = $bindable("fallecimiento"),
 
         //Transferir
         codigo = $bindable(""),
+        codigovacio = false,
         malcodigo = false,
         muchosrenspa = false,
-
+        onInputTransfer = () => {},
         openModal = () => {},
         transfer = () => {},
-        versionjava=false
+        versionjava = false,
     } = $props();
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
@@ -45,7 +47,6 @@
             }).then((result) => {
                 if (result.value) {
                     bajar(fechafallecimiento, motivo);
-                    
                 }
             });
         }
@@ -126,7 +127,7 @@
                             {#each motivos as m}
                                 <option value={m.id}>{m.nombre}</option>
                             {/each}
-                            {#if motivo.length>0 && !incluyeMotivo(motivo)}
+                            {#if motivo.length > 0 && !incluyeMotivo(motivo)}
                                 <option value={motivo}>{motivo}</option>
                             {/if}
                         </select>
@@ -139,6 +140,7 @@
                             onclick={darBaja}
                             disabled={fechafallecimiento == ""}
                             class={`
+                                disabled:cursor-not-allowed
                                 mt-2 px-10 py-2  text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base
                                 bg-[#A94442] disabled:bg-[#dd978f]
                             `}
@@ -187,8 +189,16 @@
                                 w-full
                                 ${estilos.bgdark2}
                             `}
+                        oninput={onInputTransfer}
                         bind:value={codigo}
                     />
+                    {#if codigovacio}
+                        <div class="label">
+                            <span class="label-text-alt text-red-500"
+                                >Debe escribir un Renspa</span
+                            >
+                        </div>
+                    {/if}
                     {#if malcodigo}
                         <div class="label">
                             <span class="label-text-alt text-red-500"
@@ -205,13 +215,11 @@
                     {/if}
                 </div>
                 <div class="flex justify-end">
-                    <button
-                        aria-label="iniciar"
+                    <Success
                         onclick={transfer}
-                        class="mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
-                    >
-                        Confirmar
-                    </button>
+                        disabled={muchosrenspa || malcodigo || codigovacio}
+                        texto="Confirmar"
+                    />
                 </div>
             </div>
         </div>

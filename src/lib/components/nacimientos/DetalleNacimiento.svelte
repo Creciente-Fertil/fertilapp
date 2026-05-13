@@ -23,7 +23,7 @@
         nombremadre = $bindable(""),
         nombrepadre = $bindable(""),
         observacion = $bindable(""),
-        onchange = () => {},
+        onchange = (campo) => {},
         malfecha = false,
         listamadres = [],
         listapadres = [],
@@ -32,6 +32,9 @@
         onelegirPadre = () => {},
         onwritePadre = () => {},
         toggleJava = () => {},
+        onInputAnimal=()=>{},
+        onInputNacimiento=()=>{},
+        switchAgregarAnimal=()=>{},
         versionjava = false,
     } = $props();
     let cadena = $state("");
@@ -70,6 +73,8 @@
                 bind:peso
                 bind:fechanacimiento={fecha}
                 confechanac={true}
+                {onInputAnimal}
+                {switchAgregarAnimal}
             />
         </div>
     {:else}

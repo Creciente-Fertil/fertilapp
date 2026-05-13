@@ -26,6 +26,7 @@
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     import { savePeso } from "$lib/java/pesajes/pesajesback";
     import { saveBirth } from "$lib/java/nacimientos/nacimientosback";
+    import Success from "../botones/Success.svelte";
     let {
         caravana = $bindable(""),
         rodeo = $bindable(""),
@@ -76,7 +77,8 @@
     let categoriavieja = $state("");
     let prenadaviejo = $state(false);
     let rpviejo = $state("");
-
+    //validaciones
+    let malcaravana = $state(false);
     //Nacimiento
     let fechaviejo = $state("");
     let nombremadreviejo = $state("");
@@ -194,6 +196,7 @@
 
     function openEditar() {
         modoedicion = true;
+        malcaravana = false;
         pesoviejo = peso;
         sexoviejo = sexo;
         loteviejo = lote;
@@ -209,6 +212,9 @@
             madreviejo = madre;
             padreviejo = padre;
             observacionviejo = observacion;
+        }
+        if (caravana.trim().length == 0) {
+            malcaravana = true;
         }
         //if (userpermisos[5]) {
         //    modoedicion = true;
@@ -538,6 +544,11 @@
         }
     }
     async function guardarAnimal() {
+        onInput();
+        if (malcaravana) {
+            Swal.fire("Caravana vacia", "Debe escribir una caravana", "error");
+            return;
+        }
         if (!versionjava) {
             let data = {
                 peso,
@@ -640,18 +651,17 @@
                 );
             }
         } else {
-            let birth={birthId:null}
-            if(fecha && fecha.length>0){
-
+            let birth = { birthId: null };
+            if (fecha && fecha.length > 0) {
                 if (madre || padre) {
                     let data_nacimiento = {
                         fecha,
                         madre,
                         padre,
-                        cab:cab.id
-                    }
-                    
-                    birth = await saveBirth(data_nacimiento)
+                        cab: cab.id,
+                    };
+
+                    birth = await saveBirth(data_nacimiento);
                 }
             }
 
@@ -660,34 +670,38 @@
                 active: true,
                 delete: false,
                 prenada,
-                fechanacimiento:fecha,
+                fechanacimiento: fecha,
                 sexo,
                 peso,
                 lote,
-                rodeo, 
+                rodeo,
                 rp,
-                raza ,
+                raza,
                 color,
-                categoria: categoria  &&  categoria.length>0 ? categoria : sexo == "M" ? "ternero" : "ternera",
+                categoria:
+                    categoria && categoria.length > 0
+                        ? categoria
+                        : sexo == "M"
+                          ? "ternero"
+                          : "ternera",
                 cab: cab.id,
             };
-            
-            if(birth.birthId){
-                data.nacimiento = birth.birthId
+
+            if (birth.birthId) {
+                data.nacimiento = birth.birthId;
             }
 
             let res = await saveAnimal(data);
 
-            if(peso){
-
+            if (peso) {
                 let data_peso = {
-                    animal:res.id,
-                    fecha:new Date().toISOString().split("T")[0],
-                    pesonuevo:peso
-                }
-                await savePeso(data_peso)
+                    animal: res.id,
+                    fecha: new Date().toISOString().split("T")[0],
+                    pesonuevo: peso,
+                };
+                await savePeso(data_peso);
             }
-            
+
             Swal.fire("Éxito guardar", "Se pudo guardar el animal", "success");
             modoedicion = false;
 
@@ -746,6 +760,13 @@
     function volver() {
         goto(pre + "/animales");
     }
+    function onInput() {
+        if (caravana.trim().length > 0) {
+            malcaravana = false;
+        } else {
+            malcaravana = true;
+        }
+    }
 </script>
 
 <div class="grid grid-cols-2 lg:grid-cols-2">
@@ -789,8 +810,12 @@
                     id="caravana"
                     type="text"
                     class={`input input-bordered w-full ${estilos.bgdark2}`}
+                    oninput={onInput}
                     bind:value={caravana}
                 />
+                {#if malcaravana}
+                    <span class={`text-sm text-red-500`}>Caravana vacía</span>
+                {/if}
             </label>
         </div>
     {/if}
@@ -1266,13 +1291,12 @@
     <div class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
         <!-- Botón Cancelar -->
         {#if add}
-            <!-- Botón Editar -->
-            <button
-                class="mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+            <!-- Botón Agregar -->
+            <Success
+                disabled={malcaravana || caravana.trim().length == 0}
                 onclick={guardarAnimal}
-            >
-                Guardar
-            </button>
+                texto="Guardar"
+            />
         {:else}
             <button
                 class="
@@ -1294,12 +1318,11 @@
                 Cancelar
             </button>
             <!-- Botón Editar -->
-            <button
-                class="mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+            <Success
+                disabled={malcaravana || caravana.trim().length == 0}
                 onclick={editarAnimal}
-            >
-                Guardar cambios
-            </button>
+                texto="Guardar cambios"
+            />
         {/if}
     </div>
 {/if}
@@ -1342,4 +1365,3 @@
         Editar
     </button>
 </div>
-

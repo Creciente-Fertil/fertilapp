@@ -135,7 +135,8 @@
             lastName: apellidodata,
             level: 1,
             couponCode: null,
-            avatar: null
+            avatar: null,
+            roleId:1
         };
         if (cupon.trim().length > 0) {
             data["couponCode"] = cupon;

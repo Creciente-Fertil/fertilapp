@@ -57,8 +57,9 @@
         }
         try {
             let data_login = await loginJava(usuarioname, contra);
+            
             if(data_login.status==401){
-                throw new Error("Erro de credenciales")
+                throw new Error("Error de credenciales")
             }
             let storage_data = {
                 useremail: usuarioname,

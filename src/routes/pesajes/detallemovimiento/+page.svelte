@@ -94,7 +94,22 @@
         goto(pre + "/pesajes");
     }
     async function moverJava() {}
+    function validarMovimiento(){
+        if(fecha.length==0){
+            Swal.fire("Error fecha","Se debe seleccionar una fecha","error")
+            return false
+        }
+        if(selectanimales.length==0){
+            Swal.fire("Error animales","Se debe seleccionar algún animal","error")
+            return false
+        }
+        return true
+    }
     async function mover() {
+        let validacion = validarMovimiento()
+        if(!validacion){
+            return
+        }
         if (versionjava) {
             let errores = false;
             let pesajeserror = [];

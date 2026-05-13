@@ -29,7 +29,7 @@
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
-        await getData()
+        await getData();
     }
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
@@ -48,6 +48,8 @@
     let edit = $state(false);
     let add = $state(false);
     let animales = $state([]);
+    //validador
+    let malnombre = $state(false);
     let defaultRodeo = {
         id: "",
         nombre: "",
@@ -120,6 +122,11 @@
         }
     }
     async function guardarCambio() {
+        onInput()
+        if (malnombre) {
+            Swal.fire("Nombre vacio", "No puede haber lotes vacios", "error");
+            return;
+        }
         try {
             let data = {
                 nombre,
@@ -143,6 +150,11 @@
         }
     }
     async function guardarNuevo() {
+        onInput()
+        if (malnombre) {
+            Swal.fire("Nombre vacio", "No puede haber lotes vacios", "error");
+            return;
+        }
         if (!versionjava) {
             try {
                 let data = {
@@ -198,6 +210,13 @@
             return;
         }
         goto(pre + "/rodeos");
+    }
+    function onInput() {
+        if (nombre.trim().length > 0) {
+            malnombre = false;
+        } else {
+            malnombre = true;
+        }
     }
 </script>
 
@@ -314,8 +333,15 @@
                                 focus:border-green-500
                                 ${estilos.bgdark2} 
                             `}
+                            oninput={onInput}
                             bind:value={nombre}
                         />
+
+                        {#if malnombre}
+                            <span class={`text-sm text-red-500`}
+                                >Nombre vacío</span
+                            >
+                        {/if}
                     {:else}
                         <label for="nombre" class="label py-0 my-0">
                             <span
@@ -332,10 +358,18 @@
             >
                 {#if add}
                     <Secondary onclick={volver} texto="Volver" />
-                    <Success onclick={guardarNuevo} texto="Guardar nuevo" />
+                    <Success
+                        disabled={malnombre || nombre.trim().length == 0}
+                        onclick={guardarNuevo}
+                        texto="Guardar nuevo"
+                    />
                 {:else if edit}
                     <Secondary onclick={volver} texto="Cancelar" />
-                    <Success onclick={guardarCambio} texto="Guardar edición" />
+                    <Success
+                        disabled={malnombre || nombre.trim().length == 0}
+                        onclick={guardarCambio}
+                        texto="Guardar edición"
+                    />
                 {:else}
                     <Danger onclick={confirmDelete} texto="Eliminar" />
                     <Secondary onclick={editar} texto="Editar" />

@@ -2,7 +2,7 @@ export async function handleAuthenticatedRequest(url, options) {
     try {
         const response = await fetch(url, options);
         
-        if (response.status === 401) {
+        if (response.status === 401 || response.status === 403) {
             // Limpiar localStorage
             //localStorage.removeItem('user');
             // Disparar un evento personalizado

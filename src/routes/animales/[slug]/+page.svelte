@@ -48,6 +48,7 @@
     } from "$lib/java/animales/animalesback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    
 
     //ver java
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
@@ -366,12 +367,26 @@
     //*Transferir*/
     let codigo = $state("");
     let malcodigo = $state(false);
-    let muchosrenspa = $state("");
+    let codigovacio = $state(true);
+    let muchosrenspa = $state(false);
     function openModalTransfer() {
         codigo = "";
         transferModal2.showModal();
     }
+    function onInputTransfer(){
+        if(codigo.trim().length==0){
+            codigovacio=true
+        }
+        else{
+            codigovacio = false
+        }
+    }
     async function transfer() {
+        onInputTransfer()
+        if(codigovacio){
+            Swal.fire("Renspa vacio","Debe escribir un renspa","error")
+            return
+        }
         if (versionjava) {
             Swal.fire({
                 title: "Transferir animal",
@@ -822,7 +837,9 @@
                         bind:codigo
                         {muchosrenspa}
                         {malcodigo}
+                        {codigovacio}
                         {versionjava}
+                        {onInputTransfer}
                     />
                 </CardAnimal>
             {/if}

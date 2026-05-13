@@ -39,13 +39,15 @@
     let edit = $state(false);
     let add = $state(false);
     let animales = $state([]);
+    //validador
+    let malnombre = $state(false);
 
     //ver java
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
 
     async function toggleJava() {
         versionjava = !versionjava;
-        await getData()
+        await getData();
     }
     let defaultLote = {
         id: "",
@@ -64,26 +66,32 @@
         versionjava = detalleLote.versionjava;
     }
     async function getData() {
-        if(versionjava){
-            let user_data = getUser()
-            cab = loadStorageEstablecimiento()
-            usuarioid = user_data.id
-            userpermisos =[]
+        if (versionjava) {
+            let user_data = getUser();
+            cab = loadStorageEstablecimiento();
+            usuarioid = user_data.id;
+            userpermisos = [];
+        } else {
+            cab = caber.cab;
+            let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
+            usuarioid = pb_json.record.id;
+
+            let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
+            per.setPer(respermisos.permisos, usuarioid);
+
+            userpermisos = getPermisosList(per.per.permisos);
         }
-        else{
-            cab =  caber.cab
-let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
-
-        let respermisos = await getPermisosCabUser(pb, usuarioid, cab.id);
-        per.setPer(respermisos.permisos, usuarioid);
-
-        userpermisos = getPermisosList(per.per.permisos);
+    }
+    function onInput() {
+        if (nombre.trim().length > 0) {
+            malnombre = false;
+        } else {
+            malnombre = true;
         }
     }
     onMount(async () => {
         slug = $page.params.slug;
-        await getData()
+        await getData();
         if (slug == "0") {
             add = true;
             nombre = "";
@@ -122,6 +130,11 @@ let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         }
     }
     async function guardarCambio() {
+        onInput()
+        if (malnombre) {
+            Swal.fire("Nombre vacio", "No puede haber lotes vacios", "error");
+            return;
+        }
         try {
             let data = {
                 nombre,
@@ -131,7 +144,7 @@ let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
                     name: nombre,
                     establishmentId: cab.id,
                     latitude: -34.6037,
-                    longitude: -58.3816
+                    longitude: -58.3816,
                 };
                 await editLote(slug, data_java);
             } else {
@@ -146,6 +159,11 @@ let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         }
     }
     async function guardarNuevo() {
+        onInput()
+        if (malnombre) {
+            Swal.fire("Nombre vacio", "No puede haber lotes vacios", "error");
+            return;
+        }
         if (versionjava) {
             let data = {
                 nombre,
@@ -322,8 +340,14 @@ let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
                             ps-3
                             ${estilos.bgdark2} 
                         `}
+                            oninput={onInput}
                             bind:value={nombre}
                         />
+                        {#if malnombre}
+                            <span class={`text-sm text-red-500`}
+                                >Nombre vacio</span
+                            >
+                        {/if}
                     {:else}
                         <label for="nombre" class="label py-0 my-0 ps-3">
                             <span
@@ -340,10 +364,18 @@ let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
             >
                 {#if add}
                     <Secondary onclick={volver} texto="Volver" />
-                    <Success onclick={guardarNuevo} texto="Guardar nuevo" />
+                    <Success
+                        disabled={malnombre || nombre.trim().length == 0}
+                        onclick={guardarNuevo}
+                        texto="Guardar nuevo"
+                    />
                 {:else if edit}
                     <Secondary onclick={volver} texto="Cancelar" />
-                    <Success onclick={guardarCambio} texto="Guardar edición" />
+                    <Success
+                        disabled={malnombre || nombre.trim().length == 0}
+                        onclick={guardarCambio}
+                        texto="Guardar edición"
+                    />
                 {:else}
                     <Danger onclick={confirmDelete} texto="Eliminar" />
                     <Secondary onclick={editar} texto="Editar" />

@@ -26,7 +26,6 @@
 	"dependencies": {
 		"@mercadopago/sdk-js": "^0.0.3",
 		"chart.js": "^4.4.7",
-		"exceljs": "^4.4.0",
 		"file-saver": "^2.0.5",
 		"pocketbase": "^0.25.2",
 		"sweetalert2": "^11.14.5",

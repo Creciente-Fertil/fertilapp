@@ -62,7 +62,7 @@
                         ${estilos.bgdark2} 
                     `}
                     bind:value={fecha}
-                    onchange={() => onchange("FECHA")}
+                    onchange={() => oninput("FECHA")}
                 />
                 {#if malfecha}
                     <div class="label">

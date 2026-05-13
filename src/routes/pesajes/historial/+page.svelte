@@ -21,8 +21,12 @@
     import TablaPesajes from "$lib/components/pesajes/TablaPesajes.svelte";
 
     import ListaPesajes from "$lib/components/pesajes/ListaPesajes.svelte";
-    import { editPeso, eliminarPeso, getAll } from "$lib/java/pesajes/pesajesback";
-    
+    import {
+        editPeso,
+        eliminarPeso,
+        getAll,
+    } from "$lib/java/pesajes/pesajesback";
+
     import Success from "$lib/components/botones/Success.svelte";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let innerWidth = $state(0);
@@ -77,12 +81,12 @@
     }
     async function getPesajes() {
         if (versionjava) {
-            cab = loadStorageEstablecimiento()
+            cab = loadStorageEstablecimiento();
             let records = await getAll(cab.id);
             pesajes = records;
             cargados = true;
         } else {
-            cab = caber.cab
+            cab = caber.cab;
             const records = await pb.collection("pesaje").getFullList({
                 sort: "-fecha",
                 expand: "animal,animal.cab",
@@ -148,7 +152,7 @@
                         weightDate: fecha,
                         weight: pesonuevo,
                     };
-                    await editPeso(idpesaje,data_java)
+                    await editPeso(idpesaje, data_java);
                 }
             } else {
                 await pb.collection("pesaje").update(idpesaje, data);
@@ -182,7 +186,7 @@
             cancelButtonText: "No",
         }).then(async (result) => {
             if (result.value) {
-                idpesaje = p_id
+                idpesaje = p_id;
                 eliminar();
             }
         });
@@ -194,7 +198,7 @@
             } else {
                 await pb.collection("pesaje").delete(idpesaje);
             }
-            
+
             Swal.fire(
                 "Éxito eliminar pesaje",
                 "Se pudo eliminar el pesaje",
@@ -202,7 +206,7 @@
             );
             await getPesajes();
             filterUpdate();
-            
+
             detallePesaje.close();
         } catch (err) {
             console.error(err);
@@ -312,7 +316,7 @@
             onclick={toggleJava}
         />
     {/if}
-    
+
     {#if cargados}
         <!--Tabla-->
         <div
@@ -509,8 +513,14 @@
                         Cancelar
                     </button>
                     <!-- Botón Editar -->
+                    <Success
+                        onclick={editarPesaje}
+                        mt="mt-2"
+                        texto="Guardar"
+                        disabled={fecha.length == 0}
+                    />
                     <button
-                        class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                        class="hidden mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                         onclick={editarPesaje}
                     >
                         Guardar

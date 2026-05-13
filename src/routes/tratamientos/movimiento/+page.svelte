@@ -297,7 +297,8 @@
                 todos = false;
                 algunos = true;
             }
-            selecthashmap[id] = null;
+            delete selecthashmap[id]
+            
         } else {
             if (ninguno) {
                 algunos = true;
@@ -641,12 +642,7 @@
                     {inputObsGeneral}
                     {input}
                 />
-                <div class="hidden">
-                    <AnimalesSeleccionados
-                        {selecthashmap}
-                        quitarAnimal={clickAnimal}
-                    />
-                </div>
+                
             </div>
             <!--Lado derecho-->
             <div class="md:col-span-2">

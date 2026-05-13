@@ -14,6 +14,9 @@
         categoria = $bindable(""),
         observacion = $bindable(""),
         malfecha = false,
+        malanimal = false,
+        malobservacion = false,
+        validarCampo = (campo) => {},
     } = $props();
 
     let cadenaanimal = $state("");
@@ -38,6 +41,7 @@
                     bind:cadena={cadenaanimal}
                     etiquetaDefault={false}
                     campo={"caravana"}
+                    onelegir={() => validarCampo("animal")}
                 >
                     <label for="caravana" class="label py-0 my-0">
                         <span class="label-text text-sm font-normal"
@@ -45,6 +49,11 @@
                         >
                     </label>
                 </PredictSelect>
+                {#if malanimal}
+                    <span class="text-sm text-red-500"
+                        >Debe elegir un animal</span
+                    >
+                {/if}
             {/if}
         {:else}
             <label for="caravana" class="label py-0 my-0">
@@ -75,8 +84,8 @@
                         focus:border-green-500
                         ${estilos.bgdark2} 
                     `}
+                    onchange={() => validarCampo("fecha")}
                     bind:value={fecha}
-                    
                 />
                 {#if malfecha}
                     <div class="label">
@@ -147,9 +156,15 @@
                         w-full
                         ${estilos.bgdark2}
                     `}
+                        oninput={() => validarCampo("observacion")}
                         bind:value={observacion}
                     >
                     </textarea>
+                    {#if malobservacion}
+                        <span class="text-sm text-red-500"
+                            >Debe escribir una observacion</span
+                        >
+                    {/if}
                 {:else}
                     <p class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}>
                         {observacion}

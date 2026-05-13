@@ -62,7 +62,7 @@
     //Validaciones
     let malfecha = $state(false);
     let maltipo = $state(false);
-    let botonhabilitado = $state(false);
+    let botonhabilitado = $state(true);
     let vaciotratamiento = {
         edit: false,
         idtratamiento: "",
@@ -282,10 +282,15 @@
                 >
                     Cancelar
                 </button>
-
+                <Success
+                onclick={editar}
+                disabled={!botonhabilitado}
+                mt="mt-2"
+                texto="Guardar cambios"
+                />
                 <!-- Botón Editar -->
                 <button
-                    class="mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
+                    class="hidden mt-2 px-10 py-2 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base"
                     onclick={editar}
                 >
                     Guardar cambios
@@ -311,127 +316,6 @@
                 </button>
             </div>
         {/if}
-        <div class="form-control hidden">
-            <label for="madre" class="label">
-                <span class="label-text text-base">Animal: {caravana}</span>
-            </label>
-            <label for="fecha" class="label">
-                <span class="label-text text-base">Fecha</span>
-            </label>
-            <label class="input-group">
-                <input
-                    id="fecha"
-                    type="date"
-                    max={HOY}
-                    class={`
-                        input input-bordered w-full
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 
-                        focus:border-green-500
-                        ${estilos.bgdark2} 
-                    `}
-                    bind:value={fecha}
-                    onchange={() => oninput("FECHA")}
-                />
-                <div class={`label ${malfecha ? "" : "hidden"}`}>
-                    <span class="label-text-alt text-red-400"
-                        >Debe seleccionar la fecha</span
-                    >
-                </div>
-            </label>
-            <label for="categoria" class="label">
-                <span class="label-text text-base">Categoria</span>
-            </label>
-            <label class="input-group">
-                <select
-                    class={`
-                        select select-bordered w-full
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 
-                        focus:border-green-500
-                        ${estilos.bgdark2} 
-                    `}
-                    bind:value={categoria}
-                    disabled
-                >
-                    {#each categorias as c}
-                        <option value={c.id}>{c.nombre}</option>
-                    {/each}
-                </select>
-            </label>
-
-            <label for="tipo" class="label">
-                <span class="label-text text-base">Tipo tratamiento</span>
-            </label>
-            <label class="input-group">
-                <select
-                    class={`
-                        select select-bordered w-full
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 
-                        focus:border-green-500
-                        ${estilos.bgdark2} 
-                    `}
-                    bind:value={tipo}
-                    onchange={() => oninput("TIPO")}
-                >
-                    {#each tipos as t}
-                        <option value={t.id}>{t.nombre}</option>
-                    {/each}
-                </select>
-                <div class={`label ${maltipo ? "" : "hidden"}`}>
-                    <span class="label-text-alt text-red-400"
-                        >Debe seleccionar un tipo</span
-                    >
-                </div>
-            </label>
-            <label class="form-control">
-                <div class="label">
-                    <span class="label-text">Observacion</span>
-                </div>
-                <input
-                    id="observacion"
-                    type="text"
-                    class={`
-                        input 
-                        input-bordered 
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
-                        w-full
-                        ${estilos.bgdark2}
-                    `}
-                    bind:value={observacion}
-                />
-            </label>
-        </div>
-        <!-- Botones alineados a la izquierda, más bajos, en la parte inferior -->
-        <div class="mt-6 flex space-x-3 hidden">
-            <!-- Botón Eliminar -->
-            <button
-                class="px-4 py-1.5 bg-red-700 text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-sm"
-                onclick={eliminar}
-            >
-                Eliminar
-            </button>
-
-            <!-- Botón Cancelar -->
-            <button
-                class="px-4 py-1.5 bg-white text-gray-800 font-medium rounded-full shadow-sm border border-gray-300 hover:bg-gray-50 transition-colors text-sm"
-                onclick={volver}
-            >
-                Cancelar
-            </button>
-
-            <!-- Botón Editar -->
-            <button
-                class="px-4 py-1.5 bg-green-800 text-white font-medium rounded-full shadow-sm hover:bg-green-900 transition-colors text-sm"
-                onclick={editar}
-            >
-                Editar
-            </button>
-        </div>
+       
     </CardTratamiento>
 </Navbar2>

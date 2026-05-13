@@ -10,14 +10,20 @@
         fechanacimiento=$bindable(""),
         categoria=$bindable(""),
         agregaranimal=$bindable(false),
-        confechanac =  $bindable(false)
+        confechanac =  $bindable(false),
+        onInputAnimal=()=>{},
+        switchAgregarAnimal=()=>{}
     } = $props()
     let malcaravana = $state(false)
+    function onClickAnimal(){
+        agregaranimal = !agregaranimal
+        switchAgregarAnimal()
+    }
     function onlyPositiveNumber(_peso){
         return Math.max(0,_peso)
     }
     function onChangeAgregar(){
-        
+        onInputAnimal()
         if(caravana == ""){
             malcaravana = true
         }
@@ -30,7 +36,7 @@
     <dir class="flex justify-start mx-0 px-0">
         <button 
             class={`${estilos.basico} ${estilos.chico} ${estilos.danger}`} 
-            onclick={()=>agregaranimal = false}
+            onclick={onClickAnimal}
         >Cancelar</button>
     </dir>
     
@@ -128,7 +134,7 @@
     <dir class="flex justify-start mx-0 px-0">
         <button 
         class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`} 
-            onclick={()=>agregaranimal = true}
+            onclick={onClickAnimal}
         >Nuevo animal</button>
     </dir>
     

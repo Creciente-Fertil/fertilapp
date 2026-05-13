@@ -25,7 +25,10 @@
     import estilos from "$lib/stores/estilos";
     import ListaAnimales from "$lib/components/servicios/ListaAnimales.svelte";
     import Secondary from "$lib/components/botones/Secondary.svelte";
-    import { saveServicio, saveServicioBulk } from "$lib/java/servicios/serviciosback";
+    import {
+        saveServicio,
+        saveServicioBulk,
+    } from "$lib/java/servicios/serviciosback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { getAll } from "$lib/java/animales/animalesback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
@@ -153,7 +156,7 @@
         fechainseminacion = proxymovimiento.fechainseminacion;
         observaciongeneral = proxymovimiento.observacion;
         listaanimales = [];
-        
+
         for (const [key, value] of Object.entries(selecthashmap)) {
             if (value != null) {
                 let fila = value;
@@ -282,9 +285,36 @@
         proxy.save(defaultmovimiento);
         loadDetalle();
     }
+    function validarMovimiento() {
+        if (esservicio) {
+            if (fechadesdeserv.length == 0) {
+                Swal.fire(
+                    "Sin fecha desde",
+                    "Debe seleccionar una fecha desde",
+                    "error",
+                );
+                return false;
+            }
+        } else {
+            if (fechainseminacion.length == 0) {
+                Swal.fire(
+                    "Sin fecha inseminación",
+                    "Debe seleccionar una fecha de inseminación",
+                    "error",
+                );
+                return false;
+            }
+        }
+
+        return true;
+    }
     async function mover() {
         if (listaanimales.length == 0) {
             Swal.fire("Sin madres", "No hay madres seleccionados", "error");
+            return;
+        }
+        let valido = validarMovimiento();
+        if (!valido) {
             return;
         }
         if (!versionjava) {
@@ -420,13 +450,13 @@
         } else {
             let errores = false;
             let serverrores = [];
-            let data_javas = []
-            
+            let data_javas = [];
+
             for (let i = 0; i < listaanimales.length; i++) {
                 let servicio = listaanimales[i];
-                let fathers = servicio.padres.map(p=>({
-                    fatherId:p
-                }))
+                let fathers = servicio.padres.map((p) => ({
+                    fatherId: p,
+                }));
                 let data_java = {
                     animalId: servicio.id,
                     establishmentId: cab.id,
@@ -436,7 +466,6 @@
                     notes: servicio.observacion,
                     isActive: true,
                     fathers: fathers,
-                    
                 };
                 //let data_java_simple={
                 //    animalId: servicio.id,
@@ -452,14 +481,14 @@
                     data_java.endDate = fechahastaserv;
                     //data_java_simple.endDate = fechahastaserv;
                 }
-                data_javas.push(data_java)
-                
+                data_javas.push(data_java);
+
                 //await saveServicio(data_java);
             }
             //console.log(data_javas)
-            await saveServicioBulk(data_javas)
+            await saveServicioBulk(data_javas);
         }
-        
+
         setDetalleDefault();
         goto(pre + "/servicios");
     }

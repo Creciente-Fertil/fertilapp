@@ -1,6 +1,9 @@
 import { getUser } from "$lib/userstorage/usersotrage"
 import { handleAuthenticatedRequest } from "../errores/erroresback"
-const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
+let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
+let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
+let bd_local = import.meta.env.VITE_LOCAL_BD=="si";
+let RUTA_JAVA =bd_local? ruta_local_java:ruta_java;
 const RUTA_RODEOS = "herds"
 function processHerd(herd) {
     let data_rodeo = {
@@ -33,6 +36,8 @@ function processHerds(data, cabid = null) {
     return data_rodeos
 }
 export async function getAll(cabid = null) {
+
+    
     let ruta = `${RUTA_JAVA}${RUTA_RODEOS}/all`
     let url = new URL(ruta);
     if (cabid) {
@@ -50,7 +55,7 @@ export async function getAll(cabid = null) {
 
     let data_all = await res_all.json()
 
-
+    
     let procesada = processHerds(data_all,cabid)
     procesada = procesada.filter(r => r.active)
     return procesada

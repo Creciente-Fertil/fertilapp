@@ -14,7 +14,10 @@
         pajuela = $bindable(""),
         listapadres = [],
         tiposanimal = [],
-        versionjava = false
+        versionjava = false,
+        
+        malfecha=false,
+        onInput=()=>{}
     } = $props();
     let padresserv = $state("");
     function onelegir(id) {}
@@ -76,8 +79,12 @@
                         focus:border-green-500
                         ${estilos.bgdark2} 
                     `}
+                    onchange={onInput}
                     bind:value={fechainseminacion}
                 />
+                {#if malfecha}
+                <span class="text-sm text-red-500">Debe seleccionar una fecha de inseminación</span>
+                {/if}
             {:else}
                 <span class={`text-lg ${estilos.labelcolor} py-0 my-0 px-1`}
                     >{new Date(fechainseminacion).toLocaleDateString()}</span

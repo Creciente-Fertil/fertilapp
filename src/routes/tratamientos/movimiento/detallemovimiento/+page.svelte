@@ -115,22 +115,39 @@
             selectanimales[i].observacionnuevo = observaciongeneral;
         }
     }
+    function validarMovimiento(){
+        if(selectanimales.length==0){
+            Swal.fire("Error animales","Debe seleccionar animales","error")
+            return false
+        }
+        if(fecha.length==0){
+            Swal.fire("Error fecha","Debe seleccionar una fecha","error")
+            return false
+        }
+        return true
+    }
     async function mover() {
+        let valido = validarMovimiento()
+        if(!valido){
+            return
+        }
         if (versionjava) {
             let errores = false;
 
             let errorestrata = [];
             for (let i = 0; i < selectanimales.length; i++) {
                 let tratamientoanimal = selectanimales[i];
+                
                 let datatratamiento = {
                     fecha: fecha + " 03:00:00",
                     observacion: tratamientoanimal.observacionnuevo,
                     categoria: tratamientoanimal.categoria,
                     animal: tratamientoanimal.id,
-                    tipo: tipotratamientoselect,
+                    tipo: tratamientoanimal.tipotratamiento,
                     active: true,
                     cab: cab.id,
                 };
+
                 try {
                     let res_trata = await saveTrata(datatratamiento);
                 } catch (err) {

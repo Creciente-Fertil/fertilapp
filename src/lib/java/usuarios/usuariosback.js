@@ -1,7 +1,11 @@
 import { processEstablishment, processEstablishments } from "../establecimientos/establecimientosback"
 import { getUser } from "$lib/userstorage/usersotrage"
 import { handleAuthenticatedRequest } from "../errores/erroresback"
-const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
+//const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
+let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
+let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
+let bd_local = import.meta.env.VITE_LOCAL_BD=="si";
+let RUTA_JAVA =bd_local? ruta_local_java:ruta_java
 const RUTA_USERS = "users"
 const RUTA_AUTH = "auth"
 const RUTA_ESTA = "establishments/user/"
@@ -29,10 +33,12 @@ export async function loginJava(email, contra) {
         method: "POST",
         body: JSON.stringify(data), // data can be `string` or {object}!
         headers: {
-            "Content-Type": "application/json"
-        },
+            'Content-Type': 'application/json'
+        }
     })
+
     let data_login = await res_login.json()
+
     return data_login
 }
 
