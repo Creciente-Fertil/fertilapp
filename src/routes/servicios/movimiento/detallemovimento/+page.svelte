@@ -456,6 +456,9 @@
                 let servicio = listaanimales[i];
                 let fathers = servicio.padres.map((p) => ({
                     fatherId: p,
+                    fatherTagNumber:"",
+                    notes:""
+
                 }));
                 let data_java = {
                     animalId: servicio.id,
@@ -486,6 +489,7 @@
                 //await saveServicio(data_java);
             }
             //console.log(data_javas)
+            //console.log(JSON.stringify(data_javas))
             await saveServicioBulk(data_javas);
         }
 

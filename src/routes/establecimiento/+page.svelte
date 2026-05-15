@@ -299,26 +299,25 @@
     }
     async function guardarCabaña() {
         if (versionjava) {
+            let _u = getUser()
+
             const data = {
                 nombre,
                 direccion,
-                user: usuarioid,
-                active: true,
                 contacto,
-                renspa,
-                localidad,
-                provincia,
-                telefono,
-                mail,
-                codigo: "",
+                mail:_u.useremail
             };
+            
+
             textodetalle = nombre;
             try {
                 const record = await saveEstablishment(data);
+
                 // El back hace claim de ownership automatico en `create`
                 // cuando no se pasan userIds: asocia al usuario
                 // autenticado como ADM con permisos sembrados. No hace
                 // falta llamar a setDueñoEstablecimiento aca.
+                // Cuando se crea un establecimiento
 
                 Swal.fire(
                     "Exito guadar",
@@ -333,7 +332,9 @@
                 // Refrescar establishments[] del usertoken para que el
                 // switcher / sidebar reflejen el nuevo establishment
                 // sin re-loguear.
-                const _u = getUser();
+                // Se puede mandasr un evento
+                
+                _u.token = record.token
                 setUser({
                     ..._u,
                     establishments: [...(_u.establishments || []), {

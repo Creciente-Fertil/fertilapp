@@ -29,6 +29,11 @@
   let pre = import.meta.env.VITE_PRE;
   let darker = createDarker();
 
+  //ver java
+  let versionjava = $state(import.meta.env.VITE_JAVA == "si");
+  function toggleJava() {
+    versionjava = !versionjava;
+  }
   let cab = $state(loadStorageEstablecimiento());
   let nombreusuario = $state("");
   let nombreestablecimiento = $state("");
@@ -64,21 +69,15 @@
   function volver() {
     goto(pre + "/establecimientos");
   }
-
-  // Crea el establishment + reclama ownership. Despues actualiza
-  // `usertoken.establishments` para que aparezca en el switcher sin
-  // re-loguear, y vuelve al listado.
-  async function guardar() {
-    if (!nombreest || !direccionest) {
-      Swal.fire("Faltan datos", "Nombre y dirección son obligatorios", "warning");
-      return;
-    }
-    saving = true;
+  async function guardarPB() {}
+  async function guardarJava() {
+    let userdata = getUser()
     try {
       const data = {
         nombre: nombreest,
         direccion: direccionest,
         contacto: contactoest,
+        mail:userdata.useremail,
         active: true,
       };
       const created = await saveEstablishment(data);
@@ -91,6 +90,7 @@
       // Refrescar la lista del switcher: agregamos el nuevo UE con rol
       // ADM (lo asume el back en `addUserToEstablishment` cuando es
       // claim de ownership).
+      //
       const u = getUser();
       const newUe = {
         establishmentId: created.establishmentId,
@@ -117,6 +117,25 @@
       );
     } finally {
       saving = false;
+    }
+  }
+  // Crea el establishment + reclama ownership. Despues actualiza
+  // `usertoken.establishments` para que aparezca en el switcher sin
+  // re-loguear, y vuelve al listado.
+  async function guardar() {
+    if (!nombreest || !direccionest) {
+      Swal.fire(
+        "Faltan datos",
+        "Nombre y dirección son obligatorios",
+        "warning",
+      );
+      return;
+    }
+    saving = true;
+    if (versionjava) {
+      await guardarJava();
+    } else {
+      await guardarPB();
     }
   }
 

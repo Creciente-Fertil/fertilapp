@@ -2,8 +2,8 @@ import { getUser } from "$lib/userstorage/usersotrage"
 import { handleAuthenticatedRequest } from "../errores/erroresback"
 let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
 let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
-let bd_local = import.meta.env.VITE_LOCAL_BD=="si";
-let RUTA_JAVA =bd_local? ruta_local_java:ruta_java
+let bd_local = import.meta.env.VITE_LOCAL_BD == "si";
+let RUTA_JAVA = bd_local ? ruta_local_java : ruta_java
 const RUTA_LOTES = "lots"
 function processLot(lot) {
     let data_lote = {
@@ -19,19 +19,17 @@ function processLots(data, cabid = null) {
     let data_lotes = []
     for (let i = 0; i < data.length; i++) {
         let fila = data[i]
-        if (fila.isActive) {
-            if (cabid) {
-                if (fila.establishmentId == cabid) {
-                    
-                    data_lotes.push(processLot(fila))
-                }
-
-            }
-            else {
-                data_lotes.push(processLot(fila))
-            }
-
-        }
+        data_lotes.push(processLot(fila))
+        //if (fila.isActive) {
+        //    if (cabid) {
+        //        if (fila.establishmentId == cabid) {
+        //            data_lotes.push(processLot(fila))
+        //        }
+        //    }
+        //    else {
+        //        data_lotes.push(processLot(fila))
+        //    }
+        //}
 
     }
     return data_lotes
@@ -55,7 +53,7 @@ export async function getAll(cabid = null) {
     let data_all = await res_all.json()
 
 
-    let procesada = processLots(data_all,cabid)
+    let procesada = processLots(data_all, cabid)
     procesada = procesada.filter(l => l.active)
     return procesada
 }
@@ -78,7 +76,7 @@ function postData(data) {
     let data_lot = {
         name: data.nombre,
 
-        establishmentId:data.cab
+        establishmentId: data.cab
     }
 
     return data_lot

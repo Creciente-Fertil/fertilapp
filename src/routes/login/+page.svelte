@@ -57,7 +57,7 @@
         }
         try {
             let data_login = await loginJava(usuarioname, contra);
-            
+
             if(data_login.status==401){
                 throw new Error("Error de credenciales")
             }
@@ -81,7 +81,7 @@
             let establecimientoid = data_login.establishmentId
                 ? data_login.establishmentId
                 : 0;
-            
+
             if (establecimientoid > 0) {
                 let establecimiento =
                     await getEstablishmentId(establecimientoid);

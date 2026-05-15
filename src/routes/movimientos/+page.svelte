@@ -407,7 +407,7 @@
             selecthashmap,
         };
         proxy.save(movimiento);
-        console.log(movimiento)
+
         goto(pre + "/movimientos/detalle");
     }
     async function mover() {
@@ -771,8 +771,7 @@
         detallemovimiento.categorias = categorias;
         detallemovimiento.seccion = seccionAbierta;
         detallemovimiento.versionjava = versionjava;
-        console.log(detallemovimiento)
-        console.log(fechabaja)
+
         proxyDetalleMovimiento.save(detallemovimiento);
     }
     function loadDetalleMovimiento() {

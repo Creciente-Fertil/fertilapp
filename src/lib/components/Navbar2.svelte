@@ -39,7 +39,7 @@
         loadStorageEstablecimiento,
         saveStorageEstablecimientoDefault,
     } from "$lib/java/establecimientos/establecimientostorage";
-    //Eventos 
+    //Eventos
     let sessionExpiredHandler;
     //tamaño
     let innerWidth = $state(0);
@@ -76,18 +76,32 @@
 
     let rol = "Establecimiento";
     let nombreestablecimiento = $state("");
+    function refreshNavbar() {
+        let user = getUser();
+        let establecimiento = loadStorageEstablecimiento();
 
+        nombreestablecimiento = establecimiento.nombre;
+        if (window.innerWidth <= 600) {
+            // Pantallas pequeñas
+            nombreestablecimiento = nombreestablecimiento.slice(0, 15);
+        }
+        usuarioid = user.id;
+        nombreusuario = user.useremail;
+        cab = establecimiento;
+    }
     //let rol = "cab"
     onDestroy(() => {
         //document.removeEventListener("click", handleClickOutsideMenu);
         //document.removeEventListener("click", handleClickOutsideNoti);
         if (sessionExpiredHandler) {
-      window.removeEventListener('auth:session-expired', sessionExpiredHandler);
-    }
+            window.removeEventListener(
+                "auth:session-expired",
+                sessionExpiredHandler,
+            );
+        }
+        window.removeEventListener("refreshNavbar", refreshNavbar);
     });
-    async function getNotisJava(){
-
-    }
+    async function getNotisJava() {}
     async function getNavData() {
         if (versionjava) {
             let user = getUser();
@@ -98,9 +112,9 @@
                 // Pantallas pequeñas
                 nombreestablecimiento = nombreestablecimiento.slice(0, 15);
             }
-            usuarioid = 1;
+            usuarioid = user.id;
             nombreusuario = user.useremail;
-            cab = establecimiento
+            cab = establecimiento;
             let hab = $enabled;
             if (hab === "no") {
                 goto(pre + "/");
@@ -126,22 +140,19 @@
             await getNotis();
         }
     }
-    function addEvents(){
-        
-        
+
+    function addEvents() {
         sessionExpiredHandler = (event) => {
-            
-            salir()
-            
-        }
-        window.addEventListener('session-expired', sessionExpiredHandler);
-        
+            salir();
+        };
+        window.addEventListener("session-expired", sessionExpiredHandler);
+        window.addEventListener("refreshNavbar", refreshNavbar);
     }
     onMount(async () => {
         //document.addEventListener("click", handleClickOutsideMenu);
         //document.addEventListener("click", handleClickOutsideNoti);
         await getNavData();
-        addEvents()
+        addEvents();
     });
     //menu
     let containerMenu = $state(null); // referencia al div principal

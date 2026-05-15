@@ -6,7 +6,10 @@ import { processTactos } from "../tactos/tactosback"
 import { processNacimientos } from "../nacimientos/nacimientosback"
 import { processServicios } from "../servicios/serviciosback"
 import { processTratamientos } from "../tratamientos/tratamientosback"
-const RUTA_JAVA = import.meta.env.VITE_RUTA_JAVA_SERVER
+let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
+let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
+let bd_local = import.meta.env.VITE_LOCAL_BD=="si";
+let RUTA_JAVA =bd_local? ruta_local_java:ruta_java;
 const RUTA_ANIMALES = "animals"
 function null2string(param) {
     return param ? param : ""

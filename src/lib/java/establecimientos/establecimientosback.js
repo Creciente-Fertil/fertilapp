@@ -113,7 +113,8 @@ function postData(data) {
     let data_est = {
         name: data.nombre,
         address: data.direccion,
-        contactReference: data.contacto
+        contactReference: data.contacto,
+        email: data.mail
     }
     return data_est
 }
@@ -134,6 +135,7 @@ function updateData(data) {
 export async function saveEstablishment(data) {
     let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}`
     let data_est = postData(data)
+
     let res_save = await handleAuthenticatedRequest(ruta, {
         method: "POST",
         body: JSON.stringify(data_est),
@@ -142,8 +144,11 @@ export async function saveEstablishment(data) {
             "Authorization": `Bearer ${getUser().token}`
         },
     })
+
     if (!res_save.ok) {
+
         throw new Error(`saveEstablishment -> ${res_save.status}`)
+
     }
     return await res_save.json()
 }

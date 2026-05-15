@@ -19,18 +19,17 @@ function processHerds(data, cabid = null) {
 
     for (let i = 0; i < data.length; i++) {
         let fila = data[i]
-        if (fila.isActive) {
- 
-            if (cabid) {
-                if (fila.establishmentId == cabid) {
-                    data_rodeos.push(processHerd(fila))
-                }
-            }
-            else {
-                data_rodeos.push(processHerd(fila))
-            }
-
-        }
+        data_rodeos.push(processHerd(fila))
+        //if (fila.isActive) {
+        //    if (cabid) {
+        //        if (fila.establishmentId == cabid) {
+        //            data_rodeos.push(processHerd(fila))
+        //        }
+        //    }
+        //    else {
+        //        data_rodeos.push(processHerd(fila))
+        //    }
+        //}
 
     }
     return data_rodeos
