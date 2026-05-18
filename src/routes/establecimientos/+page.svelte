@@ -16,11 +16,11 @@
     import { switchEstablishment } from "$lib/java/usuarios/usuariosback";
 
     let pre = import.meta.env.VITE_PRE;
-
+    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     // Lista de establishments del usuario (la guarda el login en
     // usertoken.establishments) separada por rol en dos arrays para
     // alimentar las dos tabs.
-    let establecimientos = $state([]);     // ADM → "Tus establecimientos"
+    let establecimientos = $state([]); // ADM → "Tus establecimientos"
     let establecimientoscolab = $state([]); // ENC/OPE → "Asociados"
     // Cab actual (scoped en el JWT). Lo usamos para resaltar cual estoy
     // viendo y decidir si muestro el boton de eliminar.
@@ -85,17 +85,7 @@
     function crearEstablecimiento() {
         goto(pre + "/establecimientos/nuevo");
     }
-
-    async function eliminar(id) {
-        const result = await Swal.fire({
-            title: "Eliminar establecimiento",
-            text: "¿Seguro que deseas eliminar el establecimiento?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Sí",
-            cancelButtonText: "No",
-        });
-        if (!result.value) return;
+    async function eliminarJava(id) {
         try {
             await deleteEstablishment(id);
             // Saco el item del array local. La lista canonica vive en
@@ -117,6 +107,20 @@
                 "No se pudo eliminar el establecimiento",
                 "error",
             );
+        }
+    }
+    async function eliminar(id) {
+        const result = await Swal.fire({
+            title: "Eliminar establecimiento",
+            text: "¿Seguro que deseas eliminar el establecimiento?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí",
+            cancelButtonText: "No",
+        });
+        if (!result.value) return;
+        if (versionjava) {
+            await eliminarJava(id);
         }
     }
 
