@@ -9,22 +9,22 @@
     let pre = import.meta.env.VITE_PRE;
     let {
         pageSize = $bindable(15),
-        
+
         tiposrows = [],
         ordenarTratamientos = (campo, mantener) => {},
         openViewModal = (_p) => {},
         openEditModal = (_p) => {},
         openDelModal = (_p) => {},
-        guardarTipo =()=>{},
+        guardarTipo = () => {},
         clickTodos = () => {},
         clickFila = (id) => {},
         todos = $bindable(false),
         ascendente = false,
         forma = "",
-        isOpenForm =false,
+        isOpenForm = false,
         idtipo = "",
-        nombretipo=$bindable(""),
-        esCelu=false
+        nombretipo = $bindable(""),
+        esCelu = false,
     } = $props();
     let firstRun = true;
     function onChangePageSize() {
@@ -36,10 +36,7 @@
     let paginaAnterior = $derived(paginaActual - 1);
 
     let rows = $derived(
-        tiposrows.slice(
-            paginaAnterior * pageSize,
-            paginaActual * pageSize,
-        ),
+        tiposrows.slice(paginaAnterior * pageSize, paginaActual * pageSize),
     );
 
     let count = $derived(tiposrows.length);
@@ -47,8 +44,11 @@
     let totalPaginas = $derived(Math.ceil(count / pageSize));
     let pyfila = "py-1";
 </script>
-<div class="max-h-[600px] overflow-y-auto custom-scrollbar ">
-    <table class="table table-lg w-full bg-white dark:bg-slate-900 rounded-none">
+
+<div class="max-h-[600px] overflow-y-auto custom-scrollbar">
+    <table
+        class="table table-lg w-full bg-white dark:bg-slate-900 rounded-none"
+    >
         <thead class={`${estilos.tableheader}  sticky top-0 z-5 shadow-sm`}>
             <tr>
                 <th
@@ -69,24 +69,24 @@
             {#each rows as t}
                 <tr>
                     <td class={`text-base mx-1 px-4 ${pyfila}`}>
-                        {`${shorterWord(t.nombre,30)}`}
+                        {`${shorterWord(t.nombre, 30)}`}
                     </td>
                     <td
                         class={`flex items-center justify-center gap-2 px-1 ${pyfila}`}
                     >
-                        
-                        <button onclick={() => openEditModal(t.id)}>
-                            <Pencil size="size-5" />
-                        </button>
-                        <button onclick={() => openDelModal(t.id)}>
-                            <Trash size="size-5" />
-                        </button>
+                        {#if !t.generico}
+                            <button onclick={() => openEditModal(t.id)}>
+                                <Pencil size="size-5" />
+                            </button>
+                            <button onclick={() => openDelModal(t.id)}>
+                                <Trash size="size-5" />
+                            </button>
+                        {/if}
                     </td>
                 </tr>
             {/each}
         </tbody>
     </table>
-
 </div>
 <Paginacion
     rows={tiposrows}

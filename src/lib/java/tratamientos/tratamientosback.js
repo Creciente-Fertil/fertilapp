@@ -66,15 +66,36 @@ export function processTratamientos(data) {
     }
     return data_tratamientos
 }
+export async function getGenericTipos() {
+    let user = getUser();
+    let token = user.token;
+
+    let ruta = `${RUTA_JAVA}${RUTA_TIPO_TRATAMIENTOS}/all?generic=true`
+    let url = new URL(ruta)
+
+    let options = {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    }
+    let res_all = await handleAuthenticatedRequest(url.toString(), options)
+
+    let data_all = await res_all.json()
+
+
+
+    let procesada = processTipos(data_all,1)
+
+    return procesada
+}
 export async function getAllTipos(cabid = null) {
     let user = getUser();
     let token = user.token;
 
-    let ruta = `${RUTA_JAVA}${RUTA_TIPO_TRATAMIENTOS}/all`
+    let ruta = `${RUTA_JAVA}${RUTA_TIPO_TRATAMIENTOS}/establishment/${cabid}`
     let url = new URL(ruta)
-    if (cabid) {
-        url.searchParams.append('establishmentId', cabid);
-    }
+    
     let options = {
         headers: {
             "Content-Type": "application/json",

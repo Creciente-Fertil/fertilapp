@@ -68,6 +68,7 @@ const config = {
 				"/tratamientos/movimiento/detallemovimiento",
 				"/recover",
 				"/recover/token",
+				"/reset-password",
 				"/user/nivel",
 				"/servicios",
 				"/servicios/1",

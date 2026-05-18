@@ -27,6 +27,7 @@
         eliminarTratamiento,
         getAll,
         getAllTipos,
+        getGenericTipos
     } from "$lib/java/tratamientos/tratamientosback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
@@ -254,6 +255,8 @@
             });
         } else {
             records = await getAllTipos(cab.id);
+            const recordsgeneric = await getGenericTipos();
+            records = records.concat(recordsgeneric);
         }
 
         tipotratamientos = records;

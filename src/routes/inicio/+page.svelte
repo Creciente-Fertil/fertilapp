@@ -303,7 +303,8 @@
     async function getTiposTratamientos() {
         if (versionjava) {
             const records = await TratamientoService.getAllTipos(cab.id);
-            tipotratamientos = records;
+            const recordsgeneric = await TratamientoService.getGenericTipos();
+            tipotratamientos = records.concat(recordsgeneric);
         } else {
             const records = await pb
                 .collection("tipotratamientos")

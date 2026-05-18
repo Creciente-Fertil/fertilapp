@@ -11,9 +11,18 @@
     import estilos from "$lib/stores/estilos";
     import { usuario } from "$lib/stores/usuario";
     import { enabled } from "$lib/stores/enabled";
-    import { getUser } from "$lib/userstorage/usersotrage";
-    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
-    import { editUser, getUserId, processUser } from "$lib/java/usuarios/usuariosback";
+    import { getUser, setUserDefault } from "$lib/userstorage/usersotrage";
+    import {
+        loadStorageEstablecimiento,
+        saveStorageEstablecimientoDefault,
+    } from "$lib/java/establecimientos/establecimientostorage";
+    import {
+        changePassword,
+        editUser,
+        eliminarUser,
+        getUserId,
+        processUser,
+    } from "$lib/java/usuarios/usuariosback";
     import Success from "$lib/components/botones/Success.svelte";
     import Danger from "$lib/components/botones/Danger.svelte";
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
@@ -103,10 +112,37 @@
         modalCambioContra.close();
     }
     function openCambioContra() {
-        contra = "";
-        confcontra = "";
-        viejacontra = "";
-        modalCambioContra.showModal();
+        if (versionjava) {
+            let html = `
+            Esta a punto de cambiar la contraseña,
+            <br>
+            Al correo registrado se le enviarán las instrucciones.
+            <br>
+            Ante la duda comunicarse con aplicacionfertil@gmail.com
+        `;
+            Swal.fire({
+                title: "¿Seguro que deseas cambiar la contraseña?",
+                html,
+                showDenyButton: false,
+                showCancelButton: true,
+                showConfirmButton: true,
+                confirmButtonText: "Confirmación",
+                cancelButtonText: `Cancelar`,
+                icon: "warning",
+            }).then(async (result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                    if (versionjava) {
+                        await cambiarContra();
+                    }
+                }
+            });
+        } else {
+            contra = "";
+            confcontra = "";
+            viejacontra = "";
+            modalCambioContra.showModal();
+        }
     }
     function validarBoton() {
         botonhabilitado = true;
@@ -145,27 +181,48 @@
         }
     }
     async function cambiarContra() {
-        const data = {
-            password: contra,
-            passwordConfirm: confcontra,
-            oldPassword: viejacontra,
-        };
+        if (versionjava) {
+            await changePassword();
+            Swal.fire(
+                    "Mail de instrucciones",
+                    "Se envió el mail con las instrucciones",
+                    "success",
+                );
+        } else {
+            const data = {
+                password: contra,
+                passwordConfirm: confcontra,
+                oldPassword: viejacontra,
+            };
 
-        try {
-            const record = await pb.collection("users").update(usuarioid, data);
-            Swal.fire(
-                "Exito cambio de contraseña",
-                "Se pudo cambiar la contraseña",
-                "success",
-            );
-        } catch (err) {
-            console.error(err);
-            Swal.fire(
-                "Error cambio de contraseña",
-                "No se pudo cambiar la contraseña",
-                "error",
-            );
+            try {
+                const record = await pb
+                    .collection("users")
+                    .update(usuarioid, data);
+                Swal.fire(
+                    "Exito cambio de contraseña",
+                    "Se pudo cambiar la contraseña",
+                    "success",
+                );
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error cambio de contraseña",
+                    "No se pudo cambiar la contraseña",
+                    "error",
+                );
+            }
         }
+    }
+    async function eliminarCuentaPB() {
+        let data = { active: false };
+        const record = await pb.collection("users").update(usuarioid, data);
+        pb.authStore.clear();
+    }
+    async function eliminarCuentaJava() {
+        await eliminarUser(usuarioid);
+        setUserDefault();
+        saveStorageEstablecimientoDefault();
     }
     async function eliminarCuenta() {
         let html = `
@@ -187,16 +244,16 @@
         }).then(async (result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isDenied) {
-                Swal.fire("Eliminada!", "", "success");
-                let data = { active: false };
-                const record = await pb
-                    .collection("users")
-                    .update(usuarioid, data);
-                pb.authStore.clear();
+                if (versionjava) {
+                    await eliminarCuentaJava();
+                } else {
+                    await eliminarCuentaPB();
+                }
+
                 usuario.set("");
                 enabled.set("no");
+                Swal.fire("Eliminada!", "", "success");
                 goto(pre + "/");
-            } else if (result.isDenied) {
             }
         });
     }

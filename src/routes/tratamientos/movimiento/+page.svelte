@@ -28,7 +28,7 @@
 
     import AnimalesSeleccionados from "$lib/components/tratamientos/AnimalesSeleccionados.svelte";
     import Success from "$lib/components/botones/Success.svelte";
-    import { getAllTipos } from "$lib/java/tratamientos/tratamientosback";
+    import { getAllTipos,getGenericTipos } from "$lib/java/tratamientos/tratamientosback";
     import { getAll } from "$lib/java/animales/animalesback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     import * as RodeoService from "$lib/java/rodeos/rodeosback";
@@ -377,6 +377,8 @@
     async function getTiposTratamientos() {
         if (versionjava) {
             let records = await getAllTipos(cab.id);
+            const recordsgeneric = await getGenericTipos();
+            records = records.concat(recordsgeneric);
             tipotratamientos = records;
             tipotratamientos.sort((tp1, tp2) =>
                 tp1.nombre.toLocaleLowerCase() > tp2.nombre.toLocaleLowerCase()

@@ -2,7 +2,6 @@
     import InfoAnimal from "../InfoAnimal.svelte";
     import { slide } from "svelte/transition";
     import { shorterWord } from "$lib/stringutil/lib";
-    
 
     import Arrowdownsimple from "$lib/svgs/arrowdownsimple.svelte";
     import estilos from "$lib/stores/estilos";
@@ -14,16 +13,14 @@
     let esCelu = $derived(innerWidth <= 1100);
     let {
         selectanimales = $bindable([]),
-        
+
         abierta = false,
-        
+
         cambiar = () => {},
         quitarAnimal = (id) => {},
         verAnimal = (id) => {},
-        
-        
     } = $props();
-    let minimo = 3
+    let minimo = 3;
     let mostrarfilas = $state(minimo);
     function mostrarmas() {
         mostrarfilas = Math.min(mostrarfilas + minimo, rows.length);
@@ -42,22 +39,22 @@
     function toggleLista() {
         verLista = !verLista;
     }
-    onMount(()=>{
-        verLista = abierta
-    })
+    onMount(() => {
+        verLista = abierta;
+    });
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <div
     class="
     pt-1 md:pt-2 lg:pt-5
-        container mx-auto  px-4 max-w-7xl
-        max-h-[500px] overflow-y-auto custom-scrollbar  
+        container px-1 md:px-4 max-w-7xl
+        md:max-h-[500px] overflow-y-auto custom-scrollbar  
         "
 >
     <div
         class={`
-            rounded-2xl p-1 md:p-3  mb-1
+            rounded-2xl p-2 md:p-3  mb-1
             dark:bg-slate-900 bg-white
             shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
             dark:shadow-none
@@ -71,7 +68,7 @@
                     py-1 
                 `}
             >
-                <div class="flex items-center justify-between gap-4">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <!-- Lado izquierdo: Icono + Título + Badge -->
                     <div class="flex items-center gap-3">
                         <h1
@@ -91,11 +88,11 @@
                             dark:bg-gray-700 dark:text-gray-200
                         `}
                         >
-                            {rows.length} animales
+                            {rows.length}
                         </span>
                     </div>
                     <!-- Lado derecho: Buscador + Botón toggle -->
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-start md:items-center gap-3">
                         <!--Buscador-->
                         <div class="relative">
                             <div
@@ -137,26 +134,20 @@
                 class="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
             >
                 <div class="col-span-3">Caravana</div>
-                
             </div>
 
             <div class="divide-y divide-slate-200 dark:divide-slate-700">
-                
-                    {#each rows as a, i}
-                        <FilaDetalleMovimiento
-                            bind:selectanimales
-
-                            animal={a}
-                            id={a.id}
-                            {quitarAnimal}
-                            {verAnimal}
-                            {cambiar}
-                            
-                            {i}
-                        />
-                    {/each}
-                    
-                
+                {#each rows as a, i}
+                    <FilaDetalleMovimiento
+                        bind:selectanimales
+                        animal={a}
+                        id={a.id}
+                        {quitarAnimal}
+                        {verAnimal}
+                        {cambiar}
+                        {i}
+                    />
+                {/each}
             </div>
         </div>
     </div>

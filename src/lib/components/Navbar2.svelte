@@ -1,4 +1,6 @@
 <script>
+  
+
     import { slide } from "svelte/transition";
     import Oscuro from "./Oscuro.svelte";
     import PocketBase from "pocketbase";
@@ -264,7 +266,9 @@
     function estadisticas() {
         goto(pre + "/animales/estadisticas");
     }
+    
 </script>
+
 
 <svelte:window bind:innerWidth bind:innerHeight />
 <!--Escritorio-->

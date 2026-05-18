@@ -152,7 +152,9 @@ export async function saveEstablishment(data) {
     }
     return await res_save.json()
 }
-export async function addColabEstablishment(data,cabid) {
+//no se si es este
+export async function addEmailColabEstablishment(data,cabid) {
+
     let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${cabid}/collaborators`
     let user = getUser();
     let token = user.token;
@@ -195,8 +197,62 @@ export async function deleteEstablishment(id) {
         },
     })
 }
-export async function getColaboradores(id){
+function processColab(fila){
+    let data = {
+        id:fila.userId,
+        nombre:fila.firstName,
+        apellido:fila.lastName
+    }
+    return data
+}
+function processColaboradores(data){
+    let colabs = []
+    for(let i = 0;i<data.length;i++){
+        let fila = data[i]
+        colabs.push(processColab(fila))
+    }
+    return colabs
+}
+export async function getColaboradores(establishmentId){
 
+
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establishmentId}/collaborators`
+    let user = getUser();
+    let token = user.token;
+    let options = {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    }
+    let res_all = await handleAuthenticatedRequest(ruta, options)
+    
+    let data_all = await res_all.json()
+    let procesada = processColaboradores(data_all)
+    
+    
+    return procesada
+}
+export async function addNewColabEstablecimiento(establecimientoid,useruid){
+    if (!establecimientoid) {
+        throw new Error("addColabEstablecimiento: establecimientoid vacio")
+    }
+
+    if (!useruid) {
+        throw new Error("addColabEstablecimiento: getUser().id vacio")
+    }
+    let user = getUser();
+    let token = user.token;
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/user/${useruid}`
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`setDueñoEstablecimiento -> ${res_save.status}`)
+    }
 }
 export async function setDueñoEstablecimiento(establecimientoid){
     if (!establecimientoid) {

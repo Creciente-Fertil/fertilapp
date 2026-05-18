@@ -21,7 +21,7 @@
     let pre = import.meta.env.VITE_PRE;
     let esdev = import.meta.env.VITE_DEV == "si";
     let go_server = import.meta.env.VITE_RUTA_GO_SERVER;
-    let versionjava = $state(import.meta.env.VITE_JAVA == "si");
+    let versionjava = $state(true);
     let usuarioname = $state("");
     let contra = $state("");
     let showpass = $state(false);

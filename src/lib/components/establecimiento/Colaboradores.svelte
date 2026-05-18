@@ -17,7 +17,7 @@
     import Plus from "$lib/svgs/plus.svelte";
     import Arrowdown from "$lib/svgs/arrowdown.svelte";
     import Userplus from "$lib/svgs/userplus.svelte";
-    import { addColabEstablishment } from "$lib/java/establecimientos/establecimientosback";
+    import { addEmailColabEstablishment } from "$lib/java/establecimientos/establecimientosback";
     import Guardando from "../Guardando.svelte";
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
@@ -31,7 +31,8 @@
         asociado,
         cabid,
         cab,
-        versionjava=false
+        versionjava=false,
+        getColabs=()=>{}
     } = $props();
     let titulo = $state("Colaboradores");
 
@@ -70,10 +71,11 @@
     }
     async function asociarJava(){
         let data = {
-            email:correoasociar
+            email:correoasociar,
+            roleId:2
         }
         try{
-            await addColabEstablishment(data,cab.id)
+            await addEmailColabEstablishment(data,cab.id)
             Swal.fire("Éxito colaborador","Se logró asociar el colaborador","success")
         }
         catch(err){

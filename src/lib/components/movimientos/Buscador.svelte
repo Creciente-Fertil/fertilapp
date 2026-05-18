@@ -8,6 +8,7 @@
     import Sticky from "./Sticky.svelte";
     import Rubber from "$lib/svgs/rubber.svelte";
     import estados from "$lib/stores/estados";
+    import Success from "../botones/Success.svelte";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -114,7 +115,7 @@
                 </svg>
             </div>
             <!-- Derecha: botones -->
-            <div class="flex flex-wrap gap-2">
+            <div class="flex justify-between">
                 <button
                     onclick={clickFilter}
                     class={`
@@ -131,6 +132,14 @@
                     <Filter size="size-4" />
                     Filtros
                 </button>
+                <div
+                    class="md:hidden"
+                >
+                    <Success
+                        onclick={nuevo}
+                        texto="Siguiente"
+                    />
+                </div>
             </div>
         </div>
         {#if isOpenFilter}

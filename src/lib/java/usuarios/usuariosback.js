@@ -1,6 +1,6 @@
 import { processEstablishment, processEstablishments } from "../establecimientos/establecimientosback"
 import { getUser } from "$lib/userstorage/usersotrage"
-import { handleAuthenticatedRequest } from "../errores/erroresback"
+import { handleAuthenticatedRequest, handleLoginRequest } from "../errores/erroresback"
 //const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
 let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
@@ -44,6 +44,7 @@ export async function getMe(token) {
 // {token, userId, establishmentId, establishmentName, role} con un JWT
 // nuevo scoped al establishment solicitado. El caller debe actualizar
 // localStorage (token + cab actual) y refrescar la app.
+// <3
 export async function switchEstablishment(estId) {
     let user = getUser();
     let ruta = `${RUTA_JAVA}${RUTA_AUTH}/switch-establishment/${estId}`
@@ -67,7 +68,7 @@ export async function loginJava(email, contra) {
         password: contra
     }
 
-    let res_login = await fetch(ruta, {
+    let res_login = await handleLoginRequest(ruta, {
         method: "POST",
         body: JSON.stringify(data), // data can be `string` or {object}!
         headers: {
@@ -144,4 +145,75 @@ export async function editUser(data,id) {
     
 
     return data_all
+}
+
+export async function eliminarUser(id) {
+    let ruta = `${RUTA_JAVA}${RUTA_USERS}/${id}`;
+    let user = getUser();
+    let token = user.token;
+    let options = {
+        method:"DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    }
+    await fetch(ruta, options)
+}
+export async function changePassword() {
+    let url = ""
+    url = window.location.origin
+    let ruta = `${RUTA_JAVA}${RUTA_USERS}/password-reset/request`;
+    let user = getUser();
+    let token = user.token;
+    let data = {
+        email:user.useremail,
+        url:url+"/recover"
+    }
+    let options = {
+        method:"POST",
+        body: JSON.stringify(data),
+        headers: {
+            "Content-Type": "application/json"
+            ,"Authorization": `Bearer ${token}`
+        }
+    }
+    await fetch(ruta, options)
+}
+export async function forgotPassword(correo) {
+    let url = ""
+    url = window.location.origin
+    let ruta = `${RUTA_JAVA}${RUTA_USERS}/password-reset/request`;
+    let user = getUser();
+    
+    let data = {
+        email:correo,
+        url:url+"/recover"
+    }
+    let options = {
+        method:"POST",
+        body: JSON.stringify(data),
+        headers: {
+            "Content-Type": "application/json"
+            
+        }
+    }
+    await fetch(ruta, options)
+}
+export async function resetPassword(data) {
+    
+    let ruta = `${RUTA_JAVA}${RUTA_USERS}/password-reset/reset`;
+    let user = getUser();
+    let token = user.token;
+
+    let options = {
+        method:"POST",
+        body: JSON.stringify(data),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }
+    let res = await fetch(ruta, options)
+    let data_body = await res.json()
+    return data_body
 }

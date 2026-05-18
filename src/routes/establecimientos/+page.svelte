@@ -62,6 +62,7 @@
     // localStorage (token + establecimiento) antes de navegar.
     async function switchTo(id) {
         try {
+            //<3
             const data = await switchEstablishment(id);
             const u = getUser();
             setUser({ ...u, token: data.token });

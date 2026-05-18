@@ -32,7 +32,10 @@
         getEstablishmentId,
         saveEstablishment,
         setDueñoEstablecimiento,
+        addNewColabEstablecimiento,
+        addEmailColabEstablishment,
         updateEstablishment,
+        getColaboradores,
     } from "$lib/java/establecimientos/establecimientosback";
     import {
         loadStorageEstablecimiento,
@@ -58,7 +61,7 @@
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     async function toggleJava() {
         versionjava = !versionjava;
-        await getData()
+        await getData();
     }
     let usuarioid = $state("");
     let cab = $state({
@@ -99,7 +102,7 @@
     //validar dato cabaña
     let malnombre = $state(false);
     let botonhabilitado = $state(false);
-    let guardando = $state(false)
+    let guardando = $state(false);
     function validarBotonNuevo() {
         if (nombre.trim().length > 0) {
             botonhabilitado = true;
@@ -201,8 +204,12 @@
             }
         }
     }
+    async function getColabsJava(){
+        colabs = await getColaboradores(cab.id)
+    }
     async function getColabs() {
         if (versionjava) {
+            
             colabs = colaboradores;
         } else {
             const records = await pb.collection("estxcolabs").getFullList({
@@ -214,15 +221,14 @@
         }
     }
     async function guardarColab(data) {
-        if(versionjava){
-            await guardarColabJava(data)
-        }
-        else{
-            await guardarColabPB(data)
+        if (versionjava) {
+            await guardarColabJava(data);
+        } else {
+            await guardarColabPB(data);
         }
     }
     async function guardarColabJava(data) {
-        guardando = true
+        guardando = true;
         let nombredata = data.nombre
             .trim()
             .split(" ")
@@ -246,9 +252,10 @@
             roleId: 1,
         };
         let data_signup = await saveUser(data_user);
-        await setDueñoEstablecimiento(cab.id,data_signup.userId)
-        guardando = false
-
+        await addNewColabEstablecimiento(cab.id,data_signup.userId)
+        await getColabsJava()
+        //await setDueñoEstablecimiento(cab.id, data_signup.userId);
+        guardando = false;
     }
     async function guardarColabPB(data) {
         let listapermisos = getPermisosList(permisos.permisos);
@@ -299,15 +306,14 @@
     }
     async function guardarCabaña() {
         if (versionjava) {
-            let _u = getUser()
+            let _u = getUser();
 
             const data = {
                 nombre,
                 direccion,
                 contacto,
-                mail:_u.useremail
+                mail: _u.useremail,
             };
-            
 
             textodetalle = nombre;
             try {
@@ -325,7 +331,7 @@
                     "success",
                 );
                 saveStorageEstablecimiento({
-                    exist: true ,
+                    exist: true,
                     nombre: record.name,
                     id: record.establishmentId,
                 });
@@ -333,15 +339,18 @@
                 // switcher / sidebar reflejen el nuevo establishment
                 // sin re-loguear.
                 // Se puede mandasr un evento
-                
-                _u.token = record.token
+
+                _u.token = record.token;
                 setUser({
                     ..._u,
-                    establishments: [...(_u.establishments || []), {
-                        establishmentId: record.establishmentId,
-                        establishmentName: record.name,
-                        role: "ADM",
-                    }],
+                    establishments: [
+                        ...(_u.establishments || []),
+                        {
+                            establishmentId: record.establishmentId,
+                            establishmentName: record.name,
+                            role: "ADM",
+                        },
+                    ],
                 });
                 per.setPer("0,1,2,3,4,5", usuarioid);
                 goto(pre + "/");
@@ -510,11 +519,10 @@
             cab = loadStorageEstablecimiento();
             let user = getUser();
             if (cab.exist) {
-                permisos = ""
+                permisos = "";
                 await getCabaña();
 
                 await getColabs();
-                
             }
         } else {
             cab = caber.cab;
@@ -551,7 +559,7 @@
         }
     }
     onMount(async () => {
-        await getData()
+        await getData();
     });
 </script>
 
@@ -868,21 +876,23 @@
                                 />
                             {/if}
                         </div>
-                        <div class="pr-3">
-                            <label for="codigo" class="label">
-                                <span
-                                    class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                        {#if !versionjava}
+                            <div class="pr-3">
+                                <label for="codigo" class="label">
+                                    <span
+                                        class="label-text text-base uppercase font-semibold dark:text-[#24a579] text-[#115642]"
+                                    >
+                                        CÓDIGO TRANSFERENCIA
+                                    </span>
+                                </label>
+                                <label
+                                    for="codigo"
+                                    class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
                                 >
-                                    CÓDIGO TRANSFERENCIA
-                                </span>
-                            </label>
-                            <label
-                                for="codigo"
-                                class={`text-lg ${estilos.labelcolor} py-0 my-0 pl-2`}
-                            >
-                                {codigo}
-                            </label>
-                        </div>
+                                    {codigo}
+                                </label>
+                            </div>
+                        {/if}
                     </div>
                 </div>
                 <div class="mt-8 flex justify-end">
@@ -940,6 +950,7 @@
                     {cab}
                     {versionjava}
                     bind:permisos
+                    getColabs={getColabsJava}
                 />
                 <ListaColabs bind:colabs {versionjava} />
             {/if}
@@ -1016,7 +1027,5 @@
 </Navbar2>
 
 {#if guardando}
-    <Guardando
-        texto="Creando nuevo usuario"
-    />
+    <Guardando texto="Creando nuevo usuario" />
 {/if}

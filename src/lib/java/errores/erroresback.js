@@ -38,3 +38,23 @@ export async function handleTransferRequest(url, options) {
         throw error;
     }
 }
+export async function handleLoginRequest(url, options) {
+    try {
+        const response = await fetch(url, options);
+        
+        if (response.status === 401 ) {
+            
+            
+            throw new Error('credenciales');
+        }
+        if ( response.status === 403) {
+            
+            
+            throw new Error('eliminado');
+        }
+        
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}

@@ -1179,12 +1179,6 @@
                     {togglePropuesta}
                     {irMadres}
                 />
-                <div class="hidden">
-                    <AnimalesSeleccionados
-                        {selecthashmap}
-                        quitarAnimal={clickAnimal}
-                    />
-                </div>
             </div>
             <!--Lado derecho-->
             <div class="md:col-span-2">

@@ -714,6 +714,30 @@
         {#if esdev}
             <span>Version java: {versionjava ? "Si" : "No"}</span>
         {/if}
+        <div class="md:hidden">
+            <a
+                href={`${pre + "/movimientos"}`}
+                class="
+                inline-flex items-center text-sm
+                text-gray-700 hover:text-gray-900 dark:text-gray-400
+                dark:hover:text-gray-200 mb-4"
+            >
+                <svg
+                    class="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                </svg>
+                Volver a nuevo movimientos
+            </a>
+        </div>
         <DetalleMovimientoHeader
             {lotes}
             {rodeos}
@@ -727,6 +751,8 @@
             bind:fechabaja
             {motivo}
             {codigo}
+            mover={moverDetalle}
+            {listaanimales}
         />
         <DetallesAnimalesMovimiento
             bind:selectanimales={listaanimales}

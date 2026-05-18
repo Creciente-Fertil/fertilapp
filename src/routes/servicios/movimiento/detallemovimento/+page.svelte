@@ -454,12 +454,23 @@
 
             for (let i = 0; i < listaanimales.length; i++) {
                 let servicio = listaanimales[i];
-                let fathers = servicio.padres.map((p) => ({
-                    fatherId: p,
-                    fatherTagNumber:"",
-                    notes:""
+                let fathers = [];
+                if (esNatural) {
+                    fathers = servicio.padres.map((p) => ({
+                        fatherId: p,
+                        fatherTagNumber: "",
+                        notes: "",
+                    }));
+                } else {
+                    fathers = [
+                        {
+                            fatherId: servicio.padre,
+                            fatherTagNumber: "",
+                            notes: "",
+                        },
+                    ];
+                }
 
-                }));
                 let data_java = {
                     animalId: servicio.id,
                     establishmentId: cab.id,
@@ -614,6 +625,7 @@
             {fechainseminacion}
             {padre}
             {pajuela}
+            {listaanimales}
         />
 
         <DetalleAnimalesMovimiento
