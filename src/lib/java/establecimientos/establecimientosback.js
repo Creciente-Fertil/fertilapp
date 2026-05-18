@@ -1,10 +1,10 @@
 import { getUser } from "$lib/userstorage/usersotrage"
 import { handleAuthenticatedRequest } from "../errores/erroresback"
-
 let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
 let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
 let bd_local = import.meta.env.VITE_LOCAL_BD=="si";
 let RUTA_JAVA =bd_local? ruta_local_java:ruta_java;
+const RUTA_ESTABLECIMIENTOS = "establishments"
 const RUTA_ESTABLECIMIENTOS = "establishments"
 
 function processColabos(colabs){
@@ -113,8 +113,7 @@ function postData(data) {
     let data_est = {
         name: data.nombre,
         address: data.direccion,
-        contactReference: data.contacto,
-        email: data.mail
+        contactReference: data.contacto
     }
     return data_est
 }
@@ -135,7 +134,6 @@ function updateData(data) {
 export async function saveEstablishment(data) {
     let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}`
     let data_est = postData(data)
-
     let res_save = await handleAuthenticatedRequest(ruta, {
         method: "POST",
         body: JSON.stringify(data_est),
@@ -144,17 +142,12 @@ export async function saveEstablishment(data) {
             "Authorization": `Bearer ${getUser().token}`
         },
     })
-
     if (!res_save.ok) {
-
         throw new Error(`saveEstablishment -> ${res_save.status}`)
-
     }
     return await res_save.json()
 }
-//no se si es este
-export async function addEmailColabEstablishment(data,cabid) {
-
+export async function addColabEstablishment(data,cabid) {
     let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${cabid}/collaborators`
     let user = getUser();
     let token = user.token;
@@ -197,62 +190,8 @@ export async function deleteEstablishment(id) {
         },
     })
 }
-function processColab(fila){
-    let data = {
-        id:fila.userId,
-        nombre:fila.firstName,
-        apellido:fila.lastName
-    }
-    return data
-}
-function processColaboradores(data){
-    let colabs = []
-    for(let i = 0;i<data.length;i++){
-        let fila = data[i]
-        colabs.push(processColab(fila))
-    }
-    return colabs
-}
-export async function getColaboradores(establishmentId){
+export async function getColaboradores(id){
 
-
-    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establishmentId}/collaborators`
-    let user = getUser();
-    let token = user.token;
-    let options = {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        }
-    }
-    let res_all = await handleAuthenticatedRequest(ruta, options)
-    
-    let data_all = await res_all.json()
-    let procesada = processColaboradores(data_all)
-    
-    
-    return procesada
-}
-export async function addNewColabEstablecimiento(establecimientoid,useruid){
-    if (!establecimientoid) {
-        throw new Error("addColabEstablecimiento: establecimientoid vacio")
-    }
-
-    if (!useruid) {
-        throw new Error("addColabEstablecimiento: getUser().id vacio")
-    }
-    let user = getUser();
-    let token = user.token;
-    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/user/${useruid}`
-    let res_save = await handleAuthenticatedRequest(ruta, {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${token}`
-        },
-    })
-    if (!res_save.ok) {
-        throw new Error(`setDueñoEstablecimiento -> ${res_save.status}`)
-    }
 }
 export async function setDueñoEstablecimiento(establecimientoid){
     if (!establecimientoid) {

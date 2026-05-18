@@ -94,6 +94,15 @@
             // actualizados? — no, el switch solo trae el nuevo cab). Si
             // el usuario re-loguea queda limpio.
             establecimientos = establecimientos.filter((e) => e.id !== id);
+            
+            let user_data = getUser()
+            let establishments = user_data.establishments
+            establishments = establishments.filter((e) => e.id !== id);
+            let storage_data = {
+                ...user_data
+            };
+
+            setUser(storage_data);
             totales = establecimientos.map(() => 0);
             Swal.fire(
                 "Éxito",

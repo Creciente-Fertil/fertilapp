@@ -208,7 +208,7 @@ export async function getMe(token) {
             "Authorization": `Bearer ${token}`
         }
     })
-    if (!res.ok) {
+    if (!res.ok) {  
         throw new Error(`getMe -> ${res.status}`)
     }
     return await res.json()
