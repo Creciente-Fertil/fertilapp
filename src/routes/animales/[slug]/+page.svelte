@@ -48,7 +48,6 @@
     } from "$lib/java/animales/animalesback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
-    
 
     //ver java
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
@@ -125,23 +124,44 @@
         tactos = recordtactos;
     }
     async function getMadre(id) {
-        if (id == "") {
-            madre = { id: -1 };
+        
+        if (versionjava) {
+            if (id == "" || id == null) {
+                madre = { id: -1 };
+            } else {
+                let record = await getAnimalId(id);
+                madre = record;
+                nacimientoobj.nombremadre = madre.caravana
+            }
         } else {
-            const record = await pb
-                .collection("animales")
-                .getOne(id, { expand: "lote,rodeo" });
-            madre = record;
+            if (id == "") {
+                madre = { id: -1 };
+            } else {
+                const record = await pb
+                    .collection("animales")
+                    .getOne(id, { expand: "lote,rodeo" });
+                madre = record;
+            }
         }
     }
     async function getPadre(id) {
-        if (id == "") {
-            padre = { id: -1 };
+        if (versionjava) {
+            if (id == "" || id == null) {
+                padre = { id: -1 };
+            } else {
+                let record = await getAnimalId(id);
+                padre = record;
+                nacimientoobj.nombrepadre = padre.caravana
+            }
         } else {
-            const record = await pb
-                .collection("animales")
-                .getOne(id, { expand: "lote,rodeo" });
-            padre = record;
+            if (id == "") {
+                padre = { id: -1 };
+            } else {
+                const record = await pb
+                    .collection("animales")
+                    .getOne(id, { expand: "lote,rodeo" });
+                padre = record;
+            }
         }
     }
     async function darBaja(fechafallecimiento, motivo) {
@@ -299,8 +319,6 @@
                     "success",
                 );
             } catch (err) {
-                
-
                 if (err.message == "transfer") {
                     Swal.fire(
                         "Error transferencia",
@@ -373,19 +391,18 @@
         codigo = "";
         transferModal2.showModal();
     }
-    function onInputTransfer(){
-        if(codigo.trim().length==0){
-            codigovacio=true
-        }
-        else{
-            codigovacio = false
+    function onInputTransfer() {
+        if (codigo.trim().length == 0) {
+            codigovacio = true;
+        } else {
+            codigovacio = false;
         }
     }
     async function transfer() {
-        onInputTransfer()
-        if(codigovacio){
-            Swal.fire("Renspa vacio","Debe escribir un renspa","error")
-            return
+        onInputTransfer();
+        if (codigovacio) {
+            Swal.fire("Renspa vacio", "Debe escribir un renspa", "error");
+            return;
         }
         if (versionjava) {
             Swal.fire({
@@ -535,7 +552,7 @@
         } else {
             if (slug != "") {
                 let recorda = await getAnimalId(slug);
-
+                
                 animal = recorda;
                 caravana = recorda.caravana;
                 color = recorda.raza;
@@ -552,6 +569,7 @@
                 if (recorda.nacimiento != "" && recorda.nacimiento != null) {
                     connacimiento = true;
                     nacimiento = recorda.nacimiento;
+                    
                     nacimientoobj = recorda.expand.nacimiento;
                     await getMadre(recorda.expand.nacimiento.madre);
                     await getPadre(recorda.expand.nacimiento.padre);
@@ -618,7 +636,7 @@
     async function getData() {
         if (versionjava) {
             let _id = $page.params.slug;
-            let user_data = getUser()
+            let user_data = getUser();
             usuarioid = user_data.id;
 
             cab = loadStorageEstablecimiento();
@@ -629,9 +647,7 @@
                 await perfilAnimal(_id);
             }
 
-            
-
-            userpermisos =[];
+            userpermisos = [];
         } else {
             let _id = $page.params.slug;
             let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));

@@ -5,7 +5,7 @@ let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
 let bd_local = import.meta.env.VITE_LOCAL_BD=="si";
 let RUTA_JAVA =bd_local? ruta_local_java:ruta_java;
 const RUTA_ESTABLECIMIENTOS = "establishments"
-const RUTA_ESTABLECIMIENTOS = "establishments"
+
 
 function processColabos(colabs){
     let data_colabs = []
@@ -212,5 +212,42 @@ export async function setDueñoEstablecimiento(establecimientoid){
     })
     if (!res_save.ok) {
         throw new Error(`setDueñoEstablecimiento -> ${res_save.status}`)
+    }
+}
+
+export async function addEmailColabEstablishment(data,cabid) {
+
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${cabid}/collaborators`
+    let user = getUser();
+    let token = user.token;
+    let res_save = await fetch(ruta, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+    })
+}
+
+export async function addNewColabEstablecimiento(establecimientoid,useruid){
+    if (!establecimientoid) {
+        throw new Error("addColabEstablecimiento: establecimientoid vacio")
+    }
+
+    if (!useruid) {
+        throw new Error("addColabEstablecimiento: getUser().id vacio")
+    }
+    let user = getUser();
+    let token = user.token;
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/user/${useruid}`
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`set colaborador -> ${res_save.status}`)
     }
 }

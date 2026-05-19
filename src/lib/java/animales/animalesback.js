@@ -10,6 +10,7 @@ let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
 let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
 let bd_local = import.meta.env.VITE_LOCAL_BD=="si";
 let RUTA_JAVA =bd_local? ruta_local_java:ruta_java;
+//Queso
 const RUTA_ANIMALES = "animals"
 function null2string(param) {
     return param ? param : ""
@@ -70,7 +71,10 @@ function processAnimal(animal) {
             },
             nacimiento: {
                 id: animal.birthId,
-                fecha: animal.birthDate
+                fecha: animal.birthDate,
+                madre:animal.motherId,
+                padre:animal.fatherId,
+                
             }
         }
 

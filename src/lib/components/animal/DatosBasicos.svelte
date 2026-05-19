@@ -659,6 +659,7 @@
                         madre,
                         padre,
                         cab: cab.id,
+                        notes:observacion
                     };
 
                     birth = await saveBirth(data_nacimiento);

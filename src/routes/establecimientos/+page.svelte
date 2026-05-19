@@ -97,7 +97,8 @@
             
             let user_data = getUser()
             let establishments = user_data.establishments
-            establishments = establishments.filter((e) => e.id !== id);
+            establishments = establishments.filter((e) => e.establishmentId !== id);
+            user_data.establishments = establishments
             let storage_data = {
                 ...user_data
             };
