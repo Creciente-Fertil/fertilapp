@@ -23,11 +23,16 @@
         userpermisos = $bindable([]),
         cab = { id: "" },
         versionjava = false,
+        //nuevo peso
+        openNewModal=()=>{},
+        //Detalle
+        pesajes = [],
+        openDetalle=(id)=>{}
     } = $props();
 
     let id = $state("");
     //Pesajes
-    let pesajes = $state([]);
+    //let pesajes = $state([]);
     let fecha = $state("");
     let pesonuevo = $state("");
     let xs = $state([]);
@@ -50,11 +55,11 @@
     let canvas;
     let chart;
     async function guardarPesaje() {
-        if (!userpermisos[4]) {
-            nuevoPesaje.close();
-            Swal.fire("Error permisos", getPermisosMessage(4), "error");
-            return;
-        }
+        //if (!userpermisos[4]) {
+        //    nuevoPesaje.close();
+        //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+        //    return;
+        //}
         let data = {
             fecha: fecha + " 03:00:00",
             animal: id,
@@ -107,7 +112,9 @@
     }
     async function getPesajes() {
         if (versionjava) {
+            
             pesajes = await getAllAnimal(id, cab.id);
+            
         } else {
             pesajes = await pb.collection("pesaje").getFullList({
                 filter: `animal='${id}'`,
@@ -149,24 +156,22 @@
         }
     }
 
-    function openNewModal() {
-        malfecha = false;
-        malpeso = false;
-        botonhabilitado = false;
-        pesonuevo = "";
-        fecha = "";
-        nuevoPesaje.showModal();
-    }
-    function openDetalle(id) {
-        idpesaje = id;
-        let pesaje = pesajes.filter((p) => p.id == idpesaje)[0];
-
-        fechaedit = pesaje.fecha.split(" ")[0];
-        pesoanterioredit = pesaje.pesoanterior;
-        pesonuevoedit = pesaje.pesonuevo;
-
-        detallePesaje.showModal();
-    }
+    //function openNewModal() {
+    //    malfecha = false;
+    //    malpeso = false;
+    //    botonhabilitado = false;
+    //    pesonuevo = "";
+    //    fecha = "";
+    //    nuevoPesaje2.showModal();
+    //}
+    //function openDetalle(id) {
+    //    idpesaje = id;
+    //    let pesaje = pesajes.filter((p) => p.id == idpesaje)[0];
+    //    fechaedit = pesaje.fecha.split(" ")[0];
+    //    pesoanterioredit = pesaje.pesoanterior;
+    //    pesonuevoedit = pesaje.pesonuevo;
+    //    detallePesaje.showModal();
+    //}
     async function eliminar() {
         try {
             await pb.collection("pesaje").delete(idpesaje);
@@ -260,7 +265,7 @@
 </div>
 
 <dialog
-    id="nuevoPesaje"
+    id="nuevoPesaje2"
     class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"
 >
     <div

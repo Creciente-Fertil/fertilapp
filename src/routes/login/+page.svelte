@@ -20,7 +20,10 @@
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
     let esdev = import.meta.env.VITE_DEV == "si";
-    let go_server = import.meta.env.VITE_RUTA_GO_SERVER;
+    let go_local = import.meta.env.VITE_LOCAL_GO=="si";
+    let go_ruta_local = import.meta.env.VITE_RUTA_LOCAL_GO_SERVER;
+    let go_ruta = import.meta.env.VITE_RUTA_GO_SERVER;
+    let go_server = $state(go_local?go_ruta_local:go_ruta);
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     let usuarioname = $state("");
     let contra = $state("");

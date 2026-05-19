@@ -499,8 +499,7 @@
 
                 //await saveServicio(data_java);
             }
-            //console.log(data_javas)
-            //console.log(JSON.stringify(data_javas))
+
             await saveServicioBulk(data_javas);
         }
 

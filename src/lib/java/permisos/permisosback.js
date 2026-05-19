@@ -44,6 +44,7 @@ export async function listColaboradores(estId) {
 let _catalogCache = null
 export async function loadCatalog() {
     if (_catalogCache) return _catalogCache
+    //let _catalogCache = null
     const url = `${RUTA_JAVA}permissions`
     const res = await handleAuthenticatedRequest(url, { headers: authHeaders() })
     _catalogCache = await jsonOrThrow(res, "loadCatalog")

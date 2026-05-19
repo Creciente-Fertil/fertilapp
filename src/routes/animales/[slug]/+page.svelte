@@ -48,6 +48,7 @@
     } from "$lib/java/animales/animalesback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import { isEmpty } from "$lib/stringutil/lib";
 
     //ver java
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
@@ -101,6 +102,79 @@
     let tactos = $state([]);
     let prenada = $state(0);
     let modohistoria = $state(false);
+    //pesajes
+    let pesajes = $state([])
+    //nuevo
+    let fecha = $state("");
+    let pesoanterior = $state("");
+    let pesonuevo = $state("")
+    let malfecha = $state(false);
+    let malpeso = $state(false);
+    let botonhabilitado = $state(false);
+    function validarBoton() {
+        botonhabilitado = true;
+        if (isEmpty(pesonuevo)) {
+            botonhabilitado = false;
+        }
+        if (isEmpty(fecha)) {
+            botonhabilitado = false;
+        }
+    }
+    function onchange(campo) {
+        validarBoton();
+        if (campo == "FECHA") {
+            if (isEmpty(fecha)) {
+                malfecha = true;
+            } else {
+                malfecha = false;
+            }
+        }
+        if (campo == "PESO") {
+            if (isEmpty(pesonuevo)) {
+                malpeso = true;
+            } else {
+                pesonuevo = Math.max(0, pesonuevo);
+                malpeso = false;
+            }
+        }
+    }
+    async function guardarPesaje() {
+        if(versionjava){
+
+        }
+        else{
+
+        }
+    }
+    function openNewModal() {
+        malfecha = false;
+        malpeso = false;
+        botonhabilitado = false;
+        pesonuevo = "";
+        fecha = "";
+        
+        nuevoPesajePerfilAnimal.showModal();
+    }
+    //detalle
+    let fechaedit = $state("");
+    let pesonuevoedit = $state("");
+    let pesoanterioredit = $state("");
+    let idpesaje = $state("");
+    function openDetalle(id) {
+        idpesaje = id;
+        
+        detallePesajePerfilAnimal.showModal();
+        return
+        let pesaje = pesajes.filter((p) => p.id == idpesaje)[0];
+
+        fechaedit = pesaje.fecha.split(" ")[0];
+        pesoanterioredit = pesaje.pesoanterior;
+        pesonuevoedit = pesaje.pesonuevo;
+
+        detallePesajePerfilAnimal.showModal();
+    }
+    //pesajes chart
+
     //Geneologia
     const genealogiaStorage = createStorageProxy("genealogia_arbol", {
         progenitores: [],
@@ -124,14 +198,13 @@
         tactos = recordtactos;
     }
     async function getMadre(id) {
-        
         if (versionjava) {
             if (id == "" || id == null) {
                 madre = { id: -1 };
             } else {
                 let record = await getAnimalId(id);
                 madre = record;
-                nacimientoobj.nombremadre = madre.caravana
+                nacimientoobj.nombremadre = madre.caravana;
             }
         } else {
             if (id == "") {
@@ -151,7 +224,7 @@
             } else {
                 let record = await getAnimalId(id);
                 padre = record;
-                nacimientoobj.nombrepadre = padre.caravana
+                nacimientoobj.nombrepadre = padre.caravana;
             }
         } else {
             if (id == "") {
@@ -552,7 +625,7 @@
         } else {
             if (slug != "") {
                 let recorda = await getAnimalId(slug);
-                
+
                 animal = recorda;
                 caravana = recorda.caravana;
                 color = recorda.raza;
@@ -569,7 +642,7 @@
                 if (recorda.nacimiento != "" && recorda.nacimiento != null) {
                     connacimiento = true;
                     nacimiento = recorda.nacimiento;
-                    
+
                     nacimientoobj = recorda.expand.nacimiento;
                     await getMadre(recorda.expand.nacimiento.madre);
                     await getPadre(recorda.expand.nacimiento.padre);
@@ -758,6 +831,9 @@
                         bind:userpermisos
                         {versionjava}
                         {cab}
+                        {openNewModal}
+                        {pesajes}
+                        {openDetalle}
                     ></Pesajes>
                 </CardAnimal>
             {:else if tab == "tratamientos"}
@@ -954,6 +1030,191 @@
 
                 <button class="btn btn-error text-white">Cerrar</button>
             </form>
+        </div>
+    </div>
+</dialog>
+<!--Pesajes-->
+<dialog
+    id="nuevoPesajePerfilAnimal"
+    class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"
+>
+    <div
+        class="
+            modal-box w-11/12 max-w-10xl
+            bg-gradient-to-br from-white to-gray-100
+            dark:from-gray-900 dark:to-gray-800
+        "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-lg font-bold">Nuevo pesaje - {caravana}</h3>
+        <div class="form-control">
+            <label for="fecha" class="label">
+                <span class="label-text text-base">Fecha </span>
+            </label>
+            <label class="input-group">
+                <input
+                    id="fecha"
+                    type="date"
+                    class={`
+                        input input-bordered 
+                        w-full
+                        border border-gray-300 rounded-md
+                        focus:outline-none focus:ring-2 
+                        focus:ring-green-500 
+                        focus:border-green-500
+                        ${estilos.bgdark2}
+                    `}
+                    bind:value={fecha}
+                    onchange={() => onchange("FECHA")}
+                />
+                {#if malfecha}
+                    <div class="label">
+                        <span class="label-text-alt text-red-500"
+                            >Debe seleccionar la fecha del pesaje</span
+                        >
+                    </div>
+                {/if}
+            </label>
+            <div class="label">
+                <span class="label-text">Peso anterior</span>
+            </div>
+            <input
+                id="pesoanterior"
+                type="number"
+                disabled
+                class={`
+                    disabled
+                    input 
+                    input-bordered 
+                    border border-gray-300 rounded-md
+                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                    w-full
+                    ${estilos.bgdark2}
+                `}
+                bind:value={pesoanterior}
+            />
+            <div class="label">
+                <span class="label-text">Peso nuevo</span>
+            </div>
+            <input
+                id="pesonuevo"
+                type="number"
+                class={`
+                    input 
+                    input-bordered 
+                    border border-gray-300 rounded-md
+                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500
+                    w-full
+                    ${estilos.bgdark2}
+                `}
+                bind:value={pesonuevo}
+                oninput={() => onchange("PESO")}
+            />
+            {#if malpeso}
+                <div class="label">
+                    <span class="label-text-alt text-red-500"
+                        >Debe escribir el peso</span
+                    >
+                </div>
+            {/if}
+        </div>
+        <div class="modal-action justify-start">
+            <button
+                class="btn btn-success text-white"
+                disabled={!botonhabilitado}
+                onclick={guardarPesaje}>Guardar</button
+            >
+            <button
+                class="btn btn-error text-white"
+                onclick={() => nuevoPesajePerfilAnimal.close()}>Cancelar</button
+            >
+        </div>
+    </div>
+</dialog>
+<dialog
+    id="detallePesajePerfilAnimal"
+    class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl lg:modal-middle"
+>
+    <div
+        class="
+        modal-box w-11/12 max-w-xl
+        bg-gradient-to-br from-white to-gray-100
+        dark:from-gray-900 dark:to-gray-800
+        "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-lg font-bold">Ver pesaje</h3>
+        <div class="form-control">
+            <div class="grid grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
+                <div class="mb-1 lg:mb-0">
+                    <label for="caravana" class="label">
+                        <span class="label-text text-base">Caravana</span>
+                    </label>
+                    <label
+                        for="caravana"
+                        class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                    >
+                        {caravana}
+                    </label>
+                </div>
+                <div class="mb-1 lg:mb-0">
+                    <label for="caravana" class="label">
+                        <span class="label-text text-base">Fecha</span>
+                    </label>
+                    <label
+                        for="caravana"
+                        class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                    >
+                        {fechaedit}
+                    </label>
+                </div>
+                <div class="mb-1 lg:mb-0">
+                    <label for="pesoanterior" class="label">
+                        <span class="label-text text-base"
+                            >Peso anterior(KG)</span
+                        >
+                    </label>
+                    <label
+                        for="pesoanterior"
+                        class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                    >
+                        {pesoanterioredit}
+                    </label>
+                </div>
+                <div class="mb-1 lg:mb-0">
+                    <label for="pesonuevo" class="label">
+                        <span class="label-text text-base">Peso nuevo(KG)</span>
+                    </label>
+                    <label
+                        for="pesonuevo"
+                        class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-1`}
+                    >
+                        {pesonuevoedit}
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-action justify-start">
+            <button class="btn btn-error text-white" onclick={eliminar}
+                >Eliminar</button
+            >
+            <button
+                class={`
+                    btn 
+                    bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
+                    ${estilos.btnsecondary}`}
+                onclick={() => detallePesaje.close()}>Cerrar</button
+            >
         </div>
     </div>
 </dialog>

@@ -78,7 +78,10 @@
         const has = (g, a) => (perms[g] || []).includes(a);
         const groupHas = (g) => (perms[g] || []).length > 0;
 
-        if (has("establecimiento", "editar") || has("establecimiento", "colabs")) {
+        if (
+            has("establecimiento", "editar") ||
+            has("establecimiento", "colabs")
+        ) {
             lines.push({
                 tone: "yes",
                 text: "Puede modificar la configuración del establecimiento.",
@@ -320,7 +323,8 @@
         saving = true;
         try {
             const newGrouped = perms;
-            const oldGrouped = initialPermsByUserId[userId] || applyPreset("custom");
+            const oldGrouped =
+                initialPermsByUserId[userId] || applyPreset("custom");
             const detected = detectPreset(newGrouped);
             const presetMatch = ROLE_PRESETS.find((r) => r.id === detected);
 
@@ -387,7 +391,9 @@
         userId = $page.params.id;
         loading = true;
         try {
-            const [cat, rls] = await Promise.all([loadCatalog(), getRoles()]);
+            let cat = await loadCatalog();
+            let rls = await getRoles();
+            //const [cat, rls] = await Promise.all([loadCatalog(), getRoles()]);
             catalog = cat;
             roles = rls;
             await loadAllColabs();
@@ -450,625 +456,785 @@
     }
 </script>
 
+<!--Esta muy piola la cabecera por cada pagina, pero hace falta agregarla en todas las paginas-->
 <svelte:head>
     <title>Roles y permisos · Fertilapp</title>
 </svelte:head>
-
 <Navbar2>
-    <div class="max-w-[1400px] mx-auto w-full px-3 sm:px-5">
-        <!-- Page header -->
-        <div class="pt-3 pb-2">
-            <div class="flex items-center gap-2 flex-wrap">
-                <a
-                    href={pre + "/establecimiento"}
-                    class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-100"
-                >
-                    <svg
-                        class="w-3.5 h-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        viewBox="0 0 24 24"
-                    >
-                        <line x1="19" y1="12" x2="5" y2="12" />
-                        <polyline points="12 19 5 12 12 5" />
-                    </svg>
-                    Volver
-                </a>
-                <span class="text-gray-300 dark:text-gray-600">·</span>
-                <h1 class="text-lg font-semibold dark:text-gray-100">
-                    Roles y permisos
-                </h1>
-                {#if cab.nombre}
-                    <span
-                        class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline"
-                    >
-                        {cab.nombre}
-                    </span>
-                {/if}
-                <button
-                    class="ml-auto lg:hidden inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md border border-gray-200 dark:border-gray-700"
-                    onclick={() => (sidebarOpen = !sidebarOpen)}
-                    aria-label="Abrir lista de colaboradores"
-                >
-                    <svg
-                        class="w-3.5 h-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        viewBox="0 0 24 24"
-                    >
-                        <line x1="3" y1="6" x2="21" y2="6" />
-                        <line x1="3" y1="12" x2="21" y2="12" />
-                        <line x1="3" y1="18" x2="21" y2="18" />
-                    </svg>
-                    Colaboradores
-                </button>
-            </div>
-        </div>
-
-        <!-- Two-pane main area -->
-        <div
-            class="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-3 pb-4"
-            style="min-height: 560px;"
-        >
-            <!-- Sidebar: colaborador picker -->
-            <aside
-                class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden
-                {sidebarOpen
-                    ? 'fixed inset-x-3 top-16 bottom-3 z-30 lg:relative lg:inset-auto'
-                    : 'hidden lg:block'}"
-            >
-                <div class="flex flex-col h-full">
-                    <div
-                        class="p-3 border-b border-gray-100 dark:border-gray-800"
-                    >
-                        <div class="relative">
-                            <svg
-                                class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle cx="11" cy="11" r="7" />
-                                <line
-                                    x1="21"
-                                    y1="21"
-                                    x2="16.65"
-                                    y2="16.65"
-                                />
-                            </svg>
-                            <input
-                                type="text"
-                                bind:value={query}
-                                placeholder="Buscar colaborador…"
-                                class="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg
-                                    bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700
-                                    focus:outline-none focus:border-[#168561] focus:ring-1 focus:ring-[#168561]
-                                    placeholder:text-gray-400 dark:text-gray-100"
-                            />
-                        </div>
-                        <div
-                            class="mt-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
-                        >
-                            <span>{filtered.length} colaboradores</span>
-                            <a
-                                href={pre + "/colaboradores/asociar"}
-                                class="text-[#115642] dark:text-[#3f9d77] hover:underline font-medium"
-                            >
-                                + Asociar nuevo
-                            </a>
-                        </div>
-                    </div>
-                    <div class="flex-1 overflow-y-auto scrollbar-thin">
-                        {#if filtered.length === 0}
-                            <div
-                                class="p-8 text-center text-sm text-gray-400"
-                            >
-                                Sin resultados{query ? ` para "${query}"` : ""}
-                            </div>
-                        {:else}
-                            <ul class="py-1">
-                                {#each filtered as u (u.userId)}
-                                    {@const active =
-                                        String(u.userId) === String(userId)}
-                                    <li>
-                                        <button
-                                            onclick={() => selectColab(u.userId)}
-                                            class="w-full text-left flex items-center gap-2.5 px-3 py-2 transition
-                                                {active
-                                                ? 'bg-[#eef7f3] dark:bg-[#168561]/15 border-l-2 border-[#168561]'
-                                                : 'hover:bg-gray-50 dark:hover:bg-gray-800/60 border-l-2 border-transparent'}"
-                                        >
-                                            <div
-                                                class="relative flex-shrink-0 rounded-full flex items-center justify-center font-semibold text-white"
-                                                style="width:32px;height:32px;background-color:{u.color};font-size:12px;{active
-                                                    ? 'box-shadow:0 0 0 2px #168561, 0 0 0 4px #fff;'
-                                                    : ''}"
-                                            >
-                                                {initials(u)}
-                                            </div>
-                                            <div class="min-w-0 flex-1">
-                                                <div
-                                                    class="text-sm font-medium truncate dark:text-gray-100"
-                                                >
-                                                    {u.firstName}
-                                                    {u.lastName}
-                                                </div>
-                                                <div
-                                                    class="text-[11px] text-gray-400 truncate"
-                                                >
-                                                    {u.email || ""}
-                                                </div>
-                                            </div>
-                                        </button>
-                                    </li>
-                                {/each}
-                            </ul>
-                        {/if}
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Main pane: editor -->
-            <main
-                class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden flex flex-col"
-            >
-                {#if loading}
-                    <div
-                        class="flex-1 flex items-center justify-center text-sm text-gray-500"
-                    >
-                        Cargando…
-                    </div>
-                {:else if unauthorized}
-                    <div
-                        class="flex-1 flex flex-col items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-300 px-6 text-center"
+    <div class="container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4">
+        <div class="max-w-[1400px] mx-auto w-full px-3 sm:px-5">
+            <!-- Page header -->
+            <div class="pt-3 pb-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <a
+                        href={pre + "/establecimiento"}
+                        class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-100"
                     >
                         <svg
-                            class="w-10 h-10 text-amber-500"
+                            class="w-3.5 h-3.5"
                             fill="none"
                             stroke="currentColor"
-                            stroke-width="1.8"
+                            stroke-width="2"
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             viewBox="0 0 24 24"
                         >
-                            <rect x="4" y="11" width="16" height="10" rx="2" />
-                            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                            <line x1="19" y1="12" x2="5" y2="12" />
+                            <polyline points="12 19 5 12 12 5" />
                         </svg>
-                        <h3 class="font-semibold text-base dark:text-gray-100">
-                            No tenés permiso para gestionar permisos en este
-                            establecimiento.
-                        </h3>
-                        <p class="max-w-sm">
-                            Solo los administradores pueden ver y editar los
-                            permisos de los colaboradores. Pedile a un
-                            administrador del establecimiento que te otorgue
-                            los permisos correspondientes.
-                        </p>
-                    </div>
-                {:else if !user}
-                    <div
-                        class="flex-1 flex items-center justify-center text-sm text-gray-500"
-                    >
-                        Colaborador no encontrado.
-                    </div>
-                {:else}
-                    <!-- User header -->
-                    <div
-                        class="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3"
-                    >
-                        <div
-                            class="relative flex-shrink-0 rounded-full flex items-center justify-center font-semibold text-white"
-                            style="width:36px;height:36px;background-color:{user.color};font-size:14px;"
+                        Volver
+                    </a>
+                    <span class="text-gray-300 dark:text-gray-600">·</span>
+                    <h1 class="text-lg font-semibold dark:text-gray-100">
+                        Roles y permisos
+                    </h1>
+                    {#if cab.nombre}
+                        <span
+                            class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline"
                         >
-                            {initials(user)}
-                        </div>
-                        <div class="min-w-0 flex-1">
-                            <div
-                                class="flex items-center gap-2 flex-wrap"
-                            >
-                                <h2
-                                    class="text-base font-semibold truncate dark:text-gray-100"
+                            {cab.nombre}
+                        </span>
+                    {/if}
+                    <button
+                        class="ml-auto lg:hidden inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md border border-gray-200 dark:border-gray-700"
+                        onclick={() => (sidebarOpen = !sidebarOpen)}
+                        aria-label="Abrir lista de colaboradores"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            viewBox="0 0 24 24"
+                        >
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                        Colaboradores
+                    </button>
+                </div>
+            </div>
+
+            <!-- Two-pane main area -->
+            <div
+                class="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-3 pb-4"
+                style="min-height: 560px;"
+            >
+                <!-- Sidebar: colaborador picker -->
+                <aside
+                    class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden
+                {sidebarOpen
+                        ? 'fixed inset-x-3 top-16 bottom-3 z-30 lg:relative lg:inset-auto'
+                        : 'hidden lg:block'}"
+                >
+                    <div class="flex flex-col h-full">
+                        <div
+                            class="p-3 border-b border-gray-100 dark:border-gray-800"
+                        >
+                            <div class="relative">
+                                <svg
+                                    class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    viewBox="0 0 24 24"
                                 >
-                                    {user.lastName}, {user.firstName}
-                                </h2>
-                                <span
-                                    class="text-xs text-gray-400 truncate hidden sm:inline"
-                                >
-                                    {#if user.email}· {user.email}{/if}
-                                </span>
+                                    <circle cx="11" cy="11" r="7" />
+                                    <line
+                                        x1="21"
+                                        y1="21"
+                                        x2="16.65"
+                                        y2="16.65"
+                                    />
+                                </svg>
+                                <input
+                                    type="text"
+                                    bind:value={query}
+                                    placeholder="Buscar colaborador…"
+                                    class="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg
+                                    bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700
+                                    focus:outline-none focus:border-[#168561] focus:ring-1 focus:ring-[#168561]
+                                    placeholder:text-gray-400 dark:text-gray-100"
+                                />
                             </div>
-                            {#if user.email}
-                                <div
-                                    class="text-xs text-gray-500 dark:text-gray-400 sm:hidden truncate"
+                            <div
+                                class="hidden mt-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
+                            >
+                                <span>{filtered.length} colaboradores</span>
+                                <a
+                                    href={pre + "/colaboradores/asociar"}
+                                    class="text-[#115642] dark:text-[#3f9d77] hover:underline font-medium"
                                 >
-                                    {user.email}
+                                    + Asociar nuevo
+                                </a>
+                            </div>
+                        </div>
+                        <div class="flex-1 overflow-y-auto scrollbar-thin">
+                            {#if filtered.length === 0}
+                                <div
+                                    class="p-8 text-center text-sm text-gray-400"
+                                >
+                                    Sin resultados{query
+                                        ? ` para "${query}"`
+                                        : ""}
                                 </div>
+                            {:else}
+                                <ul class="py-1">
+                                    {#each filtered as u (u.userId)}
+                                        {@const active =
+                                            String(u.userId) === String(userId)}
+                                        <li>
+                                            <button
+                                                onclick={() =>
+                                                    selectColab(u.userId)}
+                                                class="w-full text-left flex items-center gap-2.5 px-3 py-2 transition
+                                                {active
+                                                    ? 'bg-[#eef7f3] dark:bg-[#168561]/15 border-l-2 border-[#168561]'
+                                                    : 'hover:bg-gray-50 dark:hover:bg-gray-800/60 border-l-2 border-transparent'}"
+                                            >
+                                                <div
+                                                    class="relative flex-shrink-0 rounded-full flex items-center justify-center font-semibold text-white"
+                                                    style="width:32px;height:32px;background-color:{u.color};font-size:12px;{active
+                                                        ? 'box-shadow:0 0 0 2px #168561, 0 0 0 4px #fff;'
+                                                        : ''}"
+                                                >
+                                                    {initials(u)}
+                                                </div>
+                                                <div class="min-w-0 flex-1">
+                                                    <div
+                                                        class="text-sm font-medium truncate dark:text-gray-100"
+                                                    >
+                                                        {u.firstName}
+                                                        {u.lastName}
+                                                    </div>
+                                                    <div
+                                                        class="text-[11px] text-gray-400 truncate"
+                                                    >
+                                                        {u.email || ""}
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </li>
+                                    {/each}
+                                </ul>
                             {/if}
                         </div>
                     </div>
+                </aside>
 
-                    <!-- Self-edit banner: nadie modifica sus propios permisos -->
-                    {#if isSelf}
+                <!-- Main pane: editor -->
+                <main
+                    class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden flex flex-col"
+                >
+                    {#if loading}
                         <div
-                            class="px-4 py-1.5 bg-blue-50 dark:bg-blue-500/10 border-b border-blue-200 dark:border-blue-500/30 text-xs text-blue-800 dark:text-blue-200 flex items-center gap-2"
+                            class="flex-1 flex items-center justify-center text-sm text-gray-500"
                         >
-                            <svg
-                                class="w-3.5 h-3.5 flex-shrink-0"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle cx="12" cy="12" r="9" />
-                                <line x1="12" y1="11" x2="12" y2="17" />
-                                <circle cx="12" cy="8" r=".6" fill="currentColor" />
-                            </svg>
-                            No podés modificar tus propios permisos. Pedile a
-                            otro administrador del establecimiento que los
-                            ajuste.
+                            Cargando…
                         </div>
-                    {/if}
-
-                    <!-- Unsaved banner -->
-                    {#if dirty}
+                    {:else if unauthorized}
                         <div
-                            class="px-4 py-1.5 bg-amber-50 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/30 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2"
+                            class="flex-1 flex flex-col items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-300 px-6 text-center"
                         >
                             <svg
-                                class="w-3.5 h-3.5"
+                                class="w-10 h-10 text-amber-500"
                                 fill="none"
                                 stroke="currentColor"
-                                stroke-width="2"
+                                stroke-width="1.8"
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 viewBox="0 0 24 24"
                             >
-                                <path
-                                    d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"
+                                <rect
+                                    x="4"
+                                    y="11"
+                                    width="16"
+                                    height="10"
+                                    rx="2"
                                 />
-                                <line x1="12" y1="9" x2="12" y2="13" />
-                                <circle cx="12" cy="17" r=".7" fill="currentColor" />
+                                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
                             </svg>
-                            Tenés cambios sin guardar.
-                            <button
-                                onclick={discard}
-                                class="ml-auto underline font-medium hover:no-underline"
+                            <h3
+                                class="font-semibold text-base dark:text-gray-100"
                             >
-                                Descartar
-                            </button>
+                                No tenés permiso para gestionar permisos en este
+                                establecimiento.
+                            </h3>
+                            <p class="max-w-sm">
+                                Solo los administradores pueden ver y editar los
+                                permisos de los colaboradores. Pedile a un
+                                administrador del establecimiento que te otorgue
+                                los permisos correspondientes.
+                            </p>
                         </div>
-                    {/if}
-
-                    <!-- Body -->
-                    <div class="flex-1 overflow-y-auto scrollbar-thin">
+                    {:else if !user}
                         <div
-                            class="px-4 py-4 space-y-4 max-w-4xl"
+                            class="flex-1 flex items-center justify-center text-sm text-gray-500"
                         >
-                            <!-- Role select -->
+                            Colaborador no encontrado.
+                        </div>
+                    {:else}
+                        <!-- User header -->
+                        <div
+                            class="px-4 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3"
+                        >
                             <div
-                                class="flex items-center gap-3 flex-wrap"
+                                class="relative flex-shrink-0 rounded-full flex items-center justify-center font-semibold text-white"
+                                style="width:36px;height:36px;background-color:{user.color};font-size:14px;"
                             >
-                                <label
-                                    for="role-select"
-                                    class="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                                {initials(user)}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h2
+                                        class="text-base font-semibold truncate dark:text-gray-100"
+                                    >
+                                        {user.lastName}, {user.firstName}
+                                    </h2>
+                                    <span
+                                        class="text-xs text-gray-400 truncate hidden sm:inline"
+                                    >
+                                        {#if user.email}· {user.email}{/if}
+                                    </span>
+                                </div>
+                                {#if user.email}
+                                    <div
+                                        class="text-xs text-gray-500 dark:text-gray-400 sm:hidden truncate"
+                                    >
+                                        {user.email}
+                                    </div>
+                                {/if}
+                            </div>
+                        </div>
+
+                        <!-- Self-edit banner: nadie modifica sus propios permisos -->
+                        {#if isSelf}
+                            <div
+                                class="px-4 py-1.5 bg-blue-50 dark:bg-blue-500/10 border-b border-blue-200 dark:border-blue-500/30 text-xs text-blue-800 dark:text-blue-200 flex items-center gap-2"
+                            >
+                                <svg
+                                    class="w-3.5 h-3.5 flex-shrink-0"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    viewBox="0 0 24 24"
                                 >
-                                    Rol
-                                </label>
-                                <div
-                                    class="relative flex-1 min-w-[220px] max-w-sm"
+                                    <circle cx="12" cy="12" r="9" />
+                                    <line x1="12" y1="11" x2="12" y2="17" />
+                                    <circle
+                                        cx="12"
+                                        cy="8"
+                                        r=".6"
+                                        fill="currentColor"
+                                    />
+                                </svg>
+                                No podés modificar tus propios permisos. Pedile a
+                                otro administrador del establecimiento que los ajuste.
+                            </div>
+                        {/if}
+
+                        <!-- Unsaved banner -->
+                        {#if dirty}
+                            <div
+                                class="px-4 py-1.5 bg-amber-50 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/30 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2"
+                            >
+                                <svg
+                                    class="w-3.5 h-3.5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    viewBox="0 0 24 24"
                                 >
-                                    <select
-                                        id="role-select"
-                                        value={presetId}
-                                        onchange={(e) =>
-                                            setPreset(e.currentTarget.value)}
-                                        class="w-full appearance-none pl-3 pr-9 py-1.5 text-sm rounded-lg
+                                    <path
+                                        d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"
+                                    />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                    <circle
+                                        cx="12"
+                                        cy="17"
+                                        r=".7"
+                                        fill="currentColor"
+                                    />
+                                </svg>
+                                Tenés cambios sin guardar.
+                                <button
+                                    onclick={discard}
+                                    class="ml-auto underline font-medium hover:no-underline"
+                                >
+                                    Descartar
+                                </button>
+                            </div>
+                        {/if}
+
+                        <!-- Body -->
+                        <div class="flex-1 overflow-y-auto scrollbar-thin">
+                            <div class="px-4 py-4 space-y-4 max-w-4xl">
+                                <!-- Role select -->
+                                <div class="flex items-center gap-3 flex-wrap">
+                                    <label
+                                        for="role-select"
+                                        class="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                                    >
+                                        Rol
+                                    </label>
+                                    <div
+                                        class="relative flex-1 min-w-[220px] max-w-sm"
+                                    >
+                                        <select
+                                            id="role-select"
+                                            value={presetId}
+                                            onchange={(e) =>
+                                                setPreset(
+                                                    e.currentTarget.value,
+                                                )}
+                                            class="w-full appearance-none pl-3 pr-9 py-1.5 text-sm rounded-lg
                                             bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700
                                             focus:outline-none focus:border-[#168561] focus:ring-1 focus:ring-[#168561]
                                             font-medium dark:text-gray-100"
-                                    >
-                                        {#each ROLE_PRESETS as r (r.id)}
-                                            <option value={r.id}>{r.name}</option>
-                                        {/each}
-                                        <option value="custom">Personalizado</option>
-                                    </select>
-                                    <svg
-                                        class="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <polyline points="6 9 12 15 18 9" />
-                                    </svg>
-                                </div>
-                                {#if currentPreset()?.summary}
-                                    <p
-                                        class="text-xs text-gray-500 dark:text-gray-400 flex-1 min-w-0 leading-snug"
-                                    >
-                                        {currentPreset().summary}
-                                    </p>
-                                {:else if presetId === "custom"}
-                                    <p
-                                        class="text-xs text-gray-500 dark:text-gray-400 flex-1 min-w-0 leading-snug"
-                                    >
-                                        Permisos personalizados.
-                                    </p>
-                                {/if}
-                            </div>
-
-                            <!-- Permission list -->
-                            <div
-                                class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
-                            >
-                                {#each PERMISSION_GROUPS as group, gi (group.id)}
-                                    {@const status = groupStatus(group)}
-                                    {@const fullyOn = isFullyOn(group)}
-                                    <div
-                                        class={gi > 0
-                                            ? "border-t border-gray-100 dark:border-gray-800"
-                                            : ""}
-                                    >
-                                        <!-- Group header -->
-                                        <div
-                                            class="flex items-center gap-2.5 px-3 py-2 bg-gray-50/50 dark:bg-gray-800/30"
                                         >
-                                            <span
-                                                class="w-3.5 h-3.5 text-[#115642] dark:text-[#3f9d77] flex-shrink-0"
-                                            >
-                                                {#if group.icon === "settings"}
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                                                        <circle cx="12" cy="12" r="3" />
-                                                        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3 1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8 1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
-                                                    </svg>
-                                                {:else if group.icon === "layers"}
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                                                        <path d="m12 2 10 6-10 6L2 8z" />
-                                                        <path d="m2 16 10 6 10-6" />
-                                                        <path d="m2 12 10 6 10-6" />
-                                                    </svg>
-                                                {:else if group.icon === "upload"}
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                                        <polyline points="17 8 12 3 7 8" />
-                                                        <line x1="12" y1="3" x2="12" y2="15" />
-                                                    </svg>
-                                                {:else if group.icon === "arrows"}
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                                                        <path d="M3 7h13l-3-3" />
-                                                        <path d="M21 17H8l3 3" />
-                                                    </svg>
-                                                {:else if group.icon === "calendar"}
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                                                        <rect x="3" y="4" width="18" height="18" rx="2" />
-                                                        <line x1="16" y1="2" x2="16" y2="6" />
-                                                        <line x1="8" y1="2" x2="8" y2="6" />
-                                                        <line x1="3" y1="10" x2="21" y2="10" />
-                                                    </svg>
-                                                {:else if group.icon === "cow"}
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5">
-                                                        <path d="M5 9c0-1.5 1.5-3 3-3 1 0 1.7.4 2.2.9M19 9c0-1.5-1.5-3-3-3-1 0-1.7.4-2.2.9" />
-                                                        <path d="M4 12c0-3 3.5-5 8-5s8 2 8 5c0 4-3.5 7-8 7s-8-3-8-7Z" />
-                                                        <circle cx="9.5" cy="13" r=".7" fill="currentColor" />
-                                                        <circle cx="14.5" cy="13" r=".7" fill="currentColor" />
-                                                        <path d="M10.5 16.5c.5.4 1 .5 1.5.5s1-.1 1.5-.5" />
-                                                    </svg>
-                                                {/if}
-                                            </span>
-                                            <h4
-                                                class="font-semibold text-[13px] truncate dark:text-gray-100"
-                                            >
-                                                {group.title}
-                                            </h4>
-                                            {#if group.required}
-                                                <span
-                                                    class="inline-flex items-center gap-1 text-[10px] font-medium px-1 py-0 rounded bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
+                                            {#each ROLE_PRESETS as r (r.id)}
+                                                <option value={r.id}
+                                                    >{r.name}</option
                                                 >
-                                                    <svg
-                                                        class="w-2.5 h-2.5"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        stroke-width="2.4"
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <rect
-                                                            x="4"
-                                                            y="11"
-                                                            width="16"
-                                                            height="10"
-                                                            rx="2"
-                                                        />
-                                                        <path
-                                                            d="M8 11V7a4 4 0 0 1 8 0v4"
-                                                        />
-                                                    </svg>
-                                                    Requerido
-                                                </span>
-                                            {/if}
-                                            <span
-                                                class="text-[11px] font-medium px-1.5 py-0 rounded-full flex-shrink-0
-                                                {status.tone === 'ok'
-                                                    ? 'bg-[#d6ebe1] text-[#0d4434] dark:bg-[#168561]/20 dark:text-[#74bb9d]'
-                                                    : status.tone === 'partial'
-                                                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
-                                                    : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}"
+                                            {/each}
+                                            <option value="custom"
+                                                >Personalizado</option
                                             >
-                                                {status.label}
-                                            </span>
-                                            <div class="ml-auto">
-                                                <button
-                                                    type="button"
-                                                    role="switch"
-                                                    aria-checked={fullyOn}
-                                                    aria-label="Activar todos los permisos del grupo"
-                                                    onclick={() =>
-                                                        toggleAll(
-                                                            group,
-                                                            !fullyOn,
-                                                        )}
-                                                    class="rp-toggle sm {fullyOn ? 'on' : ''}"
-                                                ></button>
-                                            </div>
-                                        </div>
+                                        </select>
+                                        <svg
+                                            class="w-4 h-4 absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <polyline points="6 9 12 15 18 9" />
+                                        </svg>
+                                    </div>
+                                    <!--Agregar algun truquito para que el summary vaya a la fila de abaj -->
+                                    <br class="md:hidden" />
+                                    {#if currentPreset()?.summary}
+                                        <p
+                                            class="text-xs text-gray-500 dark:text-gray-400 flex-1 min-w-0 leading-snug"
+                                        >
+                                            {currentPreset().summary}
+                                        </p>
+                                    {:else if presetId === "custom"}
+                                        <p
+                                            class="text-xs text-gray-500 dark:text-gray-400 flex-1 min-w-0 leading-snug"
+                                        >
+                                            Permisos personalizados.
+                                        </p>
+                                    {/if}
+                                </div>
 
-                                        <!-- Action rows -->
-                                        {#each group.actions as a (a.id)}
-                                            {@const checked = isChecked(group, a.id)}
-                                            {@const locked = actionLocked(group, a.id)}
-                                            <label
-                                                class="flex items-center justify-between gap-4 pl-9 pr-3 py-1.5 border-t border-gray-100/70 dark:border-gray-800/70
-                                                    {locked
-                                                    ? 'cursor-not-allowed'
-                                                    : 'cursor-pointer hover:bg-gray-50/60 dark:hover:bg-gray-800/40'}"
+                                <!-- Permission list -->
+                                <div
+                                    class="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden"
+                                >
+                                    {#each PERMISSION_GROUPS as group, gi (group.id)}
+                                        {@const status = groupStatus(group)}
+                                        {@const fullyOn = isFullyOn(group)}
+                                        <div
+                                            class={gi > 0
+                                                ? "border-t border-gray-100 dark:border-gray-800"
+                                                : ""}
+                                        >
+                                            <!-- Group header -->
+                                            <div
+                                                class="flex items-center gap-2.5 px-3 py-2 bg-gray-50/50 dark:bg-gray-800/30"
                                             >
                                                 <span
-                                                    class="text-[13px] flex items-center gap-2 min-w-0 dark:text-gray-200"
+                                                    class="w-3.5 h-3.5 text-[#115642] dark:text-[#3f9d77] flex-shrink-0"
                                                 >
-                                                    {#if a.id === "ver"}
+                                                    {#if group.icon === "settings"}
                                                         <svg
-                                                            class="w-3 h-3 text-gray-400 flex-shrink-0"
+                                                            viewBox="0 0 24 24"
                                                             fill="none"
                                                             stroke="currentColor"
                                                             stroke-width="2"
                                                             stroke-linecap="round"
                                                             stroke-linejoin="round"
-                                                            viewBox="0 0 24 24"
+                                                            class="w-3.5 h-3.5"
                                                         >
-                                                            <path
-                                                                d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"
-                                                            />
                                                             <circle
                                                                 cx="12"
                                                                 cy="12"
                                                                 r="3"
                                                             />
+                                                            <path
+                                                                d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3 1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8 1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
+                                                            />
+                                                        </svg>
+                                                    {:else if group.icon === "layers"}
+                                                        <svg
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            class="w-3.5 h-3.5"
+                                                        >
+                                                            <path
+                                                                d="m12 2 10 6-10 6L2 8z"
+                                                            />
+                                                            <path
+                                                                d="m2 16 10 6 10-6"
+                                                            />
+                                                            <path
+                                                                d="m2 12 10 6 10-6"
+                                                            />
+                                                        </svg>
+                                                    {:else if group.icon === "upload"}
+                                                        <svg
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            class="w-3.5 h-3.5"
+                                                        >
+                                                            <path
+                                                                d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                                                            />
+                                                            <polyline
+                                                                points="17 8 12 3 7 8"
+                                                            />
+                                                            <line
+                                                                x1="12"
+                                                                y1="3"
+                                                                x2="12"
+                                                                y2="15"
+                                                            />
+                                                        </svg>
+                                                    {:else if group.icon === "arrows"}
+                                                        <svg
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            class="w-3.5 h-3.5"
+                                                        >
+                                                            <path
+                                                                d="M3 7h13l-3-3"
+                                                            />
+                                                            <path
+                                                                d="M21 17H8l3 3"
+                                                            />
+                                                        </svg>
+                                                    {:else if group.icon === "calendar"}
+                                                        <svg
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            class="w-3.5 h-3.5"
+                                                        >
+                                                            <rect
+                                                                x="3"
+                                                                y="4"
+                                                                width="18"
+                                                                height="18"
+                                                                rx="2"
+                                                            />
+                                                            <line
+                                                                x1="16"
+                                                                y1="2"
+                                                                x2="16"
+                                                                y2="6"
+                                                            />
+                                                            <line
+                                                                x1="8"
+                                                                y1="2"
+                                                                x2="8"
+                                                                y2="6"
+                                                            />
+                                                            <line
+                                                                x1="3"
+                                                                y1="10"
+                                                                x2="21"
+                                                                y2="10"
+                                                            />
+                                                        </svg>
+                                                    {:else if group.icon === "cow"}
+                                                        <svg
+                                                            viewBox="0 0 24 24"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            class="w-3.5 h-3.5"
+                                                        >
+                                                            <path
+                                                                d="M5 9c0-1.5 1.5-3 3-3 1 0 1.7.4 2.2.9M19 9c0-1.5-1.5-3-3-3-1 0-1.7.4-2.2.9"
+                                                            />
+                                                            <path
+                                                                d="M4 12c0-3 3.5-5 8-5s8 2 8 5c0 4-3.5 7-8 7s-8-3-8-7Z"
+                                                            />
+                                                            <circle
+                                                                cx="9.5"
+                                                                cy="13"
+                                                                r=".7"
+                                                                fill="currentColor"
+                                                            />
+                                                            <circle
+                                                                cx="14.5"
+                                                                cy="13"
+                                                                r=".7"
+                                                                fill="currentColor"
+                                                            />
+                                                            <path
+                                                                d="M10.5 16.5c.5.4 1 .5 1.5.5s1-.1 1.5-.5"
+                                                            />
                                                         </svg>
                                                     {/if}
-                                                    <span class="truncate"
-                                                        >{a.label}</span
-                                                    >
                                                 </span>
-                                                <button
-                                                    type="button"
-                                                    role="switch"
-                                                    aria-checked={checked}
-                                                    aria-label={a.label}
-                                                    disabled={locked}
-                                                    onclick={() =>
-                                                        toggleAction(
-                                                            group,
-                                                            a.id,
-                                                        )}
-                                                    class="rp-toggle sm {checked
-                                                        ? 'on'
-                                                        : ''} {locked
-                                                        ? 'disabled'
-                                                        : ''}"
-                                                ></button>
-                                            </label>
-                                        {/each}
-                                    </div>
-                                {/each}
-                            </div>
+                                                <h4
+                                                    class="font-semibold text-[13px] truncate dark:text-gray-100"
+                                                >
+                                                    {group.title}
+                                                </h4>
+                                                {#if group.required}
+                                                    <span
+                                                        class="inline-flex items-center gap-1 text-[10px] font-medium px-1 py-0 rounded bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
+                                                    >
+                                                        <svg
+                                                            class="w-2.5 h-2.5"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            stroke-width="2.4"
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <rect
+                                                                x="4"
+                                                                y="11"
+                                                                width="16"
+                                                                height="10"
+                                                                rx="2"
+                                                            />
+                                                            <path
+                                                                d="M8 11V7a4 4 0 0 1 8 0v4"
+                                                            />
+                                                        </svg>
+                                                        Requerido
+                                                    </span>
+                                                {/if}
+                                                <span
+                                                    class="text-[11px] font-medium px-1.5 py-0 rounded-full flex-shrink-0
+                                                {status.tone === 'ok'
+                                                        ? 'bg-[#d6ebe1] text-[#0d4434] dark:bg-[#168561]/20 dark:text-[#74bb9d]'
+                                                        : status.tone ===
+                                                            'partial'
+                                                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
+                                                          : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}"
+                                                >
+                                                    {status.label}
+                                                </span>
+                                                <div class="ml-auto">
+                                                    <button
+                                                        type="button"
+                                                        role="switch"
+                                                        aria-checked={fullyOn}
+                                                        aria-label="Activar todos los permisos del grupo"
+                                                        onclick={() =>
+                                                            toggleAll(
+                                                                group,
+                                                                !fullyOn,
+                                                            )}
+                                                        class="rp-toggle sm {fullyOn
+                                                            ? 'on'
+                                                            : ''}"
+                                                    ></button>
+                                                </div>
+                                            </div>
 
-                            <!-- Plain-language summary -->
-                            <div
-                                class="rounded-xl border border-[#d6ebe1] dark:border-[#168561]/30 p-4"
-                                style="background: linear-gradient(135deg,#eef7f3,#fff);"
-                            >
-                                <div class="flex items-center gap-2 mb-3">
-                                    <svg
-                                        class="w-4 h-4 text-[#115642] dark:text-[#3f9d77]"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <circle cx="12" cy="12" r="9" />
-                                        <line x1="12" y1="11" x2="12" y2="17" />
-                                        <circle cx="12" cy="8" r=".6" fill="currentColor" />
-                                    </svg>
-                                    <h4 class="font-semibold text-sm dark:text-gray-100">
-                                        Qué puede hacer este colaborador
-                                    </h4>
-                                </div>
-                                <ul class="space-y-2">
-                                    {#each summaryFor(perms) as l, i (i)}
-                                        <li
-                                            class="flex items-start gap-2 text-sm leading-snug"
-                                        >
-                                            <span
-                                                class="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0
-                                                {l.tone === 'yes'
-                                                    ? 'bg-[#168561]'
-                                                    : l.tone === 'warn'
-                                                    ? 'bg-[#A94442]'
-                                                    : l.tone === 'soft'
-                                                    ? 'bg-gray-300'
-                                                    : 'bg-gray-200'}"
-                                            ></span>
-                                            <span
-                                                class={l.tone === "no"
-                                                    ? "text-gray-400 line-through decoration-gray-300"
-                                                    : l.tone === "warn"
-                                                    ? "text-[#A94442] dark:text-[#c25b5e]"
-                                                    : "text-gray-700 dark:text-gray-200"}
-                                            >
-                                                {l.text}
-                                            </span>
-                                        </li>
+                                            <!-- Action rows -->
+                                            {#each group.actions as a (a.id)}
+                                                {@const checked = isChecked(
+                                                    group,
+                                                    a.id,
+                                                )}
+                                                {@const locked = actionLocked(
+                                                    group,
+                                                    a.id,
+                                                )}
+                                                <label
+                                                    class="flex items-center justify-between gap-4 pl-9 pr-3 py-1.5 border-t border-gray-100/70 dark:border-gray-800/70
+                                                    {locked
+                                                        ? 'cursor-not-allowed'
+                                                        : 'cursor-pointer hover:bg-gray-50/60 dark:hover:bg-gray-800/40'}"
+                                                >
+                                                    <span
+                                                        class="text-[13px] flex items-center gap-2 min-w-0 dark:text-gray-200"
+                                                    >
+                                                        {#if a.id === "ver"}
+                                                            <svg
+                                                                class="w-3 h-3 text-gray-400 flex-shrink-0"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                stroke-width="2"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"
+                                                                />
+                                                                <circle
+                                                                    cx="12"
+                                                                    cy="12"
+                                                                    r="3"
+                                                                />
+                                                            </svg>
+                                                        {/if}
+                                                        <span class="truncate"
+                                                            >{a.label}</span
+                                                        >
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        role="switch"
+                                                        aria-checked={checked}
+                                                        aria-label={a.label}
+                                                        disabled={locked}
+                                                        onclick={() =>
+                                                            toggleAction(
+                                                                group,
+                                                                a.id,
+                                                            )}
+                                                        class="rp-toggle sm {checked
+                                                            ? 'on'
+                                                            : ''} {locked
+                                                            ? 'disabled'
+                                                            : ''}"
+                                                    ></button>
+                                                </label>
+                                            {/each}
+                                        </div>
                                     {/each}
-                                </ul>
+                                </div>
+
+                                <!-- Plain-language summary -->
+                                <!--Style del dvi style="background: linear-gradient(135deg,#eef7f3,#fff);"-->
+                                <div
+                                    class="
+                                rounded-xl border border-[#d6ebe1] dark:border-[#168561]/30 p-4
+                                bg-gradient-to-br from-[#eef7f3] to-white dark:from-[#1a2a2a] dark:to-[#0f1a1a]
+                                "
+                                >
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <svg
+                                            class="w-4 h-4 text-[#115642] dark:text-[#3f9d77]"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle cx="12" cy="12" r="9" />
+                                            <line
+                                                x1="12"
+                                                y1="11"
+                                                x2="12"
+                                                y2="17"
+                                            />
+                                            <circle
+                                                cx="12"
+                                                cy="8"
+                                                r=".6"
+                                                fill="currentColor"
+                                            />
+                                        </svg>
+                                        <h4
+                                            class="font-semibold text-sm dark:text-gray-100"
+                                        >
+                                            Qué puede hacer este colaborador
+                                        </h4>
+                                    </div>
+                                    <ul class="space-y-2">
+                                        {#each summaryFor(perms) as l, i (i)}
+                                            <li
+                                                class="flex items-start gap-2 text-sm leading-snug"
+                                            >
+                                                <span
+                                                    class="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0
+                                                {l.tone === 'yes'
+                                                        ? 'bg-[#168561]'
+                                                        : l.tone === 'warn'
+                                                          ? 'bg-[#A94442]'
+                                                          : l.tone === 'soft'
+                                                            ? 'bg-gray-300'
+                                                            : 'bg-gray-200'}"
+                                                ></span>
+                                                <span
+                                                    class={l.tone === "no"
+                                                        ? "text-gray-400 line-through decoration-gray-300"
+                                                        : l.tone === "warn"
+                                                          ? "text-[#A94442] dark:text-[#c25b5e]"
+                                                          : "text-gray-700 dark:text-gray-200"}
+                                                >
+                                                    {l.text}
+                                                </span>
+                                            </li>
+                                        {/each}
+                                    </ul>
+                                </div>
+
+                                <div class="h-2"></div>
                             </div>
-
-                            <div class="h-2"></div>
                         </div>
-                    </div>
 
-                    <!-- Sticky action bar -->
-                    <div
-                        class="border-t border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur px-4 py-2 flex items-center gap-2"
-                    >
-                        <div class="ml-auto flex items-center gap-2">
-                            {#if dirty}
-                                <span
-                                    class="text-xs text-amber-600 dark:text-amber-400 font-medium hidden sm:inline"
-                                >
-                                    Sin guardar
-                                </span>
-                            {:else}
-                                <span
-                                    class="text-xs text-gray-400 hidden sm:inline"
-                                >
-                                    Todo guardado
-                                </span>
-                            {/if}
-                            <Success
-                                texto={saving ? "Guardando…" : "Guardar permisos"}
-                                disabled={!dirty || saving || isSelf}
-                                onclick={guardarPermiso}
-                            />
+                        <!-- Sticky action bar -->
+                        <div
+                            class="border-t border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur px-4 py-2 flex items-center gap-2"
+                        >
+                            <div class="ml-auto flex items-center gap-2">
+                                {#if dirty}
+                                    <span
+                                        class="text-xs text-amber-600 dark:text-amber-400 font-medium hidden sm:inline"
+                                    >
+                                        Sin guardar
+                                    </span>
+                                {:else}
+                                    <span
+                                        class="text-xs text-gray-400 hidden sm:inline"
+                                    >
+                                        Todo guardado
+                                    </span>
+                                {/if}
+                                <Success
+                                    texto={saving
+                                        ? "Guardando…"
+                                        : "Guardar permisos"}
+                                    disabled={!dirty || saving || isSelf}
+                                    onclick={guardarPermiso}
+                                />
+                            </div>
                         </div>
-                    </div>
-                {/if}
-            </main>
+                    {/if}
+                </main>
+            </div>
         </div>
     </div>
 </Navbar2>

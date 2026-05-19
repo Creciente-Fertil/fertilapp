@@ -210,7 +210,9 @@
     async function getColabs() {
         if (versionjava) {
             
-            colabs = colaboradores;
+            //colabs = colaboradores;
+            
+            await getColabsJava()
         } else {
             const records = await pb.collection("estxcolabs").getFullList({
                 expand: "colab",

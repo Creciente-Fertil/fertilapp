@@ -134,6 +134,9 @@ function updateData(data) {
 export async function saveEstablishment(data) {
     let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}`
     let data_est = postData(data)
+    let user = getUser();
+    let token = user.token;
+    data_est.email = user.useremail
     let res_save = await handleAuthenticatedRequest(ruta, {
         method: "POST",
         body: JSON.stringify(data_est),
@@ -190,8 +193,40 @@ export async function deleteEstablishment(id) {
         },
     })
 }
-export async function getColaboradores(id){
+function processColaborador(fila){
+    let data = {
+        id:fila.userId,
+        nombre:fila.firstName,
+        apellido:fila.lastName
+    }
+    return data
+}
+function processColaboradores(data){
+    let filas = []
+    for(let i = 0;i<data.length;i++){
+        filas.push(processColaborador(data[i]))
+    }
+    return filas
 
+}
+export async function getColaboradores(id){
+    let user = getUser();
+    let token = user.token;
+    
+
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${id}/collaborators`
+    let options = {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    }
+    let res_all = await handleAuthenticatedRequest(ruta, options)
+    let data_all = await res_all.json()
+    
+    let procesada = processColaboradores(data_all)
+    
+    return procesada
 }
 export async function setDueñoEstablecimiento(establecimientoid){
     if (!establecimientoid) {
