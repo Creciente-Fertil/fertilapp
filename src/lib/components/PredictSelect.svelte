@@ -19,16 +19,18 @@
         campo = "nombre",
         etiquetaDefault = true,
         flotante = true,
-        margintop="mt-1",
+        margintop = "mt-1",
         children,
     } = $props();
 
     let containerPredict = $state(null);
 
     let listarow = $derived(
-        lista.filter((e) =>
-            e[campo].toLowerCase().includes(cadena.toLowerCase()),
-        ),
+        !cadena || cadena.trim() === ""
+            ? lista
+            : lista.filter((e) =>
+                  e[campo].toLowerCase().includes(cadena.toLowerCase()),
+              ),
     );
     let isOpen = $state(false);
     let inputWidth = $state("0px");
@@ -73,7 +75,7 @@
     onMount(() => {
         document.addEventListener("click", handleClickOutside);
 
-        if (valor.length != 0) {
+        if (valor && valor.length != 0) {
             let idx_valor = listarow.findIndex((v) => v.id == valor);
             if (idx_valor != -1) {
                 let fila = listarow[idx_valor];
@@ -247,7 +249,7 @@
                 {/if}
             </div>
         {/if}
-        {#if valor.length != 0 && nombre.length > 0}
+        {#if valor && valor.length != 0 && nombre.length > 0}
             <span class="text-sm mt-1">Elegiste a {nombre}</span>
         {/if}
     {:else}

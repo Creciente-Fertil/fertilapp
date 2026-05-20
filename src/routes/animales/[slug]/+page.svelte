@@ -644,6 +644,7 @@
                     nacimiento = recorda.nacimiento;
 
                     nacimientoobj = recorda.expand.nacimiento;
+                    
                     await getMadre(recorda.expand.nacimiento.madre);
                     await getPadre(recorda.expand.nacimiento.padre);
                 }

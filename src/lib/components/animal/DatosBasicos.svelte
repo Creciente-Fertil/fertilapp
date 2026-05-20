@@ -20,13 +20,19 @@
     import { shorterWord, capitalize } from "$lib/stringutil/lib";
     import InfoAnimal from "../InfoAnimal.svelte";
     import NacimientoPerfil from "./NacimientoPerfil.svelte";
-    import { getAll, saveAnimal } from "$lib/java/animales/animalesback";
+    import {
+        editAnimal,
+        getAll,
+        saveAnimal,
+        getAnimalId,
+    } from "$lib/java/animales/animalesback";
     import * as LoteService from "$lib/java/lotes/lotesback";
     import * as RodeoService from "$lib/java/rodeos/rodeosback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     import { savePeso } from "$lib/java/pesajes/pesajesback";
-    import { saveBirth } from "$lib/java/nacimientos/nacimientosback";
+    import { saveBirth,editNacimiento } from "$lib/java/nacimientos/nacimientosback";
     import Success from "../botones/Success.svelte";
+
     let {
         caravana = $bindable(""),
         rodeo = $bindable(""),
@@ -303,11 +309,16 @@
             );
         }
     }
-
-    async function guardarNacimiento() {
-        //if (!userpermisos[4]) {
-        //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
-        //}
+    async function guardarNacimientoJava() {
+        let data_nacimiento = {
+            fecha: fecha + " 03:00:00",
+            madre,
+            padre,
+            cab: cab.id,
+            notes: observacion,
+        };
+    }
+    async function guardarNacimientoPB() {
         try {
             let dataparicion = {
                 madre,
@@ -379,7 +390,43 @@
             );
         }
     }
-    async function editarNacimiento() {
+    async function guardarNacimiento() {
+        //if (!userpermisos[4]) {
+        //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
+        //}
+        if (versionjava) {
+            let birth = { birthId: null };
+            if (fecha && fecha.length > 0) {
+                if (madre || padre) {
+                    let data_nacimiento = {
+                        fecha,
+                        madre,
+                        padre,
+                        cab: cab.id,
+                        observacion,
+                    };
+                    try {
+                        birth = await saveBirth(data_nacimiento);
+                        connacimiento = true;
+                        idnacimiento = birth.birthId;
+                        if (madre != "" && madre != null) {
+                            let record = await getAnimalId(madre);
+                            nombremadre = record.caravana;
+                        }
+                        if (padre != "" && padre != null) {
+                            let record = await getAnimalId(madre);
+                            nombrepadre = record.caravana;
+                        }
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+            }
+        } else {
+            await guardarNacimientoPB();
+        }
+    }
+    async function editarNacimientoPB() {
         //if (!userpermisos[4]) {
         //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
         //    return
@@ -425,6 +472,34 @@
             console.error(err);
         }
     }
+    async function editarNacimientoJava() {
+        if (
+            fecha != fechaviejo ||
+            madre != madreviejo ||
+            padre != padreviejo ||
+            observacion != observacionviejo
+        ) {
+            let data_java = {
+                date: fecha,
+                motherId: madre,
+                fatherId: padre,
+                notes: observacion,
+                establishmentId: cab.id,
+            };
+            try {
+                await editNacimiento(idnacimiento, data_java);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+    async function editarNacimiento() {
+        if (versionjava) {
+            await editarNacimientoJava();
+        } else {
+            await editarAnimalPB();
+        }
+    }
     function getNombreMadre() {
         let m = madres.filter((item) => item.id == madre)[0];
         nombremadre = m.caravana;
@@ -435,7 +510,7 @@
         let p = padres.filter((item) => item.id == padre)[0];
         nombrepadre = p.caravana;
     }
-    async function editarAnimal() {
+    async function editarAnimalPB() {
         let data = {
             peso,
             sexo,
@@ -541,6 +616,59 @@
         } catch (err) {
             console.error(err);
             Swal.fire("Error editar", "No se pudo editar el animal", "error");
+        }
+    }
+    async function editarAnimalJava() {
+        let data = {
+            caravana,
+            prenada,
+            fechanacimiento: fecha,
+            sexo,
+            peso,
+            lote,
+            rodeo,
+            rp,
+            raza,
+            color,
+            categoria:
+                categoria && categoria.length > 0
+                    ? categoria
+                    : sexo == "M"
+                      ? "ternero"
+                      : "ternera",
+            cab: cab.id,
+            nacimiento:idnacimiento
+        };
+        try {
+            if (pesoviejo != peso) {
+                let data_peso = {
+                    animal: id,
+                    fecha: new Date().toISOString().split("T")[0],
+                    pesonuevo: peso,
+                };
+                await savePeso(data_peso);
+            }
+            if (!connacimiento) {
+                await guardarNacimiento();
+                if (idnacimiento != null) {
+                    data.nacimiento = idnacimiento;
+                }
+            } else {
+                await editarNacimiento();
+            }
+            await editAnimal(id, data);
+            Swal.fire("Éxito editar", "Se pudo editar el animal", "success");
+            modoedicion = false;
+        } catch (err) {
+            console.error(err);
+            Swal.fire("Error edición", "No se pudo editar el animal", "error");
+        }
+    }
+    async function editarAnimal() {
+        if (versionjava) {
+            await editarAnimalJava();
+        } else {
+            await editarAnimalPB();
         }
     }
     async function guardarAnimal() {
@@ -659,7 +787,7 @@
                         madre,
                         padre,
                         cab: cab.id,
-                        notes:observacion
+                        observacion,
                     };
 
                     birth = await saveBirth(data_nacimiento);
@@ -948,6 +1076,7 @@
                     `}
                     bind:value={rodeo}
                 >
+                    <option value={null}>{""}</option>
                     {#each rodeos as t}
                         <option value={t.id}>{t.nombre}</option>
                     {/each}
@@ -987,6 +1116,7 @@
                     `}
                     bind:value={lote}
                 >
+                    <option value={null}>{""}</option>
                     {#each lotes as l}
                         <option value={l.id}>{l.nombre}</option>
                     {/each}
@@ -1026,6 +1156,7 @@
                     `}
                     bind:value={categoria}
                 >
+                    <option value={null}>{""}</option>
                     {#each categorias.filter((c) => c.sexo == sexo) as l}
                         <option value={l.id}>{l.nombre}</option>
                     {/each}

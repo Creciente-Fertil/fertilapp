@@ -38,7 +38,6 @@ function getCategoriaCod(categoria) {
 }
 function processAnimal(animal) {
     let data_animal = {
-
         id: animal.animalId,
         caravana: animal.tagNumber,
         active: animal.isActive,
@@ -74,7 +73,11 @@ function processAnimal(animal) {
                 fecha: animal.birthDate,
                 madre:animal.motherId,
                 padre:animal.fatherId,
-                
+                nombremadre:animal.motherTagNumber,
+                nombrepadre:animal.fatherTagNumber,
+
+                observacion:animal.birthNotes
+
             }
         }
 
