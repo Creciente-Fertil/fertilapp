@@ -1,6 +1,6 @@
 import { processEstablishment, processEstablishments } from "../establecimientos/establecimientosback"
 import { getUser } from "$lib/userstorage/usersotrage"
-import { handleAuthenticatedRequest } from "../errores/erroresback"
+import { handleAuthenticatedRequest, handleLoginRequest } from "../errores/erroresback"
 //const RUTA_JAVA = "https://test.crecientefertil.com.ar/api/"
 let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
 let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
@@ -29,7 +29,7 @@ export async function loginJava(email, contra) {
         password: contra
     }
 
-    let res_login = await fetch(ruta, {
+    let res_login = await handleLoginRequest(ruta, {
         method: "POST",
         body: JSON.stringify(data), // data can be `string` or {object}!
         headers: {

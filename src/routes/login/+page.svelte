@@ -63,6 +63,7 @@
 
             if (data_login.status == 401) {
                 throw new Error("Error de credenciales");
+                return
             }
             if (data_login.status == 403) {
                 throw new Error("Usuario eliminado");
