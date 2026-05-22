@@ -103,11 +103,11 @@
     let prenada = $state(0);
     let modohistoria = $state(false);
     //pesajes
-    let pesajes = $state([])
+    let pesajes = $state([]);
     //nuevo
     let fecha = $state("");
     let pesoanterior = $state("");
-    let pesonuevo = $state("")
+    let pesonuevo = $state("");
     let malfecha = $state(false);
     let malpeso = $state(false);
     let botonhabilitado = $state(false);
@@ -139,11 +139,8 @@
         }
     }
     async function guardarPesaje() {
-        if(versionjava){
-
-        }
-        else{
-
+        if (versionjava) {
+        } else {
         }
     }
     function openNewModal() {
@@ -152,7 +149,7 @@
         botonhabilitado = false;
         pesonuevo = "";
         fecha = "";
-        
+
         nuevoPesajePerfilAnimal.showModal();
     }
     //detalle
@@ -162,9 +159,9 @@
     let idpesaje = $state("");
     function openDetalle(id) {
         idpesaje = id;
-        
+
         detallePesajePerfilAnimal.showModal();
-        return
+        return;
         let pesaje = pesajes.filter((p) => p.id == idpesaje)[0];
 
         fechaedit = pesaje.fecha.split(" ")[0];
@@ -524,8 +521,7 @@
             });
         }
     }
-
-    async function irPadre(_id) {
+    async function irPadrePB(_id) {
         //Revisar si esta en la cabaña
         //Lo idea seria poder ver los datos del animaal este donde este
         let recordxiste = await pb.collection("animales").getFullList({
@@ -550,6 +546,36 @@
                 "No existe el animal en esta cabaña",
                 "error",
             );
+        }
+    }
+    async function irPadreJava(_id) {
+        let record = await getAnimalId(_id);
+
+        if (record) {
+            genealogiaStorage.save({ progenitores: [], posicionActual: -1 });
+            padre = record;
+            navegarAPadre(animal.id, animal.caravana, animal);
+
+            navegarAPadre(padre.id, padre.caravana, padre);
+
+            goto(`${pre}/animales/geneologia`);
+  
+        } else {
+            Swal.fire(
+                "Error animal",
+                "No existe el animal en esta cabaña",
+                "error",
+            );
+        }
+    }
+    async function irPadre(_id) {
+        if (_id == null) {
+            return;
+        }
+        if (versionjava) {
+            await irPadreJava(_id)
+        } else {
+            await irPadrePB(_id);
         }
     }
     function perfilNuevoAnimal() {
@@ -644,7 +670,7 @@
                     nacimiento = recorda.nacimiento;
 
                     nacimientoobj = recorda.expand.nacimiento;
-                    
+
                     await getMadre(recorda.expand.nacimiento.madre);
                     await getPadre(recorda.expand.nacimiento.padre);
                 }

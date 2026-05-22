@@ -1203,7 +1203,7 @@
         {/if}
     </div>
     <div class="mb-1 lg:mb-0">
-        <label for="peso" class="label mb-0 pb-0">
+        <label for="color" class="label mb-0 pb-0">
             <span
                 class="
                     label-text tracking-wide
@@ -1293,7 +1293,9 @@
             {modoedicionnacimiento}
         />
     {:else}
-        <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
+        <div 
+        class="grid grid-cols-1 gap-1 lg:gap-6 mb-2"
+        >
             <div>
                 <label for="fechanacimiento" class="label mb-0 pb-0">
                     <span
@@ -1331,7 +1333,7 @@
                     <div class="flex justify-start mx-0 px-0">
                         <button
                             class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
-                            onclick={async () => await irPadre(madreobj.id)}
+                            onclick={async () => {await irPadre(madreobj.id);}}
                             >Ver animal</button
                         >
                     </div>

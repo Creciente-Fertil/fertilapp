@@ -37,6 +37,9 @@ function getCategoriaCod(categoria) {
     }
 }
 function processAnimal(animal) {
+    if(animal==null){
+        return animal;
+    }
     let data_animal = {
         id: animal.animalId,
         caravana: animal.tagNumber,
