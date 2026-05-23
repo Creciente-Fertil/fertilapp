@@ -26,8 +26,13 @@
         //nuevo peso
         openNewModal=()=>{},
         //Detalle
-        pesajes = [],
-        openDetalle=(id)=>{}
+        pesajes = $bindable([]),
+        openDetalle=(id)=>{},
+        //chart
+        createChart =()=>{},
+        xs=$bindable([]),
+        ys=$bindable([]),
+        evolucion=()=>{}
     } = $props();
 
     let id = $state("");
@@ -35,8 +40,6 @@
     //let pesajes = $state([]);
     let fecha = $state("");
     let pesonuevo = $state("");
-    let xs = $state([]);
-    let ys = $state([]);
     let fechadesde = $state("");
     let fechahasta = $state("");
 
@@ -55,7 +58,7 @@
     let canvas;
     let chart;
     async function guardarPesaje() {
-        //if (!userpermisos[4]) {
+        //ife (!userpermisos[4]) {
         //    nuevoPesaje.close();
         //    Swal.fire("Error permisos", getPermisosMessage(4), "error");
         //    return;
@@ -89,31 +92,11 @@
             nuevoPesaje.close();
         }
     }
-    function createChart() {
-        ctx = canvas.getContext("2d");
-        if (chart) {
-            chart.destroy();
-        }
-
-        chart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels: xs.map((x) => new Date(x).toLocaleDateString()),
-                datasets: [
-                    {
-                        label: "Evolucion pesos",
-                        backgroundColor: "rgb(255, 99, 132)",
-                        borderColor: "rgb(255, 99, 132)",
-                        data: ys.map((r) => r),
-                    },
-                ],
-            },
-        });
-    }
     async function getPesajes() {
         if (versionjava) {
             
             pesajes = await getAllAnimal(id, cab.id);
+            
             
         } else {
             pesajes = await pb.collection("pesaje").getFullList({
@@ -235,7 +218,7 @@
         bind:fechahasta
         {filterUpdate}
         nuevo={openNewModal}
-        evolucion={() => chartpesaje.showModal()}
+        {evolucion}
     />
 </div>
 <div

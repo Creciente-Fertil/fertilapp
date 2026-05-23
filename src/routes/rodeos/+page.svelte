@@ -348,6 +348,12 @@
                 };
             }
         }
+
+    }
+    function prepararData(item){
+        return {
+            NOMBRE:item.nombre
+        };
     }
 </script>
 
@@ -362,6 +368,7 @@
         cabnombre={cab.nombre}
         {toggleJava}
         {versionjava}
+        {prepararData}
     />
     {#if cargadorodeos}
         <!--Tabla-->

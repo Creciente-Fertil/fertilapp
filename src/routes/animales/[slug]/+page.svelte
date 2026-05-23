@@ -46,6 +46,8 @@
         getAnimalId,
         transferirAnimal,
     } from "$lib/java/animales/animalesback";
+    import { savePeso, eliminarPeso } from "$lib/java/pesajes/pesajesback";
+    import Chart from "chart.js/auto";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     import { isEmpty } from "$lib/stringutil/lib";
@@ -102,6 +104,10 @@
     let tactos = $state([]);
     let prenada = $state(0);
     let modohistoria = $state(false);
+    //Genericos
+    let rodeos = $state([]);
+    let lotes = $state([]);
+    let cargarlotes = $state(false);
     //pesajes
     let pesajes = $state([]);
     //nuevo
@@ -139,7 +145,31 @@
         }
     }
     async function guardarPesaje() {
+        let _id = $page.params.slug;
         if (versionjava) {
+            try {
+                let data_peso = {
+                    animal: _id,
+                    fecha: new Date(fecha).toISOString().split("T")[0],
+                    pesonuevo,
+                };
+                await savePeso(data_peso);
+                Swal.fire(
+                    "Éxito pesaje",
+                    "Se logró editar el pesaje",
+                    "success",
+                );
+
+                await perfilAnimal(_id);
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error pesaje",
+                    "No se pudo crear el pesaje",
+                    "error",
+                );
+            }
+            nuevoPesajePerfilAnimal.close();
         } else {
         }
     }
@@ -152,6 +182,7 @@
 
         nuevoPesajePerfilAnimal.showModal();
     }
+
     //detalle
     let fechaedit = $state("");
     let pesonuevoedit = $state("");
@@ -160,17 +191,66 @@
     function openDetalle(id) {
         idpesaje = id;
 
-        detallePesajePerfilAnimal.showModal();
-        return;
         let pesaje = pesajes.filter((p) => p.id == idpesaje)[0];
 
-        fechaedit = pesaje.fecha.split(" ")[0];
-        pesoanterioredit = pesaje.pesoanterior;
-        pesonuevoedit = pesaje.pesonuevo;
+        if (pesaje) {
+            fechaedit = pesaje.fecha.split(" ")[0];
+            pesoanterioredit = pesaje.pesoanterior;
+            pesonuevoedit = pesaje.pesonuevo;
 
-        detallePesajePerfilAnimal.showModal();
+            detallePesajePerfilAnimal.showModal();
+        }
+    }
+    async function eliminarPesaje() {
+        try {
+            await eliminarPeso(idpesaje);
+            Swal.fire(
+                "Éxito eliminar pesaje",
+                "Se pudo eliminar el pesaje",
+                "success",
+            );
+            let _id = $page.params.slug;
+            await perfilAnimal(_id);
+        } catch (err) {
+            console.error(err);
+            Swal.fire(
+                "Error eliminar pesaje",
+                "No se pudo eliminar el pesaje",
+                "error",
+            );
+            detallePesajePerfilAnimal.close();
+        }
     }
     //pesajes chart
+    let ctx;
+    let canvas;
+    let chart;
+    let xs = $state([]);
+    let ys = $state([]);
+    function createChart() {
+        ctx = canvas.getContext("2d");
+        if (chart) {
+            chart.destroy();
+        }
+
+        chart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: xs.map((x) => new Date(x).toLocaleDateString()),
+                datasets: [
+                    {
+                        label: "Evolucion pesos",
+                        backgroundColor: "rgb(255, 99, 132)",
+                        borderColor: "rgb(255, 99, 132)",
+                        data: ys.map((r) => r),
+                    },
+                ],
+            },
+        });
+    }
+    function evolucion() {
+        chartpesajeDetalle.showModal();
+    }
 
     //Geneologia
     const genealogiaStorage = createStorageProxy("genealogia_arbol", {
@@ -559,7 +639,6 @@
             navegarAPadre(padre.id, padre.caravana, padre);
 
             goto(`${pre}/animales/geneologia`);
-  
         } else {
             Swal.fire(
                 "Error animal",
@@ -573,7 +652,7 @@
             return;
         }
         if (versionjava) {
-            await irPadreJava(_id)
+            await irPadreJava(_id);
         } else {
             await irPadrePB(_id);
         }
@@ -619,6 +698,8 @@
                     color = recorda.raza;
                     raza = recorda.color;
                     active = recorda.active;
+                    
+
                     fechanacimiento = recorda.fechanacimiento.split(" ")[0];
 
                     nacimiento = "";
@@ -656,7 +737,7 @@
                 caravana = recorda.caravana;
                 color = recorda.raza;
                 raza = recorda.color;
-                active = recorda.active;
+                active = !recorda.delete;
                 fechanacimiento =
                     recorda.fechanacimiento &&
                     recorda.fechanacimiento.length > 0
@@ -681,13 +762,20 @@
                 categoria = recorda.categoria;
                 prenada = recorda.prenada == 1 ? 0 : recorda.prenada;
                 rp = recorda.rp;
-                if (
-                    recorda.fechafallecimiento != "" &&
-                    recorda.fechafallecimiento != null
-                ) {
-                    fechafall = recorda.fechafallecimiento.split(" ")[0];
-                    motivobaja = recorda.motivobaja;
+                if (!active) {
+                    if (
+                        recorda.fechafallecimiento != "" &&
+                        recorda.fechafallecimiento != null
+                    ) {
+                        fechafall = recorda.fechafallecimiento.split(" ")[0];
+                        motivobaja = "fallecimiento";
+                    }
+                    else{
+                        motivobaja = "venta";
+                    }
                 }
+
+
                 cargado = true;
                 tab = "datos";
                 calcularTabs();
@@ -736,6 +824,7 @@
     async function getData() {
         if (versionjava) {
             let _id = $page.params.slug;
+
             let user_data = getUser();
             usuarioid = user_data.id;
 
@@ -832,6 +921,9 @@
                         {openEliminarModal}
                         {add}
                         {versionjava}
+                        bind:cargarlotes
+                        bind:lotes
+                        bind:rodeos
                     />
                 </CardAnimal>
                 <div class="hidden">
@@ -859,8 +951,12 @@
                         {versionjava}
                         {cab}
                         {openNewModal}
-                        {pesajes}
+                        bind:pesajes
                         {openDetalle}
+                        bind:xs
+                        bind:ys
+                        {createChart}
+                        {evolucion}
                     ></Pesajes>
                 </CardAnimal>
             {:else if tab == "tratamientos"}
@@ -929,7 +1025,16 @@
                 </CardAnimal>
             {:else if tab == "movimientos"}
                 <CardAnimal cardsize="max-w-7xl">
-                    <Movimientos {caravana} {animal} {cab} {versionjava} />
+                    {#if cargarlotes}
+                        <Movimientos
+                            {caravana}
+                            {animal}
+                            {cab}
+                            {versionjava}
+                            {lotes}
+                            {rodeos}
+                        />
+                    {/if}
                 </CardAnimal>
             {:else if tab == "transfer"}
                 <CardAnimal cardsize="max-w-7xl" titulo="Transferencia">
@@ -959,6 +1064,7 @@
                         {codigovacio}
                         {versionjava}
                         {onInputTransfer}
+                        {active}
                     />
                 </CardAnimal>
             {/if}
@@ -1232,7 +1338,7 @@
             </div>
         </div>
         <div class="modal-action justify-start">
-            <button class="btn btn-error text-white" onclick={eliminar}
+            <button class="btn btn-error text-white" onclick={eliminarPesaje}
                 >Eliminar</button
             >
             <button
@@ -1240,8 +1346,45 @@
                     btn 
                     bg-transparent border rounded-lg focus:outline-none transition-colors duration-200
                     ${estilos.btnsecondary}`}
-                onclick={() => detallePesaje.close()}>Cerrar</button
+                onclick={() => detallePesajePerfilAnimal.close()}>Cerrar</button
             >
         </div>
     </div>
 </dialog>
+<dialog
+    id="chartpesajeDetalle"
+    class="modal modal-top mt-10 ml-5 lg:items-start rounded-xl"
+>
+    <div
+        class="
+            modal-box max-w-5xl
+            bg-gradient-to-br from-white to-gray-100
+            dark:from-gray-900 dark:to-gray-800
+        "
+    >
+        <form method="dialog">
+            <button
+                class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 rounded-xl"
+                >✕</button
+            >
+        </form>
+        <h3 class="text-lg font-bold">Evolucion pesaje</h3>
+        <div class="chart-container justify-items-center">
+            <canvas class="" bind:this={canvas}> </canvas>
+        </div>
+
+        <div class="modal-action justify-start">
+            <button
+                class="btn btn-error text-white"
+                onclick={() => chartpesajeDetalle.close()}>Cerrar</button
+            >
+        </div>
+    </div>
+</dialog>
+
+<style>
+    .chart-container {
+        width: 800px;
+        height: 400px;
+    }
+</style>

@@ -367,6 +367,12 @@
                 };
             }
         }
+        
+    }
+    function prepararData(item){
+        return {
+            NOMBRE:item.nombre
+        };
     }
 </script>
 
@@ -383,6 +389,7 @@
         {versionjava}
         {toggleJava}
         {esdev}
+        {prepararData}
     />
 
     {#if cargadolotes}

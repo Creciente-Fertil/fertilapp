@@ -46,7 +46,9 @@ export async function getAllAnimal(animalId,cabid = null) {
     if (cabid) {
         url.searchParams.append('establishmentId', cabid);
     }
-    
+    if (animalId) {
+        url.searchParams.append('animalId', animalId);
+    }
     let options = {
         headers: {
             "Content-Type": "application/json",

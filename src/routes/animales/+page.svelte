@@ -239,7 +239,7 @@
             animales = data_animales;
         }
         animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
-        
+
         animalesrows = animales;
         madres = animales.filter((a) => a.sexo == "H");
         padres = animales.filter((a) => a.sexo == "M");
@@ -511,10 +511,18 @@
             }
         }
         if (activosbuscar == "activos") {
-            animalesrows = animalesrows.filter((a) => a.active == true);
+            if (versionjava) {
+                animalesrows = animalesrows.filter((a) => a.delete == false);
+            } else {
+                animalesrows = animalesrows.filter((a) => a.active == true);
+            }
         }
         if (activosbuscar == "inactivos") {
-            animalesrows = animalesrows.filter((a) => a.active == false);
+            if (versionjava) {
+                animalesrows = animalesrows.filter((a) => a.delete == true);
+            } else {
+                animalesrows = animalesrows.filter((a) => a.active == false);
+            }
         }
         ordenarAnimales("caravana", true);
         totalAnimalesEncontrados = animalesrows.length;
@@ -555,7 +563,7 @@
             usuarioid = user.id;
 
             userpermisos = [];
-            cab = loadStorageEstablecimiento()
+            cab = loadStorageEstablecimiento();
             await getAnimales();
             await getRodeos();
             await getLotes();

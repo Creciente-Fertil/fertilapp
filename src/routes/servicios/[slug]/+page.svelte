@@ -86,9 +86,9 @@
     let padre = $state("");
     let pajuela = $state("");
     let categoria = $state("");
-    let malfecha=$state(false)
-    function loadServicio() { 
-        malfecha = false
+    let malfecha = $state(false);
+    function loadServicio() {
+        malfecha = false;
         detalleServicio = proxyServicio.load();
         edit = detalleServicio.edit;
         id = detalleServicio.id;
@@ -177,15 +177,36 @@
                     dataser.fechahasta = fechahasta + " 03:00:00";
                 }
                 if (versionjava) {
+                    let fathers = [];
                     let data_java = {
-                        startDate: fechadesde,
-
+                        establishmentId: cab.id,
                         expectedBirthDate: fechaparto,
                         notes: observacion,
+                        endDate: fechahasta,
                     };
-                    if (fechahasta != "") {
-                        data_java.endDate = fechahasta;
+                    if (natural) {
+                        data_java.animalId = madre;
+                        fathers = padreslist.map((p) => ({
+                            fatherId: p,
+                            fatherTagNumber: "",
+                            notes: "",
+                        }));
+                        data_java.serviceType = "NATURAL_SERVICE";
+                        data_java.fathers = fathers;
+                    } else {
+                        data_java.animalId = animal;
+                        fathers = [
+                            {
+                                fatherId: padre,
+                                fatherTagNumber: "",
+                                notes: "",
+                            },
+                        ];
+                        data_java.fathers = fathers;
+                        data_java.serviceType = "INSEMINATION";
                     }
+                    console.log(data_java)
+                    return;
                     await editServicio(id, data_java);
                 } else {
                     await pb.collection("servicios").update(id, dataser);
@@ -303,21 +324,18 @@
         }
         goto(pre + "/servicios");
     }
-    function onInput(){
-        if(natural){
-            if(fechadesde.length==0){
-                malfecha=true
+    function onInput() {
+        if (natural) {
+            if (fechadesde.length == 0) {
+                malfecha = true;
+            } else {
+                malfecha = false;
             }
-            else{
-                malfecha = false
-            }
-        }
-        else{
-            if(fechainseminacion.length==0){
-                malfecha=true
-            }
-            else{
-                malfecha = false
+        } else {
+            if (fechainseminacion.length == 0) {
+                malfecha = true;
+            } else {
+                malfecha = false;
             }
         }
     }
@@ -342,7 +360,6 @@
                 {versionjava}
                 {onInput}
                 {malfecha}
-
             />
         {:else}
             <InseminacionDetalle
@@ -412,7 +429,7 @@
                 </button>
 
                 <!-- Botón Editar -->
-                 <Success
+                <Success
                     disabled={malfecha}
                     onclick={editar}
                     texto="Editar"

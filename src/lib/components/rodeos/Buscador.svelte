@@ -25,7 +25,7 @@
         limpiarFiltros = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
-        prepararData = () => {},
+        prepararData = (item) => {},
         toggleJava = ()=>{},
         versionjava = false
     } = $props();

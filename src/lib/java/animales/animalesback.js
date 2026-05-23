@@ -44,7 +44,7 @@ function processAnimal(animal) {
         id: animal.animalId,
         caravana: animal.tagNumber,
         active: animal.isActive,
-        delete: false,
+        delete: animal.isDeregistered?animal.isDeregistered:false,
         fechanacimiento: null2string(animal.birthDate),
         sexo: animal.sex == "F" ? "H" : "M",
         nacimiento: null2string(animal.birthId),
@@ -52,6 +52,7 @@ function processAnimal(animal) {
         cab: animal.establishmentId,
         rodeo: null2string(animal.herdId),
         fechafallecimiento: animal.deathDate,
+        fechaventa: animal.deathDate,
         lote: null2string(animal.lotId),
         categoria: getCategoriaId(animal.categoryId),
         nombrecategoria: null2string(animal.categoryName),
@@ -92,6 +93,7 @@ function processAnimales(data) {
     let data_animales = []
     for (let i = 0; i < data.length; i++) {
         let fila = data[i]
+
         data_animales.push(processAnimal(fila))
     }
     return data_animales
@@ -151,7 +153,6 @@ export async function getAll(cabid = null, lotid = null) {
     let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
-
 
     let procesada = processAnimales(data_all)
 

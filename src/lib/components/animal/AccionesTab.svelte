@@ -26,6 +26,7 @@
         openModal = () => {},
         transfer = () => {},
         versionjava = false,
+        active = true
     } = $props();
     let ruta = import.meta.env.VITE_RUTA;
     const pb = new PocketBase(ruta);
@@ -138,7 +139,7 @@
                         <button
                             aria-label="confirmar baja"
                             onclick={darBaja}
-                            disabled={fechafallecimiento == ""}
+                            disabled={!active && fechafallecimiento == ""}
                             class={`
                                 disabled:cursor-not-allowed
                                 mt-2 px-10 py-2  text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base
@@ -217,7 +218,7 @@
                 <div class="flex justify-end">
                     <Success
                         onclick={transfer}
-                        disabled={muchosrenspa || malcodigo || codigovacio}
+                        disabled={!active && (muchosrenspa || malcodigo || codigovacio)}
                         texto="Confirmar"
                     />
                 </div>

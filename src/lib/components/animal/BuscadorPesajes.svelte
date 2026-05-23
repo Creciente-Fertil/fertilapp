@@ -15,7 +15,7 @@
     function prepararData(item) {
         return {
             FECHA: item.fecha ? new Date(item.fecha).toLocaleDateString() : "",
-            PESO: item.peso,
+            PESO: item.pesonuevo,
             
             
         };

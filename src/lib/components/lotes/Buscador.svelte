@@ -15,8 +15,8 @@
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
     let {
-        selecthash,
-        lotesrows,
+        selecthash = {},
+        lotesrows = [],
         cabnombre,
         totalLotes,
         isOpenFilter = $bindable(false),
@@ -26,7 +26,7 @@
         limpiarFiltros = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
-        prepararData = () => {},
+        prepararData = (item) => {},
         esdev=false,
         versionjava=false,
         toggleJava=()=>{}

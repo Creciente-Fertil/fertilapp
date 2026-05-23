@@ -31,6 +31,7 @@
         getAnimalId,
     } from "$lib/java/animales/animalesback";
     import DatosGeneologia from "$lib/components/animal/DatosGeneologia.svelte";
+    import HistoriaClinicaGeneologia from "$lib/components/animal/HistoriaClinicaGeneologia.svelte";
     //Size
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -50,6 +51,7 @@
     let pariciones = $state([]);
     let observaciones = $state([]);
     let tratamientos = $state([]);
+    let cargadoeventos = $state(false);
 
     let idanimal = $state("");
     let caravana = $state("Padre");
@@ -206,16 +208,18 @@
     }
     async function cargarEventos() {
         if (versionjava) {
+            
             let eventos = await getAnimalEventos(idanimal);
+            
             servicios = eventos.servicios.filter(
                 (s) => s.tipo == "NATURAL_SERVICE",
-            );
+            ).map(h=>({...h,cod:h.id+""+Math.random()}));
             inseminaciones = eventos.servicios.filter(
                 (s) => s.tipo != "NATURAL_SERVICE",
-            );
-            observaciones = eventos.observaciones;
-            tactos = eventos.tactos;
-            tratamientos = eventos.tratamientos;
+            ).map(h=>({...h,cod:h.id+""+Math.random()}));
+            observaciones = eventos.observaciones.map(h=>({...h,cod:h.id+""+Math.random()}));
+            tactos = eventos.tactos.map(h=>({...h,cod:h.id+""+Math.random()}));
+            tratamientos = eventos.tratamientos.map(h=>({...h,cod:h.id+""+Math.random()}));
         } else {
             await getServicios();
             await getInseminaciones();
@@ -237,6 +241,8 @@
         progenitores = geneologia.progenitores.map((a) => a.caravana);
     }
     async function cargarPadre() {
+        cargadoeventos = false;
+
         let geneologia = genealogiaStorage.load();
 
         let data = geneologia.progenitores[geneologia.posicionActual];
@@ -250,7 +256,7 @@
         sexo = animal.sexo;
         peso = animal.peso;
         categoria = animal.categoria;
-        fechanacimiento = animal.fechanacimiento
+        fechanacimiento = animal.fechanacimiento;
         if (animal.nacimiento && animal.nacimiento != "") {
             connacimiento = true;
             cargarNacimiento(animal);
@@ -258,6 +264,7 @@
             connacimiento = false;
         }
         await cargarEventos();
+        cargadoeventos = true;
     }
     async function irPadre(indice) {
         if (indice == 0) {
@@ -277,6 +284,7 @@
 
             if (record) {
                 let animal = record;
+                idanimal =_id
                 navegarAPadre(animal.id, animal.caravana, animal);
                 cargarProgenitores();
                 await cargarPadre();
@@ -310,6 +318,7 @@
     }
     onMount(async () => {
         let geneologia = genealogiaStorage.load();
+
         if (geneologia.posicionActual != -1) {
             cargarProgenitores();
             let animal = irAElemento(geneologia.posicionActual);
@@ -381,7 +390,6 @@
                 {madre}
                 {padre}
                 {nuevaEntrada}
-
             />
             <div class="hidden">
                 <div>
@@ -576,323 +584,340 @@
                 {/if}
             </div>
         </CardAnimal>
-        <CardAnimal cardsize="max-w-7xl" titulo="Últimos Tactos">
-            <div
-                class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
-            >
-                {#if tactos.length == 0}
-                    <p class="mt-5 text-lg">No tiene tactos</p>
-                {:else}
-                    <div
-                        class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
-                    >
-                        <table class="table table-lg">
-                            <thead>
-                                <tr>
-                                    <th class="text-base ml-3 pl-3 mr-1 pr-1"
-                                        >Fecha</th
-                                    >
-                                    <th class="text-base mx-1 px-1"
-                                        >Observacion</th
-                                    >
-                                    <th class="text-base mx-1 px-1"
-                                        >Categoria</th
-                                    >
-                                    <th class="text-base mx-1 px-1">Preñada</th>
-                                    <th class="text-base mx-1 px-1">Tipo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {#each tactos as t}
+        {#if cargadoeventos}
+            <CardAnimal cardsize="max-w-7xl" titulo="Eventos">
+                <HistoriaClinicaGeneologia
+                    id={idanimal}
+                    {caravana}
+                    {inseminaciones}
+                    {servicios}
+                    {tactos}
+                    {tratamientos}
+                    {observaciones}
+                    {pariciones}
+                    {pesajes}
+                />
+            </CardAnimal>
+        {/if}
+        <div class="hidden">
+            <CardAnimal cardsize="max-w-7xl" titulo="Últimos Tactos">
+                <div
+                    class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
+                >
+                    {#if tactos.length == 0}
+                        <p class="mt-5 text-lg">No tiene tactos</p>
+                    {:else}
+                        <div
+                            class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
+                        >
+                            <table class="table table-lg">
+                                <thead>
                                     <tr>
-                                        <td class="text-base">
-                                            {`${new Date(t.fecha).toLocaleDateString()}`}
-                                        </td>
-                                        <td class="text-base mx-1 px-1">
-                                            {`${t.observacion}`}
-                                        </td>
-                                        <td class="text-base mx-1 px-1">
-                                            {`${getCategoriaNombre(t.categoria)}`}
-                                        </td>
-                                        <td class="text-base mx-1 px-1">
-                                            {t.prenada == 0
-                                                ? "Vacia"
-                                                : t.prenada == 1
-                                                  ? "Dudosa"
-                                                  : "Preñada"}
-                                        </td>
-                                        <td class="text-base mx-1 px-1">
-                                            {`${getTipoNombre(t.tipo)}`}
-                                        </td>
-                                    </tr>
-                                {/each}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div
-                        class="block w-full md:hidden justify-items-center mx-1"
-                    >
-                        {#each tactos as t}
-                            <div
-                                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                            >
-                                <button>
-                                    <div class="block p-4">
-                                        <div
-                                            class="flex justify-between items-start mb-2"
+                                        <th
+                                            class="text-base ml-3 pl-3 mr-1 pr-1"
+                                            >Fecha</th
                                         >
-                                            <h3 class="font-medium">
+                                        <th class="text-base mx-1 px-1"
+                                            >Observacion</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Categoria</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Preñada</th
+                                        >
+                                        <th class="text-base mx-1 px-1">Tipo</th
+                                        >
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {#each tactos as t}
+                                        <tr>
+                                            <td class="text-base">
                                                 {`${new Date(t.fecha).toLocaleDateString()}`}
-                                            </h3>
-                                            {#if t.prenada != 1}
-                                                <div
-                                                    class={`badge badge-outline badge-${getEstadoColor(t.prenada)}`}
-                                                >
-                                                    {getEstadoNombre(t.prenada)}
-                                                </div>
-                                            {/if}
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-y-2">
-                                            <div class="flex items-start">
-                                                <span>Tipo:</span>
-                                                <span
-                                                    class="mx-2 font-semibold"
-                                                >
-                                                    {`${t.tipo == "eco" ? "Ecografía" : "Tacto"}`}
-                                                </span>
+                                            </td>
+                                            <td class="text-base mx-1 px-1">
+                                                {`${t.observacion}`}
+                                            </td>
+                                            <td class="text-base mx-1 px-1">
+                                                {`${getCategoriaNombre(t.categoria)}`}
+                                            </td>
+                                            <td class="text-base mx-1 px-1">
+                                                {t.prenada == 0
+                                                    ? "Vacia"
+                                                    : t.prenada == 1
+                                                      ? "Dudosa"
+                                                      : "Preñada"}
+                                            </td>
+                                            <td class="text-base mx-1 px-1">
+                                                {`${getTipoNombre(t.tipo)}`}
+                                            </td>
+                                        </tr>
+                                    {/each}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            class="block w-full md:hidden justify-items-center mx-1"
+                        >
+                            {#each tactos as t}
+                                <div
+                                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                >
+                                    <button>
+                                        <div class="block p-4">
+                                            <div
+                                                class="flex justify-between items-start mb-2"
+                                            >
+                                                <h3 class="font-medium">
+                                                    {`${new Date(t.fecha).toLocaleDateString()}`}
+                                                </h3>
+                                                {#if t.prenada != 1}
+                                                    <div
+                                                        class={`badge badge-outline badge-${getEstadoColor(t.prenada)}`}
+                                                    >
+                                                        {getEstadoNombre(
+                                                            t.prenada,
+                                                        )}
+                                                    </div>
+                                                {/if}
                                             </div>
                                             <div
-                                                class="col-span-2 flex items-start"
+                                                class="grid grid-cols-2 gap-y-2"
                                             >
-                                                <span>{`${t.observacion}`}</span
-                                                >
-                                            </div>
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
-                        {/each}
-                    </div>
-                {/if}
-            </div>
-        </CardAnimal>
-        <CardAnimal cardsize="max-w-7xl" titulo="Últimos Pesajes">
-            <div
-                class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
-            >
-                {#if pesajes.length == 0}
-                    <p class="mt-5 text-lg">No hay pesajes</p>
-                {:else}
-                    <div
-                        class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
-                    >
-                        <table class="table table-lg">
-                            <thead>
-                                <tr>
-                                    <th class="text-base ml-3 pl-3 mr-1 pr-1"
-                                        >Fecha</th
-                                    >
-                                    <th class="text-base mx-1 px-1"
-                                        >Peso anterior</th
-                                    >
-                                    <th class="text-base mx-1 px-1"
-                                        >Peso nuevo</th
-                                    >
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {#each pesajes as p}
-                                    <tr>
-                                        <td
-                                            class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                            >{new Date(
-                                                p.fecha,
-                                            ).toLocaleDateString()}</td
-                                        >
-                                        <td class="text-base mx-1 px-1">
-                                            {`${p.pesoanterior}`}
-                                        </td>
-                                        <td class="text-base mx-1 px-1">
-                                            {`${p.pesonuevo}`}
-                                        </td>
-                                    </tr>
-                                {/each}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div
-                        class="block w-full md:hidden justify-items-center mx-1"
-                    >
-                        {#each pesajes as p}
-                            <div
-                                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                            >
-                                <button>
-                                    <div class="block p-4">
-                                        <div class="grid grid-cols-2 gap-y-2">
-                                            <div class="flex items-start">
-                                                <span>Fecha:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {new Date(
-                                                        p.fecha,
-                                                    ).toLocaleDateString()}
-                                                </span>
-                                            </div>
-
-                                            <div class="flex items-start">
-                                                <span>Peso anterior:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {`${p.pesoanterior}`}
-                                                </span>
-                                            </div>
-                                            <div class="flex items-start">
-                                                <span>Peso nuevo:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {`${p.pesonuevo}`}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
-                        {/each}
-                    </div>
-                {/if}
-            </div>
-        </CardAnimal>
-        <CardAnimal cardsize="max-w-7xl" titulo="Últimos Servicios">
-            <div
-                class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
-            >
-                {#if servicios.length == 0}
-                    <p class="mt-5 text-lg">
-                        No tiene inseminaciones y servicios
-                    </p>
-                {:else}
-                    <div
-                        class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
-                    >
-                        <table class="table table-lg">
-                            <thead>
-                                <tr>
-                                    <th class="text-base ml-3 pl-3 mr-1 pr-1"
-                                        >Fecha</th
-                                    >
-                                    <th class="text-base ml-3 pl-3 mr-1 pr-1"
-                                        >Fecha hasta</th
-                                    >
-                                    <th class="text-base ml-3 pl-3 mr-1 pr-1"
-                                        >Fecha parto</th
-                                    >
-
-                                    <th class="text-base mx-1 px-1">Tipo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {#each servicios as s}
-                                    <tr>
-                                        <td
-                                            class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10 border-b dark:border-gray-600"
-                                            >{s.fechadesde
-                                                ? new Date(
-                                                      s.fechadesde,
-                                                  ).toLocaleDateString()
-                                                : s.fechainseminacion
-                                                  ? new Date(
-                                                        s.fechainseminacion,
-                                                    ).toLocaleDateString()
-                                                  : ""}
-                                        </td>
-                                        <td
-                                            class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10 border-b dark:border-gray-600"
-                                            >{s.fechahasta
-                                                ? new Date(
-                                                      s.fechadesde,
-                                                  ).toLocaleDateString()
-                                                : ""}</td
-                                        >
-                                        <td
-                                            class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10 border-b dark:border-gray-600"
-                                            >{new Date(
-                                                s.fechaparto,
-                                            ).toLocaleDateString()}</td
-                                        >
-
-                                        <td
-                                            class="text-base mx-1 px-1 border-b dark:border-gray-600"
-                                        >
-                                            {s.fechadesde
-                                                ? "Natural"
-                                                : "Artificial"}
-                                        </td>
-                                    </tr>
-                                {/each}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div
-                        class="block w-full md:hidden justify-items-center mx-1"
-                    >
-                        {#each servicios as s}
-                            <div
-                                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                            >
-                                <button>
-                                    <div class="block p-4">
-                                        <div class="grid grid-cols-2 gap-y-2">
-                                            <div class="flex items-start">
-                                                <span>Tipo:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {s.fechadesde
-                                                        ? "Natural"
-                                                        : "Artificial"}
-                                                </span>
-                                            </div>
-                                            <div class="flex items-start">
-                                                <span>Fecha parto:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {s.fechaparto
-                                                        ? new Date(
-                                                              s.fechaparto,
-                                                          ).toLocaleDateString()
-                                                        : ""}
-                                                </span>
-                                            </div>
-                                            <div
-                                                class={`flex items-start ${s.fechadesde ? "" : "col-span-2"}`}
-                                            >
-                                                <span>
-                                                    Fecha {s.fechadesde
-                                                        ? "desde"
-                                                        : "de inseminación"}:
-                                                </span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {s.fechadesde
-                                                        ? new Date(
-                                                              s.fechadesde,
-                                                          ).toLocaleDateString()
-                                                        : s.fechainseminacion
-                                                          ? new Date(
-                                                                s.fechainseminacion,
-                                                            ).toLocaleDateString()
-                                                          : ""}
-                                                </span>
-                                            </div>
-                                            {#if s.fechadesde}
                                                 <div class="flex items-start">
-                                                    <span>Fecha hasta:</span>
+                                                    <span>Tipo:</span>
+                                                    <span
+                                                        class="mx-2 font-semibold"
+                                                    >
+                                                        {`${t.tipo == "eco" ? "Ecografía" : "Tacto"}`}
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    class="col-span-2 flex items-start"
+                                                >
+                                                    <span
+                                                        >{`${t.observacion}`}</span
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            </CardAnimal>
+            <CardAnimal cardsize="max-w-7xl" titulo="Últimos Pesajes">
+                <div
+                    class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
+                >
+                    {#if pesajes.length == 0}
+                        <p class="mt-5 text-lg">No hay pesajes</p>
+                    {:else}
+                        <div
+                            class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
+                        >
+                            <table class="table table-lg">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="text-base ml-3 pl-3 mr-1 pr-1"
+                                            >Fecha</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Peso anterior</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Peso nuevo</th
+                                        >
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {#each pesajes as p}
+                                        <tr>
+                                            <td
+                                                class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
+                                                >{new Date(
+                                                    p.fecha,
+                                                ).toLocaleDateString()}</td
+                                            >
+                                            <td class="text-base mx-1 px-1">
+                                                {`${p.pesoanterior}`}
+                                            </td>
+                                            <td class="text-base mx-1 px-1">
+                                                {`${p.pesonuevo}`}
+                                            </td>
+                                        </tr>
+                                    {/each}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            class="block w-full md:hidden justify-items-center mx-1"
+                        >
+                            {#each pesajes as p}
+                                <div
+                                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                >
+                                    <button>
+                                        <div class="block p-4">
+                                            <div
+                                                class="grid grid-cols-2 gap-y-2"
+                                            >
+                                                <div class="flex items-start">
+                                                    <span>Fecha:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {new Date(
+                                                            p.fecha,
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+
+                                                <div class="flex items-start">
+                                                    <span>Peso anterior:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {`${p.pesoanterior}`}
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-start">
+                                                    <span>Peso nuevo:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {`${p.pesonuevo}`}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            </CardAnimal>
+            <CardAnimal cardsize="max-w-7xl" titulo="Últimos Servicios">
+                <div
+                    class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
+                >
+                    {#if servicios.length == 0}
+                        <p class="mt-5 text-lg">
+                            No tiene inseminaciones y servicios
+                        </p>
+                    {:else}
+                        <div
+                            class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
+                        >
+                            <table class="table table-lg">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="text-base ml-3 pl-3 mr-1 pr-1"
+                                            >Fecha</th
+                                        >
+                                        <th
+                                            class="text-base ml-3 pl-3 mr-1 pr-1"
+                                            >Fecha hasta</th
+                                        >
+                                        <th
+                                            class="text-base ml-3 pl-3 mr-1 pr-1"
+                                            >Fecha parto</th
+                                        >
+
+                                        <th class="text-base mx-1 px-1">Tipo</th
+                                        >
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {#each servicios as s}
+                                        <tr>
+                                            <td
+                                                class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10 border-b dark:border-gray-600"
+                                                >{s.fechadesde
+                                                    ? new Date(
+                                                          s.fechadesde,
+                                                      ).toLocaleDateString()
+                                                    : s.fechainseminacion
+                                                      ? new Date(
+                                                            s.fechainseminacion,
+                                                        ).toLocaleDateString()
+                                                      : ""}
+                                            </td>
+                                            <td
+                                                class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10 border-b dark:border-gray-600"
+                                                >{s.fechahasta
+                                                    ? new Date(
+                                                          s.fechadesde,
+                                                      ).toLocaleDateString()
+                                                    : ""}</td
+                                            >
+                                            <td
+                                                class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10 border-b dark:border-gray-600"
+                                                >{new Date(
+                                                    s.fechaparto,
+                                                ).toLocaleDateString()}</td
+                                            >
+
+                                            <td
+                                                class="text-base mx-1 px-1 border-b dark:border-gray-600"
+                                            >
+                                                {s.fechadesde
+                                                    ? "Natural"
+                                                    : "Artificial"}
+                                            </td>
+                                        </tr>
+                                    {/each}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            class="block w-full md:hidden justify-items-center mx-1"
+                        >
+                            {#each servicios as s}
+                                <div
+                                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                >
+                                    <button>
+                                        <div class="block p-4">
+                                            <div
+                                                class="grid grid-cols-2 gap-y-2"
+                                            >
+                                                <div class="flex items-start">
+                                                    <span>Tipo:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {s.fechadesde
+                                                            ? "Natural"
+                                                            : "Artificial"}
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-start">
+                                                    <span>Fecha parto:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {s.fechaparto
+                                                            ? new Date(
+                                                                  s.fechaparto,
+                                                              ).toLocaleDateString()
+                                                            : ""}
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    class={`flex items-start ${s.fechadesde ? "" : "col-span-2"}`}
+                                                >
+                                                    <span>
+                                                        Fecha {s.fechadesde
+                                                            ? "desde"
+                                                            : "de inseminación"}:
+                                                    </span>
                                                     <span
                                                         class="mx-1 font-semibold"
                                                     >
@@ -907,299 +932,340 @@
                                                               : ""}
                                                     </span>
                                                 </div>
-                                            {/if}
+                                                {#if s.fechadesde}
+                                                    <div
+                                                        class="flex items-start"
+                                                    >
+                                                        <span>Fecha hasta:</span
+                                                        >
+                                                        <span
+                                                            class="mx-1 font-semibold"
+                                                        >
+                                                            {s.fechadesde
+                                                                ? new Date(
+                                                                      s.fechadesde,
+                                                                  ).toLocaleDateString()
+                                                                : s.fechainseminacion
+                                                                  ? new Date(
+                                                                        s.fechainseminacion,
+                                                                    ).toLocaleDateString()
+                                                                  : ""}
+                                                        </span>
+                                                    </div>
+                                                {/if}
 
-                                            <div
-                                                class="col-span-2 flex items-start"
-                                            >
-                                                <span>{`${s.observacion}`}</span
+                                                <div
+                                                    class="col-span-2 flex items-start"
                                                 >
+                                                    <span
+                                                        >{`${s.observacion}`}</span
+                                                    >
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </button>
-                            </div>
-                        {/each}
-                    </div>
-                {/if}
+                                    </button>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            </CardAnimal>
+            <div class="hidden">
+                <CardAnimal
+                    cardsize="max-w-7xl"
+                    titulo="Últimos Inseminaciones"
+                >
+                    {inseminaciones.length}
+                </CardAnimal>
             </div>
-        </CardAnimal>
-        <div class="hidden">
-            <CardAnimal cardsize="max-w-7xl" titulo="Últimos Inseminaciones">
-                {inseminaciones.length}
+
+            <CardAnimal cardsize="max-w-7xl" titulo="Últimos Pariciones">
+                <div
+                    class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
+                >
+                    {#if pariciones.length == 0}
+                        <p class="mt-5 text-lg">No hay pariciones</p>
+                    {:else}
+                        <div
+                            class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
+                        >
+                            <table class="table table-lg">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="text-base ml-3 pl-3 mr-1 pr-1"
+                                            >Fecha</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Madre</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Padre</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Observacion</th
+                                        >
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {#each pariciones as n}
+                                        <tr>
+                                            <td
+                                                class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
+                                                >{new Date(
+                                                    n.fecha,
+                                                ).toLocaleDateString()}</td
+                                            >
+                                            <td class="text-base mx-1 px-1">
+                                                {`${n.nombremadre}`}
+                                            </td>
+                                            <td class="text-base mx-1 px-1">
+                                                {`${n.nombrepadre}`}
+                                            </td>
+                                            <td class="text-base mx-1 px-1">
+                                                {`${n.observacion}`}
+                                            </td>
+                                        </tr>
+                                    {/each}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            class="block w-full md:hidden justify-items-center mx-1"
+                        >
+                            {#each pariciones as n}
+                                <div
+                                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                >
+                                    <button>
+                                        <div class="block p-4">
+                                            <div
+                                                class="grid grid-cols-2 gap-y-2"
+                                            >
+                                                <div class="flex items-start">
+                                                    <span>Fecha:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {new Date(
+                                                            n.fecha,
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-start">
+                                                    <span>Madre:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {`${n.nombremadre}`}
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-start">
+                                                    <span>Padre:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {`${n.nombrepadre}`}
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    class="col-span-2 flex items-start"
+                                                >
+                                                    <span
+                                                        >{`${n.observacion}`}</span
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            </CardAnimal>
+            <CardAnimal cardsize="max-w-7xl" titulo="Últimos Tratamientos">
+                <div
+                    class="w-full flex justify-items-center lg:w-3/4 overflow-x-auto"
+                >
+                    {#if tratamientos.length == 0}
+                        <p class="mt-5 text-lg">No hay tratamientos</p>
+                    {:else}
+                        <div
+                            class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
+                        >
+                            <table class="table table-lg">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="text-base ml-3 pl-3 mr-1 pr-1"
+                                            >Fecha</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Tratamiento</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Categoria</th
+                                        >
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {#each tratamientos as t}
+                                        <tr>
+                                            <td
+                                                class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
+                                                >{new Date(
+                                                    t.fecha,
+                                                ).toLocaleDateString()}</td
+                                            >
+                                            <td class="text-base mx-1 px-1">
+                                                {t.expand.tipo.nombre}
+                                            </td>
+                                            <td class="text-base mx-1 px-1"
+                                                >{t.categoria}</td
+                                            >
+                                        </tr>
+                                    {/each}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            class="block w-full md:hidden justify-items-center mx-1"
+                        >
+                            {#each tratamientos as t}
+                                <div
+                                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                >
+                                    <button>
+                                        <div class="block p-4">
+                                            <div
+                                                class="grid grid-cols-2 gap-y-2"
+                                            >
+                                                <div class="flex items-start">
+                                                    <span>Fecha:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {new Date(
+                                                            t.fecha,
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-start">
+                                                    <span>Tipo:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {`${t.expand.tipo.nombre}`}
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    class="col-span-2 flex items-start"
+                                                >
+                                                    <span
+                                                        >{`${t.observacion}`}</span
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            </CardAnimal>
+            <CardAnimal cardsize="max-w-7xl" titulo="Últimos Observaciones">
+                <div
+                    class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
+                >
+                    {#if observaciones.length == 0}
+                        <p class="mt-5 text-lg">No hay observaciones</p>
+                    {:else}
+                        <div
+                            class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
+                        >
+                            <table class="table table-lg">
+                                <thead>
+                                    <tr>
+                                        <th
+                                            class="text-base ml-3 pl-3 mr-1 pr-1"
+                                            >Fecha</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Observacion</th
+                                        >
+                                        <th class="text-base mx-1 px-1"
+                                            >Categoria</th
+                                        >
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {#each observaciones as o}
+                                        <tr>
+                                            <td
+                                                class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
+                                                >{new Date(
+                                                    o.fecha,
+                                                ).toLocaleDateString()}</td
+                                            >
+                                            <td class="text-base mx-1 px-1">
+                                                {`${o.observacion}`}
+                                            </td>
+                                            <td class="text-base mx-1 px-1">
+                                                {`${capitalize(o.categoria)}`}
+                                            </td>
+                                        </tr>
+                                    {/each}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div
+                            class="block w-full md:hidden justify-items-center mx-1"
+                        >
+                            {#each observaciones as o}
+                                <div
+                                    class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+                                >
+                                    <button>
+                                        <div class="block p-4">
+                                            <div
+                                                class="grid grid-cols-2 gap-y-2"
+                                            >
+                                                <div class="flex items-start">
+                                                    <span>Fecha:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {new Date(
+                                                            o.fecha,
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-start">
+                                                    <span>Categoria:</span>
+                                                    <span
+                                                        class="mx-1 font-semibold"
+                                                    >
+                                                        {`${capitalize(o.categoria)}`}
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    class="col-span-2 flex items-start"
+                                                >
+                                                    <span
+                                                        >{`${o.observacion}`}</span
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
             </CardAnimal>
         </div>
-
-        <CardAnimal cardsize="max-w-7xl" titulo="Últimos Pariciones">
-            <div
-                class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
-            >
-                {#if pariciones.length == 0}
-                    <p class="mt-5 text-lg">No hay pariciones</p>
-                {:else}
-                    <div
-                        class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
-                    >
-                        <table class="table table-lg">
-                            <thead>
-                                <tr>
-                                    <th class="text-base ml-3 pl-3 mr-1 pr-1"
-                                        >Fecha</th
-                                    >
-                                    <th class="text-base mx-1 px-1">Madre</th>
-                                    <th class="text-base mx-1 px-1">Padre</th>
-                                    <th class="text-base mx-1 px-1"
-                                        >Observacion</th
-                                    >
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {#each pariciones as n}
-                                    <tr>
-                                        <td
-                                            class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                            >{new Date(
-                                                n.fecha,
-                                            ).toLocaleDateString()}</td
-                                        >
-                                        <td class="text-base mx-1 px-1">
-                                            {`${n.nombremadre}`}
-                                        </td>
-                                        <td class="text-base mx-1 px-1">
-                                            {`${n.nombrepadre}`}
-                                        </td>
-                                        <td class="text-base mx-1 px-1">
-                                            {`${n.observacion}`}
-                                        </td>
-                                    </tr>
-                                {/each}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div
-                        class="block w-full md:hidden justify-items-center mx-1"
-                    >
-                        {#each pariciones as n}
-                            <div
-                                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                            >
-                                <button>
-                                    <div class="block p-4">
-                                        <div class="grid grid-cols-2 gap-y-2">
-                                            <div class="flex items-start">
-                                                <span>Fecha:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {new Date(
-                                                        n.fecha,
-                                                    ).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                            <div class="flex items-start">
-                                                <span>Madre:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {`${n.nombremadre}`}
-                                                </span>
-                                            </div>
-                                            <div class="flex items-start">
-                                                <span>Padre:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {`${n.nombrepadre}`}
-                                                </span>
-                                            </div>
-                                            <div
-                                                class="col-span-2 flex items-start"
-                                            >
-                                                <span>{`${n.observacion}`}</span
-                                                >
-                                            </div>
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
-                        {/each}
-                    </div>
-                {/if}
-            </div>
-        </CardAnimal>
-        <CardAnimal cardsize="max-w-7xl" titulo="Últimos Tratamientos">
-            <div
-                class="w-full flex justify-items-center lg:w-3/4 overflow-x-auto"
-            >
-                {#if tratamientos.length == 0}
-                    <p class="mt-5 text-lg">No hay tratamientos</p>
-                {:else}
-                    <div
-                        class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
-                    >
-                        <table class="table table-lg">
-                            <thead>
-                                <tr>
-                                    <th class="text-base ml-3 pl-3 mr-1 pr-1"
-                                        >Fecha</th
-                                    >
-                                    <th class="text-base mx-1 px-1"
-                                        >Tratamiento</th
-                                    >
-                                    <th class="text-base mx-1 px-1"
-                                        >Categoria</th
-                                    >
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {#each tratamientos as t}
-                                    <tr>
-                                        <td
-                                            class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                            >{new Date(
-                                                t.fecha,
-                                            ).toLocaleDateString()}</td
-                                        >
-                                        <td class="text-base mx-1 px-1">
-                                            {t.expand.tipo.nombre}
-                                        </td>
-                                        <td class="text-base mx-1 px-1"
-                                            >{t.categoria}</td
-                                        >
-                                    </tr>
-                                {/each}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div
-                        class="block w-full md:hidden justify-items-center mx-1"
-                    >
-                        {#each tratamientos as t}
-                            <div
-                                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                            >
-                                <button>
-                                    <div class="block p-4">
-                                        <div class="grid grid-cols-2 gap-y-2">
-                                            <div class="flex items-start">
-                                                <span>Fecha:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {new Date(
-                                                        t.fecha,
-                                                    ).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                            <div class="flex items-start">
-                                                <span>Tipo:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {`${t.expand.tipo.nombre}`}
-                                                </span>
-                                            </div>
-                                            <div
-                                                class="col-span-2 flex items-start"
-                                            >
-                                                <span>{`${t.observacion}`}</span
-                                                >
-                                            </div>
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
-                        {/each}
-                    </div>
-                {/if}
-            </div>
-        </CardAnimal>
-        <CardAnimal cardsize="max-w-7xl" titulo="Últimos Observaciones">
-            <div
-                class="w-full flex justify-items-center mx-1 lg:w-3/4 overflow-x-auto"
-            >
-                {#if observaciones.length == 0}
-                    <p class="mt-5 text-lg">No hay observaciones</p>
-                {:else}
-                    <div
-                        class="hidden w-full md:grid justify-items-center mx-1 lg:mx-10 lg:w-3/4 overflow-x-auto"
-                    >
-                        <table class="table table-lg">
-                            <thead>
-                                <tr>
-                                    <th class="text-base ml-3 pl-3 mr-1 pr-1"
-                                        >Fecha</th
-                                    >
-                                    <th class="text-base mx-1 px-1"
-                                        >Observacion</th
-                                    >
-                                    <th class="text-base mx-1 px-1"
-                                        >Categoria</th
-                                    >
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {#each observaciones as o}
-                                    <tr>
-                                        <td
-                                            class="text-base ml-3 pl-3 mr-1 pr-1 lg:ml-10"
-                                            >{new Date(
-                                                o.fecha,
-                                            ).toLocaleDateString()}</td
-                                        >
-                                        <td class="text-base mx-1 px-1">
-                                            {`${o.observacion}`}
-                                        </td>
-                                        <td class="text-base mx-1 px-1">
-                                            {`${capitalize(o.categoria)}`}
-                                        </td>
-                                    </tr>
-                                {/each}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div
-                        class="block w-full md:hidden justify-items-center mx-1"
-                    >
-                        {#each observaciones as o}
-                            <div
-                                class="card w-full shadow-xl p-2 hover:bg-gray-200 dark:hover:bg-gray-900"
-                            >
-                                <button>
-                                    <div class="block p-4">
-                                        <div class="grid grid-cols-2 gap-y-2">
-                                            <div class="flex items-start">
-                                                <span>Fecha:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {new Date(
-                                                        o.fecha,
-                                                    ).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                            <div class="flex items-start">
-                                                <span>Categoria:</span>
-                                                <span
-                                                    class="mx-1 font-semibold"
-                                                >
-                                                    {`${capitalize(o.categoria)}`}
-                                                </span>
-                                            </div>
-                                            <div
-                                                class="col-span-2 flex items-start"
-                                            >
-                                                <span>{`${o.observacion}`}</span
-                                                >
-                                            </div>
-                                        </div>
-                                    </div>
-                                </button>
-                            </div>
-                        {/each}
-                    </div>
-                {/if}
-            </div>
-        </CardAnimal>
     </div>
 </Navbar2>

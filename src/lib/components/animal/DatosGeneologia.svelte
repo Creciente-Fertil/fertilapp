@@ -307,28 +307,31 @@
         </div>
     {:else}
         <div>
-            <div
-                class="grid grid-cols-1 lg:grid-cols-4 gap-2 lg:gap-10 m-1 mb-2 lg:mt-2"
-            >
-                {#if fecha.length > 0}
-                    <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
-                        <div>
-                            <label for="fechanacimiento" class="label">
-                                <span class="label-text text-base"
-                                    >Fecha nacimiento</span
-                                >
-                            </label>
-                            <label
-                                for="fechanacimiento"
-                                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-2`}
+            {#if fecha.length > 0}
+                <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
+                    <div>
+                        <label for="fechanacimiento" class="label mb-0 pb-0">
+                            <span
+                                class="
+                            label-text tracking-wide
+                            text-md uppercase
+                            font-semibold dark:text-gray-400
+                            text-gray-500
+                        "
                             >
-                                {new Date(
-                                    fecha + " 03:00:00",
-                                ).toLocaleDateString()}
-                            </label>
-                        </div>
+                                Fecha nacimiento</span
+                            >
+                        </label>
+                        <label
+                            for="fechanacimiento"
+                            class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-2`}
+                        >
+                            {new Date(fecha + " 03:00:00").toLocaleDateString()}
+                        </label>
                     </div>
-                {/if}
+                </div>
+            {/if}
+            <div class="grid grid-cols-1">
                 <h3 class="text-xl mx-1 font-bold mb-1 text-left">
                     No tiene un nacimiento registrado
                 </h3>

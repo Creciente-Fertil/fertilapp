@@ -57,6 +57,7 @@ function processMoves(data) {
     return data_moves
 }
 export async function getAllAnimal(animalId,cabid=null) {
+    
     let user = getUser();
     let token = user.token;
 
@@ -64,6 +65,9 @@ export async function getAllAnimal(animalId,cabid=null) {
     let url = new URL(ruta)
     if (cabid) {
         url.searchParams.append('establishmentId', cabid);
+    }
+    if (animalId) {
+        url.searchParams.append('animalId', animalId);
     }
     let options = {
         headers: {
@@ -75,7 +79,8 @@ export async function getAllAnimal(animalId,cabid=null) {
 
     let data_all = await res_all.json()
     
-    data_all = data_all.filter(a=>a.animalId==animalId)
+    //data_all = data_all.filter(a=>a.animalId==animalId)
+
     let procesada = processMoves(data_all)
 
     return procesada

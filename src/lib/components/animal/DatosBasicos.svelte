@@ -30,7 +30,10 @@
     import * as RodeoService from "$lib/java/rodeos/rodeosback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     import { savePeso } from "$lib/java/pesajes/pesajesback";
-    import { saveBirth,editNacimiento } from "$lib/java/nacimientos/nacimientosback";
+    import {
+        saveBirth,
+        editNacimiento,
+    } from "$lib/java/nacimientos/nacimientosback";
     import Success from "../botones/Success.svelte";
 
     let {
@@ -58,6 +61,10 @@
         openEliminarModal = () => {},
         add = false,
         versionjava = false,
+        //datos genricos
+        lotes = $bindable([]),
+        rodeos = $bindable([]),
+        cargarlotes = $bindable(false),
     } = $props();
     let ruta = import.meta.env.VITE_RUTA;
     let pre = import.meta.env.VITE_PRE;
@@ -107,8 +114,8 @@
     let tipomadre = $state("");
 
     let observacion = $state("");
-    let rodeos = $state([]);
-    let lotes = $state([]);
+    //rodeos = $state([]);
+    //lotes = $state([]);
 
     function onwrite() {}
     function onelegir() {}
@@ -637,7 +644,7 @@
                       ? "ternero"
                       : "ternera",
             cab: cab.id,
-            nacimiento:idnacimiento
+            nacimiento: idnacimiento,
         };
         try {
             if (pesoviejo != peso) {
@@ -865,9 +872,10 @@
             cab = caber.cab;
         }
         await getAnimales();
+        cargarlotes = false;
         await getRodeos();
         await getLotes();
-
+        cargarlotes = true;
         if (connacimiento) {
             idnacimiento = nacimiento.id;
             fecha = nacimiento.fecha.split(" ")[0];
@@ -1052,83 +1060,88 @@
         {/if}
     </div>
     <div class="mb-1 lg:mb-0">
-        <label for="rodeo" class="label mb-0 pb-0">
-            <span
-                class="
+        {#if cargarlotes}
+            <label for="rodeo" class="label mb-0 pb-0">
+                <span
+                    class="
                     label-text tracking-wide
                     text-md uppercase
                     font-semibold dark:text-gray-400
                     text-gray-500
                 "
-            >
-                Rodeo</span
-            >
-        </label>
-        {#if modoedicion}
-            <label class="input-group">
-                <select
-                    class={`
+                >
+                    Rodeo</span
+                >
+            </label>
+            {#if modoedicion}
+                <label class="input-group">
+                    <select
+                        class={`
                         select select-bordered w-full
                         border border-gray-300 rounded-md
                         focus:outline-none focus:ring-2 
                         focus:ring-green-500 focus:border-green-500
                         ${estilos.bgdark2}
                     `}
-                    bind:value={rodeo}
+                        bind:value={rodeo}
+                    >
+                        <option value={null}>{""}</option>
+                        {#each rodeos as t}
+                            <option value={t.id}>{t.nombre}</option>
+                        {/each}
+                    </select>
+                </label>
+            {:else}
+                <label
+                    for="rodeo"
+                    class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
                 >
-                    <option value={null}>{""}</option>
-                    {#each rodeos as t}
-                        <option value={t.id}>{t.nombre}</option>
-                    {/each}
-                </select>
-            </label>
-        {:else}
-            <label
-                for="rodeo"
-                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-            >
-                {nombrerodeo}
-            </label>
+                    {nombrerodeo}
+                </label>
+            {/if}
         {/if}
     </div>
     <div class="mb-1 lg:mb-0">
-        <label for="lote" class="label mb-0 pb-0">
-            <span
-                class="
+        {#if cargarlotes}
+            <label for="lote" class="label mb-0 pb-0">
+                <span
+                    class="
                     label-text tracking-wide
                     text-md uppercase
                     font-semibold dark:text-gray-400
                     text-gray-500
                 "
-            >
-                Lote</span
-            >
-        </label>
-        {#if modoedicion}
-            <label class="input-group">
-                <select
-                    class={`
+                >
+                    Lote</span
+                >
+            </label>
+
+            {#if modoedicion}
+                <label class="input-group">
+                    <select
+                        class={`
                         select select-bordered w-full
                         border border-gray-300 rounded-md
                         focus:outline-none focus:ring-2 
                         focus:ring-green-500 focus:border-green-500
                         ${estilos.bgdark2}
                     `}
-                    bind:value={lote}
+                        bind:value={lote}
+                    >
+                        <option value={null}>{""}</option>
+                        {#each lotes as l}
+                            <option value={l.id}>{l.nombre}</option>
+                        {/each}
+                    </select>
+                </label>
+            {:else}
+                <label
+                    for="lote"
+                    class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
                 >
-                    <option value={null}>{""}</option>
-                    {#each lotes as l}
-                        <option value={l.id}>{l.nombre}</option>
-                    {/each}
-                </select>
-            </label>
-        {:else}
-            <label
-                for="lote"
-                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-            >
-                {nombrelote}
-            </label>
+                    {nombrelote}
+                </label>
+            {/if}
         {/if}
     </div>
     <div class="mb-1 lg:mb-0">
@@ -1293,9 +1306,7 @@
             {modoedicionnacimiento}
         />
     {:else}
-        <div 
-        class="grid grid-cols-1 gap-1 lg:gap-6 mb-2"
-        >
+        <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
             <div>
                 <label for="fechanacimiento" class="label mb-0 pb-0">
                     <span
@@ -1333,8 +1344,9 @@
                     <div class="flex justify-start mx-0 px-0">
                         <button
                             class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
-                            onclick={async () => {await irPadre(madreobj.id);}}
-                            >Ver animal</button
+                            onclick={async () => {
+                                await irPadre(madreobj.id);
+                            }}>Ver animal</button
                         >
                     </div>
                 {/if}
@@ -1386,9 +1398,16 @@
             {#if fecha.length > 0}
                 <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
                     <div>
-                        <label for="fechanacimiento" class="label">
-                            <span class="label-text text-base"
-                                >Fecha nacimiento</span
+                        <label for="fechanacimiento" class="label mb-0 pb-0">
+                            <span
+                                class="
+                            label-text tracking-wide
+                            text-md uppercase
+                            font-semibold dark:text-gray-400
+                            text-gray-500
+                        "
+                            >
+                                Fecha nacimiento</span
                             >
                         </label>
                         <label

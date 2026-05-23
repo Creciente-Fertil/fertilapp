@@ -31,7 +31,7 @@
         } else {
             csvdata = data.map(prepararData);
         }
-
+                
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet([]);
         ws["A1"] = { t: "s", v: "Creciente fertil ", s: {} };

@@ -20,6 +20,8 @@
         animal = {},
         cab = { id: "" },
         versionjava = false,
+        lotes = [],
+        rodeos = []
     } = $props();
 
     let ruta = import.meta.env.VITE_RUTA;
@@ -107,6 +109,40 @@
             let f2 = new Date(m2.fecha);
             return descendente ? (f1 > f2 ? -1 : 1) : f1 > f2 ? 1 : -1;
         });
+    }
+    function getNombreRodeo(id){
+        if(id){
+            let idx = rodeos.findIndex(item=>item.id==id)
+
+            if(idx != -1){
+
+                return rodeos[idx].nombre
+            }
+            else{
+                return "Sin rodeo"
+            }
+        }   
+        else{
+            return "Sin rodeo"
+        }
+    }
+    function getNombreLote(id){
+        
+        if(id){
+            let idx = lotes.findIndex(item=>item.id==id)
+
+
+            if(idx != -1){
+
+                return lotes[idx].nombre
+            }
+            else{
+               return "Sin lote" 
+            }
+        }   
+        else{
+            return "Sin lote"
+        }
     }
     function procesarHistorial() {
         filas = [];
@@ -211,22 +247,22 @@
             let desde = "";
             let hasta = "";
             if (fila.fromLotId) {
-                desde = " " + fila.fromLotId;
+                desde = " " + getNombreLote(fila.fromLotId);
             } else {
                 desde = "Sin lote";
             }
             if (fila.toLotId) {
-                hasta += " &rarr; " + fila.toLotId;
+                hasta += " &rarr; " + getNombreLote(fila.toLotId);
             } else {
                 hasta += " ⇒ " + " Sin lote";
             }
             info = crearInfo(desde, hasta);
             let move = {
-                id: id + "rodeo" + fecha,
+                id: id + "lote" + fecha,
                 fecha,
                 caravana,
-                nombre: "Rodeo",
-                coleccion: "rodeo",
+                nombre: "Lote",
+                coleccion: "lote",
                 info,
             };
             return move;
@@ -237,12 +273,12 @@
             let desde = "";
             let hasta = "";
             if (fila.fromHerdId) {
-                desde = " " + fila.fromHerdId;
+                desde = " " + getNombreRodeo(fila.fromHerdId);
             } else {
                 desde = "Sin lote";
             }
             if (fila.toHerdId) {
-                hasta += " &rarr; " + fila.toHerdId;
+                hasta += " &rarr; " + getNombreRodeo(fila.toHerdId);
             } else {
                 hasta += " ⇒ " + " Sin lote";
             }
@@ -263,6 +299,7 @@
         data.forEach((item) => {
             data_moves.push(processMove(item));
         });
+
         return data_moves;
     }
     async function getData() {
@@ -280,7 +317,9 @@
     }
     onMount(async () => {
         id = $page.params.slug;
+
         await getData();
+        
         filterUpdate();
 
     });
