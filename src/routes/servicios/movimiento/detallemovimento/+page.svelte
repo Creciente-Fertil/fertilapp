@@ -516,6 +516,7 @@
         let recordsa = [];
         if (versionjava) {
             recordsa = await getAll(cab.id);
+            recordsa = recordsa.filter(animal => !animal.delete)
         } else {
             recordsa = await pb.collection("Animalestacto").getFullList({
                 filter: `active=true && cab='${cab.id}'`,

@@ -44,7 +44,7 @@ function processAnimal(animal) {
         id: animal.animalId,
         caravana: animal.tagNumber,
         active: animal.isActive,
-        delete: animal.isDeregistered?animal.isDeregistered:false,
+        delete: animal.isDeregistered?animal.isDeregistered:animal.deathDate?animal.deathDate.length>0:false,
         fechanacimiento: null2string(animal.birthDate),
         sexo: animal.sex == "F" ? "H" : "M",
         nacimiento: null2string(animal.birthId),

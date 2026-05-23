@@ -532,6 +532,7 @@
             animales = recordsa;
         } else {
             let recordsa = await getAll(cab.id);
+            recordsa = recordsa.filter(animal => !animal.delete)
             animales = recordsa;
         }
 

@@ -86,6 +86,10 @@
     async function getAnimales() {
         if (versionjava) {
             let recordsa = await getAll(cab.id);
+            if (add) {
+                recordsa = recordsa.filter((animal) => !animal.delete);
+            }
+
             animales = recordsa;
             animales.sort((a1, a2) =>
                 a1.caravana.toLocaleLowerCase() >
@@ -113,7 +117,6 @@
         }
     }
     function validarCampo(campo) {
-        
         if (campo == "animal") {
             if (animal.length == 0) {
                 malanimal = true;
@@ -304,16 +307,16 @@
     function volver() {
         if (edit) {
             edit = false;
-            validarCampo("animal")
-            validarCampo("fecha")
-            validarCampo("observacion")
-            
+            validarCampo("animal");
+            validarCampo("fecha");
+            validarCampo("observacion");
+
             return;
         }
         goto(pre + "/observaciones");
     }
     function loadObservacion() {
-        botonhabilitado = true
+        botonhabilitado = true;
         detalleobservacion = proxydetalleobservacion.load();
         idobservacion = detalleobservacion.id;
         animal = detalleobservacion.animal;
@@ -335,7 +338,6 @@
             if (slug == "0") {
                 add = true;
             } else {
-                
                 loadObservacion();
             }
         } else {

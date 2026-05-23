@@ -357,6 +357,7 @@
             });
         } else {
             recordsa = await getAll(cab.id);
+            recordsa = recordsa.filter(animal => !animal.delete)
 
         }
 

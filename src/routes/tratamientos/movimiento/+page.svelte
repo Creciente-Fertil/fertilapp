@@ -403,6 +403,7 @@
     async function getAnimales() {
         if (versionjava) {
             let recordsa = await getAll(cab.id);
+            recordsa = recordsa.filter(animal => !animal.delete)
             animales = recordsa;
             animales.sort((a1, a2) =>
                 a1.caravana.toLocaleLowerCase() >

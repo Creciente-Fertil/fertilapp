@@ -143,6 +143,9 @@
         } else {
             let data_animales = await getAll(cab.id);
             recordsa = data_animales;
+            if(add){
+                recordsa = recordsa.filter(animal => !animal.delete)
+            }
         }
         recordsa = recordsa.sort((a, b) =>
             a.caravana.toLocaleLowerCase() < b.caravana.toLocaleLowerCase()

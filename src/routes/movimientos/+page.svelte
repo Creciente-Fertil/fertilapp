@@ -306,8 +306,8 @@
     }
     async function getAnimales() {
         if (versionjava) {
-            const recordsa = await AnimalService.getAll(cab.id);
-
+            let recordsa = await AnimalService.getAll(cab.id);
+            recordsa = recordsa.filter(animal => !animal.delete)
             animales = recordsa;
         } else {
             const recordsa = await pb.collection("animales").getFullList({
