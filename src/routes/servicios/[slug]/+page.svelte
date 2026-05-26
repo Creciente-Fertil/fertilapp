@@ -28,6 +28,7 @@
     import { getAll } from "$lib/java/animales/animalesback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import Success from "$lib/components/botones/Success.svelte";
+    import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
 
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
@@ -35,7 +36,7 @@
     const pb = new PocketBase(ruta);
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
     let caber = createCaber();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
     let cargado = $state(false);
 
     let per = createPer();
@@ -150,10 +151,17 @@
             userpermisos = getPermisosList(per.per.permisos);
         }
     }
+    function getCab() {
+        if (versionjava) {
+            cab = loadStorageEstablecimiento();
+        } else {
+            cab = caber.cab;
+        }
+    }
     //Detalles
     onMount(async () => {
         slug = $page.params.slug;
-
+        getCab();
         loadServicio();
         await getToros();
         cargado = true;
@@ -182,30 +190,18 @@
                         establishmentId: cab.id,
                         expectedBirthDate: fechaparto,
                         notes: observacion,
-                        endDate: fechahasta,
+                        endDtate: fechahasta,
                     };
-                    if (natural) {
-                        data_java.animalId = madre;
-                        fathers = padreslist.map((p) => ({
-                            fatherId: p,
-                            fatherTagNumber: "",
-                            notes: "",
-                        }));
-                        data_java.serviceType = "NATURAL_SERVICE";
-                        data_java.fathers = fathers;
-                    } else {
-                        data_java.animalId = animal;
-                        fathers = [
-                            {
-                                fatherId: padre,
-                                fatherTagNumber: "",
-                                notes: "",
-                            },
-                        ];
-                        data_java.fathers = fathers;
-                        data_java.serviceType = "INSEMINATION";
-                    }
-                    console.log(data_java)
+                    data_java.animalId = madre;
+                    fathers = padreslist.map((p) => ({
+                        fatherId: p,
+                        fatherTagNumber: "",
+                        notes: "",
+                    }));
+                    data_java.serviceType = "NATURAL_SERVICE";
+                    data_java.fathers = fathers;
+                    data_java.startDate = fechadesde;
+
                     return;
                     await editServicio(id, data_java);
                 } else {
@@ -234,10 +230,22 @@
                 if (versionjava) {
                     let data_java = {
                         startDate: fechadesde,
-
+                        
                         expectedBirthDate: fechaparto,
                         notes: observacion,
                     };
+                    data_java.animalId = animal;
+                    let fathers = [
+                        {
+                            fatherId: padre,
+                            fatherTagNumber: "",
+                            notes: "",
+                        },
+                    ];
+                    data_java.fathers = fathers;
+                    data_java.serviceType = "INSEMINATION";
+                    data_java.startDate = fechainseminacion;
+
                     await editServicio(id, data_java);
                 } else {
                     const record = await pb
@@ -445,3 +453,4 @@
         {/if}
     </CardServicio>
 </Navbar2>
+

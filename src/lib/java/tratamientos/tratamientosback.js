@@ -248,7 +248,7 @@ export async function eliminarTratamiento(id) {
     //let data_post = await res_post.json()
     return {}
 }
-export async function eliminarTipo(id) {
+export async function deleteTipo(id) {
     let ruta = `${RUTA_JAVA}${RUTA_TIPO_TRATAMIENTOS}/delete/${id}`
     let user = getUser();
     let token = user.token;

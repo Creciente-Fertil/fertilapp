@@ -17,6 +17,7 @@
     import {
         editTipo,
         saveTipo,
+        deleteTipo
     } from "$lib/java/tratamientos/tratamientosback";
     import Success from "$lib/components/botones/Success.svelte";
     import { getUser } from "$lib/userstorage/usersotrage";
@@ -188,7 +189,7 @@
                 active: false,
             };
             if (versionjava) {
-                await eliminarTipo(p_id);
+                await deleteTipo(p_id);
             } else {
                 const record = await pb
                     .collection("tipotratamientos")

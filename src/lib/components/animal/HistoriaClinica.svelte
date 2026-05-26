@@ -172,7 +172,7 @@
                     return {
                         id: i.id,
                         cod:i.cod,
-                        fecha: i.fecha,
+                        fecha: i.fechadesde,
                         nombre: "Servicio",
                         info:
                             i.observacion.length > 0

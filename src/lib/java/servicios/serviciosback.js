@@ -27,6 +27,7 @@ function processServicio(fila) {
         fechainseminacion: fila.startDate,
         fechahasta: fila.endDate,
         madre: fila.animalId,
+        animal: fila.animalId,
         pajuelas: padres.length>0?pajuelas.join():"",
         padres: padres.length>0?padres.join():"",
 
