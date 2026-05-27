@@ -103,7 +103,9 @@
         getData();
     });
 </script>
-
+<svelte:head>
+    <title>Movimientos · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <CardMovimiento cardsize="max-w-7xl" {edit}>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-1 p-2 pt-0">

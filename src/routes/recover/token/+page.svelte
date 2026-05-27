@@ -92,7 +92,9 @@
         }
     }
 </script>
-
+<svelte:head>
+    <title>Usuario · Fertilapp</title>
+</svelte:head>
 <svelte:window on:keydown={keyEvent} />
 <div
     class="min-h-screen bg-gradient-to-br from-green-400 to-green-700 dark:from-gray-900 dark:to-gray-800 p-4"

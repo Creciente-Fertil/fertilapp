@@ -589,7 +589,9 @@
         }
     }
 </script>
-
+<svelte:head>
+    <title>Animales · Fertilapp</title>
+</svelte:head>
 <Navbarr>
     {#if esdev}
         premisos {JSON.stringify(userpermisos, null, 2)}

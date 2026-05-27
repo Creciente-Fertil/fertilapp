@@ -2,8 +2,8 @@ import { getUser } from "$lib/userstorage/usersotrage";
 import { handleAuthenticatedRequest } from "../errores/erroresback"
 let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
 let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
-let bd_local = import.meta.env.VITE_LOCAL_BD=="si";
-let RUTA_JAVA =bd_local? ruta_local_java:ruta_java
+let bd_local = import.meta.env.VITE_LOCAL_BD == "si";
+let RUTA_JAVA = bd_local ? ruta_local_java : ruta_java
 const RUTA_MOVEMENTS = "movements";
 export function getMovementType() {
     return [
@@ -28,7 +28,7 @@ function processMove(move) {
     let data_movimiento = {
         id: move.movementId,
         animal: move.animalId,
-        animalnombre:move.animalTagNumber,
+        animalnombre: move.animalTagNumber,
         cab: move.establishmentId,
         fecha: move.movementDate,
         tipo: move.movementType,
@@ -53,11 +53,11 @@ function processMoves(data) {
         }
 
     }
-    
+
     return data_moves
 }
-export async function getAllAnimal(animalId,cabid=null) {
-    
+export async function getAllAnimal(animalId, cabid = null) {
+
     let user = getUser();
     let token = user.token;
 
@@ -78,14 +78,14 @@ export async function getAllAnimal(animalId,cabid=null) {
     let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
-    
+
     //data_all = data_all.filter(a=>a.animalId==animalId)
 
     let procesada = processMoves(data_all)
 
     return procesada
 }
-export async function getAll(cabid=null) {
+export async function getAll(cabid = null) {
     let user = getUser();
     let token = user.token;
 
@@ -103,7 +103,7 @@ export async function getAll(cabid=null) {
     let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
-    
+
 
     let procesada = processMoves(data_all)
 
@@ -111,7 +111,7 @@ export async function getAll(cabid=null) {
 }
 export async function getMoveId(id) {
     let ruta = `${RUTA_JAVA}${RUTA_MOVEMENTS}/${id}`
-    
+
     let user = getUser();
     let token = user.token;
     let options = {
@@ -128,36 +128,42 @@ export async function getMoveId(id) {
 function postData(data, establishmentId = 1) {
     let data_move = {
         animalIds: data.animales,
-        establishmentId:data.cab,
+        establishmentId: data.cab,
         movementDate: data.fecha,
         movementType: data.tipo,
-        fromLotId:data.fromLotId,
-        toLotId:data.toLotId,
-        fromHerdId:data.fromHerdId ,
-        toHerdId:data.toHerdId,
-        fromEstablishmentId:data.fromEstablishmentId,
-        toEstablishmentId:data.toEstablishmentId,
+        fromLotId: data.fromLotId,
+        toLotId: data.toLotId,
+        fromHerdId: data.fromHerdId,
+        toHerdId: data.toHerdId,
+        fromEstablishmentId: data.fromEstablishmentId,
+        toEstablishmentId: data.toEstablishmentId,
         notes: data.observaciones
 
     }
     return data_move
 }
-export async function saveMove(data,establishmentId=1) {
+export async function saveMove(data, establishmentId = 1) {
     let ruta = `${RUTA_JAVA}${RUTA_MOVEMENTS}`
     //let data_move = postData(data,establishmentId)
     let user = getUser();
-    let token =  user.token;
-    let res_save = await fetch(ruta, {
-        method: "POST",
-        body: JSON.stringify(data), // data can be `string` or {object}!
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization":`Bearer ${token}`
-        },
-    })
-    let data_save = await res_save.json()
-    let animal = processMove(data_save)
-    return animal
+    let token = user.token;
+    try {
+        let res_save = await fetch(ruta, {
+            method: "POST",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        })
+        let data_save = await res_save.json()
+        let animal = processMove(data_save)
+        return animal
+    }
+    catch (err) {
+        throw new Error(err)
+    }
+
 
 }
 export async function eliminarMove(id) {

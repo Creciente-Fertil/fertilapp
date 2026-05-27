@@ -227,6 +227,9 @@
     }
 </script>
 
+<svelte:head>
+    <title>Lotes · Fertilapp</title>
+</svelte:head>
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <div

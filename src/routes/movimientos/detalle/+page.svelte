@@ -27,10 +27,12 @@
         darBajaAnimal,
         editAnimal,
         transferirAnimal,
+        moverCategoria,
     } from "$lib/java/animales/animalesback";
     import { saveMove } from "$lib/java/movimientos/movimientosback";
     import { getUser } from "$lib/userstorage/usersotrage";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
+    import Movimiento from "$lib/svgs/movimiento.svelte";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -280,13 +282,29 @@
     }
     async function moverDetalleJava(lista) {
         if (selectcategoria) {
+            let ids = lista.map((item) => item.id);
+            try {
+                await moverCategoria(ids, categoria, cab.id);
+                Swal.fire(
+                    "Éxito movimiento",
+                    "Se logró cambiar la categoria",
+                    "success",
+                );
+            } catch (err) {
+                console.error(err);
+                Swal.fire(
+                    "Error movimiento",
+                    "No se logró cambiar la categoria",
+                    "error",
+                );
+            }
             for (let i = 0; i < lista.length; i++) {
                 let fila = lista[i];
                 let id = fila.id;
                 let animal = { ...fila };
                 animal.categoria = categoria;
 
-                await editAnimal(id, animal);
+                //await editAnimal(id, animal);
             }
         }
         if (selectlote) {
@@ -303,7 +321,20 @@
                 toEstablishmentId: null,
                 notes: "",
             };
-            await saveMove(data_move, cab.id);
+            try {
+                await saveMove(data_move, cab.id);
+                Swal.fire(
+                    "Éxito movimiento",
+                    "Se logró mover de lote",
+                    "success",
+                );
+            } catch (err) {
+                Swal.fire(
+                    "Error movimiento",
+                    "No se logró cambiar mover de lote",
+                    "error",
+                );
+            }
         }
         if (selectrodeo) {
             let data_move = {
@@ -319,47 +350,83 @@
                 toEstablishmentId: null,
                 notes: "",
             };
-            await saveMove(data_move, cab.id);
+            try {
+                await saveMove(data_move, cab.id);
+                Swal.fire(
+                    "Éxito movimiento",
+                    "Se logró mover de rodeo",
+                    "success",
+                );
+            } catch (err) {
+                Swal.fire(
+                    "Error movimiento",
+                    "No se logró cambiar mover de rodeo",
+                    "error",
+                );
+            }
         }
 
+        //save move pueder ser
         if (selectbaja) {
-            for (let i = 0; i < lista.length; i++) {
-                let fila = lista[i];
-                let id = fila.id;
-                let data_falle = {
-                    date: fechabaja,
-                    animalId: id,
-                };
-                if (motivo == "fallecimiento") {
-                    await darBajaAnimal(data_falle, motivo);
-                } else if (motivo == "venta") {
-                    let data_venta = {
-                        saleDate: fechafallecimiento,
-                        price: "0",
+            try {
+                for (let i = 0; i < lista.length; i++) {
+                    let fila = lista[i];
+                    let id = fila.id;
+                    let data_falle = {
+                        date: fechabaja,
                         animalId: id,
                     };
-                    await darBajaAnimal(data_venta, motivo);
+                    if (motivo == "fallecimiento") {
+                        await darBajaAnimal(data_falle, motivo);
+                    } else if (motivo == "venta") {
+                        let data_venta = {
+                            saleDate: fechafallecimiento,
+                            price: "0",
+                            animalId: id,
+                        };
+                        await darBajaAnimal(data_venta, motivo);
+                    }
                 }
+                Swal.fire(
+                    "Éxito dar baja",
+                    "Se logró dar baja los animales",
+                    "success",
+                );
+            } catch (err) {
+                Swal.fire(
+                    "Error dar baja",
+                    "No se logró dar baja a todos los animales",
+                    "error",
+                );
             }
-            Swal.fire(
-                "Éxito dar baja",
-                "Se logró dar baja el animal",
-                "success",
-            );
         }
+
+        //save move pueder ser
         if (selecttransfer) {
-            for (let i = 0; i < lista.length; i++) {
-                let fila = lista[i];
-                let data_transfer = {
-                    renspaCode: codigo,
-                    animalId: fila.id,
-                };
-                try {
-                    await transferirAnimal(data_transfer);
-                } catch (err) {
-                    console.warn(err);
-                    
+            try {
+                for (let i = 0; i < lista.length; i++) {
+                    let fila = lista[i];
+                    let data_transfer = {
+                        renspaCode: codigo,
+                        animalId: fila.id,
+                    };
+                    try {
+                        await transferirAnimal(data_transfer);
+                    } catch (err) {
+                        console.warn(err);
+                    }
                 }
+                Swal.fire(
+                    "Éxito transferencia",
+                    "Se logró transferir a los animales",
+                    "success",
+                );
+            } catch (err) {
+                Swal.fire(
+                    "Error transferencia",
+                    "No se logró transferir a los animales",
+                    "error",
+                );
             }
         }
     }
@@ -707,7 +774,9 @@
     let classbuscador = "container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4";
     let classmove = "container mx-auto py-3 px-4 max-w-6xl w-full";
 </script>
-
+<svelte:head>
+    <title>Movimientos · Fertilapp</title>
+</svelte:head>
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <div class={classmove}>

@@ -356,7 +356,9 @@
         };
     }
 </script>
-
+<svelte:head>
+    <title>Rodeos · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <Buscador
         {rodeosrows}

@@ -348,7 +348,9 @@
         }
     }
 </script>
-
+<svelte:head>
+    <title>Servicios · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <CardServicio cardsize="max-w-7xl" {titulo} {edit}>
         {#if esdev}

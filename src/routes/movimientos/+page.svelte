@@ -840,7 +840,9 @@
         }
     }
 </script>
-
+<svelte:head>
+    <title>Movimientos · Fertilapp</title>
+</svelte:head>
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <div

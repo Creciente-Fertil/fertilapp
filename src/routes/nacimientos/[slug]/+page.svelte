@@ -29,6 +29,7 @@
     import { savePeso } from "$lib/java/pesajes/pesajesback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     import Success from "$lib/components/botones/Success.svelte";
+    import Nacimiento from "$lib/svgs/nacimiento.svelte";
 
     let versionjava = $state(import.meta.env.VITE_JAVA == "si");
 
@@ -481,7 +482,9 @@
     function onelegirPadre() {}
     function onwritePadre() {}
 </script>
-
+<svelte:head>
+    <title>Nacimientos · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <CardNacimiento cardsize="max-w-7xl" {edit} {add}>
         <DetalleNacimiento

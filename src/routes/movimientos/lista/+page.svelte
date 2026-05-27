@@ -205,7 +205,9 @@
         
     });
 </script>
-
+<svelte:head>
+    <title>Movimientos · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     {#if versionjava}
         <BuscadorMovimientos

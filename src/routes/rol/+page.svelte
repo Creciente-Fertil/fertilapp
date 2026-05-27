@@ -42,6 +42,9 @@
     }
   ];
 </script>
+<svelte:head>
+    <title>Rol · Fertilapp</title>
+</svelte:head>
 <div class="flex justify-end m-10">
     <Oscuro></Oscuro>
 </div>

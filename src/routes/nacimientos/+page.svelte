@@ -758,7 +758,9 @@
         openNewModal();
     }
 </script>
-
+<svelte:head>
+    <title>Nacimientos · Fertilapp</title>
+</svelte:head>
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador

@@ -1243,7 +1243,9 @@
         await getData();
     });
 </script>
-
+<svelte:head>
+    <title>Inicio · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <div class="flex items-center justify-center">
         <h2 class="text-xl font-bold">

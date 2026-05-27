@@ -88,7 +88,7 @@
                 </h1>
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
             <div class="grid grid-cols-1">
                 {#if seccionAbierta === "CATEGORIA"}
                     <div class="">
@@ -273,7 +273,12 @@
                 {#if seccionAbierta === "TRANSFERIR"}
                     <div>
                         <label for="codigo" class="label">
-                            <span class="label-text text-base">RENSPA</span>
+                            <span class="
+                                    label-text tracking-wide
+                                    text-md uppercase
+                                    font-semibold dark:text-gray-400
+                                    text-gray-500
+                                ">RENSPA</span>
                         </label>
                         <input
                             id="codigo"

@@ -8,8 +8,8 @@ import { processServicios } from "../servicios/serviciosback"
 import { processTratamientos } from "../tratamientos/tratamientosback"
 let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
 let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
-let bd_local = import.meta.env.VITE_LOCAL_BD=="si";
-let RUTA_JAVA =bd_local? ruta_local_java:ruta_java;
+let bd_local = import.meta.env.VITE_LOCAL_BD == "si";
+let RUTA_JAVA = bd_local ? ruta_local_java : ruta_java;
 //Queso
 const RUTA_ANIMALES = "animals"
 function null2string(param) {
@@ -37,14 +37,14 @@ function getCategoriaCod(categoria) {
     }
 }
 function processAnimal(animal) {
-    if(animal==null){
+    if (animal == null) {
         return animal;
     }
     let data_animal = {
         id: animal.animalId,
         caravana: animal.tagNumber,
         active: animal.isActive,
-        delete: animal.isDeregistered?animal.isDeregistered:animal.deathDate?animal.deathDate.length>0:false,
+        delete: animal.isDeregistered ? animal.isDeregistered : animal.deathDate ? animal.deathDate.length > 0 : false,
         fechanacimiento: null2string(animal.birthDate),
         sexo: animal.sex == "F" ? "H" : "M",
         nacimiento: null2string(animal.birthId),
@@ -75,12 +75,12 @@ function processAnimal(animal) {
             nacimiento: {
                 id: animal.birthId,
                 fecha: animal.birthDate,
-                madre:animal.motherId,
-                padre:animal.fatherId,
-                nombremadre:animal.motherTagNumber,
-                nombrepadre:animal.fatherTagNumber,
+                madre: animal.motherId,
+                padre: animal.fatherId,
+                nombremadre: animal.motherTagNumber,
+                nombrepadre: animal.fatherTagNumber,
 
-                observacion:animal.birthNotes
+                observacion: animal.birthNotes
 
             }
         }
@@ -182,7 +182,7 @@ function postData(data, establishmentId = 1) {
         sex: data.sexo == "H" ? "F" : "M",
         rpCode: data.rp,
         establishmentId: data.cab,
-        breed:data.raza,
+        breed: data.raza,
         color: data.color,
         herdId: data.rodeo,
         lotId: data.lote,
@@ -244,20 +244,33 @@ export async function darBajaAnimal(data, motivo) {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
     }
-    if (motivo == "fallecimiento") {
-        let res_save = await fetch(ruta + "/death", {
-            method: "POST",
-            body: JSON.stringify(data), // data can be `string` or {object}!
-            headers
-        })
+    try {
+        if (motivo == "fallecimiento") {
+            let res_save = await fetch(ruta + "/death", {
+                method: "POST",
+                body: JSON.stringify(data), // data can be `string` or {object}!
+                headers
+            })
+            
+            if (res_save.status === 400) {
+                throw new Error('Ya fallecido');
+            }
+        }
+        else if (motivo == "venta") {
+            let res_save = await fetch(ruta + "/sale", {
+                method: "POST",
+                body: JSON.stringify(data), // data can be `string` or {object}!
+                headers
+            })
+            if (res_save.status === 400) {
+                throw new Error('Ya fallecido');
+            }
+        }
     }
-    else if (motivo == "venta") {
-        let res_save = await fetch(ruta + "/sale", {
-            method: "POST",
-            body: JSON.stringify(data), // data can be `string` or {object}!
-            headers
-        })
+    catch (err) {
+        throw new Error(err.message)
     }
+
 }
 export async function transferirAnimal(data) {
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}`
@@ -268,11 +281,21 @@ export async function transferirAnimal(data) {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
     }
-    let res_save = await handleTransferRequest(ruta + "/transfer", {
-        method: "POST",
-        body: JSON.stringify(data), // data can be `string` or {object}!
-        headers
-    })
+    try {
+        let res_save = await handleTransferRequest(ruta + "/transfer", {
+            method: "POST",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers
+        })
+        if (res_save.status === 400) {
+            
+                throw new Error(res_save.message);
+            }
+    }
+    catch (err) {
+        throw new Error(err)
+    }
+
 }
 export async function eliminarAnimalJava(id) {
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}`
@@ -295,35 +318,74 @@ export async function editAnimal(id, data) {
     let user = getUser();
     let token = user.token;
     let data_animal = updateData(data)
-    let res_post = await fetch(ruta,
-        {
-            method: "PUT",
-            body: JSON.stringify(data_animal), // data can be `string` or {object}!
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-        }
-    )
+    try {
+        let res_put = await fetch(ruta,
+            {
+                method: "PUT",
+                body: JSON.stringify(data_animal), // data can be `string` or {object}!
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            }
+        )
 
-    let data_post = await res_post.json()
-    return data_post
+        let data_put = await res_put.json()
+        return data_put
+    }
+    catch (err) {
+        throw new Error(err)
+    }
+
 }
 export async function eliminarAnimal(id) {
     let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/delete/${id}`
     let user = getUser();
     let token = user.token;
-    let res_post = await fetch(ruta,
-        {
+    try {
+        let res_post = await fetch(ruta,
+            {
+                method: "POST",
+                //            body: JSON.stringify({}), // data can be `string` or {object}!
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+            }
+        )
+
+        //let data_post = await res_post.json()
+        return {}
+    }
+    catch (err) {
+        throw new Error(err)
+    }
+
+}
+export async function moverCategoria(ids, categoria, cabid) {
+    let ruta = `${RUTA_JAVA}${RUTA_ANIMALES}/category-movement`
+    let data_move = {
+        establishmentId: cabid,
+        categoryId: getCategoriaCod(categoria),
+        animalIds: ids
+    }
+    let user = getUser();
+    let token = user.token;
+    try {
+        let res_save = await fetch(ruta, {
             method: "POST",
-            //            body: JSON.stringify({}), // data can be `string` or {object}!
+            body: JSON.stringify(data_move), // data can be `string` or {object}!
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
-        }
-    )
+        })
+        let data_save = await res_save.json()
+        return data_move
+    }
+    catch (err) {
+        throw new Error(err)
+    }
 
-    //let data_post = await res_post.json()
-    return {}
+
 }

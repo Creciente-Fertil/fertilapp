@@ -63,15 +63,27 @@ export async function switchEstablishment(estId) {
 }
 export async function saveUser(data) {
     let ruta = `${RUTA_JAVA}${RUTA_USERS}`;
-    let res_signup = await fetch(ruta, {
-        method: "POST",
-        body: JSON.stringify(data), // data can be `string` or {object}!
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-    let data_signup = await res_signup.json()
-    return data_signup
+    try {
+        let res_signup = await fetch(ruta, {
+            method: "POST",
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        if (res_signup.status == 400) {
+        
+            let body_error = await res_signup.json()
+            
+            throw new Error(body_error.message);
+        }
+        let data_signup = await res_signup.json()
+        return data_signup
+    }
+    catch (err) {
+        throw new Error(err.message)
+    }
+
 }
 export async function establecimientosUser(iduser) {
     let ruta = `${RUTA_JAVA}${RUTA_USERS}/${iduser}`;
@@ -208,7 +220,7 @@ export async function getMe(token) {
             "Authorization": `Bearer ${token}`
         }
     })
-    if (!res.ok) {  
+    if (!res.ok) {
         throw new Error(`getMe -> ${res.status}`)
     }
     return await res.json()

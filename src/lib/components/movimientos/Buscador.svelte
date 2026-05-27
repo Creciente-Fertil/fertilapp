@@ -258,7 +258,7 @@
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <button
-                            onclick={limpiarFiltros}
+                            onclick={clickFilter}
                             class={`
                                 rounded-full px-0 md:px-3 py-1 text-md flex items-center gap-1
                                 bg-white  hover:bg-gray-300 dark:bg-transparent

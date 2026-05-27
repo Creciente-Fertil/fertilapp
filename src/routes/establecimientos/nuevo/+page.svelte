@@ -143,7 +143,9 @@
   let classnavbarr = `navbar ${bgnav} fixed top-0 left-0 right-0 z-50`;
   let classtextnavbar = `text-gray-700 font-extrabold dark:text-white`;
 </script>
-
+<svelte:head>
+    <title>Establecimiento · Fertilapp</title>
+</svelte:head>
 <svelte:window bind:innerWidth bind:innerHeight />
 <div
   class={`

@@ -326,18 +326,28 @@
                 };
                 try {
                     await darBajaAnimal(data_falle, motivo);
+
                     Swal.fire(
                         "Éxito dar baja",
                         "Se logró dar baja el animal",
                         "success",
                     );
                 } catch (err) {
+                    
+                    if (err.message == "Ya fallecido") {
+                        Swal.fire(
+                            "Error dar baja",
+                            "Ya esta registrado como desactivo el animal",
+                            "error",
+                        );
+                    } else {
+                        Swal.fire(
+                            "Error dar baja",
+                            "No se logró dar baja el animal",
+                            "error",
+                        );
+                    }
                     console.error(err);
-                    Swal.fire(
-                        "Error dar baja",
-                        "No se logró dar baja el animal",
-                        "error",
-                    );
                 }
             } else if (motivo == "venta") {
                 let data_venta = {
@@ -353,12 +363,21 @@
                         "success",
                     );
                 } catch (err) {
+                    console.error(err.message);
+                    if (err.message == "Ya fallecido") {
+                        Swal.fire(
+                            "Error dar baja",
+                            "Ya esta registrado como desactivo el animal",
+                            "error",
+                        );
+                    } else {
+                        Swal.fire(
+                            "Error dar baja",
+                            "No se logró dar baja el animal",
+                            "error",
+                        );
+                    }
                     console.error(err);
-                    Swal.fire(
-                        "Error dar baja",
-                        "No se logró dar baja el animal",
-                        "error",
-                    );
                 }
             }
         } else {
@@ -469,19 +488,23 @@
                     "success",
                 );
             } catch (err) {
-                if (err.message == "transfer") {
+                
+                if (err.message == "Error: transfer") {
                     Swal.fire(
                         "Error transferencia",
-                        "El animal ya fue transferido",
+                        "El animal puede que haya sido transferido o el establecimiento de origen no tiene RENSPA",
                         "error",
                     );
+                    return
                 }
+
                 if (err.message == "renspa") {
                     Swal.fire(
                         "Error transferencia",
                         "No hay un establecimiento con ese renspa",
                         "error",
                     );
+                    return
                 }
             }
         } else {
@@ -698,7 +721,6 @@
                     color = recorda.raza;
                     raza = recorda.color;
                     active = recorda.active;
-                    
 
                     fechanacimiento = recorda.fechanacimiento.split(" ")[0];
 
@@ -769,12 +791,10 @@
                     ) {
                         fechafall = recorda.fechafallecimiento.split(" ")[0];
                         motivobaja = "fallecimiento";
-                    }
-                    else{
+                    } else {
                         motivobaja = "venta";
                     }
                 }
-
 
                 cargado = true;
                 tab = "datos";
@@ -861,6 +881,9 @@
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
+<svelte:head>
+    <title>Animales · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <DetalleAnimal {caravana} {add}>
         {#if esdev}

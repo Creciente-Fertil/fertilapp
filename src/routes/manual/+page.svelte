@@ -10,6 +10,9 @@
         goto(`/Manual de Usuario.pdf`)
     }
 </script>
+<svelte:head>
+    <title>Manual · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <div class="bg-transparent p-2">
         <div class="flex items-center justify-center ">

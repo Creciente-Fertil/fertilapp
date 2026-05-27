@@ -869,6 +869,9 @@
     }
 </script>
 
+<svelte:head>
+    <title>Estadísticas · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     {#if esdev}
         permisos {JSON.stringify(userpermisos, null, 2)}

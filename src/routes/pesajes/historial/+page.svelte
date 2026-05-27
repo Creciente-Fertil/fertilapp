@@ -295,7 +295,9 @@
         filterUpdate();
     });
 </script>
-
+<svelte:head>
+    <title>Pesajes · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <HistorialPesajes
         {pesajesrows}

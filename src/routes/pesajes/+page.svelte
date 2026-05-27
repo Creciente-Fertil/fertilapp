@@ -508,7 +508,9 @@
         goto(pre + "/pesajes/lista");
     }
 </script>
-
+<svelte:head>
+    <title>Pesajes · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <div
         class="

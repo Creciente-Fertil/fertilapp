@@ -27,6 +27,7 @@
     //filtros
     import MultiSelect from "$lib/components/MultiSelect.svelte";
     import { diasEntreFechas } from "$lib/stringutil/lib";
+    import Nacimiento from "$lib/svgs/nacimiento.svelte";
     let caber = createCaber();
     let cab = caber.cab;
     let ruta = import.meta.env.VITE_RUTA;
@@ -366,7 +367,9 @@
         ordenarNacimientosDescendente(p_forma);
     }
 </script>
-
+<svelte:head>
+    <title>Nacimientos · Fertilapp</title>
+</svelte:head>
 <Navbarr>
     <div class="grid grid-cols-2 lg:grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12">
         <div>

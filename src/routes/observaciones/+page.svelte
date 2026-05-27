@@ -682,7 +682,9 @@
         }
     }
 </script>
-
+<svelte:head>
+    <title>Observaciones · Fertilapp</title>
+</svelte:head>
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
 

@@ -803,7 +803,9 @@
         }
     }
 </script>
-
+<svelte:head>
+    <title>Servicios · Fertilapp</title>
+</svelte:head>
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     <Buscador

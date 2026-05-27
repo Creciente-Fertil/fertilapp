@@ -235,7 +235,9 @@
         loadDetalle();
     });
 </script>
-
+<svelte:head>
+    <title>Tratamientos · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <CardTratamiento cardsize="max-w-7xl" {edit}>
         {#if esdev}

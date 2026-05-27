@@ -62,6 +62,9 @@
     })
 
 </script>
+<svelte:head>
+    <title>Importar · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     {#if cargado}
     <CardImportar cardsize="max-w-2xl" titulo="Importar animales">

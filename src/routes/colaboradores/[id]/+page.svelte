@@ -456,7 +456,7 @@
     }
 </script>
 
-<!--Esta muy piola la cabecera por cada pagina, pero hace falta agregarla en todas las paginas-->
+
 <svelte:head>
     <title>Roles y permisos · Fertilapp</title>
 </svelte:head>

@@ -136,7 +136,7 @@
             level: 1,
             couponCode: null,
             avatar: null,
-            roleId:1
+            roleId: 1,
         };
         if (cupon.trim().length > 0) {
             data["couponCode"] = cupon;
@@ -153,10 +153,31 @@
             );
             goto(pre + "/");
         } catch (err) {
+            guardando = false;
             console.error(err);
+            if (err.message == "Username is required") {
+                Swal.fire("Error guardar", "Nombre usuario obligario", "error");
+                return;
+            }
+            if (err.message == "Password is required") {
+                Swal.fire("Error guardar", "Contraseña obligatoria", "error");
+                return;
+            }
+            if (err.message == "Email is required") {
+                Swal.fire("Error guardar", "Correo obligatorio", "error");
+                return;
+            }
+            if (err.message == "Email is used") {
+                Swal.fire(
+                    "Error guardar",
+                    "El correo ya esta utilizado",
+                    "error",
+                );
+                return;
+            }
             Swal.fire(
                 "Error guardar",
-                "No se puede guardar el usaurio ",
+                "No se pudo guardar el usuario",
                 "error",
             );
         }
@@ -257,6 +278,9 @@
     }
 </script>
 
+<svelte:head>
+    <title>Fertilapp</title>
+</svelte:head>
 <svelte:window on:keydown={keyEvent} />
 <div
     class="min-h-screen bg-gradient-to-br from-green-400 to-green-700 dark:from-gray-900 dark:to-gray-800 p-4"

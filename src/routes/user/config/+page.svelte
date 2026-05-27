@@ -304,7 +304,9 @@
         await getData();
     });
 </script>
-
+<svelte:head>
+    <title>Usuario · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     {#if esdev}
         <Success

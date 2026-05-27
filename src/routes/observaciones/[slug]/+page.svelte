@@ -360,7 +360,9 @@
         await getData();
     });
 </script>
-
+<svelte:head>
+    <title>Observaciones · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <CardObservacion cardsize="max-w-7xl" {edit} {add}>
         {#if esdev}

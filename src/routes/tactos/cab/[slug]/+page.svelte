@@ -225,7 +225,9 @@ let pb_json = JSON.parse(localStorage.getItem("pocketbase_auth"));
         loadTacto();
     });
 </script>
-
+<svelte:head>
+    <title>Tactos · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <CardTacto cardsize="max-w-7xl">
         {#if esdev}

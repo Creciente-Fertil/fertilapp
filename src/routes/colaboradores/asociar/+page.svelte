@@ -140,6 +140,9 @@
         //await getColabs()
     })
 </script>
+<svelte:head>
+    <title>Roles y permisos · Fertilapp</title>
+</svelte:head>
 <Navbarr>
     <div class="mx-1 mt-1">
         <div>

@@ -579,7 +579,9 @@
         await getData();
     });
 </script>
-
+<svelte:head>
+    <title>Tratamientos · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <div
         class="

@@ -335,7 +335,9 @@
         }
     });
 </script>
-
+<svelte:head>
+    <title>Animales · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <div class="container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4">
         <a

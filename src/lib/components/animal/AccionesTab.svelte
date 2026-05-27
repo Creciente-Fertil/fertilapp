@@ -11,8 +11,8 @@
     let {
         caravana = "",
 
-        bajar = (fechafallecimiento, motivo) => {},
-        eliminar = (id) => {},
+        bajar = async (fechafallecimiento, motivo) => {},
+        eliminar = async (id) => {},
 
         fechafallecimiento = $bindable(""),
         motivo = $bindable("fallecimiento"),
@@ -36,7 +36,7 @@
 
     let id = $state("");
 
-    function darBaja() {
+    async function darBaja() {
         if (fechafallecimiento != "") {
             Swal.fire({
                 title: "Dar de baja",
@@ -45,14 +45,14 @@
                 showCancelButton: true,
                 confirmButtonText: "Si",
                 cancelButtonText: "No",
-            }).then((result) => {
+            }).then(async (result) => {
                 if (result.value) {
-                    bajar(fechafallecimiento, motivo);
+                    await bajar(fechafallecimiento, motivo);
                 }
             });
         }
     }
-    function del() {
+    async function del() {
         Swal.fire({
             title: "Eliminar animal",
             text: "¿Seguro que deseas eliminar al animal, los datos relacionados se podrían perder?",
@@ -60,9 +60,9 @@
             showCancelButton: true,
             confirmButtonText: "Si",
             cancelButtonText: "No",
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.value) {
-                eliminar();
+                await eliminar();
             }
         });
     }

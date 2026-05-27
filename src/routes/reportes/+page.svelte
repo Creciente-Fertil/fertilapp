@@ -613,6 +613,9 @@
     }
 
 </script>
+<svelte:head>
+    <title>Reportes · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <div class="w-full grid justify-items-left mx-1 lg:mx-10 mt-1">
         <h1 class="text-2xl">Reportes</h1>  

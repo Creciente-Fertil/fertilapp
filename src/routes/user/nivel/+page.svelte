@@ -84,7 +84,9 @@
     })
     
 </script>
-
+<svelte:head>
+    <title>Usuario · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <div class="min-h-screen font-sans ">
 

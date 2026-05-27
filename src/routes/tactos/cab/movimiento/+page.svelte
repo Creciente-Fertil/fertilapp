@@ -646,7 +646,9 @@
         loadDetalle();
     });
 </script>
-
+<svelte:head>
+    <title>Tactos · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <div
         class="

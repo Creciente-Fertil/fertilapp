@@ -836,6 +836,9 @@
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
+<svelte:head>
+    <title>Animales · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     {#if esdev && false}
         premisos {JSON.stringify(userpermisos, null, 2)}

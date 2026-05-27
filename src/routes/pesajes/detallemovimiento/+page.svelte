@@ -245,7 +245,9 @@
     let classbuscador = "container mx-auto py-1 px-4 max-w-7xl w-full xl:w-3/4";
     let classmove = "container mx-auto py-3 px-4 max-w-6xl w-full";
 </script>
-
+<svelte:head>
+    <title>Pesajes · Fertilapp</title>
+</svelte:head>
 <Navbar2>
     <div class={classmove}>
         {#if esdev}

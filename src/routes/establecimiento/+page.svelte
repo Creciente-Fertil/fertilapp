@@ -565,6 +565,9 @@
     });
 </script>
 
+<svelte:head>
+    <title>Establecimiento · Fertilapp</title>
+</svelte:head>
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
     {#if esdev}
