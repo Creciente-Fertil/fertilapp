@@ -8,7 +8,10 @@
     import estilos from "$lib/stores/estilos";
     import Swal from "sweetalert2";
     import { createStorageProxy } from "$lib/filtros/filtros";
-    import { eliminarMove } from "$lib/java/movimientos/movimientosback";
+    import {
+        eliminarMove,
+        getNombreTipo,
+    } from "$lib/java/movimientos/movimientosback";
     import { loadStorageEstablecimiento } from "$lib/java/establecimientos/establecimientostorage";
     let esdev = import.meta.env.VITE_DEV == "si";
     let ruta = import.meta.env.VITE_RUTA;
@@ -17,7 +20,7 @@
     let defaultmovimiento = {
         id: "",
         animal: "",
-
+        animalnombre: "",
         fecha: "",
         tipo: "",
         tiponombre: "",
@@ -36,6 +39,7 @@
     //Movimiento
     let id = $state("");
     let animal = $state("");
+    let nombreanimal = $state("");
     let fecha = $state("");
     let tipo = $state("");
     let tiponombre = $state("");
@@ -47,7 +51,7 @@
     let toEstablishmentId = $state("");
     let observaciones = $state("");
     let edit = $state(false);
-    let cab = $state({id:"",exist:false,nombre:""})
+    let cab = $state({ id: "", exist: false, nombre: "" });
 
     async function eliminar() {
         Swal.fire({
@@ -87,6 +91,7 @@
         detallemovimento = storage.load();
         id = detallemovimento.id;
         animal = detallemovimento.animal;
+        nombreanimal = detallemovimento.animalnombre;
         fecha = detallemovimento.fecha;
         tipo = detallemovimento.tipo;
         fromLotId = detallemovimento.fromLotId;
@@ -96,13 +101,14 @@
         fromEstablishmentId = detallemovimento.fromEstablishmentId;
         toEstablishmentId = detallemovimento.toEstablishmentId;
         observaciones = detallemovimento.observaciones;
-        cab =loadStorageEstablecimiento()
-        
+        tiponombre = getNombreTipo(detallemovimento.tipo)
+        cab = loadStorageEstablecimiento();
     }
     onMount(() => {
         getData();
     });
 </script>
+
 <svelte:head>
     <title>Movimientos · Fertilapp</title>
 </svelte:head>
@@ -123,7 +129,7 @@
                 </label>
                 <label for="caravana" class="label py-0 my-0">
                     <span class={`text-lg ${estilos.labelcolor} py-0 my-0 px-3`}
-                        >{animal}</span
+                        >{nombreanimal}</span
                     >
                 </label>
             </div>
@@ -146,7 +152,7 @@
                     {tiponombre}
                 </label>
             </div>
-            <div class="col-span-1 md:col-span-2 border-t dark:border-gray-800">
+            <div class="hidden  col-span-1 md:col-span-2 border-t dark:border-gray-800">
                 <div class="label">
                     <span
                         class={`label-text font-medium text-lg ${estilos.subtitle}`}
@@ -163,9 +169,9 @@
         <div
             class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
         >
-        <!-- Botón Cancelar -->
-                <button
-                    class="
+            <!-- Botón Cancelar -->
+            <button
+                class="
                         hidden md:block
                         mt-2 px-10 py-2
                         dark:bg-transparent
@@ -179,10 +185,10 @@
                         dark:hover:bg-gray-800
                         transition-colors
                         text-base"
-                    onclick={volver}
-                >
-                    Volver
-                </button>
+                onclick={volver}
+            >
+                Volver
+            </button>
             <button
                 class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
                 onclick={eliminar}

@@ -23,6 +23,7 @@
     const pb = new PocketBase(ruta);
     let pre = import.meta.env.VITE_PRE;
     let {
+        asociando = $bindable(false),
         colabs = $bindable([]),
         permisos = $bindable({}),
         mostrarcolab,
@@ -32,7 +33,7 @@
         cabid,
         cab,
         versionjava=false,
-        getColabs=()=>{}
+        getColabs=async ()=>{}
     } = $props();
     let titulo = $state("Colaboradores");
 
@@ -62,11 +63,13 @@
         if(versionjava){
             guardando = true
             await asociarJava()
+            await getColabs()
             guardando = false
             
         }
         else{
             await asociarPB()
+            await getColabs()
         }
     }
     async function asociarJava(){
@@ -74,13 +77,16 @@
             email:correoasociar,
             roleId:2
         }
+        asociando = true
         try{
             await addEmailColabEstablishment(data,cab.id)
             Swal.fire("Éxito colaborador","Se logró asociar el colaborador","success")
+            asociando = false
         }
         catch(err){
             console.warn(err)
             Swal.fire("Error colaborador","No se pudo asociar el usuario","error")
+            asociando = true
         }
     }
     async function asociarPB() {

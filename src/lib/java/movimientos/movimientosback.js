@@ -15,7 +15,7 @@ export function getMovementType() {
         { cod: 1, id: "DOWN_SALE", nombre: "Baja por venta" }
     ];
 }
-function getNombreTipo(id) {
+export function getNombreTipo(id) {
     let tipos = getMovementType()
     let t_idx = tipos.findIndex(t => t.id == id)
     if (t_idx != -1) {

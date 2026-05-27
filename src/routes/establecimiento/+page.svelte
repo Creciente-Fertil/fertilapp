@@ -103,6 +103,7 @@
     let malnombre = $state(false);
     let botonhabilitado = $state(false);
     let guardando = $state(false);
+    let asociando =  $state(false);
     function validarBotonNuevo() {
         if (nombre.trim().length > 0) {
             botonhabilitado = true;
@@ -947,15 +948,17 @@
             {:else}
                 <Colaboradores
                     bind:colabs
+                    bind:asociando
                     {mostrarcolab}
                     {guardarColab}
                     {desasociar}
+                    
                     {asociado}
                     cabid={cab.id}
                     {cab}
                     {versionjava}
                     bind:permisos
-                    getColabs={getColabsJava}
+                    {getColabs}
                 />
                 <ListaColabs bind:colabs {versionjava} />
             {/if}
@@ -1033,4 +1036,7 @@
 
 {#if guardando}
     <Guardando texto="Creando nuevo usuario" />
+{/if}
+{#if asociando}
+    <Guardando texto="Asociando usuario" />
 {/if}

@@ -37,6 +37,7 @@
     let defaultmovimiento = {
         id: "",
         animal: "",
+        animalnombre: "",
         fecha: "",
         tipo: "",
         fromLotId: "",
