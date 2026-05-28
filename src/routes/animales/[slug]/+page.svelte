@@ -842,6 +842,7 @@
         }
     }
     async function getData() {
+        cargado = false
         if (versionjava) {
             let _id = $page.params.slug;
 
@@ -873,6 +874,7 @@
 
             userpermisos = getPermisosList(per.per.permisos);
         }
+        cargado = true
     }
     //Necesito una funcion que traiga toda la informacion del animal
     onMount(async () => {
@@ -1091,6 +1093,8 @@
                     />
                 </CardAnimal>
             {/if}
+        {:else}
+                <span class="loading loading-spinner text-success"></span>
         {/if}
     </DetalleAnimal>
 </Navbar2>
