@@ -202,7 +202,7 @@
                     data_java.fathers = fathers;
                     data_java.startDate = fechadesde;
 
-                    return;
+                    
                     await editServicio(id, data_java);
                 } else {
                     await pb.collection("servicios").update(id, dataser);
