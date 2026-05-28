@@ -190,7 +190,7 @@
                         establishmentId: cab.id,
                         expectedBirthDate: fechaparto,
                         notes: observacion,
-                        endDtate: fechahasta,
+                        endDate: fechahasta,
                     };
                     data_java.animalId = madre;
                     fathers = padreslist.map((p) => ({
@@ -230,7 +230,6 @@
                 if (versionjava) {
                     let data_java = {
                         startDate: fechadesde,
-                        
                         expectedBirthDate: fechaparto,
                         notes: observacion,
                     };
