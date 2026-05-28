@@ -72,7 +72,8 @@
     const HOY = new Date().toISOString().split("T")[0];
     let caber = createCaber();
     let userer = createUserer();
-    let cab = caber.cab;
+    let cab = $state(caber.cab);
+    let cargado = $state(false);
 
     let userid = userer.userid;
     let id = $state("");
@@ -866,6 +867,7 @@
 
     onMount(async () => {
         id = $page.params.slug;
+        cargado = false;
         if (versionjava) {
             cab = loadStorageEstablecimiento();
         } else {
@@ -891,6 +893,7 @@
         if (add) {
             modoedicion = true;
         }
+        cargado = true;
     });
     //cancelar class="btn btn-error text-white font-medium text-lg "
     //Editar animal class="btn text-lg px-6 py-2 bg-green-600 hover:bg-green-700 rounded-md text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
@@ -906,162 +909,92 @@
     }
 </script>
 
-<div class="grid grid-cols-2 lg:grid-cols-2">
-    <button class="hidden" onclick={volver}>
-        <h2 class="flex text-2xl mx-1 font-bold mb-2 text-left mt-2">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="md:hidden size-5 mt-1"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15.75 19.5 8.25 12l7.5-7.5"
-                />
-            </svg>
-            Caravana: {shorterWord(caravana)}
-        </h2>
-    </button>
-</div>
+{#if cargado}
+    <div class="grid grid-cols-2 lg:grid-cols-2">
+        <button class="hidden" onclick={volver}>
+            <h2 class="flex text-2xl mx-1 font-bold mb-2 text-left mt-2">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="md:hidden size-5 mt-1"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15.75 19.5 8.25 12l7.5-7.5"
+                    />
+                </svg>
+                Caravana: {shorterWord(caravana)}
+            </h2>
+        </button>
+    </div>
 
-<div class="grid grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
-    {#if modoedicion}
-        <div class="mb-1 lg:mb-0 col-span-2 lg:col-span-1">
-            <label for="caravana" class="label mb-0 pb-0">
-                <span
-                    class="
+    <div class="grid grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
+        {#if modoedicion}
+            <div class="mb-1 lg:mb-0 col-span-2 lg:col-span-1">
+                <label for="caravana" class="label mb-0 pb-0">
+                    <span
+                        class="
                         label-text tracking-wide
                         text-md uppercase
                         font-semibold dark:text-gray-400
                         text-gray-500
                         
                     ">Caravana</span
+                    >
+                </label>
+                <label class="input-group">
+                    <input
+                        id="caravana"
+                        type="text"
+                        class={`input input-bordered w-full ${estilos.bgdark2}`}
+                        oninput={onInput}
+                        bind:value={caravana}
+                    />
+                    {#if malcaravana}
+                        <span class={`text-sm text-red-500`}
+                            >Caravana vacía</span
+                        >
+                    {/if}
+                </label>
+            </div>
+        {/if}
+        <div class="mb-1 lg:mb-0 col-span-2 lg:col-span-1">
+            <label for="rp" class="label mb-0 pb-0">
+                <span
+                    class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+                >
+                    RP</span
                 >
             </label>
-            <label class="input-group">
-                <input
-                    id="caravana"
-                    type="text"
-                    class={`input input-bordered w-full ${estilos.bgdark2}`}
-                    oninput={onInput}
-                    bind:value={caravana}
-                />
-                {#if malcaravana}
-                    <span class={`text-sm text-red-500`}>Caravana vacía</span>
-                {/if}
-            </label>
+            {#if modoedicion}
+                <label class="input-group">
+                    <input
+                        id="rp"
+                        type="text"
+                        class={`input input-bordered w-full ${estilos.bgdark2}`}
+                        bind:value={rp}
+                    />
+                </label>
+            {:else}
+                <label
+                    for="rp"
+                    class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+                >
+                    {shorterWord(rp)}
+                </label>
+            {/if}
         </div>
-    {/if}
-    <div class="mb-1 lg:mb-0 col-span-2 lg:col-span-1">
-        <label for="rp" class="label mb-0 pb-0">
-            <span
-                class="
-                    label-text tracking-wide
-                    text-md uppercase
-                    font-semibold dark:text-gray-400
-                    text-gray-500
-                "
-            >
-                RP</span
-            >
-        </label>
-        {#if modoedicion}
-            <label class="input-group">
-                <input
-                    id="rp"
-                    type="text"
-                    class={`input input-bordered w-full ${estilos.bgdark2}`}
-                    bind:value={rp}
-                />
-            </label>
-        {:else}
-            <label
-                for="rp"
-                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-            >
-                {shorterWord(rp)}
-            </label>
-        {/if}
-    </div>
-    <div class="mb-1 lg:mb-0">
-        <label for="peso" class="label mb-0 pb-0">
-            <span
-                class="
-                    label-text tracking-wide
-                    text-md uppercase
-                    font-semibold dark:text-gray-400
-                    text-gray-500
-                "
-            >
-                Peso(KG)
-            </span>
-        </label>
-        {#if modoedicion}
-            <label class="input-group">
-                <input
-                    id="peso"
-                    type="number"
-                    class={`input input-bordered w-full ${estilos.bgdark2}`}
-                    bind:value={peso}
-                    oninput={() => (peso = Math.max(0, peso))}
-                />
-            </label>
-        {:else}
-            <label
-                for="peso"
-                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-            >
-                {peso}
-            </label>
-        {/if}
-    </div>
-    <div class="mb-1 lg:mb-0">
-        <label for="sexo" class="label mb-0 pb-0">
-            <span
-                class="
-                    label-text tracking-wide
-                    text-md uppercase
-                    font-semibold dark:text-gray-400
-                    text-gray-500
-                "
-            >
-                Sexo</span
-            >
-        </label>
-        {#if modoedicion}
-            <label class="input-group">
-                <select
-                    class={`
-                        select select-bordered
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 focus:border-green-500
-                        ${estilos.bgdark2}
-                    `}
-                    bind:value={sexo}
-                    onchange={calcularTabs}
-                >
-                    {#each sexos as s}
-                        <option value={s.id}>{s.nombre}</option>
-                    {/each}
-                </select>
-            </label>
-        {:else}
-            <label
-                for="sexo"
-                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-            >
-                {getSexo(sexo)}
-            </label>
-        {/if}
-    </div>
-    <div class="mb-1 lg:mb-0">
-        {#if cargarlotes}
-            <label for="rodeo" class="label mb-0 pb-0">
+        <div class="mb-1 lg:mb-0">
+            <label for="peso" class="label mb-0 pb-0">
                 <span
                     class="
                     label-text tracking-wide
@@ -1070,40 +1003,30 @@
                     text-gray-500
                 "
                 >
-                    Rodeo</span
-                >
+                    Peso(KG)
+                </span>
             </label>
             {#if modoedicion}
                 <label class="input-group">
-                    <select
-                        class={`
-                        select select-bordered w-full
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 focus:border-green-500
-                        ${estilos.bgdark2}
-                    `}
-                        bind:value={rodeo}
-                    >
-                        <option value={null}>{""}</option>
-                        {#each rodeos as t}
-                            <option value={t.id}>{t.nombre}</option>
-                        {/each}
-                    </select>
+                    <input
+                        id="peso"
+                        type="number"
+                        class={`input input-bordered w-full ${estilos.bgdark2}`}
+                        bind:value={peso}
+                        oninput={() => (peso = Math.max(0, peso))}
+                    />
                 </label>
             {:else}
                 <label
-                    for="rodeo"
+                    for="peso"
                     class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
                 >
-                    {nombrerodeo}
+                    {peso}
                 </label>
             {/if}
-        {/if}
-    </div>
-    <div class="mb-1 lg:mb-0">
-        {#if cargarlotes}
-            <label for="lote" class="label mb-0 pb-0">
+        </div>
+        <div class="mb-1 lg:mb-0">
+            <label for="sexo" class="label mb-0 pb-0">
                 <span
                     class="
                     label-text tracking-wide
@@ -1112,152 +1035,7 @@
                     text-gray-500
                 "
                 >
-                    Lote</span
-                >
-            </label>
-
-            {#if modoedicion}
-                <label class="input-group">
-                    <select
-                        class={`
-                        select select-bordered w-full
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 focus:border-green-500
-                        ${estilos.bgdark2}
-                    `}
-                        bind:value={lote}
-                    >
-                        <option value={null}>{""}</option>
-                        {#each lotes as l}
-                            <option value={l.id}>{l.nombre}</option>
-                        {/each}
-                    </select>
-                </label>
-            {:else}
-                <label
-                    for="lote"
-                    class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-                >
-                    {nombrelote}
-                </label>
-            {/if}
-        {/if}
-    </div>
-    <div class="mb-1 lg:mb-0">
-        <label for="categoria" class="label mb-0 pb-0">
-            <span
-                class="
-                    label-text tracking-wide
-                    text-md uppercase
-                    font-semibold dark:text-gray-400
-                    text-gray-500
-                "
-            >
-                Categoria</span
-            >
-        </label>
-        {#if modoedicion}
-            <label class="input-group">
-                <select
-                    class={`
-                        select select-bordered w-full
-                        border border-gray-300 rounded-md
-                        focus:outline-none focus:ring-2 
-                        focus:ring-green-500 focus:border-green-500
-                        ${estilos.bgdark2}
-                    `}
-                    bind:value={categoria}
-                >
-                    <option value={null}>{""}</option>
-                    {#each categorias.filter((c) => c.sexo == sexo) as l}
-                        <option value={l.id}>{l.nombre}</option>
-                    {/each}
-                </select>
-            </label>
-        {:else}
-            <label
-                for="categoria"
-                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-            >
-                {capitalize(categoria)}
-            </label>
-        {/if}
-    </div>
-    <div class="mb-1 lg:mb-0">
-        <label for="raza" class="label mb-0 pb-0">
-            <span
-                class="
-                    label-text tracking-wide
-                    text-md uppercase
-                    font-semibold dark:text-gray-400
-                    text-gray-500
-                "
-            >
-                Raza</span
-            >
-        </label>
-        {#if modoedicion}
-            <label class="input-group">
-                <input
-                    id="raza"
-                    type="text"
-                    class={`input input-bordered w-full ${estilos.bgdark2}`}
-                    bind:value={raza}
-                />
-            </label>
-        {:else}
-            <label
-                for="raza"
-                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-            >
-                {shorterWord(raza)}
-            </label>
-        {/if}
-    </div>
-    <div class="mb-1 lg:mb-0">
-        <label for="color" class="label mb-0 pb-0">
-            <span
-                class="
-                    label-text tracking-wide
-                    text-md uppercase
-                    font-semibold dark:text-gray-400
-                    text-gray-500
-                "
-            >
-                Color</span
-            >
-        </label>
-        {#if modoedicion}
-            <label class="input-group">
-                <input
-                    id="color"
-                    type="text"
-                    class={`input input-bordered w-full ${estilos.bgdark2}`}
-                    bind:value={color}
-                />
-            </label>
-        {:else}
-            <label
-                for="color"
-                class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
-            >
-                {shorterWord(color)}
-            </label>
-        {/if}
-    </div>
-    {#if sexo == "H"}
-        <div class="mb-1 lg:mb-0 col-span-2 lg:w-1/2">
-            <label for="prenada" class="label mb-0 pb-0">
-                <span
-                    class="
-                        label-text tracking-wide
-                        text-md uppercase
-                        font-semibold dark:text-gray-400
-                        text-gray-500
-                    "
-                >
-                    Estado</span
+                    Sexo</span
                 >
             </label>
             {#if modoedicion}
@@ -1270,9 +1048,10 @@
                         focus:ring-green-500 focus:border-green-500
                         ${estilos.bgdark2}
                     `}
-                        bind:value={prenada}
+                        bind:value={sexo}
+                        onchange={calcularTabs}
                     >
-                        {#each estados.filter((es) => es.id > -1) as s}
+                        {#each sexos as s}
                             <option value={s.id}>{s.nombre}</option>
                         {/each}
                     </select>
@@ -1282,102 +1061,240 @@
                     for="sexo"
                     class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
                 >
-                    {getEstadoNombre(prenada)}
+                    {getSexo(sexo)}
                 </label>
             {/if}
         </div>
-    {/if}
-</div>
-{#if connacimiento}
-    {#if modoedicionnacimiento}
-        <NacimientoPerfil
-            {connacimiento}
-            bind:fecha
-            bind:madre
-            bind:nombremadre
-            {onelegir}
-            {onwrite}
-            {listamadres}
-            {cargadoanimales}
-            bind:padre
-            bind:nombrepadre
-            {listapadres}
-            bind:observacion
-            {modoedicionnacimiento}
-        />
-    {:else}
-        <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
-            <div>
-                <label for="fechanacimiento" class="label mb-0 pb-0">
+        <div class="mb-1 lg:mb-0">
+            {#if cargarlotes}
+                <label for="rodeo" class="label mb-0 pb-0">
                     <span
                         class="
-                            label-text tracking-wide
-                            text-md uppercase
-                            font-semibold dark:text-gray-400
-                            text-gray-500
-                        "
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
                     >
-                        Fecha nacimiento</span
+                        Rodeo</span
                     >
                 </label>
+                {#if modoedicion}
+                    <label class="input-group">
+                        <select
+                            class={`
+                        select select-bordered w-full
+                        border border-gray-300 rounded-md
+                        focus:outline-none focus:ring-2 
+                        focus:ring-green-500 focus:border-green-500
+                        ${estilos.bgdark2}
+                    `}
+                            bind:value={rodeo}
+                        >
+                            <option value={null}>{""}</option>
+                            {#each rodeos as t}
+                                <option value={t.id}>{t.nombre}</option>
+                            {/each}
+                        </select>
+                    </label>
+                {:else}
+                    <label
+                        for="rodeo"
+                        class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+                    >
+                        {nombrerodeo}
+                    </label>
+                {/if}
+            {/if}
+        </div>
+        <div class="mb-1 lg:mb-0">
+            {#if cargarlotes}
+                <label for="lote" class="label mb-0 pb-0">
+                    <span
+                        class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+                    >
+                        Lote</span
+                    >
+                </label>
+
+                {#if modoedicion}
+                    <label class="input-group">
+                        <select
+                            class={`
+                        select select-bordered w-full
+                        border border-gray-300 rounded-md
+                        focus:outline-none focus:ring-2 
+                        focus:ring-green-500 focus:border-green-500
+                        ${estilos.bgdark2}
+                    `}
+                            bind:value={lote}
+                        >
+                            <option value={null}>{""}</option>
+                            {#each lotes as l}
+                                <option value={l.id}>{l.nombre}</option>
+                            {/each}
+                        </select>
+                    </label>
+                {:else}
+                    <label
+                        for="lote"
+                        class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+                    >
+                        {nombrelote}
+                    </label>
+                {/if}
+            {/if}
+        </div>
+        <div class="mb-1 lg:mb-0">
+            <label for="categoria" class="label mb-0 pb-0">
+                <span
+                    class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+                >
+                    Categoria</span
+                >
+            </label>
+            {#if modoedicion}
+                <label class="input-group">
+                    <select
+                        class={`
+                        select select-bordered w-full
+                        border border-gray-300 rounded-md
+                        focus:outline-none focus:ring-2 
+                        focus:ring-green-500 focus:border-green-500
+                        ${estilos.bgdark2}
+                    `}
+                        bind:value={categoria}
+                    >
+                        <option value={null}>{""}</option>
+                        {#each categorias.filter((c) => c.sexo == sexo) as l}
+                            <option value={l.id}>{l.nombre}</option>
+                        {/each}
+                    </select>
+                </label>
+            {:else}
                 <label
-                    for="fechanacimiento"
+                    for="categoria"
                     class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
                 >
-                    {new Date(fecha + " 03:00:00").toLocaleDateString()}
+                    {capitalize(categoria)}
                 </label>
-            </div>
+            {/if}
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2">
-            <div>
-                <label for="nombremadre" class="label">
-                    <span class="label-text text-base">
-                        <span
-                            class="label-text tracking-wide text-md uppercase font-semibold dark:text-gray-400 text-gray-500"
-                        >
-                            Madre
-                        </span>: {nombremadre}
-                    </span>
+        <div class="mb-1 lg:mb-0">
+            <label for="raza" class="label mb-0 pb-0">
+                <span
+                    class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+                >
+                    Raza</span
+                >
+            </label>
+            {#if modoedicion}
+                <label class="input-group">
+                    <input
+                        id="raza"
+                        type="text"
+                        class={`input input-bordered w-full ${estilos.bgdark2}`}
+                        bind:value={raza}
+                    />
                 </label>
-
-                {#if madreobj.id != -1}
-                    <div class="flex justify-start mx-0 px-0">
-                        <button
-                            class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
-                            onclick={async () => {
-                                await irPadre(madreobj.id);
-                            }}>Ver animal</button
+            {:else}
+                <label
+                    for="raza"
+                    class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+                >
+                    {shorterWord(raza)}
+                </label>
+            {/if}
+        </div>
+        <div class="mb-1 lg:mb-0">
+            <label for="color" class="label mb-0 pb-0">
+                <span
+                    class="
+                    label-text tracking-wide
+                    text-md uppercase
+                    font-semibold dark:text-gray-400
+                    text-gray-500
+                "
+                >
+                    Color</span
+                >
+            </label>
+            {#if modoedicion}
+                <label class="input-group">
+                    <input
+                        id="color"
+                        type="text"
+                        class={`input input-bordered w-full ${estilos.bgdark2}`}
+                        bind:value={color}
+                    />
+                </label>
+            {:else}
+                <label
+                    for="color"
+                    class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+                >
+                    {shorterWord(color)}
+                </label>
+            {/if}
+        </div>
+        {#if sexo == "H"}
+            <div class="mb-1 lg:mb-0 col-span-2 lg:w-1/2">
+                <label for="prenada" class="label mb-0 pb-0">
+                    <span
+                        class="
+                        label-text tracking-wide
+                        text-md uppercase
+                        font-semibold dark:text-gray-400
+                        text-gray-500
+                    "
+                    >
+                        Estado</span
+                    >
+                </label>
+                {#if modoedicion}
+                    <label class="input-group">
+                        <select
+                            class={`
+                        select select-bordered
+                        border border-gray-300 rounded-md
+                        focus:outline-none focus:ring-2 
+                        focus:ring-green-500 focus:border-green-500
+                        ${estilos.bgdark2}
+                    `}
+                            bind:value={prenada}
                         >
-                    </div>
+                            {#each estados.filter((es) => es.id > -1) as s}
+                                <option value={s.id}>{s.nombre}</option>
+                            {/each}
+                        </select>
+                    </label>
+                {:else}
+                    <label
+                        for="sexo"
+                        class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+                    >
+                        {getEstadoNombre(prenada)}
+                    </label>
                 {/if}
             </div>
-
-            <div>
-                <label for="nombrepadre" class="label">
-                    <span class="label-text text-base">
-                        <span
-                            class="label-text tracking-wide text-md uppercase font-semibold dark:text-gray-400 text-gray-500"
-                        >
-                            Padre
-                        </span>
-                        : {nombrepadre}
-                    </span>
-                </label>
-
-                {#if padreobj.id != -1}
-                    <div class="flex justify-start mx-0 px-0">
-                        <button
-                            class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
-                            onclick={async () => await irPadre(padreobj.id)}
-                            >Ver animal</button
-                        >
-                    </div>
-                {/if}
-            </div>
-        </div>
-    {/if}
-{:else}
-    <div>
+        {/if}
+    </div>
+    {#if connacimiento}
         {#if modoedicionnacimiento}
             <NacimientoPerfil
                 {connacimiento}
@@ -1395,64 +1312,162 @@
                 {modoedicionnacimiento}
             />
         {:else}
-            {#if fecha.length > 0}
-                <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
-                    <div>
-                        <label for="fechanacimiento" class="label mb-0 pb-0">
-                            <span
-                                class="
+            <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
+                <div>
+                    <label for="fechanacimiento" class="label mb-0 pb-0">
+                        <span
+                            class="
                             label-text tracking-wide
                             text-md uppercase
                             font-semibold dark:text-gray-400
                             text-gray-500
                         "
-                            >
-                                Fecha nacimiento</span
-                            >
-                        </label>
-                        <label
-                            for="fechanacimiento"
-                            class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-2`}
                         >
-                            {new Date(fecha + " 03:00:00").toLocaleDateString()}
-                        </label>
-                    </div>
+                            Fecha nacimiento</span
+                        >
+                    </label>
+                    <label
+                        for="fechanacimiento"
+                        class={`text-lg tracking-wide ${estilos.labelcolor} py-0 my-0 px-3`}
+                    >
+                        {new Date(fecha + " 03:00:00").toLocaleDateString()}
+                    </label>
                 </div>
-            {/if}
-            <div class="grid grid-cols-1">
-                <h3 class="text-xl mx-1 font-bold mb-1 text-left">
-                    No tiene un nacimiento registrado
-                </h3>
+            </div>
+            <div
+                class="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-6 mx-1 mb-2"
+            >
+                <div>
+                    <label for="nombremadre" class="label">
+                        <span class="label-text text-base">
+                            <span
+                                class="label-text tracking-wide text-md uppercase font-semibold dark:text-gray-400 text-gray-500"
+                            >
+                                Madre
+                            </span>: {nombremadre}
+                        </span>
+                    </label>
+
+                    {#if madreobj.id != -1}
+                        <div class="flex justify-start mx-0 px-0">
+                            <button
+                                class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
+                                onclick={async () => {
+                                    await irPadre(madreobj.id);
+                                }}>Ver animal</button
+                            >
+                        </div>
+                    {/if}
+                </div>
+
+                <div>
+                    <label for="nombrepadre" class="label">
+                        <span class="label-text text-base">
+                            <span
+                                class="label-text tracking-wide text-md uppercase font-semibold dark:text-gray-400 text-gray-500"
+                            >
+                                Padre
+                            </span>
+                            : {nombrepadre}
+                        </span>
+                    </label>
+
+                    {#if padreobj.id != -1}
+                        <div class="flex justify-start mx-0 px-0">
+                            <button
+                                class={`${estilos.basico} ${estilos.chico} ${estilos.primario}`}
+                                onclick={async () => await irPadre(padreobj.id)}
+                                >Ver animal</button
+                            >
+                        </div>
+                    {/if}
+                </div>
             </div>
         {/if}
+    {:else}
+        <div>
+            {#if modoedicionnacimiento}
+                <NacimientoPerfil
+                    {connacimiento}
+                    bind:fecha
+                    bind:madre
+                    bind:nombremadre
+                    {onelegir}
+                    {onwrite}
+                    {listamadres}
+                    {cargadoanimales}
+                    bind:padre
+                    bind:nombrepadre
+                    {listapadres}
+                    bind:observacion
+                    {modoedicionnacimiento}
+                />
+            {:else}
+                {#if fecha.length > 0}
+                    <div class="grid grid-cols-1 gap-1 lg:gap-6 mb-2">
+                        <div>
+                            <label
+                                for="fechanacimiento"
+                                class="label mb-0 pb-0"
+                            >
+                                <span
+                                    class="
+                            label-text tracking-wide
+                            text-md uppercase
+                            font-semibold dark:text-gray-400
+                            text-gray-500
+                        "
+                                >
+                                    Fecha nacimiento</span
+                                >
+                            </label>
+                            <label
+                                for="fechanacimiento"
+                                class={`block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1 p-2`}
+                            >
+                                {new Date(
+                                    fecha + " 03:00:00",
+                                ).toLocaleDateString()}
+                            </label>
+                        </div>
+                    </div>
+                {/if}
+                <div class="grid grid-cols-1">
+                    <h3 class="text-xl mx-1 font-bold mb-1 text-left">
+                        No tiene un nacimiento registrado
+                    </h3>
+                </div>
+            {/if}
 
-        <div class="hidden mt-6 flex space-x-3 justify-end">
-            <button
-                onclick={guardarNacimiento}
-                class={`
+            <div class="hidden mt-6 flex space-x-3 justify-end">
+                <button
+                    onclick={guardarNacimiento}
+                    class={`
                     mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base
                     ${modoedicionnacimiento ? "" : "hidden"}
                 `}
-                aria-label="Editar"
-            >
-                Guardar
-            </button>
+                    aria-label="Editar"
+                >
+                    Guardar
+                </button>
+            </div>
         </div>
-    </div>
-{/if}
-{#if modoedicion}
-    <div class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800">
-        <!-- Botón Cancelar -->
-        {#if add}
-            <!-- Botón Agregar -->
-            <Success
-                disabled={malcaravana || caravana.trim().length == 0}
-                onclick={guardarAnimal}
-                texto="Guardar"
-            />
-        {:else}
-            <button
-                class="
+    {/if}
+    {#if modoedicion}
+        <div
+            class="mt-6 flex space-x-3 justify-end border-t dark:border-gray-800"
+        >
+            <!-- Botón Cancelar -->
+            {#if add}
+                <!-- Botón Agregar -->
+                <Success
+                    disabled={malcaravana || caravana.trim().length == 0}
+                    onclick={guardarAnimal}
+                    texto="Guardar"
+                />
+            {:else}
+                <button
+                    class="
                         
                 mt-2 px-5 py-1 md:py-2 md:px-10
                 dark:bg-transparent
@@ -1466,31 +1481,31 @@
                 dark:hover:bg-gray-800
                 transition-colors
                 text-base"
-                onclick={cancelarEditar}
-            >
-                Cancelar
-            </button>
-            <!-- Botón Editar -->
-            <Success
-                disabled={malcaravana || caravana.trim().length == 0}
-                onclick={editarAnimal}
-                texto="Guardar cambios"
-            />
-        {/if}
-    </div>
-{/if}
-<div
-    class={`mt-6 flex space-x-3 justify-end border-t dark:border-gray-800 ${modoedicion ? "hidden" : ""}`}
->
-    <button
-        onclick={openEliminarModal}
-        class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+                    onclick={cancelarEditar}
+                >
+                    Cancelar
+                </button>
+                <!-- Botón Editar -->
+                <Success
+                    disabled={malcaravana || caravana.trim().length == 0}
+                    onclick={editarAnimal}
+                    texto="Guardar cambios"
+                />
+            {/if}
+        </div>
+    {/if}
+    <div
+        class={`mt-6 flex space-x-3 justify-end border-t dark:border-gray-800 ${modoedicion ? "hidden" : ""}`}
     >
-        Eliminar
-    </button>
-    <!-- Botón Volver -->
-    <button
-        class="
+        <button
+            onclick={openEliminarModal}
+            class="mt-2 px-10 py-2 bg-[#A94442] text-white font-medium rounded-full shadow-sm hover:bg-red-800 transition-colors text-base"
+        >
+            Eliminar
+        </button>
+        <!-- Botón Volver -->
+        <button
+            class="
             hidden
             mt-2 px-10 py-2
             dark:bg-transparent
@@ -1504,17 +1519,23 @@
             dark:hover:bg-gray-800
             transition-colors
             text-base"
-        onclick={volver}
-    >
-        Volver
-    </button>
-    <button
-        class={`
+            onclick={volver}
+        >
+            Volver
+        </button>
+        <button
+            class={`
             mt-2 px-5 py-1 md:py-2 md:px-10 bg-[#115642] text-white font-medium rounded-full shadow-sm hover:bg-green-700 transition-colors text-base
             
         `}
-        onclick={openEditar}
-    >
-        Editar
-    </button>
-</div>
+            onclick={openEditar}
+        >
+            Editar
+        </button>
+    </div>
+{:else}
+    <div class="flex justify-center">
+<span class="loading loading-spinner text-success"></span>
+    </div>
+    
+{/if}
