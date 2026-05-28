@@ -173,7 +173,7 @@
                     });
                     if (reccabs.totalItems > 0) {
                         let establecimiento = reccabs.items[0];
-                        //Hay que guardar a la cabaña de preferencias
+                        //Hay que guardar a el establecimiento de preferencias
                         caber.setCab(
                             establecimiento.nombre,
                             establecimiento.id,

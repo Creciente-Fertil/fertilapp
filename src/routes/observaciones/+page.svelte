@@ -167,6 +167,7 @@
         if (versionjava) {
             let records = await ObservacionService.getAll();
             observaciones = records;
+
             observacionesrow = observaciones;
             cargadosobservaciones = true;
         } else {
@@ -372,28 +373,29 @@
         }
     }
     async function getData() {
-        if(versionjava){
-            cab = loadStorageEstablecimiento()
-            let user_data = getUser()
-            usuarioid = user_data.id
+        if (versionjava) {
+            cab = loadStorageEstablecimiento();
+            let user_data = getUser();
+            usuarioid = user_data.id;
             await getObservaciones();
-        filterUpdate();
-        await getAnimales();
-        }
-        else{
-            cab = caber.cab
-            let pb_json = await JSON.parse(localStorage.getItem("pocketbase_auth"));
-        usuarioid = pb_json.record.id;
+            filterUpdate();
+            await getAnimales();
+        } else {
+            cab = caber.cab;
+            let pb_json = await JSON.parse(
+                localStorage.getItem("pocketbase_auth"),
+            );
+            usuarioid = pb_json.record.id;
 
-        await getObservaciones();
-        filterUpdate();
-        await getAnimales();
+            await getObservaciones();
+            filterUpdate();
+            await getAnimales();
         }
     }
     onMount(async () => {
         proxyfiltros = proxy.load();
         setFilters();
-        await getData()
+        await getData();
         if (esCelu) {
             pageSize = 5;
         }
@@ -682,12 +684,12 @@
         }
     }
 </script>
+
 <svelte:head>
     <title>Observaciones · Fertilapp</title>
 </svelte:head>
 <svelte:window bind:innerWidth bind:innerHeight />
 <Navbar2>
-
     <Buscador
         {observacionesrow}
         cabnombre={cab.nombre}
@@ -704,164 +706,15 @@
         {filterUpdate}
         {clickFilter}
     />
-    {#if esdev &&false}
+    {#if esdev && false}
         <Success
             texto={versionjava ? "Cerrar java" : "ver java"}
             onclick={toggleJava}
         />
     {/if}
-    <div
-        class="hidden grid grid-cols-2 lg:grid-cols-3 mx-1 lg:mx-10 mt-1 w-11/12"
-    >
-        <div>
-            <h1 class="text-2xl">Observaciones</h1>
-        </div>
-        <div class="flex col-span-2 gap-1 justify-start lg:justify-end">
-            <div>
-                <button
-                    class={` btn btn-primary rounded-lg ${estilos.btntext} px-2 mx-1`}
-                    data-theme="forest"
-                    onclick={() => openNewModal()}
-                >
-                    <span class="text-lg m-1">Nuevo</span>
-                </button>
-            </div>
-            <div>
-                <Exportar
-                    titulo={"Observaciones"}
-                    filtros={[]}
-                    confiltros={false}
-                    data={observacionesrow}
-                    sheetname={"Observaciones"}
-                    establecimiento={cab.nombre}
-                    {prepararData}
-                />
-            </div>
-        </div>
-    </div>
 
-    <div
-        class="hidden grid grid-cols-1 lg:grid-cols-2 m-1 mb-2 mt-1 mx-1 lg:mx-10 w-11/12"
-    >
-        <div class="w-11/12">
-            <label
-                class={`
-                        input input-bordered flex items-center gap-2
-                        ${estilos.bgdark2}
-                    `}
-            >
-                <input
-                    type="text"
-                    class="grow"
-                    placeholder="Buscar..."
-                    bind:value={buscar}
-                    oninput={filterUpdate}
-                />
-            </label>
-        </div>
-        <div class="w-11/12">
-            <Limpiar {limpiarFiltros} />
-        </div>
-    </div>
-    <!--Filtrar-->
-    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
-        <button aria-label="Filtrar" class="w-full" onclick={clickFilter}>
-            <div class="flex justify-between items-center px-2">
-                <h1 class="font-bold text-lg py-2">Filtros</h1>
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class={`h-5 w-5 transition-all duration-300 ${isOpenFilter ? "transform rotate-180" : ""}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
-                    />
-                </svg>
-            </div>
-        </button>
-        <div>
-            <span class="text-lg mx-1"
-                >Total de observaciones encontradas: {totalObservacionesEncontradas}</span
-            >
-        </div>
-        {#if isOpenFilter}
-            <div transition:slide>
-                <div class="grid grid-cols-1 lg:grid-cols-4">
-                    <div class="">
-                        <label
-                            class="block tracking-wide mb-2"
-                            for="grid-first-name"
-                        >
-                            Fecha desde
-                        </label>
-                        <input
-                            id="fechadesde"
-                            type="date"
-                            class={`
-                            w-full md:w-1/2
-                                input input-bordered
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={fechadesde}
-                            onchange={filterUpdate}
-                        />
-                    </div>
-                    <div class="">
-                        <label
-                            class="block tracking-wide mb-2"
-                            for="grid-first-name"
-                        >
-                            Fecha Hasta
-                        </label>
-                        <input
-                            id="fechadesde"
-                            type="date"
-                            class={`
-                            w-full md:w-1/2
-                                input input-bordered
-                                ${estilos.bgdark2}
-                            `}
-                            bind:value={fechahasta}
-                            onchange={filterUpdate}
-                        />
-                    </div>
-                    <div>
-                        <label for="categoria" class="tracking-wide label">
-                            <span class="label-text text-base">Categoria</span>
-                        </label>
-                        <label class="input-group">
-                            <select
-                                class={`
-                                    select select-bordered w-full
-                                    rounded-md
-                                    focus:outline-none focus:ring-2 
-                                    focus:ring-green-500 
-                                    focus:border-green-500
-                                    ${estilos.bgdark2}
-                                `}
-                                bind:value={buscarcategoria}
-                                onchange={filterUpdate}
-                            >
-                                <option value="">Todos</option>
-                                {#each categorias as s}
-                                    <option value={s.id}>{s.nombre}</option>
-                                {/each}
-                            </select>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        {/if}
-    </div>
     <!--Ordenar-->
-    <div
-        class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent"
-    >
+    <div class="hidden w-11/12 m-1 mb-2 lg:mx-10 rounded-lg bg-transparent">
         <button aria-label="Ordenar" class="w-full" onclick={clickOrdenar}>
             <div class="flex justify-between items-center px-1">
                 <h1 class="font-semibold text-lg py-2">Ordenar</h1>

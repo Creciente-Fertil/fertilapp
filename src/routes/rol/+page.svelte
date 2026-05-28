@@ -15,7 +15,7 @@
         {
             src: "https://picsum.photos/300/200?random=1",
             alt: "Cabañas",
-            title: "Gestion cabaña",
+            title: "Gestion establecimiento",
             rol:"cab"
         },
         {
@@ -27,7 +27,7 @@
     ];
     const roles = [
     {
-      title: "Cabaña",
+      title: "establecimiento",
       description: "Administra tus animales",
       icon: "🐮",
       rol:"cab"

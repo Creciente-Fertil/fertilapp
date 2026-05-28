@@ -330,7 +330,7 @@
 
                 Swal.fire(
                     "Exito guadar",
-                    "Se pudo guardar la cabaña con éxito",
+                    "Se pudo guardar el establecimiento con éxito",
                     "success",
                 );
                 saveStorageEstablecimiento({
@@ -361,7 +361,7 @@
                 console.error(err);
                 Swal.fire(
                     "Error guardar",
-                    "No se pudo guardar la cabaña",
+                    "No se pudo guardar el establecimiento",
                     "error",
                 );
             }
@@ -386,7 +386,7 @@
                 const record = await pb.collection("cabs").create(data);
                 Swal.fire(
                     "Exito guadar",
-                    "Se pudo guardar la cabaña con éxito",
+                    "Se pudo guardar el establecimiento con éxito",
                     "success",
                 );
                 caber.setCab(nombre, record.id);
@@ -396,7 +396,7 @@
                 console.error(err);
                 Swal.fire(
                     "Error guardar",
-                    "No se pudo guardar la cabaña",
+                    "No se pudo guardar el establecimiento",
                     "error",
                 );
             }
@@ -445,14 +445,14 @@
 
             Swal.fire(
                 "Exito modificar",
-                "Se pudo modificar la cabaña con éxito",
+                "Se pudo modificar el establecimiento con éxito",
                 "success",
             );
         } catch (err) {
             console.error(err);
             Swal.fire(
                 "Error modificar",
-                "No se pudo modificar la cabaña con éxito",
+                "No se pudo modificar el establecimiento con éxito",
                 "error",
             );
         }

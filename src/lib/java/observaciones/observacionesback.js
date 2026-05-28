@@ -56,6 +56,7 @@ export async function getAll(cabid = null) {
             "Authorization": `Bearer ${token}`
         }
     }
+
     let res_all = await handleAuthenticatedRequest(url.toString(), options)
 
     let data_all = await res_all.json()
@@ -77,6 +78,7 @@ export async function getCommentId(id) {
     }
     let res_all = await fetch(ruta)
     let data_all = await res_all.json()
+    
     let procesada = processComment(data_all)
     return procesada
 }

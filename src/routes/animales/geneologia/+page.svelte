@@ -291,7 +291,7 @@
             } else {
                 Swal.fire(
                     "Error animal",
-                    "No existe el animal en esta cabaña",
+                    "No existe el animal en este establecimiento",
                     "error",
                 );
             }
@@ -310,7 +310,7 @@
             } else {
                 Swal.fire(
                     "Error padre",
-                    "No existe el animal en esta cabaña",
+                    "No existe el animal en este establecimiento",
                     "error",
                 );
             }

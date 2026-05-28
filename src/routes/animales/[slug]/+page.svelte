@@ -625,7 +625,7 @@
         }
     }
     async function irPadrePB(_id) {
-        //Revisar si esta en la cabaña
+        //Revisar si esta en el establecimiento
         //Lo idea seria poder ver los datos del animaal este donde este
         let recordxiste = await pb.collection("animales").getFullList({
             filter: `cab='${cab.id}' && id='${_id}'`,
@@ -646,7 +646,7 @@
         } else {
             Swal.fire(
                 "Error padre",
-                "No existe el animal en esta cabaña",
+                "No existe el animal en este establecimiento",
                 "error",
             );
         }
@@ -665,7 +665,7 @@
         } else {
             Swal.fire(
                 "Error animal",
-                "No existe el animal en esta cabaña",
+                "No existe el animal en este establecimiento",
                 "error",
             );
         }
