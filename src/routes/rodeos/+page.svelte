@@ -120,6 +120,11 @@
             cargadorodeos = true;
         }
     }
+    //Para el collapse de los importar
+    let isOpenImportar = $state(false);
+    function clickImportar() {
+        isOpenImportar = !isOpenImportar;
+    }
     function openNewModal() {
         idrodeo = "";
         nombre = "";
@@ -363,14 +368,18 @@
     <Buscador
         {rodeosrows}
         bind:buscar
+        cabid={cab.id}
         {nuevo}
         {limpiarFiltros}
+        {clickImportar}
         {filterUpdate}
         {selecthash}
         cabnombre={cab.nombre}
         {toggleJava}
         {versionjava}
         {prepararData}
+        {getRodeos}
+        bind:isOpenImportar
     />
     {#if cargadorodeos}
         <!--Tabla-->

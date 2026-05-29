@@ -193,6 +193,17 @@
 
     function clickFilter() {
         isOpenFilter = !isOpenFilter;
+        if(isOpenFilter){
+            isOpenImportar = false
+        }
+    }
+    //Para el collapse de los importar
+    let isOpenImportar = $state(false);
+    function clickImportar() {
+        isOpenImportar = !isOpenImportar;
+        if(isOpenImportar){
+            isOpenFilter = false
+        }
     }
     function openEditModal(id, edit = true) {
         esservicio = true;
@@ -812,6 +823,8 @@
         {selecthash}
         {serviciosrow}
         cabnombre={cab.nombre}
+        cabid = {cab.id}
+        bind:isOpenImportar
         {totalServicios}
         bind:isOpenFilter
         bind:fechaservdesdefiltro
@@ -827,6 +840,9 @@
         {nuevoInseminacion}
         {filterUpdate}
         {clickFilter}
+        {clickImportar}
+
+        {getServicios}
         {versionjava}
         {toggleJava}
     />

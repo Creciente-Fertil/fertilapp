@@ -23,7 +23,7 @@
     import Success from "$lib/components/botones/Success.svelte";
     import {
         editTratamiento,
-        eliminarTipo,
+        
         eliminarTratamiento,
     } from "$lib/java/tratamientos/tratamientosback";
     import { getUser } from "$lib/userstorage/usersotrage";

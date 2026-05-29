@@ -9,17 +9,21 @@
     import Filter from "$lib/svgs/filter.svelte";
     import Limpiar from "$lib/svgs/limpiar.svelte";
     import Sticky from "./Sticky.svelte";
+    import Importar from "./Importar.svelte";
+
     let pre = import.meta.env.VITE_PRE;
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
     let {
         cabnombre = "",
+        cabid = "",
         selecthash = {},
         pesajesrows = [],
         //paginacion
         pageSize = $bindable(10),
         isOpenFilter = $bindable(false),
+        isOpenImportar = $bindable(false),
         buscar = $bindable(""),
 
         fechadesde = $bindable(""),
@@ -30,6 +34,8 @@
 
         filterUpdate = () => {},
         clickFilter = () => {},
+        clickImportar = () => {},
+        getPesajes=()=>{},
         nuevo = () => {},
         ultimos = () => {},
     } = $props();
@@ -136,18 +142,6 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <button
-                    class={`
-                        hidden md:flex
-                        border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
-                        dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
-                    `}
-                >
-                    <Arrowdown size="size-4" />
-                    Importar
-                </button>
-
-                <button
                     onclick={clickFilter}
                     class={`
                         border rounded-full px-3 py-1 text-md flex 
@@ -163,6 +157,31 @@
                     <Filter size="size-4" />
                     Filtros
                 </button>
+                <div class="hidden md:flex">
+                    {#if isOpenImportar}
+                        <button
+                            class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
+                            `}
+                            onclick={clickImportar}
+                        >
+                            <Arrowdown size="size-4" />
+                            Importar
+                        </button>
+                    {:else}
+                        <button
+                            class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                            `}
+                            onclick={clickImportar}
+                        >
+                            <Arrowdown size="size-4" />
+                            Importar
+                        </button>
+                    {/if}
+                </div>
                 <ExportarSmall
                     titulo={"Pesajes"}
                     filtros={[]}
@@ -261,6 +280,14 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        {/if}
+        {#if isOpenImportar}
+            <div transition:slide>
+                <Importar
+                    {cabid}
+                    {getPesajes}
+                />
             </div>
         {/if}
     </div>

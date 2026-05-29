@@ -134,6 +134,17 @@
     let botonhabilitado = $state(false);
     function clickFilter() {
         isOpenFilter = !isOpenFilter;
+        if(isOpenFilter){
+            isOpenImportar = false
+        }
+    }
+    //Para el collapse de los importar
+    let isOpenImportar = $state(false);
+    function clickImportar() {
+        isOpenImportar = !isOpenImportar;
+        if(isOpenImportar){
+            isOpenFilter = false
+        }
     }
     function isEmpty(str) {
         return !str || str.length === 0;
@@ -767,7 +778,9 @@
         {nacimientosrow}
         {selecthash}
         cabnombre={cab.nombre}
+        cabid={cab.id}
         bind:isOpenFilter
+        bind:isOpenImportar
         bind:fechadesde
         bind:fechahasta
         bind:buscar
@@ -778,6 +791,8 @@
         {filterUpdate}
         {nuevo}
         {clickFilter}
+        {clickImportar}
+        {getNacimientos}
         {toggleJava}
         {versionjava}
     />

@@ -237,6 +237,7 @@
             let data_animales = await getAll(cab.id);
 
             animales = data_animales;
+            
         }
         animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
 
@@ -652,6 +653,17 @@
     let isOpenFilter = $state(false);
     function clickFilter() {
         isOpenFilter = !isOpenFilter;
+        if(isOpenFilter){
+            isOpenImportar = false
+        }
+    }
+    //Para el collapse de los importar
+    let isOpenImportar = $state(false);
+    function clickImportar() {
+        isOpenImportar = !isOpenImportar;
+        if(isOpenImportar){
+            isOpenFilter = false
+        }
     }
     //Para el collapse de los ordenar
     let isOpenOrdenar = $state(false);
@@ -848,6 +860,8 @@
         {selecthash}
         {animalesrows}
         cabnombre={cab.nombre}
+        cabid = {cab.id}
+        bind:isOpenImportar
         bind:isOpenFilter
         bind:buscar
         {rodeos}
@@ -870,6 +884,8 @@
         {estadisticas}
         {filterUpdate}
         {clickFilter}
+        {clickImportar}
+        {getAnimales}
         verJava={toggleJava}
         {versionjava}
         {isDev}

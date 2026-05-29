@@ -126,6 +126,17 @@
     //Funciones
     function clickFilter() {
         isOpenFilter = !isOpenFilter;
+        if(isOpenFilter){
+            isOpenImportar = false
+        }
+    }
+    //Para el collapse de los importar
+    let isOpenImportar = $state(false);
+    function clickImportar() {
+        isOpenImportar = !isOpenImportar;
+        if(isOpenImportar){
+            isOpenFilter = false
+        }
     }
     async function getTactos() {
         if (!versionjava) {
@@ -680,10 +691,12 @@ await getData()
         {selecthash}
         {tactosrow}
         cabnombre={cab.nombre}
+        cabid={cab.id}
         {estados}
         {tipostacto}
         {categorias}
         bind:isOpenFilter
+        bind:isOpenImportar
         bind:buscar
         bind:fechadesde
         bind:fechahasta
@@ -695,6 +708,8 @@ await getData()
         {nuevo}
         {filterUpdate}
         {clickFilter}
+        {clickImportar}
+        {getTactos}
         {versionjava}
         {toggleJava}
     />

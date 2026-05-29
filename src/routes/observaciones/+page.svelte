@@ -132,6 +132,17 @@
     //Para el collapse de los filtros
     function clickFilter() {
         isOpenFilter = !isOpenFilter;
+        if(isOpenFilter){
+            isOpenImportar = false
+        }
+    }
+    //Para el collapse de los importar
+    let isOpenImportar = $state(false);
+    function clickImportar() {
+        isOpenImportar = !isOpenImportar;
+        if(isOpenImportar){
+            isOpenFilter = false
+        }
     }
     function isEmpty(str) {
         return !str || str.length === 0;
@@ -693,6 +704,8 @@
     <Buscador
         {observacionesrow}
         cabnombre={cab.nombre}
+        cabid = {cab.id}
+        bind:isOpenImportar
         {selecthash}
         {categorias}
         bind:isOpenFilter
@@ -705,6 +718,8 @@
         {nuevo}
         {filterUpdate}
         {clickFilter}
+        {clickImportar}
+        {getObservaciones}
     />
     {#if esdev && false}
         <Success

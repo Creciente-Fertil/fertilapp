@@ -100,7 +100,11 @@
         proxyanimales.save(proxyfiltrosanimales);
         goto(pre + "/animales");
     }
-
+    //Para el collapse de los importar
+    let isOpenImportar = $state(false);
+    function clickImportar() {
+        isOpenImportar = !isOpenImportar;
+    }
     //validacciones
     let malnombre = $state(false);
     let botonhabilitado = $state(false);
@@ -382,16 +386,20 @@
 <Navbar2>
     <Buscador
         cabnombre={cab.nombre}
+        cabid={cab.id}
         {selecthash}
         {lotesrows}
         bind:buscar
         {limpiarFiltros}
+        {clickImportar}
         {filterUpdate}
         {nuevo}
         {versionjava}
         {toggleJava}
         {esdev}
         {prepararData}
+        {getLotes}
+        bind:isOpenImportar
     />
 
     {#if cargadolotes}
@@ -528,3 +536,4 @@
         </div>
     </div>
 </dialog>
+

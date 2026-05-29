@@ -286,3 +286,192 @@ export async function addNewColabEstablecimiento(establecimientoid,useruid){
         throw new Error(`set colaborador -> ${res_save.status}`)
     }
 }
+export async function importarAnimales(establecimientoid,archivo){
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/import-animal`
+    
+    const formData = new FormData();
+    formData.append("file", archivo); // Debe coincidir con @RequestParam("file")
+    let user = getUser();
+    let token = user.token;
+    
+
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`saveEstablishment -> ${res_save.status}`)
+    }
+    return await res_save.json()
+}
+export async function importarLotes(establecimientoid,archivo){
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/import-lotes`
+    
+    const formData = new FormData();
+    formData.append("file", archivo); // Debe coincidir con @RequestParam("file")
+    let user = getUser();
+    let token = user.token;
+    
+
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`saveEstablishment -> ${res_save.status}`)
+    }
+    return await res_save.json()
+}
+export async function importarRodeos(establecimientoid,archivo){
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/import-rodeos`
+    
+    const formData = new FormData();
+    formData.append("file", archivo); // Debe coincidir con @RequestParam("file")
+    let user = getUser();
+    let token = user.token;
+    
+
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`saveEstablishment -> ${res_save.status}`)
+    }
+    return await res_save.json()
+}
+export async function importarServicios(establecimientoid,archivo){
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/import-servicios`
+    
+    const formData = new FormData();
+    formData.append("file", archivo); // Debe coincidir con @RequestParam("file")
+    let user = getUser();
+    let token = user.token;
+    
+
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`saveEstablishment -> ${res_save.status}`)
+    }
+    return await res_save.json()
+}
+export async function importarInseminaciones(establecimientoid,archivo){
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/import-inseminaciones`
+    
+    const formData = new FormData();
+    formData.append("file", archivo); // Debe coincidir con @RequestParam("file")
+    let user = getUser();
+    let token = user.token;
+    
+
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`saveEstablishment -> ${res_save.status}`)
+    }
+    return await res_save.json()
+}
+export async function importarObservaciones(establecimientoid,archivo){
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/import-observaciones  `
+    
+    const formData = new FormData();
+    formData.append("file", archivo); // Debe coincidir con @RequestParam("file")
+    let user = getUser();
+    let token = user.token;
+    
+
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`saveEstablishment -> ${res_save.status}`)
+    }
+    return await res_save.json()
+}
+export async function importarPesajes(establecimientoid,archivo){
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/import-pesajes`
+    
+    const formData = new FormData();
+    formData.append("file", archivo); // Debe coincidir con @RequestParam("file")
+    let user = getUser();
+    let token = user.token;
+    
+
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`saveEstablishment -> ${res_save.status}`)
+    }
+    return await res_save.json()
+}
+export async function importarTactos(establecimientoid,archivo){
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/import-tactos`
+    
+    const formData = new FormData();
+    formData.append("file", archivo); // Debe coincidir con @RequestParam("file")
+    let user = getUser();
+    let token = user.token;
+    
+
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`saveEstablishment -> ${res_save.status}`)
+    }
+    return await res_save.json()
+}
+export async function importarNacimientos(establecimientoid,archivo){
+    let ruta = `${RUTA_JAVA}${RUTA_ESTABLECIMIENTOS}/${establecimientoid}/import-nacimientos`
+    
+    const formData = new FormData();
+    formData.append("file", archivo); // Debe coincidir con @RequestParam("file")
+    let user = getUser();
+    let token = user.token;
+    
+
+    let res_save = await handleAuthenticatedRequest(ruta, {
+        method: "POST",
+        body: formData,
+        headers: {
+            "Authorization": `Bearer ${user.token}`
+        },
+    })
+    if (!res_save.ok) {
+        throw new Error(`saveEstablishment -> ${res_save.status}`)
+    }
+    return await res_save.json()
+}

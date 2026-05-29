@@ -3,7 +3,7 @@
     import Exportar from "$lib/components/Exportar.svelte";
     import PocketBase from "pocketbase";
     import Navbar2 from "$lib/components/Navbar2.svelte";
-    import Buscador from "$lib/components/pesajes/Buscador.svelte";
+    
     import HistorialPesajes from "$lib/components/pesajes/HistorialPesajes.svelte";
     import { slide } from "svelte/transition";
     import Swal from "sweetalert2";
@@ -78,6 +78,22 @@
     let isOpenFilter = $state(false);
     function clickFilter() {
         isOpenFilter = !isOpenFilter;
+        if(isOpenFilter){
+            isOpenImportar = false
+        }
+    }
+    //Para el collapse de los importar
+    let isOpenImportar = $state(false);
+    function clickImportar() {
+        isOpenImportar = !isOpenImportar;
+        if(isOpenImportar){
+            isOpenFilter = false
+        }
+    }
+    //Para el collapse de los ordenar
+    let isOpenOrdenar = $state(false);
+    function clickOrdenar() {
+        isOpenOrdenar = !isOpenOrdenar;
     }
     async function getPesajes() {
         if (versionjava) {
@@ -302,12 +318,17 @@
     <HistorialPesajes
         {pesajesrows}
         bind:isOpenFilter
+        bind:isOpenImportar
         bind:buscar={buscarcaravana}
+        cabnombre={cab.nombre}
+        cabid={cab.id}
         bind:fechadesde
         bind:fechahasta
         {limpiarFiltros}
         {filterUpdate}
         {clickFilter}
+        {clickImportar}
+        {getPesajes}
         {nuevo}
         {ultimos}
         {selecthash}

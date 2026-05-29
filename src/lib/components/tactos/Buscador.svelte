@@ -9,7 +9,7 @@
     import Filter from "$lib/svgs/filter.svelte";
     import Limpiar from "$lib/svgs/limpiar.svelte";
     import Sticky from "./Sticky.svelte";
-
+    import Importar from "./Importar.svelte";
     let esdev = import.meta.env.VITE_DEV == "si";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -19,6 +19,7 @@
         tactosrow = [],
         selecthash = {},
         cabnombre = "",
+        cabid,
         estados = [],
         tipostacto = [],
         categorias = [],
@@ -26,6 +27,7 @@
         pageSize = $bindable(15),
         totalTactos = 15,
         isOpenFilter = $bindable(false),
+        isOpenImportar = $bindable(false),
         buscar = $bindable(""),
         fechadesde = $bindable(""),
         fechahasta = $bindable(""),
@@ -38,8 +40,10 @@
         nuevo = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
+        clickImportar = () => {},
         versionjava = false,
         toggleJava = () => {},
+        getTactos = async () => {},
     } = $props();
 </script>
 
@@ -54,7 +58,13 @@
         `}
     >
         <div
-            class="flex flex-row md:items-center justify-between gap-4 pb-1 mb-2 border-b dark:border-gray-800"
+            class="
+                flex flex-row
+                md:items-center
+                justify-between gap-4 pb-1 mb-2
+                border-b
+                dark:border-gray-800
+            "
         >
             <div
                 class={`
@@ -81,7 +91,7 @@
                 shadow-md transition-all duration-200
                 md:hidden mt-2
             `}
-                aria-label="Nuevo animal"
+                aria-label="Nuevo Tacto"
             >
                 <span class="text-2xl leading-none">+</span>
             </button>
@@ -113,16 +123,17 @@
         </div>
         <!--Filtros-->
         <div
-            class="flex flex-row sm:items-center sm:justify-between gap-3 p-1 md:p-2 bg-transparent rounded-lg"
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-1 md:p-2 bg-transparent rounded-lg"
         >
             <!-- Input de búsqueda -->
             <div
                 class={`
-                  flex items-center flex-1
+                  flex items-center flex-1 border
                   shadow-2xl
-                  rounded-full p-3
-                
-                  bg-white dark:bg-gray-900
+                  rounded-full 
+                  py-1 px-2 md:p-3
+                  dark:border-gray-600 
+                  border-transparent bg-white dark:bg-gray-900
                   shadow-[0_4px_8px_-2px_rgba(0,0,0,0.2)]
                   dark:shadow-[0_4px_8px_-2px_rgba(255,255,255,0.1)]
                 `}
@@ -131,15 +142,14 @@
                     type="text"
                     placeholder="Buscar por madre ..."
                     class={`
-                    shadow-2xl
-                    dark:placeholder-gray-500 
-                    dark:text-gray-100
-                    placeholder-gray-600 text-gray-800
-                    
-                    w-full bg-transparent focus:outline-none
-                    border border-transparent
-                    
-                `}
+                        shadow-2xl
+                        dark:placeholder-gray-500 
+                        dark:text-gray-100
+                        placeholder-gray-600 text-gray-800
+                        
+                        w-full bg-transparent focus:outline-none
+                        border border-transparent
+                    `}
                     bind:value={buscar}
                     oninput={filterUpdate}
                 />
@@ -158,21 +168,7 @@
                     />
                 </svg>
             </div>
-            
-        </div>
-        <div class="flex flex-wrap gap-2">
-                <button
-                    class={`
-                        hidden md:flex
-                        border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
-                        dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
-                    `}
-                >
-                    <Arrowdown size="size-4" />
-                    Importar
-                </button>
-
+            <div class="flex flex-wrap gap-2">
                 <button
                     onclick={clickFilter}
                     class={`
@@ -189,6 +185,31 @@
                     <Filter size="size-4" />
                     Filtros
                 </button>
+                <div class="hidden md:flex">
+                    {#if isOpenImportar}
+                        <button
+                            class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
+                            `}
+                            onclick={clickImportar}
+                        >
+                            <Arrowdown size="size-4" />
+                            Importar
+                        </button>
+                    {:else}
+                        <button
+                            class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                            `}
+                            onclick={clickImportar}
+                        >
+                            <Arrowdown size="size-4" />
+                            Importar
+                        </button>
+                    {/if}
+                </div>
                 <ExportarSmall
                     titulo={"Tactos"}
                     filtros={[]}
@@ -203,6 +224,8 @@
                     rounded="rounded-full"
                 />
             </div>
+        </div>
+
         {#if isOpenFilter}
             <div transition:slide>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-1 w-full">
@@ -332,6 +355,11 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        {/if}
+        {#if isOpenImportar}
+            <div transition:slide>
+                <Importar {cabid} {getTactos} />
             </div>
         {/if}
     </div>

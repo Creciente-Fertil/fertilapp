@@ -12,12 +12,14 @@
 
     import MultiSelect from "../MultiSelect.svelte";
     import Plus from "$lib/svgs/plus.svelte";
+    import Importar from "./Importar.svelte";
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
     let {
         animalesrows,
         cabnombre,
+        cabid,
         selecthash = {},
         //paginacion
         pageSize = $bindable(10),
@@ -38,6 +40,7 @@
         activosbuscar = $bindable(""),
         activos = [],
         isOpenFilter = $bindable(false),
+        isOpenImportar = $bindable(false),
         //funciones
         limpiarFiltros = () => {},
         prepararData = () => {},
@@ -45,10 +48,13 @@
         estadisticas = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
+        clickImportar = () => {},
         verJava = () => {},
+        getAnimales = async () => {},
         versionjava = false,
-        isDev = false,
+        isDev = false
     } = $props();
+    
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
@@ -122,21 +128,6 @@
             >
                 <span class="text-lg font-semibold">Estadísticas</span>
             </button>
-            {#if isDev && false}
-                <button
-                    class={`
-                    ${estilos.btnbuscador}
-                    ${estilos.btntextbuscador}
-                `}
-                    onclick={verJava}
-                >
-                    {#if versionjava}
-                        <span class="text-lg">Cerrar java</span>
-                    {:else}
-                        <span class="text-lg">Ver java</span>
-                    {/if}
-                </button>
-            {/if}
         </div>
 
         <!--Filtros-->
@@ -160,14 +151,14 @@
                     type="text"
                     placeholder="Buscar por caravana..."
                     class={`
-                    shadow-2xl
-                    dark:placeholder-gray-500 
-                    dark:text-gray-100
-                    placeholder-gray-600 text-gray-800
-                    
-                    w-full bg-transparent focus:outline-none
-                    border border-transparent
-                `}
+                        shadow-2xl
+                        dark:placeholder-gray-500 
+                        dark:text-gray-100
+                        placeholder-gray-600 text-gray-800
+                        
+                        w-full bg-transparent focus:outline-none
+                        border border-transparent
+                    `}
                     bind:value={buscar}
                     oninput={filterUpdate}
                 />
@@ -188,42 +179,54 @@
             </div>
             <!-- Derecha: botones -->
             <div class="flex flex-wrap gap-2">
-                
-                    {#if isOpenFilter}
+                {#if isOpenFilter}
+                    <button
+                        onclick={clickFilter}
+                        class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
+                            `}
+                    >
+                        <Filter size="size-4" />
+                        Filtros
+                    </button>
+                {:else}
+                    <button
+                        onclick={clickFilter}
+                        class={`
+                            border rounded-full px-3 py-1 text-md flex items-center gap-1
+                            bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                        `}
+                    >
+                        <Filter size="size-4" />
+                        Filtros
+                    </button>
+                {/if}
+                <div class="hidden md:flex">
+                    {#if isOpenImportar}
                         <button
-                            onclick={clickFilter}
                             class={`
                                 border rounded-full px-3 py-1 text-md flex items-center gap-1
                                 bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
                             `}
+                            onclick={clickImportar}
                         >
-                            <Filter size="size-4" />
-                            Filtros
+                            <Arrowdown size="size-4" />
+                            Importar
                         </button>
                     {:else}
                         <button
-                            onclick={clickFilter}
                             class={`
-                            border rounded-full px-3 py-1 text-md flex items-center gap-1
-                            bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
-                        `}
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                            `}
+                            onclick={clickImportar}
                         >
-                            <Filter size="size-4" />
-                            Filtros
+                            <Arrowdown size="size-4" />
+                            Importar
                         </button>
                     {/if}
-                
-                <button
-                    class={`
-                        hidden md:flex
-                        border rounded-full px-3 py-1 text-md items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
-                        dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
-                    `}
-                >
-                    <Arrowdown size="size-4" />
-                    Importar
-                </button>
+                </div>
 
                 <ExportarSmall
                     titulo={"Animales"}
@@ -431,6 +434,14 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        {/if}
+        {#if isOpenImportar}
+            <div transition:slide>
+                <Importar
+                    {cabid}
+                    {getAnimales}
+                />
             </div>
         {/if}
     </div>

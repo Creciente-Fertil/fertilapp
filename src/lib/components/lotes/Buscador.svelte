@@ -10,7 +10,8 @@
     import Filter from "$lib/svgs/filter.svelte";
     import Limpiar from "$lib/svgs/limpiar.svelte";
     import Sticky from "../animales/Sticky.svelte";
-    
+    import Importar from "./Importar.svelte";
+
     let innerWidth = $state(0);
     let innerHeight = $state(0);
     let esCelu = $derived(innerWidth <= 1100);
@@ -18,18 +19,22 @@
         selecthash = {},
         lotesrows = [],
         cabnombre,
+        cabid,
         totalLotes,
         isOpenFilter = $bindable(false),
+        isOpenImportar = $bindable(false),
         buscar = $bindable(""),
         vacios = $bindable(false),
         nuevo = () => {},
         limpiarFiltros = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
+        clickImportar = () => {},
+        getLotes = async () => {},
         prepararData = (item) => {},
-        esdev=false,
-        versionjava=false,
-        toggleJava=()=>{}
+        esdev = false,
+        versionjava = false,
+        toggleJava = () => {},
     } = $props();
 </script>
 
@@ -149,17 +154,31 @@
                 </svg>
             </div>
             <div class="flex flex-wrap gap-2">
-                <button
-                    class={`
-                        
-                        border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
-                        dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
-                    `}
-                >
-                    <Arrowdown size="size-4" />
-                    Importar
-                </button>
+                <div class="hidden md:flex">
+                    {#if isOpenImportar}
+                        <button
+                            class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
+                            `}
+                            onclick={clickImportar}
+                        >
+                            <Arrowdown size="size-4" />
+                            Importar
+                        </button>
+                    {:else}
+                        <button
+                            class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                            `}
+                            onclick={clickImportar}
+                        >
+                            <Arrowdown size="size-4" />
+                            Importar
+                        </button>
+                    {/if}
+                </div>
 
                 <ExportarSmall
                     titulo={"Lotes"}
@@ -175,7 +194,13 @@
                     rounded="rounded-full"
                 />
             </div>
+            
         </div>
+        {#if isOpenImportar}
+                <div transition:slide>
+                    <Importar {cabid} {getLotes} />
+                </div>
+            {/if}
     </div>
 </div>
 <Sticky total={Object.keys(selecthash).length} />

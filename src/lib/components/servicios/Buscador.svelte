@@ -10,6 +10,7 @@
     import Limpiar from "$lib/svgs/limpiar.svelte";
     import Sticky from "./Sticky.svelte";
     import Secondary from "../botones/Secondary.svelte";
+    import Importar from "./Importar.svelte";
 
     let innerWidth = $state(0);
     let innerHeight = $state(0);
@@ -24,11 +25,13 @@
         selecthash,
         serviciosrow,
         cabnombre,
+        cabid,
         //paginacion
         pageSize = $bindable(10),
         //filtros
         totalServicios = 0,
         isOpenFilter = $bindable(false),
+        isOpenImportar = $bindable(false),
         fechaservdesdefiltro = $bindable(""),
         fechaservhastafiltro = $bindable(""),
         fechapartodesde = $bindable(""),
@@ -45,8 +48,10 @@
         nuevoInseminacion = () => {},
         filterUpdate = () => {},
         clickFilter = () => {},
+        clickImportar = () => {},
         versionjava = false,
         toggleJava = () => {},
+        getServicios = async () => {},
     } = $props();
 
     //buscador
@@ -184,7 +189,7 @@
                 </svg>
             </div>
             <div class="flex flex-wrap gap-2">
-            <button
+                <button
                     onclick={clickFilter}
                     class={`
                         border rounded-full px-3 py-1 text-md flex 
@@ -200,19 +205,32 @@
                     <Filter size="size-4" />
                     Filtros
                 </button>
-                <button
-                    class={`
-                        hidden md:flex
-                        border rounded-full px-3 py-1 text-md flex items-center gap-1
-                        bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent 
-                        dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
-                    `}
-                >
-                    <Arrowdown size="size-4" />
-                    Importar
-                </button>
+                <div class="hidden md:flex">
+                    {#if isOpenImportar}
+                        <button
+                            class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-[#115642]  hover:bg-[#0f4537] border-[#115642] text-white
+                            `}
+                            onclick={clickImportar}
+                        >
+                            <Arrowdown size="size-4" />
+                            Importar
+                        </button>
+                    {:else}
+                        <button
+                            class={`
+                                border rounded-full px-3 py-1 text-md flex items-center gap-1
+                                bg-white  border-gray-300  hover:bg-gray-300 dark:bg-transparent dark:hover:bg-gray-600 dark:border-gray-600 dark:text-white
+                            `}
+                            onclick={clickImportar}
+                        >
+                            <Arrowdown size="size-4" />
+                            Importar
+                        </button>
+                    {/if}
+                </div>
 
-                
                 <ExportarSmall
                     titulo={"Servicios"}
                     filtros={[]}
@@ -396,6 +414,14 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        {/if}
+        {#if isOpenImportar}
+            <div transition:slide>
+                <Importar
+                    {cabid}
+                    {getServicios}
+                />
             </div>
         {/if}
         <!--Ordenar-->
