@@ -469,6 +469,9 @@
                             notes: "",
                         },
                     ];
+                    if(servicio.padre.length==0){
+                        fathers = []
+                    }
                 }
 
                 let data_java = {
@@ -480,21 +483,13 @@
                     notes: servicio.observacion,
                     isActive: true,
                     fathers: fathers,
+                    strawCode:servicio.pajuela
                 };
-                //let data_java_simple={
-                //    animalId: servicio.id,
-                //    establishmentId: cab.id,
-                //    serviceType: esNatural ? "NATURAL_SERVICE" : "INSEMINATION",
-                //    startDate: esNatural ? fechadesdeserv : fechainseminacion,
-                //    expectedBirthDate: fechaparto,
-                //    notes: servicio.observacion,
-                //    isActive: true,
-                //    fathers: fathers
-                //}
                 if (esNatural && fechahastaserv != "") {
                     data_java.endDate = fechahastaserv;
-                    //data_java_simple.endDate = fechahastaserv;
+                    
                 }
+                
                 data_javas.push(data_java);
 
                 //await saveServicio(data_java);

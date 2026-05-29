@@ -260,12 +260,12 @@
                             : ""}</td
                     >
                     <td class={`text-base mx-1 px-1 ${pyfila}`}>
-                        {s.fechadesde
+                        {s.tipo=="NATURAL_SERVICE"
                             ? shorterWord(s.expand.madre.caravana)
                             : shorterWord(s.expand.animal.caravana)}
                     </td>
                     <td class={`text-base mx-1 px-1 ${pyfila}`}>
-                        {s.fechadesde ? getNombrePadres(s.padres) : s.pajuela}
+                        {s.tipo=="NATURAL_SERVICE" ? getNombrePadres(s.padres) : s.pajuelas}
                     </td>
                     <td class={`text-base mx-1 px-1 ${pyfila}`}>
                         {#if s.tipo=="NATURAL_SERVICE"}

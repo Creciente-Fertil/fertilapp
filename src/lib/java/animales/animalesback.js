@@ -58,9 +58,9 @@ function processAnimal(animal) {
         nombrecategoria: null2string(animal.categoryName),
         prenada: animal.reproductiveStatus == "PRENADA" ? 2 : animal.reproductiveStatus == "EN_SERVICIO" ? 3 : 0,
         motivobaja: "",
-        raza: animal.breed,
-        color: animal.color,
-        rp: animal.rpCode,
+        raza: null2string(animal.breed),
+        color: animal.color?animal.color:"",
+        rp: null2string(animal.rpCode),
         created: animal.creationDate,
         updated: animal.updateDate,
         expand: {

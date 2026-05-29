@@ -232,8 +232,10 @@
                         startDate: fechadesde,
                         expectedBirthDate: fechaparto,
                         notes: observacion,
+                        strawCode:pajuela
                     };
                     data_java.animalId = animal;
+
                     let fathers = [
                         {
                             fatherId: padre,
@@ -241,6 +243,9 @@
                             notes: "",
                         },
                     ];
+                    if(padre.length == 0){
+                        fathers = []
+                    }
                     data_java.fathers = fathers;
                     data_java.serviceType = "INSEMINATION";
                     data_java.startDate = fechainseminacion;

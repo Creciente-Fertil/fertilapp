@@ -2,8 +2,8 @@ import { getUser } from "$lib/userstorage/usersotrage"
 import { handleAuthenticatedRequest } from "../errores/erroresback"
 let ruta_java = import.meta.env.VITE_RUTA_JAVA_SERVER;
 let ruta_local_java = import.meta.env.VITE_RUTA_LOCAL_JAVA_SERVER;
-let bd_local = import.meta.env.VITE_LOCAL_BD=="si";
-let RUTA_JAVA =bd_local? ruta_local_java:ruta_java;
+let bd_local = import.meta.env.VITE_LOCAL_BD == "si";
+let RUTA_JAVA = bd_local ? ruta_local_java : ruta_java;
 const RUTA_SERVICIOS = "services"
 export function tipoServicios() {
     return [
@@ -14,12 +14,19 @@ export function tipoServicios() {
 function processServicio(fila) {
     let padres = []
     let pajuelas = []
-    
-    for (let i = 0; i < fila.fathers.length; i++) {
-        let padre = fila.fathers[i]
-        padres.push(padre.fatherId)
-        pajuelas.push(padre.fatherTagNumber)
+    if (fila.fathers.length > 0) {
+        for (let i = 0; i < fila.fathers.length; i++) {
+            let padre = fila.fathers[i]
+
+            padres.push(padre.fatherId)
+
+            pajuelas.push(padre.fatherTagNumber)
+        }
     }
+    else {
+        pajuelas = [fila.strawCode]
+    }
+
     let data_ser = {
 
         id: fila.serviceId,
@@ -28,10 +35,10 @@ function processServicio(fila) {
         fechahasta: fila.endDate,
         madre: fila.animalId,
         animal: fila.animalId,
-        pajuelas: padres.length>0?pajuelas.join():"",
-        padres: padres.length>0?padres.join():"",
+        pajuelas: pajuelas.join(),
+        padres: padres.length > 0 ? padres.join() : "",
 
-        padre: padres.length>0?padres.join():"",
+        padre: padres.length > 0 ? padres.join() : "",
         observacion: fila.notes,
         fechaparto: fila.expectedBirthDate,
         active: fila.isActive,
@@ -80,6 +87,7 @@ export async function getAllServices(cabid = null) {
 
     let servicios = processServicios(data_all)
 
+
     return servicios
 }
 export function postServicio(data) {
@@ -89,7 +97,7 @@ export function postServicio(data) {
         serviceType: data.tipo,
         startDate: data.fechadesde.split(" ")[0],
         endDate: data.fechahasta && data.fechahasta.length > 0 ? data.fechahasta.split(" ")[0] : "",
-        strawCode: "",
+        strawCode: data.pajuela,
         fatherIds: data.padres.split(",").map(item => Number(item)),
         expectedBirthDate: data.fechaparto.split(" ")[0],
         notes: data.observacion
@@ -105,7 +113,7 @@ export function postInseminacion(data) {
         serviceType: data.tipo,
         startDate: data.fechainseminacion.split(" ")[0],
         endDate: "",
-        strawCode: "",
+        strawCode: data.pajuela,
         fatherIds: [data.padre],
         expectedBirthDate: data.fechaparto.split(" ")[0],
         notes: data.observacion
