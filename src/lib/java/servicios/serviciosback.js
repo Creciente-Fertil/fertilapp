@@ -98,7 +98,10 @@ export function postServicio(data) {
         startDate: data.fechadesde.split(" ")[0],
         endDate: data.fechahasta && data.fechahasta.length > 0 ? data.fechahasta.split(" ")[0] : "",
         strawCode: data.pajuela,
-        fatherIds: data.padres.split(",").map(item => Number(item)),
+        fathers: data.padres.split(",").map(item => ({
+            fatherId:Number(item),
+            fatherTagNumber:"",notes:""
+        })),
         expectedBirthDate: data.fechaparto.split(" ")[0],
         notes: data.observacion
     }
@@ -114,7 +117,7 @@ export function postInseminacion(data) {
         startDate: data.fechainseminacion.split(" ")[0],
         endDate: "",
         strawCode: data.pajuela,
-        fatherIds: [data.padre],
+        fathers: data.padre.length>0?[{fatherId:data.padre,fatherTagNumber:"",notes:""}]:[],
         expectedBirthDate: data.fechaparto.split(" ")[0],
         notes: data.observacion
     }

@@ -9,6 +9,7 @@
     import { isEmpty } from "$lib/stringutil/lib";
     import PredictSelect from "$lib/components/PredictSelect.svelte";
     import MultipleToros from "$lib/components/MultipleToros.svelte";
+    import SelectToros from "../SelectToros.svelte";
     import categorias from "$lib/stores/categorias";
     import InfoAnimal from "../InfoAnimal.svelte";
     import Success from "../botones/Success.svelte";
@@ -63,12 +64,15 @@
         inseminacion.botonhabilitadoins = true;
         if (!agregaranimal && isEmpty(inseminacion.idanimalins)) {
             inseminacion.botonhabilitadoins = false;
+            
         }
         if (isEmpty(inseminacion.pajuelains)) {
             inseminacion.botonhabilitadoins = false;
+            
         }
         if (isEmpty(inseminacion.fechainseminacion)) {
             inseminacion.botonhabilitadoins = false;
+            
         }
         botonhabilitadoins = inseminacion.botonhabilitadoins;
     }
@@ -127,6 +131,8 @@
                 onSelectPadreIns();
                 inseminacion.malpadreins = false;
             }
+        }
+        if (campo == "PAJUELA") {
         }
         if (campo == "FECHAPARTO") {
             if (isEmpty(inseminacion.fechapartoins)) {
@@ -242,10 +248,16 @@
             </label>
             <label class="input-group">
                 {#if cargadoanimales}
-                    <MultipleToros
-                        toros={padres}
-                        bind:valor={servicio.padreser}
-                        bind:listavalores={servicio.padreserlista}
+                    
+                    <SelectToros
+                        opciones={padres}
+                        etiqueta="Padres"
+                        bind:valores={servicio.padreserlista}
+                        etiquetaDefault={true}
+                        py="py-1"
+                        px="pl-3"
+                        margintop=""
+                        campo="caravana"
                     />
                 {/if}
             </label>
@@ -404,9 +416,10 @@
             <PredictSelect
                 bind:valor={padreins}
                 etiqueta={"Padre"}
-                bind:cadena={pajuelains}
+                bind:cadena={inseminacion.pajuelains}
                 lista={listapadres}
                 onelegir={() => oninputIns("PADRE")}
+                cambiar={() => oninputIns("PAJUELA")}
             />
             {#if padreins.length > 0}
                 <InfoAnimal bind:animal={padre} />

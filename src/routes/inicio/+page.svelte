@@ -270,7 +270,7 @@
             });
             animales = recordsa;
         }
-
+        animales = animales.filter(a=>!a.delete)
         animales.sort((a1, a2) => (a1.caravana > a2.caravana ? 1 : -1));
         totaleventos.animales = animales.length;
 
@@ -911,7 +911,7 @@
             };
             if (servicio.fechahastaserv != "") {
                 dataser.fechahasta = servicio.fechahastaserv + " 03:00:00";
-            }
+            }   
             try {
                 if (versionjava) {
                     dataser.tipo = "NATURAL_SERVICE";
